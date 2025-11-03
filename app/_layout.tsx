@@ -1,16 +1,19 @@
-import { Stack } from "expo-router";
-import { AppProviders } from "../src/providers/AppProviders";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import { Slot } from 'expo-router'
+import { TamaguiProvider, Theme } from 'tamagui'
+import config from '../tamagui.config'
+import { AuthProvider } from '@/providers/Auth'
+import { QueryProvider } from '@/providers/Query'
 
 export default function RootLayout() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <AppProviders>
-          <Stack screenOptions={{ headerShown: false }} />
-        </AppProviders>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
-  );
+    <TamaguiProvider config={config}>
+      <Theme name="light">
+        <AuthProvider>
+          <QueryProvider>
+              <Slot />
+          </QueryProvider>
+        </AuthProvider>
+      </Theme>
+    </TamaguiProvider>
+  )
 }
