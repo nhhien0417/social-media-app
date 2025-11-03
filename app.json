@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "social-media-app",
+    "slug": "social-media-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font"
+    ],
+    "experiments": { "typedRoutes": true }
+  }
+}

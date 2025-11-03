@@ -11,17 +11,23 @@
     "skipLibCheck": true,
     "strict": true,
     "baseUrl": ".",
-    "paths": { "@/*": ["src/*"] },
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    },
     "types": [
       "expo-router",
       "nativewind/types"
     ]
   },
   "include": [
-    "app", 
-    "src", 
+    "app",
+    "src",
     "global.d.ts",
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
   ]
 }
