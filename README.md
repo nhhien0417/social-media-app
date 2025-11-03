@@ -1,23 +1,43 @@
-# social-media-app
+### 📱 Social Media App (Expo + TypeScript + Tamagui)
 
-Expo + React Native + TypeScript + Expo Router starter.
+Social-media-app UI built with **Expo**, **TypeScript**, **Tamagui**, **Expo Router**, **React Query**, and **FlashList**.  
+Fully type-safe, clean architecture, and mobile-first responsive.
 
-## Scripts
-- `npm run start` – Dev server (Metro)
-- `npm run start:tunnel` – Dev server qua tunnel
-- `npm run android` / `npm run ios` – Development build (cần Android Studio / Xcode)
-- `npm run web` – Web (dev)
+### 🧰 Environment Requirements
 
-## Setup
-1. `npm install` (hoặc `npx expo install`)
-2. `npm run start` → mở **Expo Go** (điện thoại) quét QR, hoặc mở emulator và bấm `a`.
+| Tool     | Recommended Version |
+| -------- | ------------------- |
+| Node.js  | >= 18.x (LTS)       |
+| npm      | >= 9                |
+| Expo CLI | via `npx expo`      |
+| Git      | >= 2.30             |
 
-npm install expo-router react-native-safe-area-context react-native-reanimated react-native-gesture-handler
-npm install @tanstack/react-query @tanstack/react-query-devtools
-npm install react-native-fast-image
-npm install nativewind tailwindcss
-npm install lucide-react-native
-npm install -D typescript @types/react @types/react-native eslint prettier @react-native/eslint-config
+### 🚀 Getting Started
 
-npx tailwindcss init
+### 1️⃣ Clone project
 
+```bash
+git clone <repo-url>
+cd social-media-app
+```
+
+### 2️⃣ Install dependencies
+
+```bash
+npm install
+# UI & Tamagui
+npm i tamagui @tamagui/core @tamagui/config @tamagui/themes @tamagui/lucide-icons
+
+# React Native dependencies (Expo auto-link)
+npx expo install react-native-reanimated react-native-gesture-handler react-native-safe-area-context react-native-svg
+
+# Routing, data fetching & lists
+npm i expo-router @shopify/flash-list @tanstack/react-query
+
+# Babel plugin for Tamagui
+npm i -D @tamagui/babel-plugin
+
+# Run
+npx expo-router@latest typegen
+expo start -c
+```
