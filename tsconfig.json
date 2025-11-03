@@ -9,11 +9,18 @@
     "isolatedModules": true,
     "noEmit": true,
     "skipLibCheck": true,
+    "strict": true,
+    "baseUrl": ".",
+    "paths": { "@/*": ["src/*"] },
     "types": [
-      "expo-router"
+      "expo-router",
+      "nativewind/types"
     ]
   },
   "include": [
+    "app", 
+    "src", 
+    "global.d.ts",
     "**/*.ts",
     "**/*.tsx"
   ]
