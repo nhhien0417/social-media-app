@@ -18,7 +18,9 @@
     },
     "types": [
       "expo-router",
-      "nativewind/types"
+      "react", 
+      "react-native",
+      "tamagui"
     ]
   },
   "include": [
