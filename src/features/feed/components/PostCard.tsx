@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { YStack, XStack, Text, Image, Button } from 'tamagui'
+import { YStack, XStack, Text, Image } from 'tamagui'
 import Avatar from '@/components/Avatar'
 import { Post } from '@/types/models'
 import {
@@ -9,6 +9,7 @@ import {
   Send,
   Bookmark,
 } from '@tamagui/lucide-icons'
+import ButtonIcon from '@/components/IconButton'
 
 function PostCard({ post }: { post: Post }) {
   const { author, media, caption, likeCount, commentCount } = post
@@ -37,7 +38,8 @@ function PostCard({ post }: { post: Post }) {
             )}
           </YStack>
         </XStack>
-        <Button chromeless circular size="$3" icon={MoreHorizontal} />
+
+        <ButtonIcon Icon={MoreHorizontal} Size={20}></ButtonIcon>
       </XStack>
 
       {/* 2. Media */}
@@ -57,13 +59,13 @@ function PostCard({ post }: { post: Post }) {
         justifyContent="space-between"
         alignItems="center"
       >
-        <XStack gap="$3.5" alignItems="center">
-          <Button chromeless icon={<Heart size={24} />} />
-          <Button chromeless icon={<MessageCircle size={24} />} />
-          <Button chromeless icon={<Send size={24} />} />
+        <XStack alignItems="center">
+          <ButtonIcon Icon={Heart}></ButtonIcon>
+          <ButtonIcon Icon={MessageCircle}></ButtonIcon>
+          <ButtonIcon Icon={Send}></ButtonIcon>
         </XStack>
 
-        <Button chromeless icon={<Bookmark size={24} />} />
+        <ButtonIcon Icon={Bookmark}></ButtonIcon>
       </XStack>
 
       {/* 4. Stats (Likes) */}

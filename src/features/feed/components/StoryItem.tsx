@@ -8,14 +8,14 @@ function StoryItem({ story }: { story: Story }) {
   const borderColor = hasNew ? '$red10' : '$blue10'
 
   return (
-    <YStack alignItems="center" marginHorizontal="$1" width={100}>
+    <YStack alignItems="center" marginHorizontal="$1.5" width={85}>
       <YStack
         padding={2}
         borderRadius={999}
         borderWidth={2}
         borderColor={borderColor}
       >
-        <Avatar uri={author.avatarUrl ?? ''} size={85} />
+        <Avatar uri={author.avatarUrl ?? ''} size={70} />
       </YStack>
 
       <Text numberOfLines={1} marginTop="$1" fontSize={13} opacity={0.8}>

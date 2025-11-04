@@ -1,6 +1,6 @@
 import { FlatList } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { YStack, XStack, Text, Button, Separator } from 'tamagui'
+import { YStack, XStack, Text, Separator } from 'tamagui'
 import { Camera, Send } from '@tamagui/lucide-icons'
 import Animated, {
   useSharedValue,
@@ -13,6 +13,7 @@ import Animated, {
 import StoryBar from './components/StoryBar'
 import PostCard from './components/PostCard'
 import { posts } from '@/mock/db'
+import ButtonIcon from '@/components/IconButton'
 
 const HEADER_VIEW_HEIGHT = 50
 const AnimatedHeader = Animated.createAnimatedComponent(
@@ -33,11 +34,11 @@ function HeaderContent() {
       backgroundColor="white"
       width="100%"
     >
-      <Button size="$3" chromeless icon={Camera} />
+      <ButtonIcon Icon={Camera}></ButtonIcon>
       <Text fontFamily="$heading" fontSize={30} fontWeight="500">
         Valorant
       </Text>
-      <Button size="$3" chromeless icon={Send} />
+      <ButtonIcon Icon={Send}></ButtonIcon>
     </XStack>
   )
 }

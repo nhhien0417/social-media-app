@@ -10,14 +10,14 @@ function CreateStoryItem() {
   const userAvatar = 'https://i.pravatar.cc/100?img=40'
 
   return (
-    <YStack alignItems="center" marginHorizontal="$1" width={90}>
+    <YStack alignItems="center" marginHorizontal="$1.5" width={85}>
       <YStack
         padding={2}
         borderRadius={999}
         borderWidth={2}
         borderColor="$red10"
       >
-        <Avatar uri={userAvatar} size={85} />
+        <Avatar uri={userAvatar} size={70} />
         <Button
           size="$2"
           circular
@@ -31,7 +31,7 @@ function CreateStoryItem() {
           borderColor="white"
         />
       </YStack>
-      <Text numberOfLines={1} marginTop="$1" fontSize={14} opacity={0.8}>
+      <Text numberOfLines={1} marginTop="$1" fontSize={13} opacity={0.8}>
         Your Story
       </Text>
     </YStack>
