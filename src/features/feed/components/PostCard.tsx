@@ -54,6 +54,9 @@ function PostCard({ post }: { post: Post }) {
   const [containerWidth, setContainerWidth] = useState(0)
   const listRef = useRef<FlatList<Media>>(null)
 
+  const [isCaptionExpanded, setIsCaptionExpanded] = useState(false)
+  const isLongCaption = !!caption && caption.length > 100
+
   const handleScroll = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
       const lmW = e.nativeEvent.layoutMeasurement?.width ?? 0
@@ -118,7 +121,7 @@ function PostCard({ post }: { post: Post }) {
 
       {/* Actions */}
       <XStack
-        paddingHorizontal="$2"
+        paddingHorizontal="$1.5"
         paddingTop="$1"
         justifyContent="space-between"
         alignItems="center"
@@ -133,13 +136,38 @@ function PostCard({ post }: { post: Post }) {
 
       {/* Caption */}
       {!!caption && (
-        <Text paddingHorizontal="$3" marginTop="$1">
-          <Text fontWeight="normal" fontSize={15}>
+        <YStack paddingHorizontal="$3" marginTop="$1">
+          <Text
+            fontWeight="normal"
+            fontSize={15}
+            numberOfLines={isCaptionExpanded ? undefined : 2}
+          >
             {caption}
           </Text>
-        </Text>
+
+          {isLongCaption && !isCaptionExpanded && (
+            <Text
+              color="#999"
+              fontSize={14}
+              onPress={() => setIsCaptionExpanded(true)}
+            >
+              More
+            </Text>
+          )}
+
+          {isLongCaption && isCaptionExpanded && (
+            <Text
+              color="#999"
+              fontSize={14}
+              onPress={() => setIsCaptionExpanded(false)}
+            >
+              Less
+            </Text>
+          )}
+        </YStack>
       )}
 
+      {/* Time (Giữ nguyên) */}
       <Text
         paddingHorizontal="$3"
         marginTop="$1"
