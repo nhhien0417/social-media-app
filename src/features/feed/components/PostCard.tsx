@@ -11,6 +11,7 @@ import {
   Bookmark,
 } from '@tamagui/lucide-icons'
 import ButtonIcon from '@/components/IconButton'
+import { formatDate } from '@/types/FormatDate'
 
 function MediaItem({ item, width }: { item: Media; width: number }) {
   return <Image source={{ uri: item.url }} width={width} aspectRatio={1} />
@@ -143,9 +144,10 @@ function PostCard({ post }: { post: Post }) {
         paddingHorizontal="$3"
         marginTop="$1"
         paddingBottom="$3"
+        color="#999999"
         fontSize={12}
       >
-        {createdAt}
+        {formatDate(createdAt)}
       </Text>
     </YStack>
   )
