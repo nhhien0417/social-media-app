@@ -88,7 +88,15 @@ export default function SignInScreen() {
           {/* Remember + Forgot */}
           <XStack justifyContent="space-between" alignItems="center" marginTop="$1">
             <XStack alignItems="center" gap="$2">
-              <Checkbox size="$3" checked={remember} onCheckedChange={setRemember} />
+              <Checkbox
+                size="$3"
+                checked={remember}
+                onCheckedChange={(value) => setRemember(value === true)}
+              >
+                <Checkbox.Indicator>
+                <Text>✓</Text>
+                </Checkbox.Indicator>
+              </Checkbox>
               <Text fontSize="$4" opacity={0.8}>Remember me</Text>
             </XStack>
             <Button chromeless size="$3">
