@@ -10,19 +10,19 @@ import {
 } from 'tamagui'
 import { useState } from 'react'
 import { useAppTheme } from '@/providers/ThemeProvider'
-import { notificationsData } from '@/mock/db'
+import { notifications } from '@/mock/notifications'
 
 export default function NotificationScreen() {
   const { theme } = useAppTheme()
   const [isSheetOpen, setIsSheetOpen] = useState(false)
 
-  const grouped = notificationsData.reduce(
+  const grouped = notifications.reduce(
     (acc, item) => {
       if (!acc[item.section]) acc[item.section] = []
       acc[item.section].push(item)
       return acc
     },
-    {} as Record<string, typeof notificationsData>
+    {} as Record<string, typeof notifications>
   )
 
   const handleMarkAllRead = () => {

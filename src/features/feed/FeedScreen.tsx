@@ -12,7 +12,7 @@ import Animated, {
 
 import StoryBar from './components/StoryBar'
 import PostCard from './components/PostCard'
-import { posts } from '@/mock/db'
+import { posts } from '@/mock/posts'
 import ButtonIcon from '@/components/IconButton'
 
 const HEADER_VIEW_HEIGHT = 50

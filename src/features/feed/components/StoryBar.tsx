@@ -2,7 +2,7 @@ import { memo } from 'react'
 import { ScrollView } from 'react-native'
 import { XStack, YStack, Text, Button } from 'tamagui'
 import { Plus } from '@tamagui/lucide-icons'
-import { stories } from '@/mock/db'
+import { stories } from '@/mock/stories'
 import Avatar from '@/components/Avatar'
 import StoryItem from './StoryItem'
 
