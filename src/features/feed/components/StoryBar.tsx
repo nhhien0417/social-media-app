@@ -11,7 +11,12 @@ function CreateStoryItem() {
 
   return (
     <YStack alignItems="center" marginHorizontal="$1" width={90}>
-      <YStack  padding={2}  borderRadius={999}  borderWidth={2} borderColor="$red10"  >
+      <YStack
+        padding={2}
+        borderRadius={999}
+        borderWidth={2}
+        borderColor="$red10"
+      >
         <Avatar uri={userAvatar} size={85} />
         <Button
           size="$2"
@@ -42,7 +47,7 @@ function StoryBar() {
     >
       <XStack>
         <CreateStoryItem />
-        {stories.map((s) => (
+        {stories.map(s => (
           <StoryItem key={s.id} story={{ ...s, thumbUrl: s.thumbUrl ?? '' }} />
         ))}
       </XStack>

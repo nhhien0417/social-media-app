@@ -11,7 +11,7 @@ export default function RootLayout() {
       <ThemeProvider>
         <AuthProvider>
           <QueryProvider>
-              <Slot />
+            <Slot />
           </QueryProvider>
         </AuthProvider>
       </ThemeProvider>

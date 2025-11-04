@@ -1,4 +1,9 @@
-import React, { createContext, useContext, useState, PropsWithChildren } from 'react'
+import React, {
+  createContext,
+  useContext,
+  useState,
+  PropsWithChildren,
+} from 'react'
 
 type AuthCtx = {
   signedIn: boolean
@@ -17,5 +22,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const [signedIn, setSignedIn] = useState(false)
   const signIn = async () => setSignedIn(true)
   const signOut = () => setSignedIn(false)
-  return <Ctx.Provider value={{ signedIn, signIn, signOut }}>{children}</Ctx.Provider>
+  return (
+    <Ctx.Provider value={{ signedIn, signIn, signOut }}>
+      {children}
+    </Ctx.Provider>
+  )
 }

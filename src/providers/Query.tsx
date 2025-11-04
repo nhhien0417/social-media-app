@@ -1,11 +1,15 @@
 import { PropsWithChildren, useEffect } from 'react'
 import { AppState, AppStateStatus } from 'react-native'
-import { QueryClient, QueryClientProvider, focusManager } from '@tanstack/react-query'
+import {
+  QueryClient,
+  QueryClientProvider,
+  focusManager,
+} from '@tanstack/react-query'
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 30_000,      
+      staleTime: 30_000,
       retry: 1,
       refetchOnReconnect: true,
       refetchOnWindowFocus: true,
@@ -21,5 +25,7 @@ export function QueryProvider({ children }: PropsWithChildren) {
     return () => sub.remove()
   }, [])
 
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  return (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  )
 }

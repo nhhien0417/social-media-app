@@ -1,4 +1,8 @@
-import { View, Text } from "react-native";
+import { View, Text } from 'react-native'
 export default function Screen() {
-  return <View className="flex-1 items-center justify-center"><Text>Coming soon</Text></View>;
+  return (
+    <View className="flex-1 items-center justify-center">
+      <Text>Coming soon</Text>
+    </View>
+  )
 }

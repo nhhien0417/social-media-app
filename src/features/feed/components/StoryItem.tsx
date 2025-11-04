@@ -5,7 +5,7 @@ import { YStack, Text } from 'tamagui'
 
 function StoryItem({ story }: { story: Story }) {
   const { author, hasNew } = story
-  const borderColor = hasNew ? '$red10' : '$blue10' 
+  const borderColor = hasNew ? '$red10' : '$blue10'
 
   return (
     <YStack alignItems="center" marginHorizontal="$1" width={100}>
@@ -13,7 +13,7 @@ function StoryItem({ story }: { story: Story }) {
         padding={2}
         borderRadius={999}
         borderWidth={2}
-        borderColor={borderColor} 
+        borderColor={borderColor}
       >
         <Avatar uri={author.avatarUrl ?? ''} size={85} />
       </YStack>

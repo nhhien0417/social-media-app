@@ -1,9 +1,18 @@
 import { Link, useRouter } from 'expo-router'
 import { useState } from 'react'
 import {
-  YStack, XStack, Input, Button, Text, Paragraph, Separator, Theme, SizableText, Spacer
+  YStack,
+  XStack,
+  Input,
+  Button,
+  Text,
+  Paragraph,
+  Separator,
+  Theme,
+  SizableText,
+  Spacer,
 } from 'tamagui'
-import {Chrome, Eye, EyeOff } from '@tamagui/lucide-icons'
+import { Chrome, Eye, EyeOff } from '@tamagui/lucide-icons'
 
 export default function SignUpScreen() {
   const router = useRouter()
@@ -32,7 +41,9 @@ export default function SignUpScreen() {
             alignItems="center"
             justifyContent="center"
           >
-            <Text fontSize={28} fontWeight="900" color="black">▶</Text>
+            <Text fontSize={28} fontWeight="900" color="black">
+              ▶
+            </Text>
           </YStack>
         </YStack>
 
@@ -47,7 +58,9 @@ export default function SignUpScreen() {
         {/* Form */}
         <YStack width="100%" maxWidth={400} gap="$3">
           {/* Email */}
-          <Text fontWeight="600" fontSize="$4">Email</Text>
+          <Text fontWeight="600" fontSize="$4">
+            Email
+          </Text>
           <Input
             value={email}
             onChangeText={setEmail}
@@ -59,7 +72,9 @@ export default function SignUpScreen() {
           />
 
           {/* Full name */}
-          <Text fontWeight="600" fontSize="$4">Full Name</Text>
+          <Text fontWeight="600" fontSize="$4">
+            Full Name
+          </Text>
           <Input
             value={fullName}
             onChangeText={setFullName}
@@ -71,7 +86,9 @@ export default function SignUpScreen() {
           />
 
           {/* Password */}
-          <Text fontWeight="600" fontSize="$4">Password</Text>
+          <Text fontWeight="600" fontSize="$4">
+            Password
+          </Text>
           <XStack alignItems="center" position="relative">
             <Input
               flex={1}
@@ -97,8 +114,7 @@ export default function SignUpScreen() {
 
           {/* Policy text */}
           <Paragraph fontSize="$3" opacity={0.7} marginTop="$1">
-            By signing up, you agree to our{' '}
-            <Text fontWeight="700">Terms</Text>,{' '}
+            By signing up, you agree to our <Text fontWeight="700">Terms</Text>,{' '}
             <Text fontWeight="700">Privacy Policy</Text>, and{' '}
             <Text fontWeight="700">Cookies Policy</Text>.
           </Paragraph>
@@ -142,7 +158,9 @@ export default function SignUpScreen() {
           <Paragraph opacity={0.7}>Already have an account?</Paragraph>
           <Link href="/(auth)/signin" asChild>
             <Button chromeless>
-              <Text color="#3797EF" fontWeight="700">Log in</Text>
+              <Text color="#3797EF" fontWeight="700">
+                Log in
+              </Text>
             </Button>
           </Link>
         </XStack>

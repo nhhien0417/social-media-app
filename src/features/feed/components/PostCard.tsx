@@ -1,4 +1,4 @@
-import  { memo } from 'react'
+import { memo } from 'react'
 import { YStack, XStack, Text, Image, Button } from 'tamagui'
 import Avatar from '@/components/Avatar'
 import { Post } from '@/types/models'
@@ -13,7 +13,7 @@ import {
 function PostCard({ post }: { post: Post }) {
   const { author, media, caption, likeCount, commentCount } = post
   const location = 'Tokyo, Japan'
-  
+
   return (
     <YStack backgroundColor="white" marginBottom="$2">
       {/* 1. Header */}
@@ -41,12 +41,12 @@ function PostCard({ post }: { post: Post }) {
       </XStack>
 
       {/* 2. Media */}
-      {media.map((m) => (
+      {media.map(m => (
         <Image
           key={m.id}
           source={{ uri: m.url }}
           width="100%"
-          aspectRatio={1} 
+          aspectRatio={1}
         />
       ))}
 
@@ -83,9 +83,14 @@ function PostCard({ post }: { post: Post }) {
 
       {/* "View all X comments" (tùy chọn) */}
       {commentCount > 0 && (
-         <Text paddingHorizontal="$3" paddingBottom="$3" color="$gray10" fontSize={14}>
-            View all {commentCount.toLocaleString()} comments
-         </Text>
+        <Text
+          paddingHorizontal="$3"
+          paddingBottom="$3"
+          color="$gray10"
+          fontSize={14}
+        >
+          View all {commentCount.toLocaleString()} comments
+        </Text>
       )}
     </YStack>
   )

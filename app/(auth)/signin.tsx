@@ -2,9 +2,19 @@ import { Link, useRouter } from 'expo-router'
 import { useState } from 'react'
 import { useAuth } from '@/providers/Auth'
 import {
-  YStack, XStack, Input, Button, Text, Paragraph, Separator, Theme, SizableText, Checkbox, Spacer
+  YStack,
+  XStack,
+  Input,
+  Button,
+  Text,
+  Paragraph,
+  Separator,
+  Theme,
+  SizableText,
+  Checkbox,
+  Spacer,
 } from 'tamagui'
-import {Chrome, Eye, EyeOff } from '@tamagui/lucide-icons'
+import { Chrome, Eye, EyeOff } from '@tamagui/lucide-icons'
 
 export default function SignInScreen() {
   const router = useRouter()
@@ -34,7 +44,9 @@ export default function SignInScreen() {
             alignItems="center"
             justifyContent="center"
           >
-            <Text fontSize={28} fontWeight="900" color="black">▶</Text>
+            <Text fontSize={28} fontWeight="900" color="black">
+              ▶
+            </Text>
           </YStack>
         </YStack>
 
@@ -49,7 +61,9 @@ export default function SignInScreen() {
         {/* Form */}
         <YStack width="100%" maxWidth={400} gap="$3">
           {/* Email */}
-          <Text fontWeight="600" fontSize="$4">Email</Text>
+          <Text fontWeight="600" fontSize="$4">
+            Email
+          </Text>
           <Input
             value={email}
             onChangeText={setEmail}
@@ -61,7 +75,9 @@ export default function SignInScreen() {
           />
 
           {/* Password */}
-          <Text fontWeight="600" fontSize="$4">Password</Text>
+          <Text fontWeight="600" fontSize="$4">
+            Password
+          </Text>
           <XStack alignItems="center" position="relative">
             <Input
               flex={1}
@@ -86,21 +102,29 @@ export default function SignInScreen() {
           </XStack>
 
           {/* Remember + Forgot */}
-          <XStack justifyContent="space-between" alignItems="center" marginTop="$1">
+          <XStack
+            justifyContent="space-between"
+            alignItems="center"
+            marginTop="$1"
+          >
             <XStack alignItems="center" gap="$2">
               <Checkbox
                 size="$3"
                 checked={remember}
-                onCheckedChange={(value) => setRemember(value === true)}
+                onCheckedChange={value => setRemember(value === true)}
               >
                 <Checkbox.Indicator>
-                <Text>✓</Text>
+                  <Text>✓</Text>
                 </Checkbox.Indicator>
               </Checkbox>
-              <Text fontSize="$4" opacity={0.8}>Remember me</Text>
+              <Text fontSize="$4" opacity={0.8}>
+                Remember me
+              </Text>
             </XStack>
             <Button chromeless size="$3">
-              <Text color="#3797EF" fontWeight="600">Forgot password?</Text>
+              <Text color="#3797EF" fontWeight="600">
+                Forgot password?
+              </Text>
             </Button>
           </XStack>
 
@@ -146,7 +170,9 @@ export default function SignInScreen() {
           <Paragraph opacity={0.7}>Don’t have an account?</Paragraph>
           <Link href="/(auth)/signup" asChild>
             <Button chromeless>
-              <Text color="#3797EF" fontWeight="700">Register</Text>
+              <Text color="#3797EF" fontWeight="700">
+                Register
+              </Text>
             </Button>
           </Link>
         </XStack>

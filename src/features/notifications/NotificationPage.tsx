@@ -7,25 +7,28 @@ import {
   ScrollView,
   Theme,
   Sheet,
-} from "tamagui";
-import { useState } from "react";
-import { useAppTheme } from "@/providers/ThemeProvider";
-import { notificationsData } from "@/mock/db";
+} from 'tamagui'
+import { useState } from 'react'
+import { useAppTheme } from '@/providers/ThemeProvider'
+import { notificationsData } from '@/mock/db'
 
 export default function NotificationScreen() {
-  const { theme } = useAppTheme();
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const { theme } = useAppTheme()
+  const [isSheetOpen, setIsSheetOpen] = useState(false)
 
-  const grouped = notificationsData.reduce((acc, item) => {
-    if (!acc[item.section]) acc[item.section] = [];
-    acc[item.section].push(item);
-    return acc;
-  }, {} as Record<string, typeof notificationsData>);
+  const grouped = notificationsData.reduce(
+    (acc, item) => {
+      if (!acc[item.section]) acc[item.section] = []
+      acc[item.section].push(item)
+      return acc
+    },
+    {} as Record<string, typeof notificationsData>
+  )
 
   const handleMarkAllRead = () => {
-    console.log("✅ All notifications marked as read");
-    setIsSheetOpen(false);
-  };
+    console.log('✅ All notifications marked as read')
+    setIsSheetOpen(false)
+  }
 
   return (
     <Theme name={theme}>
@@ -68,11 +71,11 @@ export default function NotificationScreen() {
                 {section}
               </Text>
 
-              {items.map((item) => (
+              {items.map(item => (
                 <YStack
                   key={item.id}
                   backgroundColor={
-                    item.unread ? "$backgroundHover" : "$background"
+                    item.unread ? '$backgroundHover' : '$background'
                   }
                   borderRadius="$4"
                   padding="$3"
@@ -102,15 +105,15 @@ export default function NotificationScreen() {
                     <XStack gap="$2" marginTop="$3">
                       {item.actions.map((action, idx) => (
                         <Button
-                            key={idx}
-                            flex={1}
-                            theme={action.type === "primary" ? "blue" : "gray"}
-                            {...(action.type === "primary"
-                                ? {}
-                                : { variant: "outlined" })}
-                            borderRadius="$6"
-                            >
-                            {action.label}
+                          key={idx}
+                          flex={1}
+                          theme={action.type === 'primary' ? 'blue' : 'gray'}
+                          {...(action.type === 'primary'
+                            ? {}
+                            : { variant: 'outlined' })}
+                          borderRadius="$6"
+                        >
+                          {action.label}
                         </Button>
                       ))}
                     </XStack>
@@ -134,50 +137,51 @@ export default function NotificationScreen() {
 
         {/* --- BOTTOM SHEET --- */}
         <Sheet
-            open={isSheetOpen}
-            onOpenChange={setIsSheetOpen}
-            modal
-            snapPointsMode="fit"
-            dismissOnSnapToBottom
-            animation="quick">
-            <Sheet.Overlay
-                backgroundColor="$shadow6"
-                enterStyle={{ opacity: 0 }}
-                exitStyle={{ opacity: 0 }}
-            />
-            <Sheet.Handle />
-            <Sheet.Frame
-                backgroundColor="$background"
-                elevation={20}
-                borderTopLeftRadius="$6"
-                borderTopRightRadius="$6"
-                padding="$4"
-                alignItems="center"
-                justifyContent="center"
-                gap="$4"
+          open={isSheetOpen}
+          onOpenChange={setIsSheetOpen}
+          modal
+          snapPointsMode="fit"
+          dismissOnSnapToBottom
+          animation="quick"
+        >
+          <Sheet.Overlay
+            backgroundColor="$shadow6"
+            enterStyle={{ opacity: 0 }}
+            exitStyle={{ opacity: 0 }}
+          />
+          <Sheet.Handle />
+          <Sheet.Frame
+            backgroundColor="$background"
+            elevation={20}
+            borderTopLeftRadius="$6"
+            borderTopRightRadius="$6"
+            padding="$4"
+            alignItems="center"
+            justifyContent="center"
+            gap="$4"
+          >
+            <Button
+              size="$5"
+              theme="active"
+              borderRadius="$6"
+              onPress={handleMarkAllRead}
+              width="100%"
             >
-                <Button
-                size="$5"
-                theme="active"
-                borderRadius="$6"
-                onPress={handleMarkAllRead}
-                width="100%"
-                >
-                Mark all as read
-                </Button>
+              Mark all as read
+            </Button>
 
-                <Button
-                variant="outlined"
-                borderRadius="$6"
-                color="$gray9"
-                onPress={() => setIsSheetOpen(false)}
-                width="100%"
-                >
-                Cancel
-                </Button>
-            </Sheet.Frame>
+            <Button
+              variant="outlined"
+              borderRadius="$6"
+              color="$gray9"
+              onPress={() => setIsSheetOpen(false)}
+              width="100%"
+            >
+              Cancel
+            </Button>
+          </Sheet.Frame>
         </Sheet>
       </YStack>
     </Theme>
-  );
+  )
 }

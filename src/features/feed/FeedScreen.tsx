@@ -6,8 +6,8 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   useAnimatedScrollHandler,
-  withTiming, 
-  Easing,    
+  withTiming,
+  Easing,
 } from 'react-native-reanimated'
 
 import StoryBar from './components/StoryBar'
@@ -15,9 +15,13 @@ import PostCard from './components/PostCard'
 import { posts } from '@/mock/db'
 
 const HEADER_VIEW_HEIGHT = 50
-const AnimatedHeader = Animated.createAnimatedComponent(XStack) as unknown as typeof XStack
+const AnimatedHeader = Animated.createAnimatedComponent(
+  XStack
+) as unknown as typeof XStack
 const AnimatedSpacer = Animated.View
-const AnimatedList = Animated.createAnimatedComponent(FlatList) as unknown as typeof FlatList
+const AnimatedList = Animated.createAnimatedComponent(
+  FlatList
+) as unknown as typeof FlatList
 
 function HeaderContent() {
   return (
@@ -40,15 +44,15 @@ function HeaderContent() {
 
 export default function FeedScreen() {
   const insets = useSafeAreaInsets()
-  const TOTAL_HEADER_HEIGHT = HEADER_VIEW_HEIGHT + insets.top + 2 
+  const TOTAL_HEADER_HEIGHT = HEADER_VIEW_HEIGHT + insets.top + 2
 
   const offset = useSharedValue(0)
   const lastY = useSharedValue(0)
 
   const onScroll = useAnimatedScrollHandler({
-    onScroll: (e) => {
+    onScroll: e => {
       const y = e.contentOffset.y
-      
+
       if (y < 0) {
         offset.value = 0
         lastY.value = 0
@@ -58,12 +62,10 @@ export default function FeedScreen() {
 
       if (dy > 0) {
         offset.value = Math.min(TOTAL_HEADER_HEIGHT, offset.value + dy)
-      } 
-      else if (dy < 0) {
+      } else if (dy < 0) {
         if (y < TOTAL_HEADER_HEIGHT) {
           offset.value = Math.max(0, offset.value + dy)
-        } 
-        else if (dy < -5) {
+        } else if (dy < -5) {
           offset.value = Math.max(0, offset.value + dy)
         }
       }
@@ -75,8 +77,8 @@ export default function FeedScreen() {
     transform: [
       {
         translateY: withTiming(-offset.value, {
-          duration: 150, 
-          easing: Easing.out(Easing.quad), 
+          duration: 150,
+          easing: Easing.out(Easing.quad),
         }),
       },
     ],
@@ -108,7 +110,7 @@ export default function FeedScreen() {
 
       <AnimatedList
         data={posts}
-        keyExtractor={(item) => item.id}
+        keyExtractor={item => item.id}
         onScroll={onScroll}
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
