@@ -1,27 +1,23 @@
-import { FlatList, View, Text, Image, Pressable } from "react-native";
-import { stories } from "@/mock/db";
+import React, { memo } from 'react'
+import { ScrollView } from 'react-native'
+import { XStack } from 'tamagui'
+import { stories } from '@/mock/db'
+import StoryItem from './StoryItem'
 
-export default function StoryBar() {
+function StoryBar() {
   return (
-    <FlatList
-      data={stories}
+    <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      keyExtractor={(it) => it.id}
-      contentContainerStyle={{ paddingHorizontal: 12, paddingVertical: 8, gap: 12 }}
-      renderItem={({ item }) => (
-        <Pressable className="items-center">
-          <View className={`p-[2px] rounded-full ${item.hasNew ? "border-2 border-blue-500" : ""}`}>
-            <Image
-              source={{ uri: item.thumbUrl }}
-              style={{ width: 64, height: 64, borderRadius: 999 }}
-            />
-          </View>
-          <Text className="text-xs mt-1 text-neutral-700" numberOfLines={1}>
-            {item.author.username}
-          </Text>
-        </Pressable>
-      )}
-    />
-  );
+      contentContainerStyle={{ paddingHorizontal: 12 }}
+    >
+      <XStack>
+        {stories.map((s) => (
+          <StoryItem key={s.id} story={{ ...s, thumbUrl: s.thumbUrl ?? '' }} />
+        ))}
+      </XStack>
+    </ScrollView>
+  )
 }
+
+export default memo(StoryBar)
