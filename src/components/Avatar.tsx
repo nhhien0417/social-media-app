@@ -1,10 +1,18 @@
-import { Image, ImageStyle } from "react-native";
+import { Image, type ImageProps } from 'tamagui'
 
-export default function Avatar({ uri, size = 32, style }: { uri?: string; size?: number; style?: ImageStyle }) {
+type Props = {
+  uri: string
+  size?: number
+} & Partial<ImageProps>
+
+export default function Avatar({ uri, size = 36, ...rest }: Props) {
   return (
     <Image
       source={{ uri }}
-      style={[{ width: size, height: size, borderRadius: 999 }, style]}
+      width={size}
+      height={size}
+      borderRadius={999}
+      {...rest}
     />
-  );
+  )
 }
