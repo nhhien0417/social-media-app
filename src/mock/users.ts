@@ -1,4 +1,4 @@
-import { User } from '../types/models'
+import { User } from '../types/User'
 
 export const users: User[] = [
   {

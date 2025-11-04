@@ -2,7 +2,7 @@ import { memo, useState, useRef, useCallback } from 'react'
 import { FlatList, NativeScrollEvent, NativeSyntheticEvent } from 'react-native'
 import { YStack, XStack, Text, Image, View } from 'tamagui'
 import Avatar from '@/components/Avatar'
-import { Post, Media } from '@/types/models'
+import { Post, Media } from '@/types/Post'
 import {
   MoreHorizontal,
   Heart,

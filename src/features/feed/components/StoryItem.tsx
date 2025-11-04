@@ -1,5 +1,5 @@
 import Avatar from '@/components/Avatar'
-import { Story } from '@/types/models'
+import { Story } from '@/types/Story'
 import React from 'react'
 import { YStack, Text } from 'tamagui'
 
