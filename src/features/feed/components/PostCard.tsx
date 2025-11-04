@@ -1,7 +1,8 @@
-import { memo } from 'react'
-import { YStack, XStack, Text, Image } from 'tamagui'
+import { memo, useState, useRef, useCallback } from 'react'
+import { FlatList, NativeScrollEvent, NativeSyntheticEvent } from 'react-native'
+import { YStack, XStack, Text, Image, View } from 'tamagui'
 import Avatar from '@/components/Avatar'
-import { Post } from '@/types/models'
+import { Post, Media } from '@/types/models'
 import {
   MoreHorizontal,
   Heart,
@@ -11,89 +12,141 @@ import {
 } from '@tamagui/lucide-icons'
 import ButtonIcon from '@/components/IconButton'
 
+function MediaItem({ item, width }: { item: Media; width: number }) {
+  return <Image source={{ uri: item.url }} width={width} aspectRatio={1} />
+}
+
+function PaginationDots({
+  media,
+  activeIndex,
+}: {
+  media: Media[]
+  activeIndex: number
+}) {
+  if (media.length <= 1) return null
+  return (
+    <XStack
+      justifyContent="center"
+      alignItems="center"
+      marginTop="$3"
+      width="100%"
+    >
+      {media.map((_, index) => (
+        <View
+          key={index}
+          width={6}
+          height={6}
+          borderRadius={3}
+          marginHorizontal={2}
+          backgroundColor={index === activeIndex ? '#3897f0' : '#d9d9d9'}
+        />
+      ))}
+    </XStack>
+  )
+}
+
 function PostCard({ post }: { post: Post }) {
-  const { author, media, caption, likeCount, commentCount } = post
+  const { author, media, caption, createdAt } = post
   const location = 'Tokyo, Japan'
 
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [containerWidth, setContainerWidth] = useState(0)
+  const listRef = useRef<FlatList<Media>>(null)
+
+  const handleScroll = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const lmW = e.nativeEvent.layoutMeasurement?.width ?? 0
+      const w = containerWidth || lmW || 1
+      const x = e.nativeEvent.contentOffset.x
+      const idx = Math.round(x / w)
+      if (idx !== activeIndex) setActiveIndex(idx)
+    },
+    [activeIndex, containerWidth]
+  )
+
   return (
-    <YStack backgroundColor="white" marginBottom="$2">
-      {/* 1. Header */}
+    <YStack backgroundColor="white">
+      {/* Header */}
       <XStack
-        paddingHorizontal="$3"
-        paddingVertical="$2.5"
+        paddingHorizontal="$2.5"
+        paddingVertical="$2"
         alignItems="center"
         justifyContent="space-between"
       >
         <XStack alignItems="center" gap="$2.5">
-          <Avatar uri={author.avatarUrl ?? ''} size={36} />
+          <Avatar uri={author.avatarUrl} size={40} />
           <YStack>
-            <Text fontWeight="700" fontSize={14}>
+            <Text fontWeight="600" fontSize={15}>
               {author.username}
             </Text>
-            {/* Thêm Location nếu có */}
-            {location && (
-              <Text fontSize={12} opacity={0.7}>
+            {!!location && (
+              <Text fontSize={12} opacity={0.75}>
                 {location}
               </Text>
             )}
           </YStack>
         </XStack>
-
-        <ButtonIcon Icon={MoreHorizontal} Size={20}></ButtonIcon>
+        <ButtonIcon Icon={MoreHorizontal} Size={20} />
       </XStack>
 
-      {/* 2. Media */}
-      {media.map(m => (
-        <Image
-          key={m.id}
-          source={{ uri: m.url }}
-          width="100%"
-          aspectRatio={1}
-        />
-      ))}
+      {/* Media carousel */}
+      <YStack
+        aspectRatio={1}
+        onLayout={e => setContainerWidth(e.nativeEvent.layout.width)}
+      >
+        {containerWidth > 0 && (
+          <FlatList
+            ref={listRef}
+            data={media}
+            keyExtractor={it => it.id}
+            renderItem={({ item }) => (
+              <MediaItem item={item} width={containerWidth} />
+            )}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            bounces={false}
+            onScroll={handleScroll}
+            scrollEventThrottle={16}
+          />
+        )}
+      </YStack>
 
-      {/* 3. Actions */}
+      {/* Dots */}
+      <PaginationDots media={media} activeIndex={activeIndex} />
+
+      {/* Actions */}
       <XStack
-        paddingHorizontal="$3"
-        paddingVertical="$3"
+        paddingHorizontal="$2"
+        paddingTop="$1"
         justifyContent="space-between"
         alignItems="center"
       >
         <XStack alignItems="center">
-          <ButtonIcon Icon={Heart}></ButtonIcon>
-          <ButtonIcon Icon={MessageCircle}></ButtonIcon>
-          <ButtonIcon Icon={Send}></ButtonIcon>
+          <ButtonIcon Icon={Heart} />
+          <ButtonIcon Icon={MessageCircle} />
+          <ButtonIcon Icon={Send} />
         </XStack>
-
-        <ButtonIcon Icon={Bookmark}></ButtonIcon>
+        <ButtonIcon Icon={Bookmark} />
       </XStack>
 
-      {/* 4. Stats (Likes) */}
-      <Text paddingHorizontal="$3" fontWeight="700" fontSize={14}>
-        {likeCount.toLocaleString()} likes
-      </Text>
-
-      {/* 5. Caption */}
-      {caption && (
-        <Text paddingHorizontal="$3" marginTop="$1" paddingBottom="$3">
-          <Text fontWeight="700" fontSize={14}>
-            {author.username}
+      {/* Caption */}
+      {!!caption && (
+        <Text paddingHorizontal="$3" marginTop="$1">
+          <Text fontWeight="normal" fontSize={15}>
+            {caption}
           </Text>
-          <Text fontSize={14}> {caption}</Text>
         </Text>
       )}
 
-      {/* "View all X comments" (tùy chọn) */}
-      {commentCount > 0 && (
-        <Text
-          paddingHorizontal="$3"
-          paddingBottom="$3"
-          color="$gray10"
-          fontSize={14}
-        >
-          View all {commentCount.toLocaleString()} comments
-        </Text>
-      )}
+      <Text
+        paddingHorizontal="$3"
+        marginTop="$1"
+        paddingBottom="$3"
+        fontSize={12}
+      >
+        {createdAt}
+      </Text>
     </YStack>
   )
 }

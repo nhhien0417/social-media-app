@@ -15,7 +15,7 @@ function StoryItem({ story }: { story: Story }) {
         borderWidth={2}
         borderColor={borderColor}
       >
-        <Avatar uri={author.avatarUrl ?? ''} size={70} />
+        <Avatar uri={author.avatarUrl} size={70} />
       </YStack>
 
       <Text numberOfLines={1} marginTop="$1" fontSize={13} opacity={0.8}>

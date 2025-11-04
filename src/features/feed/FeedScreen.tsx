@@ -34,11 +34,11 @@ function HeaderContent() {
       backgroundColor="white"
       width="100%"
     >
-      <ButtonIcon Icon={Camera}></ButtonIcon>
+      <ButtonIcon Icon={Camera}/>
       <Text fontFamily="$heading" fontSize={30} fontWeight="500">
         Valorant
       </Text>
-      <ButtonIcon Icon={Send}></ButtonIcon>
+      <ButtonIcon Icon={Send}/>
     </XStack>
   )
 }
