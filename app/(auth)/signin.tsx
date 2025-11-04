@@ -2,110 +2,146 @@ import { Link, useRouter } from 'expo-router'
 import { useState } from 'react'
 import { useAuth } from '@/providers/Auth'
 import {
-  YStack, XStack, Input, Button, Text, Paragraph, Separator, Theme, SizableText
+  YStack, XStack, Input, Button, Text, Paragraph, Separator, Theme, SizableText, Checkbox, Spacer
 } from 'tamagui'
-import { ArrowLeft } from '@tamagui/lucide-icons'
+import {Chrome, Eye, EyeOff } from '@tamagui/lucide-icons'
 
 export default function SignInScreen() {
   const router = useRouter()
   const { signIn } = useAuth()
-  const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [remember, setRemember] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   return (
     <Theme name="light">
       <YStack
         flex={1}
         backgroundColor="white"
-        paddingHorizontal="$4"
-        paddingTop="$6"
-        paddingBottom="$6"
+        paddingHorizontal="$6"
+        paddingVertical="$8"
         alignItems="center"
+        justifyContent="center"
       >
-        {/* Top bar */}
-        <XStack width="100%" alignItems="center" marginBottom="$2" marginTop="$1">
-          <Button onPress={() => router.back()} icon={ArrowLeft} size="$3" chromeless circular />
-        </XStack>
+        {/* Logo */}
+        <YStack alignItems="center" marginBottom="$4">
+          <YStack
+            width={60}
+            height={60}
+            borderRadius={18}
+            backgroundColor="$gray3"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Text fontSize={28} fontWeight="900" color="black">▶</Text>
+          </YStack>
+        </YStack>
 
-        {/* Wordmark */}
-        <SizableText size="$9" fontWeight="700" letterSpacing={1} marginBottom="$4">
-          Instagram
+        {/* Title */}
+        <SizableText size="$8" fontWeight="700" marginBottom="$1">
+          Welcome back
         </SizableText>
+        <Paragraph opacity={0.65} marginBottom="$5" fontSize="$4">
+          Please enter your details to login.
+        </Paragraph>
 
         {/* Form */}
-        <YStack width="100%" maxWidth={420} gap="$3">
+        <YStack width="100%" maxWidth={400} gap="$3">
+          {/* Email */}
+          <Text fontWeight="600" fontSize="$4">Email</Text>
           <Input
-            value={username}
-            onChangeText={setUsername}
-            size="$4"
-            borderRadius="$4"
+            value={email}
+            onChangeText={setEmail}
+            size="$5"
+            placeholder="uxintace.com"
             borderColor="$gray5"
-            placeholder="Phone number, username or email"
-            backgroundColor="$color2"  
-          />
-          <Input
-            value={password}
-            onChangeText={setPassword}
-            size="$4"
-            borderRadius="$4"
-            borderColor="$gray5"
-            placeholder="Password"
-            secureTextEntry
-            backgroundColor="$gray2"
+            borderRadius="$6"
+            backgroundColor="$color2"
           />
 
-          <XStack justifyContent="flex-end">
-            <Link href="/signin" asChild>
-              <Button chromeless size="$3">
-                <Text color="#3797EF">Forgot password?</Text>
-              </Button>
-            </Link>
+          {/* Password */}
+          <Text fontWeight="600" fontSize="$4">Password</Text>
+          <XStack alignItems="center" position="relative">
+            <Input
+              flex={1}
+              value={password}
+              onChangeText={setPassword}
+              size="$5"
+              placeholder="••••••••"
+              secureTextEntry={!showPassword}
+              borderColor="$gray5"
+              borderRadius="$6"
+              backgroundColor="$color2"
+              paddingRight={50}
+            />
+            <Button
+              chromeless
+              position="absolute"
+              right={10}
+              icon={showPassword ? EyeOff : Eye}
+              size="$3"
+              onPress={() => setShowPassword(!showPassword)}
+            />
           </XStack>
 
+          {/* Remember + Forgot */}
+          <XStack justifyContent="space-between" alignItems="center" marginTop="$1">
+            <XStack alignItems="center" gap="$2">
+              <Checkbox size="$3" checked={remember} onCheckedChange={setRemember} />
+              <Text fontSize="$4" opacity={0.8}>Remember me</Text>
+            </XStack>
+            <Button chromeless size="$3">
+              <Text color="#3797EF" fontWeight="600">Forgot password?</Text>
+            </Button>
+          </XStack>
+
+          {/* CTA */}
           <Button
             size="$5"
-            backgroundColor="#3797EF"
-            pressStyle={{ backgroundColor: '#2f85d5' }}
+            backgroundColor="black"
             color="white"
-            borderRadius="$6"
+            borderRadius="$7"
+            fontWeight="700"
+            marginTop="$3"
             onPress={async () => {
               await signIn()
               router.replace('/(tabs)')
             }}
           >
-            Log in
+            Login
           </Button>
 
           {/* Divider OR */}
-          <XStack alignItems="center" gap="$3" marginVertical="$3">
+          <XStack alignItems="center" gap="$3" marginVertical="$4">
             <Separator flex={1} />
             <Paragraph opacity={0.6}>OR</Paragraph>
             <Separator flex={1} />
           </XStack>
 
-          {/* Login with Facebook */}
-          <Button size="$5" chromeless onPress={() => {}} justifyContent="center" alignItems="center">
-            <XStack alignItems="center" gap="$2">
-              <YStack width={22} height={22} borderRadius="$10" backgroundColor="#1877F2" alignItems="center" justifyContent="center">
-                <Text color="white" fontWeight="800">f</Text>
-              </YStack>
-              <Text color="#1877F2" fontWeight="700">Log in with Facebook</Text>
-            </XStack>
+          {/* Social login */}
+          <Button
+            size="$5"
+            backgroundColor="$gray2"
+            borderRadius="$6"
+            icon={Chrome}
+            justifyContent="center"
+            fontWeight="700"
+          >
+            Continue with Google
           </Button>
         </YStack>
 
         {/* Footer */}
-        <YStack marginTop="auto" alignItems="center" width="100%">
-          <Separator marginVertical="$3" width="100%" />
-          <XStack gap="$2" alignItems="center">
-            <Paragraph opacity={0.7}>Don’t have an account?</Paragraph>
-            <Link href="/(auth)/signup" asChild>
-              <Button chromeless>
-                <Text color="#3797EF" fontWeight="700">Sign up.</Text>
-              </Button>
-            </Link>
-          </XStack>
-        </YStack>
+        <Spacer size="$6" />
+        <XStack gap="$2" alignItems="center">
+          <Paragraph opacity={0.7}>Don’t have an account?</Paragraph>
+          <Link href="/(auth)/signup" asChild>
+            <Button chromeless>
+              <Text color="#3797EF" fontWeight="700">Register</Text>
+            </Button>
+          </Link>
+        </XStack>
       </YStack>
     </Theme>
   )
