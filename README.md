@@ -39,5 +39,5 @@ npm i -D @tamagui/babel-plugin
 
 # Run
 npx expo-router@latest typegen
-expo start -c
+npx expo start
 ```
