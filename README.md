@@ -32,7 +32,7 @@ npm i tamagui @tamagui/core @tamagui/config @tamagui/themes @tamagui/lucide-icon
 npx expo install react-native-reanimated react-native-gesture-handler react-native-safe-area-context react-native-svg
 
 # Routing, data fetching & lists
-npm i expo-router @shopify/flash-list @tanstack/react-query
+npm i expo-router expo-secure-store @shopify/flash-list @tanstack/react-query
 
 # Babel plugin for Tamagui
 npm i -D @tamagui/babel-plugin
