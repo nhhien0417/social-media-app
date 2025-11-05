@@ -1,5 +1,4 @@
 import axios from 'axios'
-import { getToken } from './token'
 
 export const API_BASE_URL = 'http://localhost:1208/api/v1'
 

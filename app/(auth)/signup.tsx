@@ -9,7 +9,6 @@ import {
   Paragraph,
   Separator,
   SizableText,
-  Spacer,
   ScrollView,
   Spinner,
 } from 'tamagui'

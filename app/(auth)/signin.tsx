@@ -9,15 +9,12 @@ import {
   Paragraph,
   Separator,
   SizableText,
-  Checkbox,
-  Spacer,
   ScrollView,
   Spinner,
 } from 'tamagui'
 import { Chrome, Eye, EyeOff } from '@tamagui/lucide-icons'
 import { Image } from 'react-native'
 import { signInApi } from '@/api/auth.api'
-import { saveToken } from '@/api/token'
 import ButtonIcon from '@/components/IconButton'
 
 type ValidationErrors = {
