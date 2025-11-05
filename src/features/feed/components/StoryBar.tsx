@@ -15,7 +15,7 @@ function CreateStoryItem() {
         padding={2}
         borderRadius={999}
         borderWidth={2}
-        borderColor="$gray10"
+        borderColor="$red10"
       >
         <Avatar uri={userAvatar} size={70} />
         <Button
