@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import {
   YStack,
   XStack,
@@ -8,13 +9,16 @@ import {
   Theme,
   Sheet,
 } from 'tamagui'
-import { useState } from 'react'
 import { useAppTheme } from '@/providers/ThemeProvider'
 import { notifications } from '@/mock/notifications'
 
 export default function NotificationScreen() {
   const { theme } = useAppTheme()
   const [isSheetOpen, setIsSheetOpen] = useState(false)
+  const [isScrollable, setIsScrollable] = useState(false)
+
+  const [layoutHeight, setLayoutHeight] = useState(0)
+  const [contentHeight, setContentHeight] = useState(0)
 
   const grouped = notifications.reduce(
     (acc, item) => {
@@ -30,19 +34,23 @@ export default function NotificationScreen() {
     setIsSheetOpen(false)
   }
 
+  // 👇 đảm bảo chỉ update khi cả hai đã đo xong
+  useEffect(() => {
+    if (layoutHeight > 0 && contentHeight > 0) {
+      setIsScrollable(contentHeight > layoutHeight + 10) // +10 để tránh sai số nhỏ
+    }
+  }, [layoutHeight, contentHeight])
+
   return (
     <Theme name={theme}>
-      <YStack
-        flex={1}
-        backgroundColor="$background"
-        paddingHorizontal="$4"
-        paddingTop="$6"
-      >
+      <YStack flex={1} backgroundColor="$background">
         {/* --- TOP BAR --- */}
         <XStack
           width="100%"
           alignItems="center"
           justifyContent="space-between"
+          paddingHorizontal="$4"
+          paddingTop="$6"
           marginBottom="$3"
         >
           <Text fontSize="$7" fontWeight="700" color="$color">
@@ -59,7 +67,15 @@ export default function NotificationScreen() {
         </XStack>
 
         {/* --- CONTENT --- */}
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          onLayout={e => setLayoutHeight(e.nativeEvent.layout.height)}
+          onContentSizeChange={(w, h) => setContentHeight(h)}
+          contentContainerStyle={{
+            paddingHorizontal: 16,
+            paddingBottom: 24,
+          }}
+        >
           {Object.entries(grouped).map(([section, items]) => (
             <YStack key={section} marginBottom="$4">
               <Text
@@ -123,16 +139,19 @@ export default function NotificationScreen() {
             </YStack>
           ))}
 
-          <YStack alignItems="center" marginTop="$4" marginBottom="$8">
-            <Button
-              variant="outlined"
-              borderRadius="$6"
-              color="$gray9"
-              size="$4"
-            >
-              See previous notifications
-            </Button>
-          </YStack>
+          {/* 👇 chỉ hiển thị khi thật sự có thể cuộn */}
+          {isScrollable && (
+            <YStack alignItems="center" marginTop="$4" marginBottom="$8">
+              <Button
+                variant="outlined"
+                borderRadius="$6"
+                color="$gray9"
+                size="$4"
+              >
+                See previous notifications
+              </Button>
+            </YStack>
+          )}
         </ScrollView>
 
         {/* --- BOTTOM SHEET --- */}
