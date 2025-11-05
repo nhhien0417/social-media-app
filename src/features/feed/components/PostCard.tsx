@@ -4,7 +4,7 @@ import { YStack, XStack, Text, Image, View } from 'tamagui'
 import Avatar from '@/components/Avatar'
 import { Post, Media } from '@/types/Post'
 import {
-  MoreHorizontal,
+  MoreVertical,
   Heart,
   MessageCircle,
   Send,
@@ -90,7 +90,7 @@ function PostCard({ post }: { post: Post }) {
             )}
           </YStack>
         </XStack>
-        <ButtonIcon Icon={MoreHorizontal} Size={20} />
+        <ButtonIcon Icon={MoreVertical} Size={20} />
       </XStack>
 
       {/* Media carousel */}

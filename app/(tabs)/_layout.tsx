@@ -1,48 +1,61 @@
+import type { ComponentProps } from 'react'
 import { Tabs } from 'expo-router'
-import { Home, Search, PlusSquare, Bell, User } from 'lucide-react-native'
+import { Ionicons } from '@expo/vector-icons'
 import { View } from 'react-native'
 
 export default function TabsLayout() {
-  const icon = (I: any, focused: boolean) => (
-    <View className="items-center justify-center">
-      <I size={22} color={focused ? '#111' : '#666'} />
-    </View>
-  )
+  const icon = (
+    iconName: ComponentProps<typeof Ionicons>['name'],
+    focused: boolean
+  ) => {
+    const iconFullName = (
+      focused ? iconName : `${iconName}-outline`
+    ) as ComponentProps<typeof Ionicons>['name']
+    const color = focused ? '#111' : '#666'
+
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <Ionicons name={iconFullName} size={25} color={color} />
+      </View>
+    )
+  }
+
   return (
-    <Tabs screenOptions={{ headerShown: false, tabBarStyle: { height: 56 } }}>
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: { height: 50 },
+        tabBarShowLabel: false,
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          tabBarIcon: ({ focused }) => icon(Home, focused),
-          title: 'Home',
+          tabBarIcon: ({ focused }) => icon('home', focused),
         }}
       />
       <Tabs.Screen
         name="search"
         options={{
-          tabBarIcon: ({ focused }) => icon(Search, focused),
-          title: 'Search',
+          tabBarIcon: ({ focused }) => icon('search', focused),
         }}
       />
       <Tabs.Screen
         name="create"
         options={{
-          tabBarIcon: ({ focused }) => icon(PlusSquare, focused),
-          title: 'Create',
+          tabBarIcon: ({ focused }) => icon('add-circle', focused),
         }}
       />
       <Tabs.Screen
         name="activity"
         options={{
-          tabBarIcon: ({ focused }) => icon(Bell, focused),
-          title: 'Activity',
+          tabBarIcon: ({ focused }) => icon('notifications', focused),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          tabBarIcon: ({ focused }) => icon(User, focused),
-          title: 'Profile',
+          tabBarIcon: ({ focused }) => icon('person-circle', focused),
         }}
       />
     </Tabs>
