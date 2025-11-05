@@ -100,7 +100,6 @@ export default function SignUpScreen() {
             <Text fontWeight="600" fontSize="$4">
               Email
             </Text>
-
             {errors.email && (
               <Text color="$red10" fontSize="$2" marginRight="$1">
                 {errors.email}
@@ -119,6 +118,7 @@ export default function SignUpScreen() {
             borderColor={errors.email ? '$red10' : '$borderColor'}
             borderRadius="$6"
             backgroundColor="$backgroundPress"
+            placeholderTextColor="$placeholderColor"
           />
 
           {/* Full name */}
@@ -126,7 +126,6 @@ export default function SignUpScreen() {
             <Text fontWeight="600" fontSize="$4">
               Full Name
             </Text>
-
             {errors.fullName && (
               <Text color="$red10" fontSize="$2" marginRight="$1">
                 {errors.fullName}
@@ -145,6 +144,7 @@ export default function SignUpScreen() {
             borderColor={errors.fullName ? '$red10' : '$borderColor'}
             borderRadius="$6"
             backgroundColor="$backgroundPress"
+            placeholderTextColor="$placeholderColor"
           />
 
           {/* Password */}
@@ -152,7 +152,6 @@ export default function SignUpScreen() {
             <Text fontWeight="600" fontSize="$4">
               Password
             </Text>
-
             {errors.password && (
               <Text color="$red10" fontSize="$2" marginRight="$1">
                 {errors.password}
@@ -175,6 +174,7 @@ export default function SignUpScreen() {
               borderRadius="$6"
               backgroundColor="$backgroundPress"
               paddingRight={50}
+              placeholderTextColor="$placeholderColor"
             />
             <Button
               chromeless
@@ -206,8 +206,7 @@ export default function SignUpScreen() {
           {/* CTA */}
           <Button
             size="$5"
-            backgroundColor="$color"
-            color="$background"
+            theme="primary"
             borderRadius="$7"
             fontWeight="700"
             marginTop="$3"

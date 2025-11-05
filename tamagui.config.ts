@@ -2,6 +2,7 @@ import { createTamagui } from 'tamagui'
 import { defaultConfig } from '@tamagui/config/v4'
 
 const accentColor = '#3797EF'
+
 const lightTheme = {
   ...defaultConfig.themes.light,
 
@@ -14,7 +15,7 @@ const lightTheme = {
   colorPress: '#000000',
   colorHover: '#000000',
   colorFocus: '#000000',
-  placeholderColor: '#999999',
+  placeholderColor: '#888888',
 
   borderColor: '#ededed',
   borderColorPress: '#e5e5e5',
@@ -36,7 +37,7 @@ const darkTheme = {
   colorPress: '#FFFFFF',
   colorHover: '#FFFFFF',
   colorFocus: '#FFFFFF',
-  placeholderColor: '#555555',
+  placeholderColor: '#888888',
 
   borderColor: '#333333',
   borderColorPress: '#444444',

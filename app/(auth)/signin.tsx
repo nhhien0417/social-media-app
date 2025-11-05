@@ -69,7 +69,6 @@ export default function SignInScreen() {
         justifyContent: 'center',
       }}
     >
-      {/* 4. Bọc nội dung trong YStack mới */}
       <YStack paddingHorizontal="$6" paddingVertical="$8" alignItems="center">
         {/* Logo */}
         <Image
@@ -97,7 +96,6 @@ export default function SignInScreen() {
             <Text fontWeight="600" fontSize="$4">
               Email
             </Text>
-
             {errors.email && (
               <Text color="$red10" fontSize="$2" marginRight="$1">
                 {errors.email}
@@ -116,6 +114,7 @@ export default function SignInScreen() {
             borderColor={errors.email ? '$red10' : '$borderColor'}
             borderRadius="$6"
             backgroundColor="$backgroundPress"
+            placeholderTextColor="$placeholderColor"
           />
 
           {/* Password */}
@@ -123,7 +122,6 @@ export default function SignInScreen() {
             <Text fontWeight="600" fontSize="$4">
               Password
             </Text>
-
             {errors.password && (
               <Text color="$red10" fontSize="$2" marginRight="$1">
                 {errors.password}
@@ -146,6 +144,7 @@ export default function SignInScreen() {
               borderRadius="$6"
               backgroundColor="$backgroundPress"
               paddingRight={50}
+              placeholderTextColor="$placeholderColor"
             />
             <Button
               chromeless
@@ -187,8 +186,7 @@ export default function SignInScreen() {
           {/* CTA */}
           <Button
             size="$5"
-            backgroundColor="$color"
-            color="$background"
+            theme="primary"
             borderRadius="$7"
             fontWeight="700"
             marginTop="$3"
