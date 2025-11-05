@@ -10,9 +10,16 @@ import {
   Separator,
   SizableText,
   Spacer,
+  ScrollView,
 } from 'tamagui'
 import { Chrome, Eye, EyeOff } from '@tamagui/lucide-icons'
 import { Image } from 'react-native'
+
+type ValidationErrors = {
+  email?: string
+  fullName?: string
+  password?: string
+}
 
 export default function SignUpScreen() {
   const router = useRouter()
@@ -21,148 +28,218 @@ export default function SignUpScreen() {
   const [fullName, setFullName] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [errors, setErrors] = useState<ValidationErrors>({})
+
+  const isEmailValid = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  }
+
+  const validate = () => {
+    const newErrors: ValidationErrors = {}
+
+    if (!email.trim()) {
+      newErrors.email = 'Email is required'
+    } else if (!isEmailValid(email)) {
+      newErrors.email = 'Invalid email address'
+    }
+
+    if (!fullName.trim()) {
+      newErrors.fullName = 'Full name is required'
+    }
+
+    if (!password) {
+      newErrors.password = 'Password is required'
+    } else if (password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters'
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleSignUp = () => {
+    if (!validate()) {
+      return
+    }
+    router.replace('/(auth)/signin')
+  }
 
   return (
-    <YStack
+    <ScrollView
       flex={1}
       backgroundColor="$background"
-      paddingHorizontal="$6"
-      alignItems="center"
-      justifyContent="center"
+      contentContainerStyle={{
+        flexGrow: 1,
+        justifyContent: 'center',
+      }}
     >
-      {/* Logo */}
-      <Image
-        source={require('@/assets/logo_0.png')}
-        style={{ width: 150, height: 150 }}
-      />
-
-      {/* Title */}
-      <SizableText size="$8" fontWeight="700" marginBottom="$1" marginTop="$-5">
-        Create your account
-      </SizableText>
-      <Paragraph color="$gray11" marginBottom="$5" fontSize="$4">
-        Please fill in your information to sign up.
-      </Paragraph>
-
-      {/* Form */}
-      <YStack width="100%" maxWidth={400} gap="$3">
-        {/* Email */}
-        <Text fontWeight="600" fontSize="$4">
-          Email
-        </Text>
-        <Input
-          value={email}
-          onChangeText={setEmail}
-          size="$5"
-          placeholder="you@example.com"
-          borderColor="$borderColor"
-          borderRadius="$6"
-          backgroundColor="$backgroundPress"
+      <YStack paddingHorizontal="$6" paddingVertical="$8" alignItems="center">
+        {/* Logo */}
+        <Image
+          source={require('@/assets/logo_0.png')}
+          style={{ width: 150, height: 150 }}
         />
 
-        {/* Full name */}
-        <Text fontWeight="600" fontSize="$4">
-          Full Name
-        </Text>
-        <Input
-          value={fullName}
-          onChangeText={setFullName}
-          size="$5"
-          placeholder="John Doe"
-          borderColor="$borderColor"
-          borderRadius="$6"
-          backgroundColor="$backgroundPress"
-        />
-
-        {/* Password */}
-        <Text fontWeight="600" fontSize="$4">
-          Password
-        </Text>
-        <XStack alignItems="center" position="relative">
-          <Input
-            flex={1}
-            value={password}
-            onChangeText={setPassword}
-            size="$5"
-            placeholder="••••••••"
-            secureTextEntry={!showPassword}
-            borderColor="$borderColor"
-            borderRadius="$6"
-            backgroundColor="$backgroundPress"
-            paddingRight={50}
-          />
-          <Button
-            chromeless
-            position="absolute"
-            right={10}
-            icon={showPassword ? EyeOff : Eye}
-            size="$3"
-            onPress={() => setShowPassword(!showPassword)}
-          />
-        </XStack>
-
-        {/* Policy text */}
-        <Paragraph color="$gray11" fontSize="$3" marginTop="$1">
-          By signing up, you agree to our{' '}
-          <Text fontWeight="700" color="$color">
-            Terms
-          </Text>
-          ,{' '}
-          <Text fontWeight="700" color="$color">
-            Privacy Policy
-          </Text>
-          , and{' '}
-          <Text fontWeight="700" color="$color">
-            Cookies Policy
-          </Text>
-          .
+        {/* Title */}
+        <SizableText
+          size="$8"
+          fontWeight="700"
+          marginBottom="$1"
+          marginTop="$-5"
+        >
+          Create your account
+        </SizableText>
+        <Paragraph color="$gray11" marginBottom="$5" fontSize="$4">
+          Please fill in your information to sign up.
         </Paragraph>
 
-        {/* CTA */}
-        <Button
-          size="$5"
-          backgroundColor="$color"
-          color="$background"
-          borderRadius="$7"
-          fontWeight="700"
-          marginTop="$3"
-          onPress={() => router.replace('/(auth)/signin')}
-        >
-          Sign up
-        </Button>
-
-        {/* Divider OR */}
-        <XStack alignItems="center" gap="$3" marginVertical="$4">
-          <Separator flex={1} />
-          <Paragraph color="$gray10">OR</Paragraph>
-          <Separator flex={1} />
-        </XStack>
-
-        {/* Social login */}
-        <Button
-          size="$5"
-          backgroundColor="$backgroundPress"
-          borderRadius="$6"
-          icon={Chrome}
-          justifyContent="center"
-          fontWeight="700"
-        >
-          Continue with Google
-        </Button>
-      </YStack>
-
-      {/* Footer */}
-      <Spacer size="$6" />
-      <XStack gap="$2" alignItems="center">
-        <Paragraph color="$gray11">Already have an account?</Paragraph>
-        <Link href="/(auth)/signin" asChild>
-          <Button chromeless>
-            <Text color="$primary" fontWeight="700">
-              Log in
+        {/* Form */}
+        <YStack width="100%" maxWidth={400} gap="$3">
+          {/* Email */}
+          <Text fontWeight="600" fontSize="$4">
+            Email
+          </Text>
+          <Input
+            value={email}
+            onChangeText={text => {
+              setEmail(text)
+              if (errors.email)
+                setErrors(prev => ({ ...prev, email: undefined }))
+            }}
+            size="$5"
+            placeholder="you@example.com"
+            borderColor={errors.email ? '$red10' : '$borderColor'}
+            borderRadius="$6"
+            backgroundColor="$backgroundPress"
+          />
+          {errors.email && (
+            <Text color="$red10" fontSize="$2" marginLeft="$1">
+              {errors.email}
             </Text>
+          )}
+
+          {/* Full name */}
+          <Text fontWeight="600" fontSize="$4">
+            Full Name
+          </Text>
+          <Input
+            value={fullName}
+            onChangeText={text => {
+              setFullName(text)
+              if (errors.fullName)
+                setErrors(prev => ({ ...prev, fullName: undefined }))
+            }}
+            size="$5"
+            placeholder="John Doe"
+            borderColor={errors.fullName ? '$red10' : '$borderColor'}
+            borderRadius="$6"
+            backgroundColor="$backgroundPress"
+          />
+          {errors.fullName && (
+            <Text color="$red10" fontSize="$2" marginLeft="$1">
+              {errors.fullName}
+            </Text>
+          )}
+
+          {/* Password */}
+          <Text fontWeight="600" fontSize="$4">
+            Password
+          </Text>
+          <XStack alignItems="center" position="relative">
+            <Input
+              flex={1}
+              value={password}
+              onChangeText={text => {
+                setPassword(text)
+                if (errors.password)
+                  setErrors(prev => ({ ...prev, password: undefined }))
+              }}
+              size="$5"
+              placeholder="••••••••"
+              secureTextEntry={!showPassword}
+              borderColor={errors.password ? '$red10' : '$borderColor'}
+              borderRadius="$6"
+              backgroundColor="$backgroundPress"
+              paddingRight={50}
+            />
+            <Button
+              chromeless
+              position="absolute"
+              right={10}
+              icon={showPassword ? EyeOff : Eye}
+              size="$3"
+              onPress={() => setShowPassword(!showPassword)}
+            />
+          </XStack>
+          {errors.password && (
+            <Text color="$red10" fontSize="$2" marginLeft="$1">
+              {errors.password}
+            </Text>
+          )}
+
+          {/* Policy text */}
+          <Paragraph color="$gray11" fontSize="$3" marginTop="$1">
+            By signing up, you agree to our{' '}
+            <Text fontWeight="700" color="$color">
+              Terms
+            </Text>
+            ,{' '}
+            <Text fontWeight="700" color="$color">
+              Privacy Policy
+            </Text>
+            , and{' '}
+            <Text fontWeight="700" color="$color">
+              Cookies Policy
+            </Text>
+            .
+          </Paragraph>
+
+          {/* CTA */}
+          <Button
+            size="$5"
+            backgroundColor="$color"
+            color="$background"
+            borderRadius="$7"
+            fontWeight="700"
+            marginTop="$3"
+            onPress={handleSignUp}
+          >
+            Sign up
           </Button>
-        </Link>
-      </XStack>
-    </YStack>
+
+          {/* Divider OR */}
+          <XStack alignItems="center" gap="$3" marginVertical="$4">
+            <Separator flex={1} />
+            <Paragraph color="$gray10">OR</Paragraph>
+            <Separator flex={1} />
+          </XStack>
+
+          {/* Social login */}
+          <Button
+            size="$5"
+            backgroundColor="$backgroundPress"
+            borderRadius="$6"
+            icon={Chrome}
+            justifyContent="center"
+            fontWeight="700"
+          >
+            Continue with Google
+          </Button>
+        </YStack>
+
+        {/* Footer */}
+        <Spacer size="$6" />
+        <XStack gap="$2" alignItems="center">
+          <Paragraph color="$gray11">Already have an account?</Paragraph>
+          <Link href="/(auth)/signin" asChild>
+            <Button chromeless>
+              <Text color="$primary" fontWeight="700">
+                Log in
+              </Text>
+            </Button>
+          </Link>
+        </XStack>
+      </YStack>
+    </ScrollView>
   )
 }
