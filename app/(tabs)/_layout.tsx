@@ -2,6 +2,8 @@ import type { ComponentProps } from 'react'
 import { Tabs } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { View } from 'react-native'
+import { YStack } from 'tamagui'
+import Avatar from '@/components/Avatar'
 
 export default function TabsLayout() {
   const icon = (
@@ -19,6 +21,8 @@ export default function TabsLayout() {
       </View>
     )
   }
+
+  const userAvatar = 'https://i.pravatar.cc/100?img=40'
 
   return (
     <Tabs
@@ -52,10 +56,21 @@ export default function TabsLayout() {
           tabBarIcon: ({ focused }) => icon('notifications', focused),
         }}
       />
+
       <Tabs.Screen
         name="profile"
         options={{
-          tabBarIcon: ({ focused }) => icon('person-circle', focused),
+          tabBarIcon: ({ focused }) => (
+            <YStack
+              alignItems="center"
+              justifyContent="center"
+              borderWidth={focused ? 2 : 0}
+              borderColor={focused ? '#111' : 'transparent'}
+              borderRadius={999}
+            >
+              <Avatar uri={userAvatar} size={25} />
+            </YStack>
+          ),
         }}
       />
     </Tabs>
