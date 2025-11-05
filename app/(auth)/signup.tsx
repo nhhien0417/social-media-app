@@ -11,14 +11,18 @@ import {
   SizableText,
   Spacer,
   ScrollView,
+  Spinner,
 } from 'tamagui'
 import { Chrome, Eye, EyeOff } from '@tamagui/lucide-icons'
 import { Image } from 'react-native'
+import { signUpApi } from '@/api/auth.api'
+import ButtonIcon from '@/components/IconButton'
 
 type ValidationErrors = {
   email?: string
   fullName?: string
   password?: string
+  api?: string
 }
 
 export default function SignUpScreen() {
@@ -29,6 +33,7 @@ export default function SignUpScreen() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [errors, setErrors] = useState<ValidationErrors>({})
+  const [isLoading, setIsLoading] = useState(false)
 
   const isEmailValid = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
@@ -57,11 +62,24 @@ export default function SignUpScreen() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSignUp = () => {
-    if (!validate()) {
+  const handleSignUp = async () => {
+    if (!validate() || isLoading) {
       return
     }
-    router.replace('/(auth)/signin')
+    setIsLoading(true)
+    setErrors({})
+
+    try {
+      const response = await signUpApi({ email, fullName, password })
+      console.log('✅ API Response:', response)
+      router.replace('/(auth)/signin')
+    } catch (error: any) {
+      const apiError =
+        error?.response?.data?.message || 'An unknown error occurred.'
+      setErrors({ api: apiError })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -73,24 +91,19 @@ export default function SignUpScreen() {
         justifyContent: 'center',
       }}
     >
-      <YStack paddingHorizontal="$6" paddingVertical="$8" alignItems="center">
+      <YStack paddingHorizontal="$6" paddingVertical="$6" alignItems="center">
         {/* Logo */}
         <Image
           source={require('@/assets/logo_0.png')}
-          style={{ width: 150, height: 150 }}
+          style={{ width: 75, height: 75 }}
         />
 
         {/* Title */}
-        <SizableText
-          size="$8"
-          fontWeight="700"
-          marginBottom="$1"
-          marginTop="$-5"
-        >
+        <SizableText size="$8" fontWeight="700" marginTop="$2">
           Create your account
         </SizableText>
-        <Paragraph color="$gray11" marginBottom="$5" fontSize="$4">
-          Please fill in your information to sign up.
+        <Paragraph color="$gray11" marginBottom="$3" fontSize="$4">
+          Please fill in your information to sign up
         </Paragraph>
 
         {/* Form */}
@@ -103,6 +116,11 @@ export default function SignUpScreen() {
             {errors.email && (
               <Text color="$red10" fontSize="$2" marginRight="$1">
                 {errors.email}
+              </Text>
+            )}
+            {errors.api && (
+              <Text color="$red10" fontSize="$2" marginRight="$1">
+                {errors.api}
               </Text>
             )}
           </XStack>
@@ -119,6 +137,8 @@ export default function SignUpScreen() {
             borderRadius="$6"
             backgroundColor="$backgroundPress"
             placeholderTextColor="$placeholderColor"
+            autoCapitalize="none"
+            keyboardType="email-address"
           />
 
           {/* Full name */}
@@ -145,6 +165,7 @@ export default function SignUpScreen() {
             borderRadius="$6"
             backgroundColor="$backgroundPress"
             placeholderTextColor="$placeholderColor"
+            autoCapitalize="words"
           />
 
           {/* Password */}
@@ -176,12 +197,11 @@ export default function SignUpScreen() {
               paddingRight={50}
               placeholderTextColor="$placeholderColor"
             />
-            <Button
-              chromeless
+            <ButtonIcon
               position="absolute"
               right={10}
-              icon={showPassword ? EyeOff : Eye}
-              size="$3"
+              Icon={showPassword ? EyeOff : Eye}
+              Size={20}
               onPress={() => setShowPassword(!showPassword)}
             />
           </XStack>
@@ -209,14 +229,16 @@ export default function SignUpScreen() {
             theme="primary"
             borderRadius="$7"
             fontWeight="700"
-            marginTop="$3"
+            marginTop="$2"
             onPress={handleSignUp}
+            disabled={isLoading}
+            icon={isLoading ? <Spinner size="small" /> : null}
           >
-            Sign up
+            {isLoading ? 'Creating account...' : 'Sign up'}
           </Button>
 
           {/* Divider OR */}
-          <XStack alignItems="center" gap="$3" marginVertical="$4">
+          <XStack alignItems="center" gap="$3" marginVertical="$2">
             <Separator flex={1} />
             <Paragraph color="$gray10">OR</Paragraph>
             <Separator flex={1} />
@@ -236,15 +258,12 @@ export default function SignUpScreen() {
         </YStack>
 
         {/* Footer */}
-        <Spacer size="$6" />
-        <XStack gap="$2" alignItems="center">
+        <XStack marginTop="$2" gap="$1" alignItems="center">
           <Paragraph color="$gray11">Already have an account?</Paragraph>
           <Link href="/(auth)/signin" asChild>
-            <Button chromeless>
-              <Text color="$primary" fontWeight="700">
-                Log in
-              </Text>
-            </Button>
+            <Text marginLeft="$2" color="$primary" fontWeight="700">
+              Log in
+            </Text>
           </Link>
         </XStack>
       </YStack>

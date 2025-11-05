@@ -1,7 +1,7 @@
 export const ENDPOINTS = {
-  AUTH: {
-    SIGN_IN: '/auth/signin',
-    SIGN_UP: '/auth/signup',
+  IDENTITY: {
+    LOGIN: 'identity/auth/login',
+    REGISTER: 'identity/auth/register',
     PROFILE: '/auth/me',
   },
   POSTS: {

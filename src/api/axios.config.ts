@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { getToken } from './token'
 
 export const API_BASE_URL = 'http://localhost:1208/api/v1'
 
@@ -11,14 +12,18 @@ const api = axios.create({
   },
 })
 
+/*
 api.interceptors.request.use(
   async config => {
-    const token = null
-    if (token) config.headers.Authorization = `Bearer ${token}`
+    const token = await getToken()
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
     return config
   },
   error => Promise.reject(error)
 )
+*/
 
 api.interceptors.response.use(
   response => response,

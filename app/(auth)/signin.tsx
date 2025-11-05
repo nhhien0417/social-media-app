@@ -12,22 +12,28 @@ import {
   Checkbox,
   Spacer,
   ScrollView,
+  Spinner,
 } from 'tamagui'
 import { Chrome, Eye, EyeOff } from '@tamagui/lucide-icons'
 import { Image } from 'react-native'
+import { signInApi } from '@/api/auth.api'
+import { saveToken } from '@/api/token'
+import ButtonIcon from '@/components/IconButton'
 
 type ValidationErrors = {
   email?: string
   password?: string
+  api?: string
 }
 
 export default function SignInScreen() {
   const router = useRouter()
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [remember, setRemember] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [errors, setErrors] = useState<ValidationErrors>({})
+  const [isLoading, setIsLoading] = useState(false)
 
   const isEmailValid = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
@@ -51,10 +57,28 @@ export default function SignInScreen() {
   }
 
   const handleLogin = async () => {
-    if (!validate()) {
+    if (!validate() || isLoading) {
       return
     }
-    router.replace('/(tabs)')
+    setIsLoading(true)
+    setErrors({})
+
+    try {
+      const response = await signInApi({ email, password })
+      console.log('✅ API Response:', response)
+
+      // if (response && response.data && response.data.accessToken) {
+      //   await saveToken(response.data.accessToken)
+      // } else {
+      //   throw new Error('Login failed: Invalid response structure.')
+      // }
+
+      router.replace('/(tabs)')
+    } catch (error: any) {
+      setErrors({ api: 'Invalid email or password' })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -66,24 +90,19 @@ export default function SignInScreen() {
         justifyContent: 'center',
       }}
     >
-      <YStack paddingHorizontal="$6" paddingVertical="$8" alignItems="center">
+      <YStack paddingHorizontal="$6" paddingVertical="$6" alignItems="center">
         {/* Logo */}
         <Image
           source={require('@/assets/logo_0.png')}
-          style={{ width: 150, height: 150 }}
+          style={{ width: 75, height: 75 }}
         />
 
         {/* Title */}
-        <SizableText
-          size="$8"
-          fontWeight="700"
-          marginBottom="$1"
-          marginTop="$-5"
-        >
+        <SizableText size="$8" fontWeight="700" marginTop="$2">
           Welcome back
         </SizableText>
-        <Paragraph color="$gray11" marginBottom="$5" fontSize="$4">
-          Please enter your details to login.
+        <Paragraph color="$gray11" marginBottom="$3" fontSize="$4">
+          Please enter your details to login
         </Paragraph>
 
         {/* Form */}
@@ -124,18 +143,22 @@ export default function SignInScreen() {
                 {errors.password}
               </Text>
             )}
+            {errors.api && (
+              <Text color="$red10" fontSize="$2" marginRight="$1">
+                {errors.api}
+              </Text>
+            )}
           </XStack>
           <XStack alignItems="center" position="relative">
             <Input
               flex={1}
-              value={password}
               onChangeText={text => {
                 setPassword(text)
                 if (errors.password)
                   setErrors(prev => ({ ...prev, password: undefined }))
               }}
               size="$5"
-              placeholder="••••••••"
+              placeholder="••••••••••"
               secureTextEntry={!showPassword}
               borderColor={errors.password ? '$red10' : '$borderColor'}
               borderRadius="$6"
@@ -143,42 +166,25 @@ export default function SignInScreen() {
               paddingRight={50}
               placeholderTextColor="$placeholderColor"
             />
-            <Button
-              chromeless
+            <ButtonIcon
               position="absolute"
               right={10}
-              icon={showPassword ? EyeOff : Eye}
-              size="$3"
+              Icon={showPassword ? EyeOff : Eye}
+              Size={20}
               onPress={() => setShowPassword(!showPassword)}
             />
           </XStack>
 
           {/* Remember + Forgot */}
-          <XStack
-            justifyContent="space-between"
-            alignItems="center"
+          <Text
             marginTop="$1"
+            textAlign="right"
+            color="$primary"
+            fontWeight="500"
+            fontSize={15}
           >
-            <XStack alignItems="center" gap="$2">
-              <Checkbox
-                size="$3"
-                checked={remember}
-                onCheckedChange={value => setRemember(value === true)}
-              >
-                <Checkbox.Indicator>
-                  <Text>✓</Text>
-                </Checkbox.Indicator>
-              </Checkbox>
-              <Text fontSize="$4" color="$gray11">
-                Remember me
-              </Text>
-            </XStack>
-            <Button chromeless size="$3">
-              <Text color="$primary" fontWeight="600">
-                Forgot password?
-              </Text>
-            </Button>
-          </XStack>
+            Forgot password?
+          </Text>
 
           {/* CTA */}
           <Button
@@ -186,14 +192,16 @@ export default function SignInScreen() {
             theme="primary"
             borderRadius="$7"
             fontWeight="700"
-            marginTop="$3"
+            marginTop="$2"
             onPress={handleLogin}
+            disabled={isLoading}
+            icon={isLoading ? <Spinner size="small" /> : null}
           >
-            Login
+            {isLoading ? 'Logging in...' : 'Login'}
           </Button>
 
           {/* Divider OR */}
-          <XStack alignItems="center" gap="$3" marginVertical="$4">
+          <XStack alignItems="center" gap="$3" marginVertical="$2">
             <Separator flex={1} />
             <Paragraph color="$gray10">OR</Paragraph>
             <Separator flex={1} />
@@ -213,15 +221,12 @@ export default function SignInScreen() {
         </YStack>
 
         {/* Footer */}
-        <Spacer size="$5" />
-        <XStack gap="$1" alignItems="center">
+        <XStack gap="$1" marginTop="$2" alignItems="center">
           <Paragraph color="$gray11">Don’t have an account?</Paragraph>
           <Link href="/(auth)/signup" asChild>
-            <Button chromeless>
-              <Text color="$primary" fontWeight="700">
-                Register
-              </Text>
-            </Button>
+            <Text marginLeft="$2" color="$primary" fontWeight="700">
+              Register
+            </Text>
           </Link>
         </XStack>
       </YStack>
