@@ -15,20 +15,20 @@ function CreateStoryItem() {
         padding={2}
         borderRadius={999}
         borderWidth={2}
-        borderColor="$red10"
+        borderColor="$gray10"
       >
         <Avatar uri={userAvatar} size={70} />
         <Button
           size="$2"
           circular
           icon={Plus}
-          backgroundColor="$blue10"
-          color="white"
+          backgroundColor="$primary"
+          color="$color"
           position="absolute"
           right={0}
           bottom={0}
           borderWidth={3}
-          borderColor="white"
+          borderColor="$background"
         />
       </YStack>
       <Text numberOfLines={1} marginTop="$1" fontSize={13} opacity={0.8}>

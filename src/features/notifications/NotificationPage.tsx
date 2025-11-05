@@ -1,16 +1,9 @@
 import { useState, useEffect } from 'react'
-import {
-  YStack,
-  XStack,
-  Text,
-  Avatar,
-  Button,
-  ScrollView,
-  Theme,
-  Sheet,
-} from 'tamagui'
+import { YStack, XStack, Text, Button, ScrollView, Theme, Sheet } from 'tamagui'
 import { useAppTheme } from '@/providers/ThemeProvider'
 import { notifications } from '@/mock/notifications'
+import Avatar from '@/components/Avatar'
+import { MoreVertical } from '@tamagui/lucide-icons'
 
 export default function NotificationScreen() {
   const { theme } = useAppTheme()
@@ -34,10 +27,9 @@ export default function NotificationScreen() {
     setIsSheetOpen(false)
   }
 
-  // 👇 đảm bảo chỉ update khi cả hai đã đo xong
   useEffect(() => {
     if (layoutHeight > 0 && contentHeight > 0) {
-      setIsScrollable(contentHeight > layoutHeight + 10) // +10 để tránh sai số nhỏ
+      setIsScrollable(contentHeight > layoutHeight + 10)
     }
   }, [layoutHeight, contentHeight])
 
@@ -62,7 +54,7 @@ export default function NotificationScreen() {
             chromeless
             onPress={() => setIsSheetOpen(true)}
             color="$color"
-            iconAfter={() => <Text fontSize="$7">⋯</Text>}
+            icon={<MoreVertical size={24} />}
           />
         </XStack>
 
@@ -91,18 +83,14 @@ export default function NotificationScreen() {
                 <YStack
                   key={item.id}
                   backgroundColor={
-                    item.unread ? '$backgroundHover' : '$background'
+                    item.unread ? '$backgroundPress' : '$background'
                   }
                   borderRadius="$4"
                   padding="$3"
                   marginBottom="$2"
                 >
                   <XStack alignItems="center" gap="$3">
-                    <Avatar circular size="$5">
-                      <Avatar.Image src={item.avatar} />
-                      <Avatar.Fallback backgroundColor="$gray5" />
-                    </Avatar>
-
+                    <Avatar uri={item.avatar} size={60} />
                     <YStack flex={1}>
                       <Text color="$color" fontSize="$4">
                         {item.message}
@@ -111,10 +99,7 @@ export default function NotificationScreen() {
                         {item.time}
                       </Text>
                     </YStack>
-
-                    <Text color="$gray8" fontSize="$6">
-                      ⋯
-                    </Text>
+                    <MoreVertical size={20} color={888} />
                   </XStack>
 
                   {item.actions && (
@@ -123,7 +108,9 @@ export default function NotificationScreen() {
                         <Button
                           key={idx}
                           flex={1}
-                          theme={action.type === 'primary' ? 'blue' : 'gray'}
+                          theme={
+                            action.type === 'primary' ? 'primary' : undefined
+                          }
                           {...(action.type === 'primary'
                             ? {}
                             : { variant: 'outlined' })}
@@ -139,7 +126,6 @@ export default function NotificationScreen() {
             </YStack>
           ))}
 
-          {/* 👇 chỉ hiển thị khi thật sự có thể cuộn */}
           {isScrollable && (
             <YStack alignItems="center" marginTop="$4" marginBottom="$8">
               <Button
@@ -168,10 +154,9 @@ export default function NotificationScreen() {
             enterStyle={{ opacity: 0 }}
             exitStyle={{ opacity: 0 }}
           />
-          <Sheet.Handle />
+          <Sheet.Handle backgroundColor="$gray6" />
           <Sheet.Frame
             backgroundColor="$background"
-            elevation={20}
             borderTopLeftRadius="$6"
             borderTopRightRadius="$6"
             padding="$4"
@@ -181,7 +166,7 @@ export default function NotificationScreen() {
           >
             <Button
               size="$5"
-              theme="active"
+              theme="primary"
               borderRadius="$6"
               onPress={handleMarkAllRead}
               width="100%"

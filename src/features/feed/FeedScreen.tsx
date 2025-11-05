@@ -1,7 +1,7 @@
-import { FlatList } from 'react-native'
+import { FlatList, StyleSheet } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { YStack, XStack, Text, Separator } from 'tamagui'
-import { Camera, Send } from '@tamagui/lucide-icons'
+import { Camera, Send, Moon, Sun } from '@tamagui/lucide-icons'
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -14,6 +14,7 @@ import StoryBar from './components/StoryBar'
 import PostCard from './components/PostCard'
 import { posts } from '@/mock/posts'
 import ButtonIcon from '@/components/IconButton'
+import { useAppTheme } from '@/providers/ThemeProvider'
 
 const HEADER_VIEW_HEIGHT = 50
 const AnimatedHeader = Animated.createAnimatedComponent(
@@ -25,20 +26,28 @@ const AnimatedList = Animated.createAnimatedComponent(
 ) as unknown as typeof FlatList
 
 function HeaderContent() {
+  const { theme, toggleTheme } = useAppTheme()
+
   return (
     <XStack
       paddingHorizontal="$3"
       height={HEADER_VIEW_HEIGHT}
       alignItems="center"
       justifyContent="space-between"
-      backgroundColor="white"
+      backgroundColor="$background"
       width="100%"
     >
-      <ButtonIcon Icon={Camera}/>
+      <ButtonIcon Icon={Camera} />
       <Text fontFamily="$heading" fontSize={30} fontWeight="500">
         Valorant
       </Text>
-      <ButtonIcon Icon={Send}/>
+      <XStack alignItems="center" justifyContent="space-between">
+        <ButtonIcon Icon={Send} />
+        <ButtonIcon
+          Icon={theme === 'light' ? Moon : Sun}
+          onPress={toggleTheme}
+        />
+      </XStack>
     </XStack>
   )
 }
@@ -102,9 +111,9 @@ export default function FeedScreen() {
         right={0}
         zIndex={10}
         paddingTop={insets.top}
-        borderBottomWidth="0.1px"
-        borderColor="$white5"
-        backgroundColor="white"
+        borderBottomWidth={StyleSheet.hairlineWidth}
+        borderColor="$borderColor"
+        backgroundColor="$background"
       >
         <HeaderContent />
       </AnimatedHeader>

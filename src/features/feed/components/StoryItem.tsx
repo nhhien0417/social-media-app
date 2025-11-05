@@ -5,7 +5,7 @@ import { YStack, Text } from 'tamagui'
 
 function StoryItem({ story }: { story: Story }) {
   const { author, hasNew } = story
-  const borderColor = hasNew ? '$red10' : '$blue10'
+  const borderColor = hasNew ? '$primary' : '$red10'
 
   return (
     <YStack alignItems="center" marginHorizontal="$1.5" width={85}>

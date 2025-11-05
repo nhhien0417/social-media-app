@@ -39,7 +39,7 @@ function PaginationDots({
           height={6}
           borderRadius={3}
           marginHorizontal={2}
-          backgroundColor={index === activeIndex ? '#3897f0' : '#d9d9d9'}
+          backgroundColor={index === activeIndex ? '$primary' : '$borderColor'}
         />
       ))}
     </XStack>
@@ -69,7 +69,7 @@ function PostCard({ post }: { post: Post }) {
   )
 
   return (
-    <YStack backgroundColor="white">
+    <YStack backgroundColor="$background">
       {/* Header */}
       <XStack
         paddingHorizontal="$2.5"
@@ -147,7 +147,7 @@ function PostCard({ post }: { post: Post }) {
 
           {isLongCaption && !isCaptionExpanded && (
             <Text
-              color="#999"
+              color="#888"
               fontSize={14}
               onPress={() => setIsCaptionExpanded(true)}
             >
@@ -157,7 +157,7 @@ function PostCard({ post }: { post: Post }) {
 
           {isLongCaption && isCaptionExpanded && (
             <Text
-              color="#999"
+              color="#888"
               fontSize={14}
               onPress={() => setIsCaptionExpanded(false)}
             >
@@ -167,12 +167,12 @@ function PostCard({ post }: { post: Post }) {
         </YStack>
       )}
 
-      {/* Time (Giữ nguyên) */}
+      {/* Time */}
       <Text
         paddingHorizontal="$3"
         marginTop="$1"
         paddingBottom="$3"
-        color="#999999"
+        color="$gray10"
         fontSize={12}
       >
         {formatDate(createdAt)}

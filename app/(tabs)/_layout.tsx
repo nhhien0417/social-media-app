@@ -2,10 +2,12 @@ import type { ComponentProps } from 'react'
 import { Tabs } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { View } from 'react-native'
-import { YStack } from 'tamagui'
+import { YStack, useTheme } from 'tamagui'
 import Avatar from '@/components/Avatar'
 
 export default function TabsLayout() {
+  const theme = useTheme()
+
   const icon = (
     iconName: ComponentProps<typeof Ionicons>['name'],
     focused: boolean
@@ -13,11 +15,14 @@ export default function TabsLayout() {
     const iconFullName = (
       focused ? iconName : `${iconName}-outline`
     ) as ComponentProps<typeof Ionicons>['name']
-    const color = focused ? '#111' : '#666'
 
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <Ionicons name={iconFullName} size={25} color={color} />
+        <Ionicons
+          name={iconFullName}
+          size={25}
+          color={theme?.color?.val ?? '#111'}
+        />
       </View>
     )
   }
@@ -28,7 +33,11 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarStyle: { height: 50 },
+        tabBarStyle: {
+          height: 50,
+          backgroundColor: theme?.background?.val ?? 'white',
+          borderTopColor: theme?.borderColor?.val ?? '#ededed',
+        },
         tabBarShowLabel: false,
       }}
     >
@@ -65,7 +74,9 @@ export default function TabsLayout() {
               alignItems="center"
               justifyContent="center"
               borderWidth={focused ? 2 : 0}
-              borderColor={focused ? '#111' : 'transparent'}
+              borderColor={
+                focused ? (theme?.color?.val ?? '#111') : 'transparent'
+              }
               borderRadius={999}
             >
               <Avatar uri={userAvatar} size={25} />
