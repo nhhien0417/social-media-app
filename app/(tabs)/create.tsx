@@ -1,8 +1,14 @@
 import { View, Text } from 'react-native'
+import { YStack } from 'tamagui'
 export default function Screen() {
   return (
-    <View className="flex-1 items-center justify-center">
-      <Text>Coming soon</Text>
-    </View>
+    <YStack
+      flex={1}
+      backgroundColor="$background"
+      alignItems="center"
+      justifyContent="center"
+    >
+      <Text>Create Screen</Text>
+    </YStack>
   )
 }

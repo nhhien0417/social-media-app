@@ -1,10 +1,15 @@
+import { YStack } from 'tamagui'
 import NotificationPage from '@/features/notifications/NotificationPage'
-import { View } from 'react-native'
 
 export default function Screen() {
   return (
-    <View className="flex-1 items-center justify-center">
+    <YStack
+      flex={1}
+      backgroundColor="$background"
+      alignItems="center"
+      justifyContent="center"
+    >
       <NotificationPage />
-    </View>
+    </YStack>
   )
 }
