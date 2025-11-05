@@ -89,10 +89,12 @@ export default function SignInScreen() {
     >
       <YStack paddingHorizontal="$6" paddingVertical="$6" alignItems="center">
         {/* Logo */}
-        <Image
-          source={require('@/assets/logo_0.png')}
-          style={{ width: 75, height: 75 }}
-        />
+        <Link href="/(tabs)" asChild>
+          <Image
+            source={require('@/assets/logo_0.png')}
+            style={{ width: 75, height: 75 }}
+          />
+        </Link>
 
         {/* Title */}
         <SizableText size="$8" fontWeight="700" marginTop="$2">

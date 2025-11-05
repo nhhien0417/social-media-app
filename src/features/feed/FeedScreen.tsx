@@ -38,10 +38,10 @@ function HeaderContent() {
       backgroundColor="$background"
       width="100%"
     >
-      <XStack alignItems="center" justifyContent="space-between">
+      <XStack alignItems="center" justifyContent="space-between" gap={10}>
         <Image
           source={require('@/assets/logo_0.png')}
-          style={{ width: 50, height: 50 }}
+          style={{ width: 25, height: 25 }}
         />
         <Text fontFamily="$heading" fontSize={25} fontWeight="600">
           Valorant
