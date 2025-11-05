@@ -1,7 +1,8 @@
 import { FlatList, StyleSheet } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { YStack, XStack, Text, Separator } from 'tamagui'
-import { Camera, Send, Moon, Sun } from '@tamagui/lucide-icons'
+import { Send, Moon, Sun } from '@tamagui/lucide-icons'
+import { Image } from 'react-native'
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -37,10 +38,15 @@ function HeaderContent() {
       backgroundColor="$background"
       width="100%"
     >
-      <ButtonIcon Icon={Camera} />
-      <Text fontFamily="$heading" fontSize={30} fontWeight="500">
-        Valorant
-      </Text>
+      <XStack alignItems="center" justifyContent="space-between">
+        <Image
+          source={require('@/assets/logo_0.png')}
+          style={{ width: 50, height: 50 }}
+        />
+        <Text fontFamily="$heading" fontSize={25} fontWeight="600">
+          Valorant
+        </Text>
+      </XStack>
       <XStack alignItems="center" justifyContent="space-between">
         <ButtonIcon Icon={Send} />
         <ButtonIcon
