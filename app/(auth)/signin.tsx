@@ -93,9 +93,17 @@ export default function SignInScreen() {
         {/* Form */}
         <YStack width="100%" maxWidth={400} gap="$3">
           {/* Email */}
-          <Text fontWeight="600" fontSize="$4">
-            Email
-          </Text>
+          <XStack alignItems="center" justifyContent="space-between">
+            <Text fontWeight="600" fontSize="$4">
+              Email
+            </Text>
+
+            {errors.email && (
+              <Text color="$red10" fontSize="$2" marginRight="$1">
+                {errors.email}
+              </Text>
+            )}
+          </XStack>
           <Input
             value={email}
             onChangeText={text => {
@@ -109,16 +117,19 @@ export default function SignInScreen() {
             borderRadius="$6"
             backgroundColor="$backgroundPress"
           />
-          {errors.email && (
-            <Text color="$red10" fontSize="$2" marginLeft="$1">
-              {errors.email}
-            </Text>
-          )}
 
           {/* Password */}
-          <Text fontWeight="600" fontSize="$4">
-            Password
-          </Text>
+          <XStack alignItems="center" justifyContent="space-between">
+            <Text fontWeight="600" fontSize="$4">
+              Password
+            </Text>
+
+            {errors.password && (
+              <Text color="$red10" fontSize="$2" marginRight="$1">
+                {errors.password}
+              </Text>
+            )}
+          </XStack>
           <XStack alignItems="center" position="relative">
             <Input
               flex={1}
@@ -145,11 +156,6 @@ export default function SignInScreen() {
               onPress={() => setShowPassword(!showPassword)}
             />
           </XStack>
-          {errors.password && (
-            <Text color="$red10" fontSize="$2" marginLeft="$1">
-              {errors.password}
-            </Text>
-          )}
 
           {/* Remember + Forgot */}
           <XStack

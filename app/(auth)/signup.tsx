@@ -96,9 +96,17 @@ export default function SignUpScreen() {
         {/* Form */}
         <YStack width="100%" maxWidth={400} gap="$3">
           {/* Email */}
-          <Text fontWeight="600" fontSize="$4">
-            Email
-          </Text>
+          <XStack alignItems="center" justifyContent="space-between">
+            <Text fontWeight="600" fontSize="$4">
+              Email
+            </Text>
+
+            {errors.email && (
+              <Text color="$red10" fontSize="$2" marginRight="$1">
+                {errors.email}
+              </Text>
+            )}
+          </XStack>
           <Input
             value={email}
             onChangeText={text => {
@@ -112,16 +120,19 @@ export default function SignUpScreen() {
             borderRadius="$6"
             backgroundColor="$backgroundPress"
           />
-          {errors.email && (
-            <Text color="$red10" fontSize="$2" marginLeft="$1">
-              {errors.email}
-            </Text>
-          )}
 
           {/* Full name */}
-          <Text fontWeight="600" fontSize="$4">
-            Full Name
-          </Text>
+          <XStack alignItems="center" justifyContent="space-between">
+            <Text fontWeight="600" fontSize="$4">
+              Full Name
+            </Text>
+
+            {errors.fullName && (
+              <Text color="$red10" fontSize="$2" marginRight="$1">
+                {errors.fullName}
+              </Text>
+            )}
+          </XStack>
           <Input
             value={fullName}
             onChangeText={text => {
@@ -135,16 +146,19 @@ export default function SignUpScreen() {
             borderRadius="$6"
             backgroundColor="$backgroundPress"
           />
-          {errors.fullName && (
-            <Text color="$red10" fontSize="$2" marginLeft="$1">
-              {errors.fullName}
-            </Text>
-          )}
 
           {/* Password */}
-          <Text fontWeight="600" fontSize="$4">
-            Password
-          </Text>
+          <XStack alignItems="center" justifyContent="space-between">
+            <Text fontWeight="600" fontSize="$4">
+              Password
+            </Text>
+
+            {errors.password && (
+              <Text color="$red10" fontSize="$2" marginRight="$1">
+                {errors.password}
+              </Text>
+            )}
+          </XStack>
           <XStack alignItems="center" position="relative">
             <Input
               flex={1}
@@ -171,11 +185,6 @@ export default function SignUpScreen() {
               onPress={() => setShowPassword(!showPassword)}
             />
           </XStack>
-          {errors.password && (
-            <Text color="$red10" fontSize="$2" marginLeft="$1">
-              {errors.password}
-            </Text>
-          )}
 
           {/* Policy text */}
           <Paragraph color="$gray11" fontSize="$3" marginTop="$1">
