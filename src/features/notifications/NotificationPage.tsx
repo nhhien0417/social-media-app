@@ -1,5 +1,14 @@
 import { useState, useEffect } from 'react'
-import { YStack, XStack, Text, Button, ScrollView, Theme, Sheet } from 'tamagui'
+import {
+  YStack,
+  XStack,
+  Text,
+  Button,
+  ScrollView,
+  Theme,
+  Sheet,
+  Separator,
+} from 'tamagui'
 import { useAppTheme } from '@/providers/ThemeProvider'
 import { notifications } from '@/mock/notifications'
 import Avatar from '@/components/Avatar'
@@ -9,9 +18,13 @@ export default function NotificationScreen() {
   const { theme } = useAppTheme()
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const [isScrollable, setIsScrollable] = useState(false)
-
   const [layoutHeight, setLayoutHeight] = useState(0)
   const [contentHeight, setContentHeight] = useState(0)
+
+  // ✅ Sheet cho từng notification
+  const [activeNotification, setActiveNotification] = useState<
+    (typeof notifications)[number] | null
+  >(null)
 
   const grouped = notifications.reduce(
     (acc, item) => {
@@ -25,6 +38,11 @@ export default function NotificationScreen() {
   const handleMarkAllRead = () => {
     console.log('✅ All notifications marked as read')
     setIsSheetOpen(false)
+  }
+
+  const handleDeleteNotification = (id: number) => {
+    console.log('🗑️ Delete notification', id)
+    setActiveNotification(null)
   }
 
   useEffect(() => {
@@ -99,7 +117,14 @@ export default function NotificationScreen() {
                       {item.time}
                     </Text>
                   </YStack>
-                  <MoreVertical size={20} color={888} />
+
+                  {/* ✅ Nút 3 chấm cho từng item */}
+                  <Button
+                    size="$3"
+                    chromeless
+                    onPress={() => setActiveNotification(item)}
+                    icon={<MoreVertical size={20} color="$color" />}
+                  />
                 </XStack>
 
                 {item.actions && (
@@ -140,7 +165,7 @@ export default function NotificationScreen() {
         )}
       </ScrollView>
 
-      {/* --- BOTTOM SHEET --- */}
+      {/* --- GLOBAL SHEET (Mark all as read) --- */}
       <Sheet
         open={isSheetOpen}
         onOpenChange={setIsSheetOpen}
@@ -149,11 +174,7 @@ export default function NotificationScreen() {
         dismissOnSnapToBottom
         animation="quick"
       >
-        <Sheet.Overlay
-          backgroundColor="$shadow6"
-          enterStyle={{ opacity: 0 }}
-          exitStyle={{ opacity: 0 }}
-        />
+        <Sheet.Overlay backgroundColor="$shadow6" />
         <Sheet.Handle backgroundColor="$gray6" />
         <Sheet.Frame
           backgroundColor="$background"
@@ -183,6 +204,71 @@ export default function NotificationScreen() {
           >
             Cancel
           </Button>
+        </Sheet.Frame>
+      </Sheet>
+
+      {/* --- PER-NOTIFICATION SHEET --- */}
+      <Sheet
+        open={!!activeNotification}
+        onOpenChange={(open: boolean) => {
+          if (!open) setActiveNotification(null)
+        }}
+        modal
+        snapPointsMode="fit"
+        dismissOnSnapToBottom
+        animation="quick"
+      >
+        <Sheet.Overlay backgroundColor="$shadow6" />
+        <Sheet.Handle backgroundColor="$gray6" />
+        <Sheet.Frame
+          backgroundColor="$background"
+          borderTopLeftRadius="$6"
+          borderTopRightRadius="$6"
+          padding="$4"
+          alignItems="center"
+          gap="$4"
+        >
+          {activeNotification && (
+            <>
+              <Avatar uri={activeNotification.avatar} size={80} />
+              <Text
+                color="$color"
+                textAlign="center"
+                fontSize="$5"
+                fontWeight="600"
+                lineHeight={22}
+                maxWidth="100%"
+                flexWrap="wrap"
+              >
+                {activeNotification.message}
+              </Text>
+              <Text color="$gray8" fontSize="$3">
+                {activeNotification.time}
+              </Text>
+
+              <Separator marginVertical="$3" />
+
+              <Button
+                theme="red"
+                borderRadius="$6"
+                size="$5"
+                width="100%"
+                onPress={() => handleDeleteNotification(activeNotification.id)}
+              >
+                Delete this notification
+              </Button>
+
+              <Button
+                variant="outlined"
+                borderRadius="$6"
+                color="$gray9"
+                width="100%"
+                onPress={() => setActiveNotification(null)}
+              >
+                Cancel
+              </Button>
+            </>
+          )}
         </Sheet.Frame>
       </Sheet>
     </YStack>
