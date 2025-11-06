@@ -30,6 +30,7 @@ npm i tamagui @tamagui/core @tamagui/config @tamagui/themes @tamagui/lucide-icon
 
 # React Native dependencies (Expo auto-link)
 npx expo install react-native-reanimated react-native-gesture-handler react-native-safe-area-context react-native-svg
+npx expo install expo-media-library
 
 # Routing, data fetching & lists
 npm i expo-router expo-secure-store @shopify/flash-list @tanstack/react-query
