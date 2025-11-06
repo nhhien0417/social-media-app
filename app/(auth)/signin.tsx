@@ -89,12 +89,10 @@ export default function SignInScreen() {
     >
       <YStack paddingHorizontal="$6" paddingVertical="$6" alignItems="center">
         {/* Logo */}
-        <Link href="/(tabs)" asChild>
-          <Image
-            source={require('@/assets/logo_0.png')}
-            style={{ width: 75, height: 75 }}
-          />
-        </Link>
+        <Image
+          source={require('@/assets/logo_0.png')}
+          style={{ width: 75, height: 75 }}
+        />
 
         {/* Title */}
         <SizableText size="$8" fontWeight="700" marginTop="$2">
@@ -186,19 +184,20 @@ export default function SignInScreen() {
           </Text>
 
           {/* CTA */}
-          <Button
-            size="$5"
-            theme="primary"
-            borderRadius="$7"
-            fontWeight="700"
-            marginTop="$2"
-            onPress={handleLogin}
-            disabled={isLoading}
-            icon={isLoading ? <Spinner size="small" /> : null}
-          >
-            {isLoading ? 'Logging in...' : 'Login'}
-          </Button>
-
+          <Link href="/(tabs)" asChild>
+            <Button
+              size="$5"
+              theme="primary"
+              borderRadius="$7"
+              fontWeight="700"
+              marginTop="$2"
+              onPress={handleLogin}
+              disabled={isLoading}
+              icon={isLoading ? <Spinner size="small" /> : null}
+            >
+              {isLoading ? 'Logging in...' : 'Login'}
+            </Button>
+          </Link>
           {/* Divider OR */}
           <XStack alignItems="center" gap="$3" marginVertical="$2">
             <Separator flex={1} />
