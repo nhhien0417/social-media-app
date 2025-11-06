@@ -16,6 +16,7 @@ import PostCard from './components/PostCard'
 import { posts } from '@/mock/posts'
 import ButtonIcon from '@/components/IconButton'
 import { useAppTheme } from '@/providers/ThemeProvider'
+import { router } from 'expo-router'
 
 const HEADER_VIEW_HEIGHT = 50
 const AnimatedHeader = Animated.createAnimatedComponent(
@@ -48,7 +49,7 @@ function HeaderContent() {
         </Text>
       </XStack>
       <XStack alignItems="center" justifyContent="space-between">
-        <ButtonIcon Icon={Send} />
+        <ButtonIcon Icon={Send} onPress={() => router.push('/(messenger)')} />
         <ButtonIcon
           Icon={theme === 'light' ? Moon : Sun}
           onPress={toggleTheme}
