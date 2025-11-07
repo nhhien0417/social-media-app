@@ -56,18 +56,18 @@ export default function PostPreview({
   const isSingle = media.length === 1
   const itemWidth = useMemo(() => {
     if (!containerWidth) return 0
-    return Math.floor(containerWidth / 2)
+    return Math.floor((containerWidth - 13) / 2)
   }, [containerWidth])
 
-  const lineHeight = 20
+  const lineHeight = 22.5
   const fontSize = 20
-  const minHeight = 60
+  const minHeight = 22.5
   const [textHeight, setTextHeight] = useState<number>(minHeight)
 
   return (
-    <YStack marginTop="$3" gap="$3">
+    <YStack marginTop="$3" gap="$3" paddingHorizontal="$3">
       {/* User + Privacy */}
-      <XStack paddingHorizontal="$3" alignItems="center" gap="$3">
+      <XStack alignItems="center" gap="$3">
         <Avatar uri={user.avatarUrl} size={55} />
         <YStack flex={1} gap={3}>
           <SizableText size="$5" fontWeight="600">
@@ -106,7 +106,7 @@ export default function PostPreview({
       </XStack>
 
       {showCaption && (
-        <YStack padding="$3">
+        <YStack>
           <TextArea
             unstyled
             placeholder="What are you thinking about?"
@@ -118,7 +118,9 @@ export default function PostPreview({
             onContentSizeChange={event => {
               const height = event.nativeEvent.contentSize.height
               const newHeight = Math.max(minHeight, height)
-              setTextHeight(newHeight)
+              if (newHeight !== textHeight) {
+                setTextHeight(newHeight)
+              }
             }}
             style={{
               height: textHeight,
@@ -138,7 +140,7 @@ export default function PostPreview({
         </YStack>
       )}
 
-      {/* Media preview*/}
+      {/* Media preview */}
       {!!media.length && (
         <YStack
           onLayout={e => {
@@ -152,39 +154,41 @@ export default function PostPreview({
                 source={{ uri: media[0].url }}
                 width="100%"
                 aspectRatio={1}
+                borderRadius={10}
               />
               <Button
                 icon={Trash2}
-                size="$2"
+                size={40}
                 circular
                 position="absolute"
-                top={8}
-                right={8}
+                top={15}
+                right={25}
                 zIndex={1}
-                backgroundColor="$red10"
-                color="$color"
+                backgroundColor="#000"
+                color="#FFF"
                 onPress={() => onRemoveMedia(media[0].id)}
               />
             </YStack>
           ) : (
-            <XStack flexWrap="wrap">
+            <XStack flexWrap="wrap" gap="$3">
               {media.map(item => (
                 <YStack key={item.id} width={itemWidth} position="relative">
                   <Image
                     source={{ uri: item.url }}
                     width={itemWidth}
                     aspectRatio={1}
+                    borderRadius={10}
                   />
                   <Button
                     icon={Trash2}
-                    size="$2"
+                    size={30}
                     circular
                     position="absolute"
-                    top={8}
-                    right={8}
+                    top={10}
+                    right={10}
                     zIndex={1}
-                    backgroundColor="$red10"
-                    color="$color"
+                    backgroundColor="#000"
+                    color="#FFF"
                     onPress={() => onRemoveMedia(item.id)}
                   />
                 </YStack>
