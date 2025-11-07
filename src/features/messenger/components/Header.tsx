@@ -1,5 +1,5 @@
-import { XStack, Text, Image } from 'tamagui'
-import { ChevronLeft, PenSquare, Phone } from '@tamagui/lucide-icons'
+import { Avatar, AvatarFallback, AvatarImage, Text, XStack } from 'tamagui'
+import { ChevronLeft, PenSquare, Phone, Video } from '@tamagui/lucide-icons'
 import { useRouter, useLocalSearchParams } from 'expo-router'
 import { Pressable } from 'react-native'
 
@@ -48,44 +48,77 @@ export default function MessengerHeader({ type }: { type: 'list' | 'detail' }) {
       <XStack
         alignItems="center"
         justifyContent="space-between"
-        paddingHorizontal="$4"
-        paddingVertical="$3"
+        paddingLeft="$2"
+        paddingRight="$3"
+        paddingVertical="$2"
         backgroundColor="$background"
       >
         {/* Nút Back + Avatar + Tên */}
-        <XStack alignItems="center" gap="$3">
+        <XStack alignItems="center" gap="$2">
           <Pressable onPress={() => router.back()}>
-            <ChevronLeft size={22} />
+            <ChevronLeft size={24} />
           </Pressable>
 
-          {chat && (
-            <>
-              <Image
-                source={{ uri: chat.avatar }}
-                style={{ width: 36, height: 36, borderRadius: 18 }}
-              />
-              <Text fontSize="$5" fontWeight="700" numberOfLines={1}>
-                {chat.name}
+          <Avatar circular size="$3.5" marginLeft={-3}>
+            <AvatarImage
+              source={chat?.avatar ? { uri: chat.avatar } : undefined}
+              alt={chat?.name ?? 'Chat avatar'}
+            />
+            <AvatarFallback
+              backgroundColor="$color5"
+              borderRadius={999}
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Text fontSize={12} fontWeight="700">
+                {chat?.name?.[0]?.toUpperCase() ?? 'C'}
               </Text>
-            </>
-          )}
+            </AvatarFallback>
+          </Avatar>
+
+          <Text
+            fontSize="$5"
+            fontWeight="700"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            maxWidth={160}
+            flexShrink={1}
+          >
+            {chat?.name ?? 'Đoạn chat cực kì dàiiiiiiiiii'}
+          </Text>
         </XStack>
 
         {/* Nút Gọi */}
-        <Pressable
-          style={({ pressed }) => ({
-            padding: 0,
-            margin: 0,
-            minWidth: 0,
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: 'transparent',
-            opacity: pressed ? 0.5 : 1, // hiệu ứng nhấn nhẹ
-          })}
-          android_ripple={{ color: '#00000010', borderless: true }}
-        >
-          <Phone size={20} />
-        </Pressable>
+        <XStack gap="$4">
+          <Pressable
+            style={({ pressed }) => ({
+              padding: 0,
+              margin: 0,
+              minWidth: 0,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'transparent',
+              opacity: pressed ? 0.5 : 1, // hiệu ứng nhấn nhẹ
+            })}
+            android_ripple={{ color: '#00000010', borderless: true }}
+          >
+            <Phone size={20} />
+          </Pressable>
+          <Pressable
+            style={({ pressed }) => ({
+              padding: 0,
+              margin: 0,
+              minWidth: 0,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'transparent',
+              opacity: pressed ? 0.5 : 1, // hiệu ứng nhấn nhẹ
+            })}
+            android_ripple={{ color: '#00000010', borderless: true }}
+          >
+            <Video size={23} />
+          </Pressable>
+        </XStack>
       </XStack>
     )
   }
