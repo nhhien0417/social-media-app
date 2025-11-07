@@ -1,109 +1,91 @@
 import React from 'react'
-import { ArrowLeft, ChevronDown, Check } from '@tamagui/lucide-icons'
-import { Button, XStack, Select, YStack } from 'tamagui'
-import { CreateMode } from '../CreateScreen'
+import { StyleSheet } from 'react-native'
+import { XStack, Button, SizableText, Select } from 'tamagui'
+import { ChevronLeft, ChevronDown, Check } from '@tamagui/lucide-icons'
+import IconButton from '@/components/IconButton'
 
-type CreateHeaderProps = {
+export type CreateMode = 'post' | 'story'
+
+type Props = {
   mode: CreateMode
-  onModeChange: (mode: CreateMode) => void
-  onBack: () => void
+  canShare?: boolean
+  onBack?: () => void
+  onShare?: () => void
+  onChangeMode?: (mode: CreateMode) => void
 }
 
 export default function Header({
   mode,
-  onModeChange,
+  canShare = true,
   onBack,
-}: CreateHeaderProps) {
-  const [open, setOpen] = React.useState(false)
-
-  const suppressOpenRef = React.useRef(false)
-  const suppressOnce = () => {
-    suppressOpenRef.current = true
-    setTimeout(() => {
-      suppressOpenRef.current = false
-    }, 200)
-  }
-
-  const handleChange = (v: string) => {
-    onModeChange(v as CreateMode)
-    setOpen(false)
-    suppressOnce()
-  }
-
-  const handleOpenChange = (next: boolean) => {
-    if (next && suppressOpenRef.current) {
-      return
-    }
-    setOpen(next)
-  }
-
+  onShare,
+  onChangeMode,
+}: Props) {
+  const isPost = mode === 'post'
   return (
     <XStack
-      paddingHorizontal="$4"
+      paddingHorizontal="$3"
       paddingVertical="$3"
       alignItems="center"
       justifyContent="space-between"
-      borderBottomWidth={1}
+      borderBottomWidth={StyleSheet.hairlineWidth}
       borderColor="$borderColor"
       backgroundColor="$background"
+      gap="$3"
     >
-      <Button
-        icon={ArrowLeft}
-        onPress={onBack}
-        circular
-        backgroundColor="$background"
-        borderColor="$borderColor"
-        borderWidth={1}
-        size="$3"
-        pressStyle={{ backgroundColor: '$backgroundPress' }}
-      />
+      <IconButton Icon={ChevronLeft} onPress={onBack} Size={30} />
 
       <Select
         value={mode}
-        onValueChange={handleChange}
-        open={open}
-        onOpenChange={handleOpenChange}
-        disablePreventBodyScroll
+        onValueChange={val => onChangeMode?.(val as CreateMode)}
       >
         <Select.Trigger
-          pointerEvents={open ? 'none' : 'auto'}
-          width={110}
-          iconAfter={ChevronDown}
-          backgroundColor="$background"
-          borderColor="$borderColor"
-          borderWidth={1}
           borderRadius={20}
-          paddingVertical="$2"
+          backgroundColor="$background"
+          height={30}
+          width={125}
+          iconAfter={ChevronDown}
         >
-          <Select.Value size="$5" fontWeight="700" />
+          <Select.Value
+            fontSize="$6"
+            fontWeight={600}
+            textTransform="capitalize"
+          />
         </Select.Trigger>
-
-        <Select.Content zIndex={1000}>
-          <Select.Viewport borderWidth={1} borderRadius={20}>
+        <Select.Content zIndex={99999}>
+          <Select.Viewport borderRadius={20} backgroundColor="$background">
             <Select.Group>
-              <Select.Item index={0} value="post">
-                <Select.ItemText size="$5" fontWeight="600">
-                  Post
-                </Select.ItemText>
-                <Select.ItemIndicator marginLeft="auto">
-                  <Check size={16} />
-                </Select.ItemIndicator>
-              </Select.Item>
-
-              <Select.Item index={1} value="story">
-                <Select.ItemText size="$5" fontWeight="600">
-                  Story
-                </Select.ItemText>
-                <Select.ItemIndicator marginLeft="auto">
-                  <Check size={16} />
-                </Select.ItemIndicator>
-              </Select.Item>
+              {['post', 'story'].map((val, idx) => (
+                <Select.Item key={val} index={idx} value={val}>
+                  <Select.ItemText
+                    fontSize="$6"
+                    fontWeight={500}
+                    textTransform="capitalize"
+                  >
+                    {val}
+                  </Select.ItemText>
+                  <Select.ItemIndicator marginLeft="auto">
+                    <Check size={16} />
+                  </Select.ItemIndicator>
+                </Select.Item>
+              ))}
             </Select.Group>
           </Select.Viewport>
         </Select.Content>
       </Select>
 
-      <YStack width={35} />
+      <Button
+        size={40}
+        disabled={!canShare}
+        onPress={onShare}
+        borderRadius={20}
+        backgroundColor="#00AAFF"
+        paddingHorizontal={20}
+      >
+        <SizableText size={20} fontWeight="700" color="$color">
+          {isPost ? 'Post' : 'Share'}
+        </SizableText>
+      </Button>
     </XStack>
   )
 }
