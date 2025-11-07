@@ -2,7 +2,7 @@ export const ENDPOINTS = {
   IDENTITY: {
     LOGIN: 'identity/auth/login',
     REGISTER: 'identity/auth/register',
-    PROFILE: '/auth/me',
+    PROFILE: 'identity/me',
   },
   POSTS: {
     ALL: '/posts',
