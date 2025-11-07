@@ -1,7 +1,21 @@
-import React from 'react'
-import { StyleSheet } from 'react-native'
-import { XStack, Button, SizableText, Select } from 'tamagui'
-import { ChevronLeft, ChevronDown, Check } from '@tamagui/lucide-icons'
+import React, { useRef, useState } from 'react'
+import {
+  StyleSheet,
+  Modal,
+  TouchableOpacity,
+  Animated,
+  PanResponder,
+  Easing,
+  StatusBar,
+} from 'react-native'
+import { XStack, YStack, Button, SizableText } from 'tamagui'
+import {
+  ChevronLeft,
+  FileText,
+  Image,
+  ChevronDown,
+  Check,
+} from '@tamagui/lucide-icons'
 import IconButton from '@/components/IconButton'
 
 export type CreateMode = 'post' | 'story'
@@ -14,6 +28,29 @@ type Props = {
   onChangeMode?: (mode: CreateMode) => void
 }
 
+const styles = StyleSheet.create({
+  absoluteFill: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  overlayTouchable: {
+    flex: 1,
+  },
+  topSheet: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: (StatusBar.currentHeight ?? 0) + 12.5,
+    alignSelf: 'center',
+    paddingHorizontal: 12.5,
+    width: '100%',
+  },
+})
+
 export default function Header({
   mode,
   canShare = true,
@@ -21,71 +58,225 @@ export default function Header({
   onShare,
   onChangeMode,
 }: Props) {
+  const [showModal, setShowModal] = useState(false)
   const isPost = mode === 'post'
+
+  const sheetY = useRef(new Animated.Value(-100)).current
+  const overlayOpacity = useRef(new Animated.Value(0)).current
+
+  const openSheet = () => {
+    setShowModal(true)
+    requestAnimationFrame(() => {
+      Animated.parallel([
+        Animated.timing(sheetY, {
+          toValue: 0,
+          duration: 200,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+        Animated.timing(overlayOpacity, {
+          toValue: 1,
+          duration: 200,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ]).start()
+    })
+  }
+
+  const closeSheet = () => {
+    Animated.parallel([
+      Animated.timing(sheetY, {
+        toValue: -200,
+        duration: 200,
+        easing: Easing.in(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(overlayOpacity, {
+        toValue: 0,
+        duration: 200,
+        easing: Easing.in(Easing.quad),
+        useNativeDriver: true,
+      }),
+    ]).start(({ finished }) => {
+      if (finished) setShowModal(false)
+    })
+  }
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dy) > 5 && g.dy < 0,
+      onPanResponderMove: (_, g) => {
+        const v = Math.max(-180, Math.min(0, g.dy))
+        sheetY.setValue(v)
+      },
+      onPanResponderRelease: (_, g) => {
+        if (g.dy < -50) {
+          closeSheet()
+        } else {
+          Animated.spring(sheetY, {
+            toValue: 0,
+            useNativeDriver: true,
+            damping: 15,
+            stiffness: 200,
+            mass: 0.75,
+          }).start()
+        }
+      },
+    })
+  ).current
+
+  const handleSelectMode = (selectedMode: CreateMode) => {
+    onChangeMode?.(selectedMode)
+    closeSheet()
+  }
+
   return (
-    <XStack
-      paddingHorizontal="$3"
-      paddingVertical="$3"
-      alignItems="center"
-      justifyContent="space-between"
-      borderBottomWidth={StyleSheet.hairlineWidth}
-      borderColor="$borderColor"
-      backgroundColor="$background"
-      gap="$3"
-    >
-      <IconButton Icon={ChevronLeft} onPress={onBack} Size={30} />
-
-      <Select
-        value={mode}
-        onValueChange={val => onChangeMode?.(val as CreateMode)}
+    <>
+      <XStack
+        paddingHorizontal="$3"
+        paddingVertical="$3"
+        alignItems="center"
+        justifyContent="space-between"
+        borderBottomWidth={StyleSheet.hairlineWidth}
+        borderColor="$borderColor"
+        backgroundColor="$background"
+        gap="$3"
       >
-        <Select.Trigger
-          borderRadius={20}
+        <IconButton Icon={ChevronLeft} onPress={onBack} Size={30} />
+
+        <Button
+          size="$4"
+          onPress={openSheet}
           backgroundColor="$background"
-          height={30}
-          width={125}
-          iconAfter={ChevronDown}
+          borderRadius="$20"
+          paddingHorizontal="$4"
+          iconAfter={<ChevronDown size={17.5} />}
         >
-          <Select.Value
-            fontSize="$6"
-            fontWeight={600}
+          <SizableText
+            size="$6"
+            fontWeight="600"
+            color="$color"
             textTransform="capitalize"
-          />
-        </Select.Trigger>
-        <Select.Content zIndex={99999}>
-          <Select.Viewport borderRadius={20} backgroundColor="$background">
-            <Select.Group>
-              {['post', 'story'].map((val, idx) => (
-                <Select.Item key={val} index={idx} value={val}>
-                  <Select.ItemText
-                    fontSize="$6"
-                    fontWeight={500}
-                    textTransform="capitalize"
-                  >
-                    {val}
-                  </Select.ItemText>
-                  <Select.ItemIndicator marginLeft="auto">
-                    <Check size={16} />
-                  </Select.ItemIndicator>
-                </Select.Item>
-              ))}
-            </Select.Group>
-          </Select.Viewport>
-        </Select.Content>
-      </Select>
+          >
+            {mode}
+          </SizableText>
+        </Button>
 
-      <Button
-        size={40}
-        disabled={!canShare}
-        onPress={onShare}
-        borderRadius={20}
-        backgroundColor="#00AAFF"
-        paddingHorizontal={20}
+        <Button
+          size="$4"
+          disabled={!canShare}
+          onPress={onShare}
+          borderRadius={20}
+          backgroundColor="#0095F6"
+          paddingHorizontal="$4"
+        >
+          <SizableText size="$6" fontWeight="700" color="white">
+            Post
+          </SizableText>
+        </Button>
+      </XStack>
+
+      {/* Custom Top Sheet Dropdown */}
+      <Modal
+        visible={showModal}
+        transparent
+        animationType="fade"
+        onRequestClose={closeSheet}
+        statusBarTranslucent
       >
-        <SizableText size={20} fontWeight="700" color="$color">
-          {isPost ? 'Post' : 'Share'}
-        </SizableText>
-      </Button>
-    </XStack>
+        {/* Overlay */}
+        <Animated.View
+          style={[styles.absoluteFill, { opacity: overlayOpacity }]}
+        >
+          <TouchableOpacity
+            style={styles.overlayTouchable}
+            activeOpacity={1}
+            onPress={closeSheet}
+          />
+        </Animated.View>
+
+        {/* Top anchored sheet */}
+        <Animated.View
+          style={[
+            styles.topSheet,
+            {
+              transform: [{ translateY: sheetY }],
+            },
+          ]}
+          {...panResponder.panHandlers}
+        >
+          {/* 5. LÀM ĐẸP PANEL */}
+          <YStack
+            backgroundColor="$background"
+            borderRadius={20}
+            padding="$3"
+            gap="$3"
+          >
+            {/* Post Option */}
+            <Button
+              size="$6"
+              borderRadius={15}
+              padding="$4"
+              justifyContent="flex-start"
+              alignItems="center"
+              gap="$1"
+              onPress={() => handleSelectMode('post')}
+            >
+              {isPost ? (
+                <Check size={30} color="$color" />
+              ) : (
+                <FileText size={30} color="$color" />
+              )}
+
+              <YStack flex={1} alignItems="flex-start">
+                <SizableText size="$6" fontWeight="700" color="$color">
+                  Post
+                </SizableText>
+                <SizableText fontSize={12.5} fontWeight="400" color="$color">
+                  Share moment with your friends.
+                </SizableText>
+              </YStack>
+            </Button>
+
+            {/* Story Option */}
+            <Button
+              size="$6"
+              borderRadius={15}
+              padding="$4"
+              justifyContent="flex-start"
+              alignItems="center"
+              gap="$1"
+              onPress={() => handleSelectMode('story')}
+            >
+              {!isPost ? (
+                <Check size={30} color="$color" />
+              ) : (
+                <Image size={30} color="$color" />
+              )}
+
+              <YStack flex={1} alignItems="flex-start">
+                <SizableText size="$6" fontWeight="700" color="$color">
+                  Story
+                </SizableText>
+                <SizableText fontSize={12.5} fontWeight="400" color="$color">
+                  Share content that disappears after 24 hours.
+                </SizableText>
+              </YStack>
+            </Button>
+
+            {/* Drag handle bar  */}
+            <YStack alignItems="center" paddingVertical="$1">
+              <YStack
+                width={50}
+                height={5}
+                borderRadius={999}
+                backgroundColor="#888"
+              />
+            </YStack>
+          </YStack>
+        </Animated.View>
+      </Modal>
+    </>
   )
 }
