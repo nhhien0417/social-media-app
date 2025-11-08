@@ -39,9 +39,7 @@ function ActionButton({
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
   const enabledBackground = '#1877F2'
-  const disabledBackground = isDark
-    ? 'rgba(255,255,255,0.16)'
-    : '#d9dce3'
+  const disabledBackground = isDark ? 'rgba(255,255,255,0.16)' : '#d9dce3'
   const enabledTextColor = '#ffffff'
   const disabledTextColor = isDark ? 'rgba(255,255,255,0.7)' : '#4b5563'
 

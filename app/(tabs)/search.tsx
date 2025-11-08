@@ -25,9 +25,7 @@ export default function SearchTabScreen() {
   const searchIconColor = isDark ? 'rgba(255,255,255,0.75)' : '#64748b'
   const placeholderColor = isDark ? 'rgba(255,255,255,0.6)' : '#8D949E'
   const inputTextColor = isDark ? '#f5f5f5' : '#1f2937'
-  const clearButtonBackground = isDark
-    ? 'rgba(255,255,255,0.12)'
-    : '#e5e7eb'
+  const clearButtonBackground = isDark ? 'rgba(255,255,255,0.12)' : '#e5e7eb'
   const clearIconColor = isDark ? 'rgba(255,255,255,0.8)' : '#4b5563'
   const pageBackground = isDark ? '#111418' : '#ffffff'
 

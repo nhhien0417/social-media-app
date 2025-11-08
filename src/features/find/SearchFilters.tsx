@@ -19,9 +19,7 @@ export function SearchFilters({ value, onChange }: SearchFiltersProps) {
 
   const activeBackground = '#1877F2'
   const inactiveBackground = isDark ? 'rgba(255,255,255,0.08)' : '#f3f4f6'
-  const inactiveBorderColor = isDark
-    ? 'rgba(255,255,255,0.2)'
-    : '#d5dae1'
+  const inactiveBorderColor = isDark ? 'rgba(255,255,255,0.2)' : '#d5dae1'
   const activeTextColor = '#ffffff'
   const inactiveTextColor = isDark ? 'rgba(255,255,255,0.85)' : '#1f2937'
 
