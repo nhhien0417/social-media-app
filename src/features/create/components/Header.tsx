@@ -105,23 +105,37 @@ export default function Header({
 
   const panResponder = useRef(
     PanResponder.create({
-      onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dy) > 5 && g.dy < 0,
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, g) => {
+        return Math.abs(g.dy) > 8 && Math.abs(g.dy) > Math.abs(g.dx)
+      },
       onPanResponderMove: (_, g) => {
-        const v = Math.max(-180, Math.min(0, g.dy))
-        sheetY.setValue(v)
+        if (g.dy < 0) {
+          const v = Math.max(-180, Math.min(0, g.dy))
+          sheetY.setValue(v)
+        }
       },
       onPanResponderRelease: (_, g) => {
-        if (g.dy < -50) {
+        if (g.dy < -60 || g.vy < -0.5) {
           closeSheet()
         } else {
           Animated.spring(sheetY, {
             toValue: 0,
             useNativeDriver: true,
-            damping: 15,
-            stiffness: 200,
-            mass: 0.75,
+            damping: 20,
+            stiffness: 250,
+            mass: 0.8,
           }).start()
         }
+      },
+      onPanResponderTerminate: () => {
+        Animated.spring(sheetY, {
+          toValue: 0,
+          useNativeDriver: true,
+          damping: 20,
+          stiffness: 250,
+          mass: 0.8,
+        }).start()
       },
     })
   ).current
@@ -204,69 +218,73 @@ export default function Header({
               transform: [{ translateY: sheetY }],
             },
           ]}
-          {...panResponder.panHandlers}
         >
-          {/* 5. LÀM ĐẸP PANEL */}
           <YStack
             backgroundColor="$background"
             borderRadius={20}
-            padding="$3"
-            gap="$3"
+            overflow="hidden"
           >
-            {/* Post Option */}
-            <Button
-              size="$6"
-              borderRadius={15}
-              padding="$4"
-              justifyContent="flex-start"
+            {/* Content */}
+            <YStack padding="$3" gap="$3">
+              {/* Post Option */}
+              <Button
+                size="$6"
+                borderRadius={15}
+                padding="$4"
+                justifyContent="flex-start"
+                alignItems="center"
+                gap="$1"
+                onPress={() => handleSelectMode('post')}
+              >
+                {isPost ? (
+                  <Check size={30} color="$color" />
+                ) : (
+                  <FileText size={30} color="$color" />
+                )}
+
+                <YStack flex={1} alignItems="flex-start">
+                  <SizableText size="$6" fontWeight="700" color="$color">
+                    Post
+                  </SizableText>
+                  <SizableText fontSize={12.5} fontWeight="400" color="$color">
+                    Share moment with your friends.
+                  </SizableText>
+                </YStack>
+              </Button>
+
+              {/* Story Option */}
+              <Button
+                size="$6"
+                borderRadius={15}
+                padding="$4"
+                justifyContent="flex-start"
+                alignItems="center"
+                gap="$1"
+                onPress={() => handleSelectMode('story')}
+              >
+                {!isPost ? (
+                  <Check size={30} color="$color" />
+                ) : (
+                  <Image size={30} color="$color" />
+                )}
+
+                <YStack flex={1} alignItems="flex-start">
+                  <SizableText size="$6" fontWeight="700" color="$color">
+                    Story
+                  </SizableText>
+                  <SizableText fontSize={12.5} fontWeight="400" color="$color">
+                    Share content that disappears after 24 hours.
+                  </SizableText>
+                </YStack>
+              </Button>
+            </YStack>
+
+            {/* Drag handle area */}
+            <YStack
+              {...panResponder.panHandlers}
               alignItems="center"
-              gap="$1"
-              onPress={() => handleSelectMode('post')}
+              paddingVertical="$1"
             >
-              {isPost ? (
-                <Check size={30} color="$color" />
-              ) : (
-                <FileText size={30} color="$color" />
-              )}
-
-              <YStack flex={1} alignItems="flex-start">
-                <SizableText size="$6" fontWeight="700" color="$color">
-                  Post
-                </SizableText>
-                <SizableText fontSize={12.5} fontWeight="400" color="$color">
-                  Share moment with your friends.
-                </SizableText>
-              </YStack>
-            </Button>
-
-            {/* Story Option */}
-            <Button
-              size="$6"
-              borderRadius={15}
-              padding="$4"
-              justifyContent="flex-start"
-              alignItems="center"
-              gap="$1"
-              onPress={() => handleSelectMode('story')}
-            >
-              {!isPost ? (
-                <Check size={30} color="$color" />
-              ) : (
-                <Image size={30} color="$color" />
-              )}
-
-              <YStack flex={1} alignItems="flex-start">
-                <SizableText size="$6" fontWeight="700" color="$color">
-                  Story
-                </SizableText>
-                <SizableText fontSize={12.5} fontWeight="400" color="$color">
-                  Share content that disappears after 24 hours.
-                </SizableText>
-              </YStack>
-            </Button>
-
-            {/* Drag handle bar  */}
-            <YStack alignItems="center" paddingVertical="$1">
               <YStack
                 width={50}
                 height={5}
