@@ -49,6 +49,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12.5,
     width: '100%',
   },
+  dragHandleArea: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    width: '100%',
+  },
+  dragHandle: {
+    width: 50,
+    height: 5,
+    borderRadius: 999,
+    backgroundColor: '#888',
+  },
 })
 
 export default function Header({
@@ -61,7 +73,7 @@ export default function Header({
   const [showModal, setShowModal] = useState(false)
   const isPost = mode === 'post'
 
-  const sheetY = useRef(new Animated.Value(-100)).current
+  const sheetY = useRef(new Animated.Value(-200)).current
   const overlayOpacity = useRef(new Animated.Value(0)).current
 
   const openSheet = () => {
@@ -107,16 +119,16 @@ export default function Header({
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: (_, g) => {
-        return Math.abs(g.dy) > 8 && Math.abs(g.dy) > Math.abs(g.dx)
+        return Math.abs(g.dy) > 10 && Math.abs(g.dy) > Math.abs(g.dx)
       },
       onPanResponderMove: (_, g) => {
         if (g.dy < 0) {
-          const v = Math.max(-180, Math.min(0, g.dy))
+          const v = Math.max(-200, Math.min(0, g.dy))
           sheetY.setValue(v)
         }
       },
       onPanResponderRelease: (_, g) => {
-        if (g.dy < -60 || g.vy < -0.5) {
+        if (g.dy < -50 || g.vy < -0.5) {
           closeSheet()
         } else {
           Animated.spring(sheetY, {
@@ -124,7 +136,7 @@ export default function Header({
             useNativeDriver: true,
             damping: 20,
             stiffness: 250,
-            mass: 0.8,
+            mass: 0.75,
           }).start()
         }
       },
@@ -134,7 +146,7 @@ export default function Header({
           useNativeDriver: true,
           damping: 20,
           stiffness: 250,
-          mass: 0.8,
+          mass: 0.75,
         }).start()
       },
     })
@@ -224,73 +236,74 @@ export default function Header({
             borderRadius={20}
             overflow="hidden"
           >
-            {/* Content */}
-            <YStack padding="$3" gap="$3">
-              {/* Post Option */}
-              <Button
-                size="$6"
-                borderRadius={15}
-                padding="$4"
-                justifyContent="flex-start"
-                alignItems="center"
-                gap="$1"
-                onPress={() => handleSelectMode('post')}
-              >
-                {isPost ? (
-                  <Check size={30} color="$color" />
-                ) : (
-                  <FileText size={30} color="$color" />
-                )}
+            {/* Entire content area is draggable */}
+            <YStack {...panResponder.panHandlers}>
+              {/* Content */}
+              <YStack padding="$3" gap="$3">
+                {/* Post Option */}
+                <Button
+                  size="$6"
+                  borderRadius={15}
+                  padding="$4"
+                  justifyContent="flex-start"
+                  alignItems="center"
+                  gap="$1"
+                  onPress={() => handleSelectMode('post')}
+                >
+                  {isPost ? (
+                    <Check size={30} color="$color" />
+                  ) : (
+                    <FileText size={30} color="$color" />
+                  )}
 
-                <YStack flex={1} alignItems="flex-start">
-                  <SizableText size="$6" fontWeight="700" color="$color">
-                    Post
-                  </SizableText>
-                  <SizableText fontSize={12.5} fontWeight="400" color="$color">
-                    Share moment with your friends.
-                  </SizableText>
+                  <YStack flex={1} alignItems="flex-start">
+                    <SizableText size="$6" fontWeight="700" color="$color">
+                      Post
+                    </SizableText>
+                    <SizableText
+                      fontSize={12.5}
+                      fontWeight="400"
+                      color="$color"
+                    >
+                      Share moment with your friends.
+                    </SizableText>
+                  </YStack>
+                </Button>
+
+                {/* Story Option */}
+                <Button
+                  size="$6"
+                  borderRadius={15}
+                  padding="$4"
+                  justifyContent="flex-start"
+                  alignItems="center"
+                  gap="$1"
+                  onPress={() => handleSelectMode('story')}
+                >
+                  {!isPost ? (
+                    <Check size={30} color="$color" />
+                  ) : (
+                    <Image size={30} color="$color" />
+                  )}
+
+                  <YStack flex={1} alignItems="flex-start">
+                    <SizableText size="$6" fontWeight="700" color="$color">
+                      Story
+                    </SizableText>
+                    <SizableText
+                      fontSize={12.5}
+                      fontWeight="400"
+                      color="$color"
+                    >
+                      Share content that disappears after 24 hours.
+                    </SizableText>
+                  </YStack>
+                </Button>
+                {/* Drag handle area */}
+                <YStack alignItems="center">
+                  <YStack style={styles.dragHandle} />
                 </YStack>
-              </Button>
-
-              {/* Story Option */}
-              <Button
-                size="$6"
-                borderRadius={15}
-                padding="$4"
-                justifyContent="flex-start"
-                alignItems="center"
-                gap="$1"
-                onPress={() => handleSelectMode('story')}
-              >
-                {!isPost ? (
-                  <Check size={30} color="$color" />
-                ) : (
-                  <Image size={30} color="$color" />
-                )}
-
-                <YStack flex={1} alignItems="flex-start">
-                  <SizableText size="$6" fontWeight="700" color="$color">
-                    Story
-                  </SizableText>
-                  <SizableText fontSize={12.5} fontWeight="400" color="$color">
-                    Share content that disappears after 24 hours.
-                  </SizableText>
-                </YStack>
-              </Button>
-            </YStack>
-
-            {/* Drag handle area */}
-            <YStack
-              {...panResponder.panHandlers}
-              alignItems="center"
-              paddingVertical="$1"
-            >
-              <YStack
-                width={50}
-                height={5}
-                borderRadius={999}
-                backgroundColor="#888"
-              />
+              </YStack>
             </YStack>
           </YStack>
         </Animated.View>

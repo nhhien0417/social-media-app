@@ -20,6 +20,12 @@ const MODAL_HALF_HEIGHT = SCREEN_HEIGHT * 0.5
 const MODAL_FULL_HEIGHT = SCREEN_HEIGHT
 const ITEM_SIZE = (SCREEN_WIDTH - 2.5) / 3
 
+const SNAP_POINTS = {
+  HIDDEN: SCREEN_HEIGHT,
+  HALF: SCREEN_HEIGHT - MODAL_HALF_HEIGHT,
+  FULL: SCREEN_HEIGHT - MODAL_FULL_HEIGHT,
+}
+
 type MediaType = 'all' | 'photo' | 'video'
 
 interface MediaAsset {
@@ -100,6 +106,18 @@ const styles = StyleSheet.create({
   loader: {
     padding: 20,
   },
+  dragHandleArea: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    width: '100%',
+  },
+  dragHandle: {
+    width: 50,
+    height: 5,
+    borderRadius: 999,
+    backgroundColor: '#888',
+  },
 })
 
 export default function MediaPicker({
@@ -115,12 +133,12 @@ export default function MediaPicker({
   const [loading, setLoading] = useState(false)
   const [hasMore, setHasMore] = useState(true)
   const [endCursor, setEndCursor] = useState<string | undefined>(undefined)
-  const [modalHeight, setModalHeight] = useState(MODAL_HALF_HEIGHT)
 
-  const sheetY = useRef(new Animated.Value(MODAL_HALF_HEIGHT)).current
+  const translateY = useRef(new Animated.Value(SNAP_POINTS.HIDDEN)).current
   const overlayOpacity = useRef(new Animated.Value(0)).current
+  const currentSnapPoint = useRef(SNAP_POINTS.HALF)
+  const dragStartY = useRef(0)
 
-  // Request permissions
   useEffect(() => {
     ;(async () => {
       const { status } = await MediaLibrary.requestPermissionsAsync()
@@ -128,7 +146,6 @@ export default function MediaPicker({
     })()
   }, [])
 
-  // Reset and load media when modal opens or type changes
   useEffect(() => {
     if (visible && hasPermission) {
       setAssets([])
@@ -138,24 +155,39 @@ export default function MediaPicker({
     }
   }, [visible, mediaType, hasPermission])
 
-  // Animate modal open/close
   useEffect(() => {
     if (visible) {
-      setModalHeight(MODAL_HALF_HEIGHT)
-      sheetY.setValue(MODAL_HALF_HEIGHT)
+      translateY.setValue(SNAP_POINTS.HIDDEN)
+      currentSnapPoint.current = SNAP_POINTS.HALF
       openSheet()
     } else {
       setSelectedIds(new Set())
     }
   }, [visible])
 
+  const animateToSnapPoint = (snapPoint: number, onComplete?: () => void) => {
+    currentSnapPoint.current = snapPoint
+    Animated.spring(translateY, {
+      toValue: snapPoint,
+      useNativeDriver: true,
+      damping: 50,
+      stiffness: 500,
+      mass: 1,
+    }).start(({ finished }) => {
+      if (finished && onComplete) {
+        onComplete()
+      }
+    })
+  }
+
   const openSheet = () => {
     Animated.parallel([
-      Animated.timing(sheetY, {
-        toValue: 0,
-        duration: 300,
-        easing: Easing.out(Easing.cubic),
+      Animated.spring(translateY, {
+        toValue: SNAP_POINTS.HALF,
         useNativeDriver: true,
+        damping: 50,
+        stiffness: 500,
+        mass: 1,
       }),
       Animated.timing(overlayOpacity, {
         toValue: 1,
@@ -168,8 +200,8 @@ export default function MediaPicker({
 
   const closeSheet = () => {
     Animated.parallel([
-      Animated.timing(sheetY, {
-        toValue: modalHeight,
+      Animated.timing(translateY, {
+        toValue: SNAP_POINTS.HIDDEN,
         duration: 300,
         easing: Easing.in(Easing.cubic),
         useNativeDriver: true,
@@ -181,55 +213,79 @@ export default function MediaPicker({
         useNativeDriver: true,
       }),
     ]).start(({ finished }) => {
-      if (finished) onClose()
+      if (finished) {
+        onClose()
+        currentSnapPoint.current = SNAP_POINTS.HALF
+      }
     })
+  }
+
+  const findNearestSnapPoint = (position: number, velocity: number) => {
+    if (Math.abs(velocity) > 0.5) {
+      if (velocity > 0) {
+        if (currentSnapPoint.current === SNAP_POINTS.FULL) {
+          return SNAP_POINTS.HALF
+        } else {
+          return SNAP_POINTS.HIDDEN
+        }
+      } else {
+        if (currentSnapPoint.current === SNAP_POINTS.HALF) {
+          return SNAP_POINTS.FULL
+        }
+        return currentSnapPoint.current
+      }
+    }
+
+    const snapPoints = [SNAP_POINTS.FULL, SNAP_POINTS.HALF, SNAP_POINTS.HIDDEN]
+    let nearest = snapPoints[0]
+    let minDistance = Math.abs(position - snapPoints[0])
+
+    for (const point of snapPoints) {
+      const distance = Math.abs(position - point)
+      if (distance < minDistance) {
+        minDistance = distance
+        nearest = point
+      }
+    }
+
+    return nearest
   }
 
   const panResponder = useRef(
     PanResponder.create({
-      onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dy) > 5,
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, g) => {
+        return Math.abs(g.dy) > 10 && Math.abs(g.dy) > Math.abs(g.dx)
+      },
+      onPanResponderGrant: () => {
+        dragStartY.current = currentSnapPoint.current
+      },
       onPanResponderMove: (_, g) => {
-        if (g.dy > 0) {
-          // Dragging down
-          const v = Math.max(0, Math.min(modalHeight, g.dy))
-          sheetY.setValue(v)
+        const newY = dragStartY.current + g.dy
+
+        const minY = SNAP_POINTS.FULL
+        const maxY = SNAP_POINTS.HIDDEN
+
+        if (newY >= minY && newY <= maxY) {
+          translateY.setValue(newY)
+        } else if (newY < minY) {
+          translateY.setValue(minY + (newY - minY) * 0.25)
         } else {
-          // Dragging up
-          const currentHeight = modalHeight
-          const targetHeight = MODAL_FULL_HEIGHT
-          const dragProgress = Math.abs(g.dy) / 200
-          const newHeight = Math.min(
-            targetHeight,
-            currentHeight + dragProgress * (targetHeight - currentHeight)
-          )
-          setModalHeight(newHeight)
-          sheetY.setValue(Math.max(-50, g.dy))
+          translateY.setValue(maxY + (newY - maxY) * 0.25)
         }
       },
       onPanResponderRelease: (_, g) => {
-        if (g.dy > 150 || g.vy > 0.5) {
-          // Close modal
+        const finalY = dragStartY.current + g.dy
+        const nearestSnap = findNearestSnapPoint(finalY, g.vy)
+
+        if (nearestSnap === SNAP_POINTS.HIDDEN) {
           closeSheet()
-        } else if (g.dy < -100 || g.vy < -0.5) {
-          // Expand to full height
-          setModalHeight(MODAL_FULL_HEIGHT)
-          Animated.spring(sheetY, {
-            toValue: 0,
-            useNativeDriver: true,
-            damping: 20,
-            stiffness: 200,
-            mass: 0.75,
-          }).start()
         } else {
-          // Snap back
-          Animated.spring(sheetY, {
-            toValue: 0,
-            useNativeDriver: true,
-            damping: 20,
-            stiffness: 200,
-            mass: 0.75,
-          }).start()
+          animateToSnapPoint(nearestSnap)
         }
+      },
+      onPanResponderTerminate: () => {
+        animateToSnapPoint(currentSnapPoint.current)
       },
     })
   ).current
@@ -282,7 +338,7 @@ export default function MediaPicker({
         newSet.delete(id)
       } else {
         if (newSet.size >= maxSelection) {
-          return prev // Don't add if max reached
+          return prev
         }
         newSet.add(id)
       }
@@ -358,86 +414,79 @@ export default function MediaPicker({
         style={[
           styles.bottomSheet,
           {
-            height: modalHeight,
-            transform: [{ translateY: sheetY }],
+            height: SCREEN_HEIGHT,
+            transform: [{ translateY }],
           },
         ]}
       >
-        {/* Header */}
-        <YStack
-          {...panResponder.panHandlers}
-          backgroundColor="$background"
-          paddingTop="$3"
-          paddingBottom="$2"
-          borderBottomWidth={StyleSheet.hairlineWidth}
-          borderColor="$borderColor"
-        >
-          {/* Drag handle bar */}
-          <YStack alignItems="center" paddingBottom="$3">
-            <YStack
-              width={50}
-              height={5}
-              borderRadius={999}
-              backgroundColor="#888"
-            />
+        {/* Draggable Header Area */}
+        <YStack {...panResponder.panHandlers}>
+          {/* Drag handle */}
+          <YStack style={styles.dragHandleArea} backgroundColor="$background">
+            <YStack style={styles.dragHandle} />
           </YStack>
 
-          <XStack
-            paddingHorizontal="$3"
-            alignItems="center"
-            justifyContent="space-between"
-            paddingBottom="$2"
+          {/* Header */}
+          <YStack
+            backgroundColor="$background"
+            paddingBottom="$3"
+            borderBottomWidth={StyleSheet.hairlineWidth}
+            borderColor="$borderColor"
           >
-            <TouchableOpacity onPress={closeSheet}>
-              <X size={28} color="$color" />
-            </TouchableOpacity>
-
-            <SizableText size="$7" fontWeight="700" color="$color">
-              Select Media
-            </SizableText>
-
-            <Button
-              size="$3"
-              disabled={selectedIds.size === 0}
-              onPress={handleConfirm}
-              borderRadius={8}
-              backgroundColor="#0095F6"
-              paddingHorizontal="$4"
+            <XStack
+              paddingHorizontal="$3"
+              alignItems="center"
+              justifyContent="space-between"
             >
-              <SizableText size="$5" fontWeight="700" color="white">
-                Done {selectedIds.size > 0 ? `(${selectedIds.size})` : ''}
+              <SizableText size="$8" fontWeight="700" color="$color">
+                Select Media
               </SizableText>
-            </Button>
-          </XStack>
 
-          {/* Media Type Tabs */}
-          <XStack gap="$2" paddingHorizontal="$3" paddingTop="$3">
-            {(['all', 'photo', 'video'] as MediaType[]).map(type => (
               <Button
-                key={type}
-                flex={1}
                 size="$3"
-                onPress={() => setMediaType(type)}
-                borderRadius={10}
-                backgroundColor={mediaType === type ? '$blue10' : '$background'}
-                borderWidth={1}
-                borderColor={mediaType === type ? '$blue10' : '$borderColor'}
+                disabled={selectedIds.size === 0}
+                onPress={handleConfirm}
+                borderRadius={8}
+                backgroundColor="#0095F6"
+                paddingHorizontal="$4"
               >
-                <SizableText
-                  size="$5"
-                  fontWeight="600"
-                  color={mediaType === type ? 'white' : '$color'}
-                  textTransform="capitalize"
-                >
-                  {type === 'all'
-                    ? 'All'
-                    : type === 'photo'
-                      ? 'Photos'
-                      : 'Videos'}
+                <SizableText size="$5" fontWeight="700" color="white">
+                  Done {selectedIds.size > 0 ? `(${selectedIds.size})` : ''}
                 </SizableText>
               </Button>
-            ))}
-          </XStack>
+            </XStack>
+
+            {/* Media Type Tabs */}
+            <XStack gap="$3" paddingHorizontal="$3" paddingTop="$3">
+              {(['all', 'photo', 'video'] as MediaType[]).map(type => (
+                <Button
+                  key={type}
+                  flex={1}
+                  size="$3"
+                  onPress={() => setMediaType(type)}
+                  borderRadius={10}
+                  backgroundColor={
+                    mediaType === type ? '$blue10' : '$background'
+                  }
+                  borderWidth={1}
+                  borderColor={mediaType === type ? '$blue10' : '$borderColor'}
+                >
+                  <SizableText
+                    size="$5"
+                    fontWeight="700"
+                    color={mediaType === type ? 'white' : '$color'}
+                    textTransform="capitalize"
+                  >
+                    {type === 'all'
+                      ? 'All'
+                      : type === 'photo'
+                        ? 'Photos'
+                        : 'Videos'}
+                  </SizableText>
+                </Button>
+              ))}
+            </XStack>
+          </YStack>
         </YStack>
 
         {/* Media Grid */}
@@ -458,11 +507,10 @@ export default function MediaPicker({
             ListFooterComponent={
               loading ? (
                 <YStack style={styles.loader}>
-                  <ActivityIndicator size="large" color="#0095F6" />
+                  <ActivityIndicator size="large" color="$blue10" />
                 </YStack>
               ) : null
             }
-            contentContainerStyle={{ paddingBottom: 20 }}
           />
         )}
       </Animated.View>
