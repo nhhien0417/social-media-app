@@ -10,6 +10,7 @@ import PostPreview, {
 } from './components/PostPreview'
 import PostAction from './components/PostAction'
 import MediaPicker from './components/MediaPicker'
+import Camera from './components/Camera'
 
 export default function NewPostScreen() {
   const router = useRouter()
@@ -18,6 +19,7 @@ export default function NewPostScreen() {
   const [media, setMedia] = useState<MediaItem[]>([])
   const [privacy, setPrivacy] = useState<PrivacyOption>('friends')
   const [showMediaPicker, setShowMediaPicker] = useState(false)
+  const [showCamera, setShowCamera] = useState(false)
 
   const user: UserInfoData = useMemo(
     () => ({
@@ -41,6 +43,23 @@ export default function NewPostScreen() {
   const handleAddMedia = useCallback(() => {
     setShowMediaPicker(true)
   }, [])
+
+  const handleTakePhoto = useCallback(() => {
+    setShowCamera(true)
+  }, [])
+
+  const handlePhotoCapture = useCallback(
+    (photo: { uri: string; width: number; height: number }) => {
+      const newMedia: MediaItem = {
+        id: `captured-${Date.now()}`,
+        url: photo.uri,
+        type: 'photo',
+      }
+      setMedia(prev => [...prev, newMedia])
+      setShowCamera(false)
+    },
+    []
+  )
 
   const handleMediaSelect = useCallback((assets: any[]) => {
     const newMedia: MediaItem[] = assets.map(asset => ({
@@ -85,7 +104,7 @@ export default function NewPostScreen() {
           />
         </ScrollView>
 
-        <PostAction onAddMedia={handleAddMedia} />
+        <PostAction onAddMedia={handleAddMedia} onTakePhoto={handleTakePhoto} />
       </KeyboardAvoidingView>
 
       <MediaPicker
@@ -93,6 +112,12 @@ export default function NewPostScreen() {
         onClose={() => setShowMediaPicker(false)}
         onSelect={handleMediaSelect}
         maxSelection={10}
+      />
+
+      <Camera
+        visible={showCamera}
+        onClose={() => setShowCamera(false)}
+        onCapture={handlePhotoCapture}
       />
     </YStack>
   )

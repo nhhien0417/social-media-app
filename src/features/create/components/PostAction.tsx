@@ -4,9 +4,10 @@ import { Image, Camera, Smile, MapPin } from '@tamagui/lucide-icons'
 
 type Props = {
   onAddMedia?: () => void
+  onTakePhoto?: () => void
 }
 
-export default function PostAction({ onAddMedia }: Props) {
+export default function PostAction({ onAddMedia, onTakePhoto }: Props) {
   return (
     <XStack padding="$3" gap="$2" backgroundColor="$background">
       <Button
@@ -35,6 +36,7 @@ export default function PostAction({ onAddMedia }: Props) {
           icon={Camera}
           borderRadius={10}
           scaleIcon={1.75}
+          onPress={onTakePhoto}
           backgroundColor="$green4"
           color="$green10"
         />
