@@ -12,10 +12,11 @@ import {
   ScrollView,
   Spinner,
 } from 'tamagui'
+import ButtonIcon from '@/components/IconButton'
 import { Chrome, Eye, EyeOff } from '@tamagui/lucide-icons'
 import { Image } from 'react-native'
-import { signInApi } from '@/api/auth.api'
-import ButtonIcon from '@/components/IconButton'
+import { signInApi } from '@/api/api.auth'
+import { saveTokens } from '@/api/token'
 
 type ValidationErrors = {
   email?: string
@@ -64,11 +65,11 @@ export default function SignInScreen() {
       const response = await signInApi({ email, password })
       console.log('✅ API Response:', response)
 
-      // if (response && response.data && response.data.accessToken) {
-      //   await saveToken(response.data.accessToken)
-      // } else {
-      //   throw new Error('Login failed: Invalid response structure.')
-      // }
+      if (response && response.data && response.data.accessToken) {
+        await saveTokens(response.data.accessToken, response.data.refreshToken)
+      } else {
+        throw new Error('Login failed: Invalid response structure.')
+      }
 
       router.replace('/(tabs)')
     } catch (error: any) {
@@ -173,31 +174,31 @@ export default function SignInScreen() {
           </XStack>
 
           {/* Remember + Forgot */}
-          <Text
-            marginTop="$1"
-            textAlign="right"
-            color="$primary"
-            fontWeight="500"
-            fontSize={15}
-          >
-            Forgot password?
-          </Text>
+          <Link href="/(tabs)" asChild>
+            <Text
+              marginTop="$1"
+              textAlign="right"
+              color="$primary"
+              fontWeight="500"
+              fontSize={15}
+            >
+              Forgot password?
+            </Text>
+          </Link>
 
           {/* CTA */}
-          <Link href="/(tabs)" asChild>
-            <Button
-              size="$5"
-              theme="primary"
-              borderRadius="$7"
-              fontWeight="700"
-              marginTop="$2"
-              onPress={handleLogin}
-              disabled={isLoading}
-              icon={isLoading ? <Spinner size="small" /> : null}
-            >
-              {isLoading ? 'Logging in...' : 'Login'}
-            </Button>
-          </Link>
+          <Button
+            size="$5"
+            theme="primary"
+            borderRadius="$7"
+            fontWeight="700"
+            marginTop="$2"
+            onPress={handleLogin}
+            disabled={isLoading}
+            icon={isLoading ? <Spinner size="small" /> : null}
+          >
+            {isLoading ? 'Logging in...' : 'Login'}
+          </Button>
           {/* Divider OR */}
           <XStack alignItems="center" gap="$3" marginVertical="$2">
             <Separator flex={1} />

@@ -14,7 +14,7 @@ import {
 } from 'tamagui'
 import { Chrome, Eye, EyeOff } from '@tamagui/lucide-icons'
 import { Image } from 'react-native'
-import { signUpApi } from '@/api/auth.api'
+import { signUpApi } from '@/api/api.auth'
 import ButtonIcon from '@/components/IconButton'
 
 type ValidationErrors = {
