@@ -42,3 +42,12 @@ npm i -D @tamagui/babel-plugin
 npx expo-router@latest typegen
 npx expo start
 ```
+
+//TODO
+
+- Api signup
+- Api post feed
+- Save current theme
+- Preview media before post
+- Fix incorrect stretch camera
+- Socket I/O to get notification
