@@ -214,11 +214,7 @@ export default function PostPreview({
                       paddingVertical="$1"
                       borderRadius={6}
                     >
-                      <SizableText
-                        fontSize={12}
-                        color="$color"
-                        fontWeight="600"
-                      >
+                      <SizableText fontSize={12} fontWeight="600">
                         {formatDuration(media[0].duration)}
                       </SizableText>
                     </YStack>
@@ -264,7 +260,7 @@ export default function PostPreview({
                         >
                           <SizableText
                             fontSize={10}
-                            color="$color"
+                            color="white"
                             fontWeight="600"
                           >
                             {formatDuration(item.duration)}

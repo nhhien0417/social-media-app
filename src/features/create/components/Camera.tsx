@@ -16,8 +16,6 @@ import {
   Zap,
   ZapOff,
   Video,
-  Camera as CameraIcon,
-  Grid3x3,
   Timer,
   ZoomIn,
   ZoomOut,
@@ -47,23 +45,10 @@ type Props = {
 type CameraMode = 'photo' | 'video'
 type TimerOption = 0 | 3 | 10
 
-const SCREEN_HEIGHT = Dimensions.get('window').height
-const SCREEN_WIDTH = Dimensions.get('window').width
-
 const styles = StyleSheet.create({
-  modal: {
+  container: {
     flex: 1,
     backgroundColor: 'black',
-  },
-  camera: {
-    flex: 1,
-  },
-  overlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
   },
   topBar: {
     position: 'absolute',
@@ -263,9 +248,13 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
   const [recordingTime, setRecordingTime] = useState(0)
   const [timer, setTimer] = useState<TimerOption>(0)
   const [countdown, setCountdown] = useState<number | null>(null)
-  const [showGrid, setShowGrid] = useState(false)
   const [zoom, setZoom] = useState(0)
   const [showMinDurationWarning, setShowMinDurationWarning] = useState(false)
+  const [isZoomChanging, setIsZoomChanging] = useState(false)
+  const [dimensions, setDimensions] = useState(() => {
+    const { width, height } = Dimensions.get('screen')
+    return { width, height }
+  })
   const [cameraPermission, requestCameraPermission] = useCameraPermissions()
   const [microphonePermission, requestMicrophonePermission] =
     useMicrophonePermissions()
@@ -274,6 +263,14 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
   const recordingStartTime = useRef<number>(0)
   const isRecordingRef = useRef(false)
   const lastActionTime = useRef<number>(0)
+
+  // Listen to dimension changes (orientation)
+  useEffect(() => {
+    const subscription = Dimensions.addEventListener('change', ({ screen }) => {
+      setDimensions({ width: screen.width, height: screen.height })
+    })
+    return () => subscription?.remove()
+  }, [])
 
   const takePicture = useCallback(async () => {
     if (cameraRef.current) {
@@ -446,17 +443,6 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
     setFlash(current => (current === 'off' ? 'on' : 'off'))
   }
 
-  const toggleMode = () => {
-    setMode(current => (current === 'photo' ? 'video' : 'photo'))
-  }
-
-  const toggleGrid = () => {
-    const now = Date.now()
-    if (now - lastActionTime.current < 300) return // Debounce 300ms
-    lastActionTime.current = now
-    setShowGrid(current => !current)
-  }
-
   const cycleTimer = () => {
     const now = Date.now()
     if (now - lastActionTime.current < 300) return
@@ -469,17 +455,17 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
   }
 
   const increaseZoom = () => {
-    const now = Date.now()
-    if (now - lastActionTime.current < 100) return // Faster for zoom
-    lastActionTime.current = now
+    if (isZoomChanging) return
+    setIsZoomChanging(true)
     setZoom(current => Math.min(current + 0.1, 1))
+    setTimeout(() => setIsZoomChanging(false), 200)
   }
 
   const decreaseZoom = () => {
-    const now = Date.now()
-    if (now - lastActionTime.current < 100) return
-    lastActionTime.current = now
+    if (isZoomChanging) return
+    setIsZoomChanging(true)
     setZoom(current => Math.max(current - 0.1, 0))
+    setTimeout(() => setIsZoomChanging(false), 200)
   }
 
   const stopRecording = () => {
@@ -614,38 +600,25 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
   return (
     <Modal
       visible={visible}
-      animationType="slide"
-      statusBarTranslucent
+      animationType="fade"
+      statusBarTranslucent={true}
       presentationStyle="fullScreen"
       transparent={false}
+      hardwareAccelerated={true}
     >
-      <StatusBar hidden />
-      <View style={styles.modal}>
+      <StatusBar hidden={true} />
+      <View style={styles.container}>
         <CameraView
           ref={cameraRef}
-          style={styles.camera}
+          style={{
+            width: dimensions.width,
+            height: dimensions.height,
+          }}
           facing={facing}
           flash={flash}
           zoom={zoom}
           mode={mode === 'video' ? 'video' : 'picture'}
         >
-          {/* Grid Overlay */}
-          {showGrid && (
-            <View style={styles.gridOverlay}>
-              <View style={styles.gridColumn}>
-                <View style={styles.gridRow} />
-                <View style={styles.gridRow} />
-              </View>
-              <View style={styles.gridColumn}>
-                <View style={styles.gridRow} />
-                <View style={styles.gridRow} />
-              </View>
-              <View style={[styles.gridColumn, { borderRightWidth: 0 }]}>
-                <View style={styles.gridRow} />
-                <View style={styles.gridRow} />
-              </View>
-            </View>
-          )}
 
           {/* Countdown Timer */}
           {countdown !== null && countdown > 0 && (
@@ -693,10 +666,6 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
                 )}
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.iconButton} onPress={toggleGrid}>
-                <Grid3x3 size={24} color="white" opacity={showGrid ? 1 : 0.6} />
-              </TouchableOpacity>
-
               <TouchableOpacity style={styles.iconButton} onPress={toggleFlash}>
                 {flash === 'off' ? (
                   <ZapOff size={24} color="white" />
@@ -710,12 +679,28 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
           {/* Zoom Controls */}
           {zoom > 0 && (
             <View style={styles.zoomContainer}>
-              <TouchableOpacity onPress={decreaseZoom}>
-                <ZoomOut size={24} color="white" />
+              <TouchableOpacity
+                onPress={decreaseZoom}
+                disabled={isZoomChanging}
+                activeOpacity={isZoomChanging ? 1 : 0.7}
+              >
+                <ZoomOut
+                  size={24}
+                  color="white"
+                  opacity={isZoomChanging ? 0.5 : 1}
+                />
               </TouchableOpacity>
               <Text style={styles.zoomText}>{(zoom * 10 + 1).toFixed(1)}x</Text>
-              <TouchableOpacity onPress={increaseZoom}>
-                <ZoomIn size={24} color="white" />
+              <TouchableOpacity
+                onPress={increaseZoom}
+                disabled={isZoomChanging}
+                activeOpacity={isZoomChanging ? 1 : 0.7}
+              >
+                <ZoomIn
+                  size={24}
+                  color="white"
+                  opacity={isZoomChanging ? 0.5 : 1}
+                />
               </TouchableOpacity>
             </View>
           )}
@@ -759,13 +744,22 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
             </View>
 
             <View style={styles.controls}>
-              {/* Zoom In Button */}
-              <TouchableOpacity
-                style={styles.iconButton}
-                onPress={increaseZoom}
-              >
-                <ZoomIn size={28} color="white" />
-              </TouchableOpacity>
+              {/* Zoom In Button - only show when zoom popup is not visible */}
+              {zoom === 0 && (
+                <TouchableOpacity
+                  style={styles.iconButton}
+                  onPress={increaseZoom}
+                  disabled={isZoomChanging}
+                  activeOpacity={isZoomChanging ? 1 : 0.7}
+                >
+                  <ZoomIn
+                    size={28}
+                    color="white"
+                    opacity={isZoomChanging ? 0.5 : 1}
+                  />
+                </TouchableOpacity>
+              )}
+              {zoom > 0 && <View style={{ width: 50 }} />}
 
               {/* Capture/Record Button */}
               <TouchableOpacity
