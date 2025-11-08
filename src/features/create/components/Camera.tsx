@@ -251,10 +251,6 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
   const [zoom, setZoom] = useState(0)
   const [showMinDurationWarning, setShowMinDurationWarning] = useState(false)
   const [isZoomChanging, setIsZoomChanging] = useState(false)
-  const [dimensions, setDimensions] = useState(() => {
-    const { width, height } = Dimensions.get('screen')
-    return { width, height }
-  })
   const [cameraPermission, requestCameraPermission] = useCameraPermissions()
   const [microphonePermission, requestMicrophonePermission] =
     useMicrophonePermissions()
@@ -263,14 +259,6 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
   const recordingStartTime = useRef<number>(0)
   const isRecordingRef = useRef(false)
   const lastActionTime = useRef<number>(0)
-
-  // Listen to dimension changes (orientation)
-  useEffect(() => {
-    const subscription = Dimensions.addEventListener('change', ({ screen }) => {
-      setDimensions({ width: screen.width, height: screen.height })
-    })
-    return () => subscription?.remove()
-  }, [])
 
   const takePicture = useCallback(async () => {
     if (cameraRef.current) {
@@ -610,16 +598,12 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
       <View style={styles.container}>
         <CameraView
           ref={cameraRef}
-          style={{
-            width: dimensions.width,
-            height: dimensions.height,
-          }}
+          style={StyleSheet.absoluteFill}
           facing={facing}
           flash={flash}
           zoom={zoom}
           mode={mode === 'video' ? 'video' : 'picture'}
         >
-
           {/* Countdown Timer */}
           {countdown !== null && countdown > 0 && (
             <Animated.Text style={styles.timerText}>{countdown}</Animated.Text>
