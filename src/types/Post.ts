@@ -1,3 +1,4 @@
+import { Media } from './Media'
 import { User } from './User'
 
 export interface Post {
@@ -12,10 +13,3 @@ export interface Post {
   saved?: boolean
 }
 
-export interface Media {
-  id: string
-  type: 'image' | 'video'
-  url: string
-  ratio: number
-  thumbUrl?: string
-}
