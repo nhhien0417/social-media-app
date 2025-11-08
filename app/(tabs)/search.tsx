@@ -4,19 +4,28 @@ import { Input, Separator, Text, XStack, YStack, useThemeName } from 'tamagui'
 import { Search, X as Clear } from '@tamagui/lucide-icons'
 import {
   searchMockData,
+  peopleYouMayKnowMock,
+  searchHistoryMock,
   type GroupResult,
   type PostResult,
   type SearchCategory,
   type SearchResult,
+  type SearchHistoryItem,
   type UserResult,
 } from '@/features/find/data'
 import { SearchFilters } from '@/features/find/SearchFilters'
 import { SearchResults } from '@/features/find/SearchResults'
+import { SearchHistoryList } from '@/features/find/components/SearchHistoryList'
+import { PeopleYouMayKnow } from '@/features/find/components/PeopleYouMayKnow'
 
 export default function SearchTabScreen() {
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState<SearchCategory>('all')
   const [results, setResults] = useState<SearchResult[]>(searchMockData)
+  const [history, setHistory] = useState<SearchHistoryItem[]>(searchHistoryMock)
+  const [suggestedPeople, setSuggestedPeople] =
+    useState<UserResult[]>(peopleYouMayKnowMock)
+  const [hasSubmitted, setHasSubmitted] = useState(false)
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
 
@@ -55,6 +64,11 @@ export default function SearchTabScreen() {
           : item
       )
     )
+    setSuggestedPeople(prev =>
+      prev.map(item =>
+        item.id === user.id ? { ...item, isFriend: true } : item
+      )
+    )
   }
 
   const handleJoinGroup = (group: GroupResult) => {
@@ -72,6 +86,44 @@ export default function SearchTabScreen() {
   }
 
   const clearQuery = () => setQuery('')
+  const resetToLanding = () => {
+    setHasSubmitted(false)
+    setCategory('all')
+  }
+
+  const handleChangeQuery = (value: string) => {
+    setQuery(value)
+    if (!value.trim()) {
+      resetToLanding()
+    }
+  }
+
+  const performSearch = (keyword?: string) => {
+    const value = (keyword ?? query).trim()
+    if (!value) {
+      return
+    }
+
+    setQuery(value)
+    setHasSubmitted(true)
+    setCategory('all')
+
+    setHistory(prev => {
+      const withoutDuplicate = prev.filter(
+        item => item.keyword.toLowerCase() !== value.toLowerCase()
+      )
+      const nextEntry: SearchHistoryItem = {
+        id: `history-${Date.now()}`,
+        keyword: value,
+        timestamp: new Date().toISOString(),
+      }
+      return [nextEntry, ...withoutDuplicate].slice(0, 6)
+    })
+  }
+
+  const handleHistorySelect = (keyword: string) => {
+    performSearch(keyword)
+  }
 
   return (
     <ScrollView
@@ -93,18 +145,27 @@ export default function SearchTabScreen() {
             borderColor={searchBarBorder}
             gap="$2"
           >
-            <Search size={18} color={searchIconColor} />
+            <XStack
+              padding="$1"
+              borderRadius={999}
+              pressStyle={{ opacity: 0.7 }}
+              onPress={() => performSearch()}
+            >
+              <Search size={18} color={searchIconColor} />
+            </XStack>
             <Input
               flex={1}
               borderWidth={0}
               backgroundColor="transparent"
               placeholder="Search on Social App"
               value={query}
-              onChangeText={setQuery}
+              onChangeText={handleChangeQuery}
               autoCapitalize="none"
               autoCorrect={false}
               placeholderTextColor={placeholderColor}
               color={inputTextColor}
+              onSubmitEditing={() => performSearch()}
+              returnKeyType="search"
             />
             {query ? (
               <XStack
@@ -112,7 +173,10 @@ export default function SearchTabScreen() {
                 borderRadius={999}
                 backgroundColor={clearButtonBackground}
                 pressStyle={{ opacity: 0.6 }}
-                onPress={clearQuery}
+                onPress={() => {
+                  clearQuery()
+                  resetToLanding()
+                }}
               >
                 <Clear size={18} color={clearIconColor} />
               </XStack>
@@ -120,17 +184,32 @@ export default function SearchTabScreen() {
           </XStack>
         </YStack>
 
-        <SearchFilters value={category} onChange={setCategory} />
+        {hasSubmitted ? (
+          <>
+            <SearchFilters value={category} onChange={setCategory} />
 
-        <Separator />
+            <Separator />
 
-        <SearchResults
-          data={filteredResults}
-          activeCategory={category}
-          onSendFriendRequest={handleFriendRequest}
-          onJoinGroup={handleJoinGroup}
-          onOpenPost={handleOpenPost}
-        />
+            <SearchResults
+              data={filteredResults}
+              activeCategory={category}
+              onSendFriendRequest={handleFriendRequest}
+              onJoinGroup={handleJoinGroup}
+              onOpenPost={handleOpenPost}
+            />
+          </>
+        ) : (
+          <>
+            <SearchHistoryList items={history} onSelect={handleHistorySelect} />
+
+            <Separator />
+
+            <PeopleYouMayKnow
+              users={suggestedPeople}
+              onAddFriend={handleFriendRequest}
+            />
+          </>
+        )}
       </YStack>
     </ScrollView>
   )

@@ -85,3 +85,54 @@ export const searchMockData: SearchResult[] = [
     isMember: true,
   },
 ]
+
+export interface SearchHistoryItem {
+  id: string
+  keyword: string
+  timestamp: string
+}
+
+export const searchHistoryMock: SearchHistoryItem[] = [
+  {
+    id: 'history-1',
+    keyword: 'Travel inspiration',
+    timestamp: '2025-11-05T08:30:00.000Z',
+  },
+  {
+    id: 'history-2',
+    keyword: 'Running clubs near me',
+    timestamp: '2025-11-04T19:12:00.000Z',
+  },
+  {
+    id: 'history-3',
+    keyword: 'UX design tips',
+    timestamp: '2025-11-03T10:45:00.000Z',
+  },
+]
+
+export const peopleYouMayKnowMock: UserResult[] = [
+  {
+    id: 'suggestion-1',
+    category: 'users',
+    title: 'Quinn Le',
+    description: 'Product Designer at Pixel Labs',
+    mutualFriends: 6,
+    isFriend: false,
+  },
+  {
+    id: 'suggestion-2',
+    category: 'users',
+    title: 'Kevin Tran',
+    description: 'Studies Marketing at RMIT University',
+    mutualFriends: 9,
+    isFriend: false,
+  },
+  {
+    id: 'suggestion-3',
+    category: 'users',
+    title: 'Emily Nguyen',
+    description: 'Works at Aurora Studio • Lives in Da Nang',
+    mutualFriends: 3,
+    isFriend: false,
+  },
+]
