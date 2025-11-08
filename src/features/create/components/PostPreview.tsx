@@ -116,7 +116,7 @@ export default function PostPreview({
   }
 
   const formatDuration = (duration?: number) => {
-    if (!duration) return ''
+    if (!duration || duration <= 0) return '0:01' // Default to 1 second if no duration
     const minutes = Math.floor(duration / 60)
     const seconds = Math.floor(duration % 60)
     return `${minutes}:${seconds.toString().padStart(2, '0')}`
@@ -204,7 +204,7 @@ export default function PostPreview({
                     aspectRatio={1}
                     borderRadius={10}
                   />
-                  {media[0].type === 'video' && media[0].duration && (
+                  {media[0].type === 'video' && (
                     <YStack
                       position="absolute"
                       bottom={10}
@@ -252,7 +252,7 @@ export default function PostPreview({
                         aspectRatio={1}
                         borderRadius={10}
                       />
-                      {item.type === 'video' && item.duration && (
+                      {item.type === 'video' && (
                         <YStack
                           position="absolute"
                           bottom={6}
@@ -437,7 +437,7 @@ export default function PostPreview({
                 }}
                 resizeMode="contain"
               />
-              {fullscreenMedia.type === 'video' && fullscreenMedia.duration && (
+              {fullscreenMedia.type === 'video' && (
                 <YStack
                   position="absolute"
                   bottom={20}
