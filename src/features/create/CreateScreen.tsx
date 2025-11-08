@@ -49,11 +49,18 @@ export default function NewPostScreen() {
   }, [])
 
   const handlePhotoCapture = useCallback(
-    (photo: { uri: string; width: number; height: number }) => {
+    (media: {
+      uri: string
+      width?: number
+      height?: number
+      type: 'photo' | 'video'
+      duration?: number
+    }) => {
       const newMedia: MediaItem = {
         id: `captured-${Date.now()}`,
-        url: photo.uri,
-        type: 'photo',
+        url: media.uri,
+        type: media.type,
+        duration: media.duration,
       }
       setMedia(prev => [...prev, newMedia])
       setShowCamera(false)
