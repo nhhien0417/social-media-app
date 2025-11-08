@@ -1,5 +1,4 @@
 import { FlatList, StyleSheet } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { YStack, XStack, Text, Separator } from 'tamagui'
 import { Send, Moon, Sun } from '@tamagui/lucide-icons'
 import { Image } from 'react-native'
@@ -60,8 +59,7 @@ function HeaderContent() {
 }
 
 export default function FeedScreen() {
-  const insets = useSafeAreaInsets()
-  const TOTAL_HEADER_HEIGHT = HEADER_VIEW_HEIGHT + insets.top + 2
+  const TOTAL_HEADER_HEIGHT = HEADER_VIEW_HEIGHT + 2
 
   const offset = useSharedValue(0)
   const lastY = useSharedValue(0)
@@ -117,7 +115,6 @@ export default function FeedScreen() {
         left={0}
         right={0}
         zIndex={10}
-        paddingTop={insets.top}
         borderBottomWidth={StyleSheet.hairlineWidth}
         borderColor="$borderColor"
         backgroundColor="$background"

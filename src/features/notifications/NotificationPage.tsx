@@ -5,7 +5,6 @@ import {
   Text,
   Button,
   ScrollView,
-  Theme,
   Sheet,
   Separator,
 } from 'tamagui'
@@ -15,7 +14,6 @@ import Avatar from '@/components/Avatar'
 import { MoreVertical } from '@tamagui/lucide-icons'
 
 export default function NotificationScreen() {
-  const { theme } = useAppTheme()
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const [isScrollable, setIsScrollable] = useState(false)
   const [layoutHeight, setLayoutHeight] = useState(0)
@@ -58,9 +56,7 @@ export default function NotificationScreen() {
         width="100%"
         alignItems="center"
         justifyContent="space-between"
-        paddingHorizontal="$4"
-        paddingTop="$6"
-        marginBottom="$3"
+        padding="$3"
       >
         <Text fontSize="$7" fontWeight="700" color="$color">
           Notifications

@@ -128,7 +128,7 @@ export default function SearchTabScreen() {
   return (
     <ScrollView
       style={{ backgroundColor: pageBackground }}
-      contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 16 }}
+      contentContainerStyle={{ padding: 12 }}
     >
       <YStack gap="$3">
         <YStack gap="$2">
