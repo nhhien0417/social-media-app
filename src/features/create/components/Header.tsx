@@ -155,7 +155,7 @@ export default function Header({
         >
           <SizableText
             size="$6"
-            fontWeight="600"
+            fontWeight="700"
             color="$color"
             textTransform="capitalize"
           >

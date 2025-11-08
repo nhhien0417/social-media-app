@@ -1,5 +1,11 @@
 import React, { useMemo, useState } from 'react'
-import { Modal, TouchableOpacity, StyleSheet } from 'react-native'
+import {
+  Modal,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+  Image as RNImage,
+} from 'react-native'
 import {
   YStack,
   XStack,
@@ -10,7 +16,16 @@ import {
   Paragraph,
 } from 'tamagui'
 import Avatar from '@/components/Avatar'
-import { Trash2, Globe, Users, Lock, ChevronDown } from '@tamagui/lucide-icons'
+import {
+  Trash2,
+  Globe,
+  Users,
+  Lock,
+  ChevronDown,
+  X,
+} from '@tamagui/lucide-icons'
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window')
 
 export type PrivacyOption = 'public' | 'friends' | 'only-me'
 
@@ -24,6 +39,8 @@ type DropdownOption = {
 export interface MediaItem {
   id: string
   url: string
+  type?: 'photo' | 'video'
+  duration?: number
 }
 
 export interface UserInfoData {
@@ -76,6 +93,7 @@ export default function PostPreview({
 }: Props) {
   const [showModal, setShowModal] = useState(false)
   const [containerWidth, setContainerWidth] = useState<number>(0)
+  const [fullscreenMedia, setFullscreenMedia] = useState<MediaItem | null>(null)
 
   const isSingle = media.length === 1
   const itemWidth = useMemo(() => {
@@ -97,6 +115,13 @@ export default function PostPreview({
     setShowModal(false)
   }
 
+  const formatDuration = (duration?: number) => {
+    if (!duration) return ''
+    const minutes = Math.floor(duration / 60)
+    const seconds = Math.floor(duration % 60)
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`
+  }
+
   return (
     <>
       <YStack marginTop="$3" gap="$3" paddingHorizontal="$3">
@@ -104,7 +129,7 @@ export default function PostPreview({
         <XStack alignItems="center" gap="$3">
           <Avatar uri={user.avatarUrl} size={55} />
           <YStack flex={1} gap={3}>
-            <SizableText size="$6" fontWeight="600">
+            <SizableText size="$6" fontWeight="700">
               {user.name}
             </SizableText>
 
@@ -118,7 +143,7 @@ export default function PostPreview({
               icon={<SelectedIcon size={20} color="$color" />}
               iconAfter={<ChevronDown size={17.5} color="$color" />}
             >
-              <SizableText size="$3" fontWeight="500" color="$color" flex={1}>
+              <SizableText size="$3" fontWeight="600" color="$color" flex={1}>
                 {selectedOption.label}
               </SizableText>
             </Button>
@@ -168,49 +193,98 @@ export default function PostPreview({
             }}
           >
             {isSingle ? (
-              <YStack>
-                <Image
-                  source={{ uri: media[0].url }}
-                  width="100%"
-                  aspectRatio={1}
-                  borderRadius={10}
-                />
-                <Button
-                  icon={Trash2}
-                  size={40}
-                  circular
-                  position="absolute"
-                  top={15}
-                  right={15}
-                  zIndex={1}
-                  backgroundColor="#000"
-                  color="#FFF"
-                  onPress={() => onRemoveMedia(media[0].id)}
-                />
-              </YStack>
+              <TouchableOpacity
+                activeOpacity={0.9}
+                onPress={() => setFullscreenMedia(media[0])}
+              >
+                <YStack>
+                  <Image
+                    source={{ uri: media[0].url }}
+                    width="100%"
+                    aspectRatio={1}
+                    borderRadius={10}
+                  />
+                  {media[0].type === 'video' && media[0].duration && (
+                    <YStack
+                      position="absolute"
+                      bottom={10}
+                      right={10}
+                      backgroundColor="rgba(0,0,0,0.75)"
+                      paddingHorizontal="$2"
+                      paddingVertical="$1"
+                      borderRadius={6}
+                    >
+                      <SizableText
+                        fontSize={12}
+                        color="$color"
+                        fontWeight="600"
+                      >
+                        {formatDuration(media[0].duration)}
+                      </SizableText>
+                    </YStack>
+                  )}
+                  <Button
+                    icon={Trash2}
+                    size={40}
+                    circular
+                    position="absolute"
+                    top={15}
+                    right={15}
+                    zIndex={1}
+                    backgroundColor="#000"
+                    color="#FFF"
+                    onPress={() => onRemoveMedia(media[0].id)}
+                  />
+                </YStack>
+              </TouchableOpacity>
             ) : (
               <XStack flexWrap="wrap" gap="$3">
                 {media.map(item => (
-                  <YStack key={item.id} width={itemWidth} position="relative">
-                    <Image
-                      source={{ uri: item.url }}
-                      width={itemWidth}
-                      aspectRatio={1}
-                      borderRadius={10}
-                    />
-                    <Button
-                      icon={Trash2}
-                      size={30}
-                      circular
-                      position="absolute"
-                      top={10}
-                      right={10}
-                      zIndex={1}
-                      backgroundColor="#000"
-                      color="#FFF"
-                      onPress={() => onRemoveMedia(item.id)}
-                    />
-                  </YStack>
+                  <TouchableOpacity
+                    key={item.id}
+                    activeOpacity={0.9}
+                    onPress={() => setFullscreenMedia(item)}
+                  >
+                    <YStack width={itemWidth} position="relative">
+                      <Image
+                        source={{ uri: item.url }}
+                        width={itemWidth}
+                        aspectRatio={1}
+                        borderRadius={10}
+                      />
+                      {item.type === 'video' && item.duration && (
+                        <YStack
+                          position="absolute"
+                          bottom={6}
+                          right={6}
+                          backgroundColor="rgba(0,0,0,0.75)"
+                          paddingHorizontal="$1.5"
+                          paddingVertical="$0.5"
+                          borderRadius={4}
+                        >
+                          <SizableText
+                            fontSize={10}
+                            color="$color"
+                            fontWeight="600"
+                          >
+                            {formatDuration(item.duration)}
+                          </SizableText>
+                        </YStack>
+                      )}
+                      <Button
+                        icon={Trash2}
+                        size={30}
+                        circular
+                        position="absolute"
+                        top={10}
+                        right={10}
+                        zIndex={1}
+                        backgroundColor="#000"
+                        color="#FFF"
+                        onPress={() => onRemoveMedia(item.id)}
+                      />
+                    </YStack>
+                  </TouchableOpacity>
                 ))}
               </XStack>
             )}
@@ -252,7 +326,7 @@ export default function PostPreview({
               </SizableText>
 
               <YStack gap="$0.5" paddingVertical="$3">
-                <SizableText size="$6" fontWeight="600" color="$color">
+                <SizableText size="$6" fontWeight="700" color="$color">
                   Who can see your post?
                 </SizableText>
                 <Paragraph size="$4" color="$color" lineHeight={20}>
@@ -276,14 +350,14 @@ export default function PostPreview({
                       paddingVertical="$2"
                       paddingHorizontal="$2"
                       borderRadius={15}
-                      backgroundColor="#EEE"
+                      backgroundColor="$backgroundFocus"
                     >
                       {/* Icon */}
                       <YStack
                         width={50}
                         height={50}
                         borderRadius={25}
-                        backgroundColor="#d2d2d2"
+                        backgroundColor="$borderColor"
                         alignItems="center"
                         justifyContent="center"
                       >
@@ -292,7 +366,7 @@ export default function PostPreview({
 
                       {/* Text (Title + Explanation) */}
                       <YStack flex={1}>
-                        <SizableText size="$6" fontWeight="600">
+                        <SizableText size="$6" fontWeight="700">
                           {option.label}
                         </SizableText>
                         <Paragraph color="$color" size="$5">
@@ -300,7 +374,7 @@ export default function PostPreview({
                         </Paragraph>
                       </YStack>
 
-                      {/* Nút Radio */}
+                      {/* Radio */}
                       <YStack
                         width={20}
                         height={20}
@@ -328,6 +402,60 @@ export default function PostPreview({
           </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
+
+      {/* Fullscreen Media Modal */}
+      <Modal
+        visible={!!fullscreenMedia}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setFullscreenMedia(null)}
+      >
+        <YStack
+          flex={1}
+          backgroundColor="rgba(0,0,0,0.95)"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => setFullscreenMedia(null)}
+          >
+            <X size={32} color="white" />
+          </TouchableOpacity>
+
+          {fullscreenMedia && (
+            <YStack
+              width={SCREEN_WIDTH}
+              height={SCREEN_WIDTH}
+              position="relative"
+            >
+              <RNImage
+                source={{ uri: fullscreenMedia.url }}
+                style={{
+                  width: SCREEN_WIDTH,
+                  height: SCREEN_WIDTH,
+                }}
+                resizeMode="contain"
+              />
+              {fullscreenMedia.type === 'video' && fullscreenMedia.duration && (
+                <YStack
+                  position="absolute"
+                  bottom={20}
+                  right={20}
+                  backgroundColor="rgba(0,0,0,0.7)"
+                  paddingHorizontal="$3"
+                  paddingVertical="$2"
+                  borderRadius={8}
+                >
+                  <SizableText fontSize={16} color="white" fontWeight="600">
+                    {formatDuration(fullscreenMedia.duration)}
+                  </SizableText>
+                </YStack>
+              )}
+            </YStack>
+          )}
+        </YStack>
+      </Modal>
     </>
   )
 }
@@ -338,6 +466,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 12.5,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    zIndex: 10,
+    padding: 10,
   },
 })
