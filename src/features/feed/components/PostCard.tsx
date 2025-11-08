@@ -11,7 +11,7 @@ import {
   Bookmark,
 } from '@tamagui/lucide-icons'
 import ButtonIcon from '@/components/IconButton'
-import { formatDate } from '@/types/FormatDate'
+import { formatDate } from '@/utils/FormatDate'
 
 function MediaItem({ item, width }: { item: Media; width: number }) {
   return <Image source={{ uri: item.url }} width={width} aspectRatio={1} />

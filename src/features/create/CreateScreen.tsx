@@ -9,17 +9,17 @@ import PostPreview, {
   type PrivacyOption,
 } from './components/PostPreview'
 import PostAction from './components/PostAction'
+import MediaPicker from './components/MediaPicker'
+import Camera from './components/Camera'
 
 export default function NewPostScreen() {
   const router = useRouter()
   const [mode, setMode] = useState<CreateMode>('post')
   const [caption, setCaption] = useState('')
-  const [media, setMedia] = useState<MediaItem[]>([
-    { id: '1', url: 'https://picsum.photos/id/102/200/200' },
-    { id: '2', url: 'https://picsum.photos/id/192/200/200' },
-    { id: '3', url: 'https://picsum.photos/id/103/200/200' },
-  ])
-  const [privacy, setPrivacy] = useState<PrivacyOption>('public')
+  const [media, setMedia] = useState<MediaItem[]>([])
+  const [privacy, setPrivacy] = useState<PrivacyOption>('friends')
+  const [showMediaPicker, setShowMediaPicker] = useState(false)
+  const [showCamera, setShowCamera] = useState(false)
 
   const user: UserInfoData = useMemo(
     () => ({
@@ -41,13 +41,35 @@ export default function NewPostScreen() {
   }, [])
 
   const handleAddMedia = useCallback(() => {
-    setMedia(prev => [
-      ...prev,
-      {
-        id: String(Date.now()),
-        url: `https://picsum.photos/seed/${prev.length + 10}/200/200`,
-      },
-    ])
+    setShowMediaPicker(true)
+  }, [])
+
+  const handleTakePhoto = useCallback(() => {
+    setShowCamera(true)
+  }, [])
+
+  const handlePhotoCapture = useCallback(
+    (photo: { uri: string; width: number; height: number }) => {
+      const newMedia: MediaItem = {
+        id: `captured-${Date.now()}`,
+        url: photo.uri,
+        type: 'photo',
+      }
+      setMedia(prev => [...prev, newMedia])
+      setShowCamera(false)
+    },
+    []
+  )
+
+  const handleMediaSelect = useCallback((assets: any[]) => {
+    const newMedia: MediaItem[] = assets.map(asset => ({
+      id: asset.id,
+      url: asset.uri,
+      type: asset.mediaType === 'video' ? 'video' : 'photo',
+      duration: asset.duration,
+    }))
+    setMedia(prev => [...prev, ...newMedia])
+    setShowMediaPicker(false)
   }, [])
 
   const handleShare = useCallback(() => {
@@ -82,8 +104,21 @@ export default function NewPostScreen() {
           />
         </ScrollView>
 
-        <PostAction onAddMedia={handleAddMedia} />
+        <PostAction onAddMedia={handleAddMedia} onTakePhoto={handleTakePhoto} />
       </KeyboardAvoidingView>
+
+      <MediaPicker
+        visible={showMediaPicker}
+        onClose={() => setShowMediaPicker(false)}
+        onSelect={handleMediaSelect}
+        maxSelection={10}
+      />
+
+      <Camera
+        visible={showCamera}
+        onClose={() => setShowCamera(false)}
+        onCapture={handlePhotoCapture}
+      />
     </YStack>
   )
 }
