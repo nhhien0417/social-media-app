@@ -202,7 +202,7 @@ export default function SignInScreen() {
           {/* Divider OR */}
           <XStack alignItems="center" gap="$3" marginVertical="$2">
             <Separator flex={1} />
-            <Paragraph color="$gray10">OR</Paragraph>
+            <Paragraph color="#888">OR</Paragraph>
             <Separator flex={1} />
           </XStack>
 

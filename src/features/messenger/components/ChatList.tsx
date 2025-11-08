@@ -99,7 +99,7 @@ export default function ChatList() {
                     {item.name}
                   </Text>
                   <Text
-                    color="$gray10"
+                    color="#888"
                     numberOfLines={1}
                     fontSize="$3"
                     textAlign="left"
@@ -111,7 +111,7 @@ export default function ChatList() {
 
               {/* Thời gian + chấm unread */}
               <YStack alignItems="flex-end" gap="$1" minWidth={55}>
-                <Text fontSize="$2" color="$gray10">
+                <Text fontSize="$2" color="#888">
                   {item.time}
                 </Text>
                 {item.unread && (

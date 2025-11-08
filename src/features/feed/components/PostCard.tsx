@@ -2,7 +2,7 @@ import { memo, useState, useRef, useCallback } from 'react'
 import { FlatList, NativeScrollEvent, NativeSyntheticEvent } from 'react-native'
 import { YStack, XStack, Text, Image, View } from 'tamagui'
 import Avatar from '@/components/Avatar'
-import { Post, Media } from '@/types/Post'
+import { Post } from '@/types/Post'
 import {
   MoreVertical,
   Heart,
@@ -12,6 +12,7 @@ import {
 } from '@tamagui/lucide-icons'
 import ButtonIcon from '@/components/IconButton'
 import { formatDate } from '@/utils/FormatDate'
+import { Media } from '@/types/Media'
 
 function MediaItem({ item, width }: { item: Media; width: number }) {
   return <Image source={{ uri: item.url }} width={width} aspectRatio={1} />
@@ -172,7 +173,7 @@ function PostCard({ post }: { post: Post }) {
         paddingHorizontal="$3"
         marginTop="$1"
         paddingBottom="$3"
-        color="$gray10"
+        color="#888"
         fontSize={12}
       >
         {formatDate(createdAt)}

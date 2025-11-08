@@ -1,6 +1,6 @@
 import React from 'react'
 import { XStack, Button, SizableText } from 'tamagui'
-import { Image, Camera, Smile, MapPin } from '@tamagui/lucide-icons'
+import { Image, Camera, Smile } from '@tamagui/lucide-icons'
 
 type Props = {
   onAddMedia?: () => void
