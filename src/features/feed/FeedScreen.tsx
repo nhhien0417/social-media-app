@@ -1,7 +1,8 @@
-import { FlatList, StyleSheet } from 'react-native'
+import { FlatList, StyleSheet, BackHandler } from 'react-native'
 import { YStack, XStack, Text, Separator } from 'tamagui'
 import { Send, Moon, Sun } from '@tamagui/lucide-icons'
 import { Image } from 'react-native'
+import { useEffect } from 'react'
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -63,6 +64,18 @@ export default function FeedScreen() {
 
   const offset = useSharedValue(0)
   const lastY = useSharedValue(0)
+
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        BackHandler.exitApp()
+        return true
+      }
+    )
+
+    return () => backHandler.remove()
+  }, [])
 
   const onScroll = useAnimatedScrollHandler({
     onScroll: e => {

@@ -1,11 +1,10 @@
-import { Redirect } from 'expo-router'
+import { useRouter } from 'expo-router'
 import { useEffect, useState } from 'react'
 import { getAccessToken } from '@/api/token'
 import { YStack, Spinner } from 'tamagui'
 
 export default function Index() {
-  const [isLoading, setIsLoading] = useState(true)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
     checkAuth()
@@ -14,26 +13,26 @@ export default function Index() {
   const checkAuth = async () => {
     try {
       const token = await getAccessToken()
-      setIsAuthenticated(!!token)
+
+      if (token) {
+        router.replace('/(tabs)')
+      } else {
+        router.replace('/(auth)/signin')
+      }
     } catch (error) {
-      setIsAuthenticated(false)
+      router.replace('/(auth)/signin')
     } finally {
-      setIsLoading(false)
     }
   }
 
-  if (isLoading) {
-    return (
-      <YStack
-        flex={1}
-        alignItems="center"
-        justifyContent="center"
-        backgroundColor="$background"
-      >
-        <Spinner size="large" />
-      </YStack>
-    )
-  }
-
-  return <Redirect href={isAuthenticated ? '/(tabs)' : '/(auth)/signin'} />
+  return (
+    <YStack
+      flex={1}
+      alignItems="center"
+      justifyContent="center"
+      backgroundColor="$background"
+    >
+      <Spinner size="large" />
+    </YStack>
+  )
 }

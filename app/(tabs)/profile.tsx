@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
-import { ScrollView } from 'react-native'
-import { Image, Text, XStack, YStack, useThemeName } from 'tamagui'
-import { Menu, PlusSquare } from '@tamagui/lucide-icons'
+import { ScrollView, Alert } from 'react-native'
+import { Image, Text, XStack, YStack, useThemeName, Button } from 'tamagui'
+import { Menu, PlusSquare, LogOut } from '@tamagui/lucide-icons'
+import { useRouter } from 'expo-router'
 import { profileMock, type ProfilePost } from '@/features/profile/data'
 import { ProfileHeader } from '@/features/profile/ProfileHeader'
 import { ProfileBio } from '@/features/profile/ProfileBio'
@@ -9,6 +10,7 @@ import { ProfileActions } from '@/features/profile/ProfileActions'
 import { StoryHighlights } from '@/features/profile/StoryHighlights'
 import { ProfileTabBar } from '@/features/profile/ProfileTabBar'
 import type { ProfileTabKey } from '@/features/profile/types'
+import { removeTokens } from '@/api/token'
 
 const chunkMedia = (items: ProfilePost[]) => {
   const rows: ProfilePost[][] = []
@@ -98,6 +100,7 @@ function MediaGrid({
 }
 
 export default function ProfileTabScreen() {
+  const router = useRouter()
   const [tab, setTab] = useState<ProfileTabKey>('posts')
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
@@ -109,6 +112,11 @@ export default function ProfileTabScreen() {
 
   const pageBackground = isDark ? '#111418' : '#ffffff'
   const navIconColor = isDark ? '#f5f5f5' : '#111827'
+
+  const handleLogout = async () => {
+    await removeTokens()
+    router.replace('/(auth)/signin')
+  }
 
   return (
     <YStack flex={1} backgroundColor={pageBackground}>
@@ -125,6 +133,14 @@ export default function ProfileTabScreen() {
             <XStack gap="$3" alignItems="center">
               <PlusSquare size={22} color={navIconColor} />
               <Menu size={22} color={navIconColor} />
+              <Button
+                unstyled
+                onPress={handleLogout}
+                padding="$0"
+                pressStyle={{ opacity: 0.7 }}
+              >
+                <LogOut size={22} color={navIconColor} />
+              </Button>
             </XStack>
           </XStack>
 

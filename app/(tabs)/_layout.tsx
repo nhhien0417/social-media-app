@@ -1,13 +1,38 @@
 import type { ComponentProps } from 'react'
-import { Tabs } from 'expo-router'
+import { Tabs, useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { View } from 'react-native'
 import { YStack, useTheme } from 'tamagui'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { useEffect, useState } from 'react'
 import Avatar from '@/components/Avatar'
+import { getAccessToken } from '@/api/token'
 
 export default function TabsLayout() {
   const theme = useTheme()
+  const router = useRouter()
+  const [isChecking, setIsChecking] = useState(true)
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const token = await getAccessToken()
+        if (!token) {
+          router.replace('/(auth)/signin')
+        }
+      } catch (error) {
+        router.replace('/(auth)/signin')
+      } finally {
+        setIsChecking(false)
+      }
+    }
+
+    checkAuth()
+  }, [])
+
+  if (isChecking) {
+    return null
+  }
 
   const icon = (
     iconName: ComponentProps<typeof Ionicons>['name'],
