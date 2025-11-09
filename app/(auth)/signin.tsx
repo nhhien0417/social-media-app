@@ -174,17 +174,15 @@ export default function SignInScreen() {
           </XStack>
 
           {/* Remember + Forgot */}
-          <Link href="/(tabs)" asChild>
-            <Text
-              marginTop="$1"
-              textAlign="right"
-              color="$primary"
-              fontWeight="500"
-              fontSize={15}
-            >
-              Forgot password?
-            </Text>
-          </Link>
+          <Text
+            marginTop="$1"
+            textAlign="right"
+            color="$primary"
+            fontWeight="500"
+            fontSize={15}
+          >
+            Forgot password?
+          </Text>
 
           {/* CTA */}
           <Button
@@ -219,9 +217,21 @@ export default function SignInScreen() {
           </Button>
         </YStack>
 
+        {/* DEV: Skip to Home for testing */}
+        {__DEV__ && (
+          <Button
+            marginTop="$4"
+            size="$3"
+            chromeless
+            onPress={() => router.replace('/(tabs)')}
+          >
+            Skip to Home 
+          </Button>
+        )}
+
         {/* Footer */}
         <XStack gap="$1" marginTop="$2" alignItems="center">
-          <Paragraph color="$gray11">Don’t have an account?</Paragraph>
+          <Paragraph color="$gray11">Don't have an account?</Paragraph>
           <Link href="/(auth)/signup" asChild>
             <Text marginLeft="$2" color="$primary" fontWeight="700">
               Register

@@ -16,6 +16,11 @@ export default function TabsLayout() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        if (__DEV__) {
+          setIsChecking(false)
+          return
+        }
+
         const token = await getAccessToken()
         if (!token) {
           router.replace('/(auth)/signin')

@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { getAccessToken } from '@/api/token'
 import { YStack, Spinner } from 'tamagui'
 
