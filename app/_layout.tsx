@@ -6,6 +6,7 @@ import config from '../tamagui.config'
 
 import { ThemeProvider, useAppTheme } from '@/providers/ThemeProvider'
 import { QueryProvider } from '@/providers/Query'
+import { NotificationProvider } from '@/providers/NotificationProvider'
 import { getUserId } from '@/utils/SecureStore'
 
 SplashScreen.preventAutoHideAsync()
@@ -45,7 +46,9 @@ function RootContent() {
 
   return (
     <QueryProvider>
-      <Slot />
+      <NotificationProvider userId={userId || undefined}>
+        <Slot />
+      </NotificationProvider>
     </QueryProvider>
   )
 }

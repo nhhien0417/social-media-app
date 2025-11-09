@@ -31,6 +31,18 @@ export async function saveTokens(accessToken: string, refreshToken: string) {
   }
 }
 
+export async function removeTokens() {
+  if (Platform.OS === 'web') {
+    localStorage.removeItem(ACCESS_TOKEN_KEY)
+    localStorage.removeItem(REFRESH_TOKEN_KEY)
+    localStorage.removeItem(USER_ID_KEY)
+  } else {
+    await deleteItemAsync(ACCESS_TOKEN_KEY)
+    await deleteItemAsync(REFRESH_TOKEN_KEY)
+    await deleteItemAsync(USER_ID_KEY)
+  }
+}
+
 export async function getAccessToken() {
   if (Platform.OS === 'web') {
     return localStorage.getItem(ACCESS_TOKEN_KEY)
@@ -44,17 +56,5 @@ export async function getRefreshToken() {
     return localStorage.getItem(REFRESH_TOKEN_KEY)
   } else {
     return await getItemAsync(REFRESH_TOKEN_KEY)
-  }
-}
-
-export async function removeTokens() {
-  if (Platform.OS === 'web') {
-    localStorage.removeItem(ACCESS_TOKEN_KEY)
-    localStorage.removeItem(REFRESH_TOKEN_KEY)
-    localStorage.removeItem(USER_ID_KEY)
-  } else {
-    await deleteItemAsync(ACCESS_TOKEN_KEY)
-    await deleteItemAsync(REFRESH_TOKEN_KEY)
-    await deleteItemAsync(USER_ID_KEY)
   }
 }

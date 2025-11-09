@@ -4,7 +4,6 @@ import { Input, Separator, Text, XStack, YStack, useThemeName } from 'tamagui'
 import { Search, X as Clear } from '@tamagui/lucide-icons'
 import {
   searchMockData,
-  peopleYouMayKnowMock,
   searchHistoryMock,
   type GroupResult,
   type PostResult,
@@ -12,19 +11,17 @@ import {
   type SearchResult,
   type SearchHistoryItem,
   type UserResult,
-} from '@/features/find/data'
-import { SearchFilters } from '@/features/find/SearchFilters'
-import { SearchResults } from '@/features/find/SearchResults'
-import { SearchHistoryList } from '@/features/find/components/SearchHistoryList'
-import { PeopleYouMayKnow } from '@/features/find/components/PeopleYouMayKnow'
+} from '@/features/search/data'
+import { SearchFilters } from '@/features/search/SearchFilters'
+import { SearchResults } from '@/features/search/SearchResults'
+import { SearchHistoryList } from '@/features/search/components/SearchHistoryList'
+import { PeopleYouMayKnow } from '@/features/search/components/PeopleYouMayKnow'
 
 export default function SearchTabScreen() {
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState<SearchCategory>('all')
   const [results, setResults] = useState<SearchResult[]>(searchMockData)
   const [history, setHistory] = useState<SearchHistoryItem[]>(searchHistoryMock)
-  const [suggestedPeople, setSuggestedPeople] =
-    useState<UserResult[]>(peopleYouMayKnowMock)
   const [hasSubmitted, setHasSubmitted] = useState(false)
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
@@ -62,11 +59,6 @@ export default function SearchTabScreen() {
         item.id === user.id && item.category === 'users'
           ? { ...item, isFriend: true }
           : item
-      )
-    )
-    setSuggestedPeople(prev =>
-      prev.map(item =>
-        item.id === user.id ? { ...item, isFriend: true } : item
       )
     )
   }
@@ -204,10 +196,7 @@ export default function SearchTabScreen() {
 
             <Separator />
 
-            <PeopleYouMayKnow
-              users={suggestedPeople}
-              onAddFriend={handleFriendRequest}
-            />
+            <PeopleYouMayKnow />
           </>
         )}
       </YStack>

@@ -109,30 +109,3 @@ export const searchHistoryMock: SearchHistoryItem[] = [
     timestamp: '2025-11-03T10:45:00.000Z',
   },
 ]
-
-export const peopleYouMayKnowMock: UserResult[] = [
-  {
-    id: 'suggestion-1',
-    category: 'users',
-    title: 'Quinn Le',
-    description: 'Product Designer at Pixel Labs',
-    mutualFriends: 6,
-    isFriend: false,
-  },
-  {
-    id: 'suggestion-2',
-    category: 'users',
-    title: 'Kevin Tran',
-    description: 'Studies Marketing at RMIT University',
-    mutualFriends: 9,
-    isFriend: false,
-  },
-  {
-    id: 'suggestion-3',
-    category: 'users',
-    title: 'Emily Nguyen',
-    description: 'Works at Aurora Studio • Lives in Da Nang',
-    mutualFriends: 3,
-    isFriend: false,
-  },
-]

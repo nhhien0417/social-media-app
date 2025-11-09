@@ -1,15 +1,15 @@
 import ApiClient from './apiClient'
 
-export type UserProfileResponse = {
-  data: User[]
-}
-
-export type User = {
+export type ProfileData = {
   id: string
   email: string
   firstName: string
   lastName: string
   dob: string
+}
+
+export type AllProfileResponse = {
+  data: ProfileData[]
 }
 
 export type AddFriendRequest = {
@@ -22,7 +22,7 @@ export type AddFriendResponse = {
 }
 
 export const getAllProfilesApi = () => {
-  return ApiClient.get<UserProfileResponse[]>('profile/users')
+  return ApiClient.get<AllProfileResponse>('profile/users')
 }
 
 export const addFriend = (data: AddFriendRequest) => {
