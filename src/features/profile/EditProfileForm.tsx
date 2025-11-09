@@ -24,12 +24,12 @@ export function EditProfileForm({ user }: EditProfileFormProps) {
   const isDark = themeName === 'dark'
   const initialValues = useMemo(
     () => ({
-      fullName: user.fullName,
+      username: user.username,
       username: user.username,
       bio: user.bio,
       link: user.link ?? '',
     }),
-    [user.bio, user.fullName, user.link, user.username]
+    [user.bio, user.username, user.link, user.username]
   )
   const [formValues, setFormValues] = useState(initialValues)
 
@@ -60,7 +60,7 @@ export function EditProfileForm({ user }: EditProfileFormProps) {
           <AvatarImage src={user.avatarUrl} alt={user.username} />
           <AvatarFallback backgroundColor={isDark ? '#1f2937' : '#e5e7eb'}>
             <Text fontSize="$6" fontWeight="700">
-              {user.fullName[0]?.toUpperCase() ?? 'A'}
+              {user.username[0]?.toUpperCase() ?? 'A'}
             </Text>
           </AvatarFallback>
         </Avatar>
@@ -79,11 +79,11 @@ export function EditProfileForm({ user }: EditProfileFormProps) {
       <YStack gap="$2">
         <Label color={labelColor}>Name</Label>
         <Input
-          value={formValues.fullName}
+          value={formValues.username}
           backgroundColor={inputBackground}
           color={inputTextColor}
           onChangeText={value =>
-            setFormValues(current => ({ ...current, fullName: value }))
+            setFormValues(current => ({ ...current, username: value }))
           }
         />
       </YStack>

@@ -12,7 +12,7 @@ export interface ProfilePost {
 
 export interface ProfileUser {
   username: string
-  fullName: string
+  username: string
   bio: string
   link?: string
   avatarUrl: string
@@ -31,7 +31,7 @@ export interface ProfileUser {
 
 export const profileMock: ProfileUser = {
   username: 'travel.with.ava',
-  fullName: 'Ava Summers',
+  username: 'Ava Summers',
   bio: 'Capturing sunsets & city escapes ✈️📷\nDM for collaborations',
   link: 'www.avasumm.com',
   avatarUrl:

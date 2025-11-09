@@ -15,7 +15,7 @@ export function ProfileBio({ user }: ProfileBioProps) {
   return (
     <YStack gap="$1" paddingHorizontal="$3">
       <Text fontSize="$4" fontWeight="600" color={bioColor}>
-        {user.fullName}
+        {user.username}
       </Text>
       <Text fontSize="$3" color={bioColor}>
         {user.bio}

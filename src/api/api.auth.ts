@@ -8,7 +8,7 @@ export type SignInData = {
 
 export type SignUpData = {
   email: string
-  fullName: string
+  username: string
   password: string
 }
 

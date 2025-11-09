@@ -13,14 +13,14 @@ export default function TabsLayout() {
     iconName: ComponentProps<typeof Ionicons>['name'],
     focused: boolean
   ) => {
-    const iconFullName = (
+    const iconUsername = (
       focused ? iconName : `${iconName}-outline`
     ) as ComponentProps<typeof Ionicons>['name']
 
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <Ionicons
-          name={iconFullName}
+          name={iconUsername}
           size={25}
           color={theme?.color?.val ?? '#111'}
         />

@@ -47,7 +47,7 @@ export const ShareProfileSheet = memo(function ShareProfileSheet({
       <Sheet.Frame backgroundColor={sheetBackground} padding="$4" gap="$4">
         <YStack gap="$1">
           <Text fontSize="$6" fontWeight="700" color={textColor}>
-            Share {user.fullName}'s profile
+            Share {user.username}'s profile
           </Text>
           <Text fontSize="$3" color={subTextColor}>
             Choose one of the options below to share this profile with friends.

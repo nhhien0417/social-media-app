@@ -38,7 +38,7 @@ export function ProfileHeader({ user }: ProfileHeaderProps) {
         <AvatarImage src={user.avatarUrl} alt={user.username} />
         <AvatarFallback backgroundColor={isDark ? '#1f2937' : '#e5e7eb'}>
           <Text fontSize="$6" fontWeight="700">
-            {user.fullName[0]?.toUpperCase() ?? 'A'}
+            {user.username[0]?.toUpperCase() ?? 'A'}
           </Text>
         </AvatarFallback>
       </Avatar>

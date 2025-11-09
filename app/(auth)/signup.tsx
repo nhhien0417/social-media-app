@@ -19,7 +19,7 @@ import ButtonIcon from '@/components/IconButton'
 
 type ValidationErrors = {
   email?: string
-  fullName?: string
+  username?: string
   password?: string
   api?: string
 }
@@ -28,7 +28,7 @@ export default function SignUpScreen() {
   const router = useRouter()
 
   const [email, setEmail] = useState('')
-  const [fullName, setFullName] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [errors, setErrors] = useState<ValidationErrors>({})
@@ -47,8 +47,8 @@ export default function SignUpScreen() {
       newErrors.email = 'Invalid email address'
     }
 
-    if (!fullName.trim()) {
-      newErrors.fullName = 'Full name is required'
+    if (!username.trim()) {
+      newErrors.username = 'Username is required'
     }
 
     if (!password) {
@@ -69,7 +69,7 @@ export default function SignUpScreen() {
     setErrors({})
 
     try {
-      const response = await signUpApi({ email, fullName, password })
+      const response = await signUpApi({ email, username, password })
       console.log('✅ API Response:', response)
       router.replace('/(auth)/signin')
     } catch (error: any) {
@@ -140,27 +140,27 @@ export default function SignUpScreen() {
             keyboardType="email-address"
           />
 
-          {/* Full name */}
+          {/* Username */}
           <XStack alignItems="center" justifyContent="space-between">
             <Text fontWeight="600" fontSize="$4">
-              Full Name
+              Username
             </Text>
-            {errors.fullName && (
+            {errors.username && (
               <Text color="$red10" fontSize="$2" marginRight="$1">
-                {errors.fullName}
+                {errors.username}
               </Text>
             )}
           </XStack>
           <Input
-            value={fullName}
+            value={username}
             onChangeText={text => {
-              setFullName(text)
-              if (errors.fullName)
-                setErrors(prev => ({ ...prev, fullName: undefined }))
+              setUsername(text)
+              if (errors.username)
+                setErrors(prev => ({ ...prev, username: undefined }))
             }}
             size="$5"
             placeholder="John Doe"
-            borderColor={errors.fullName ? '$red10' : '$borderColor'}
+            borderColor={errors.username ? '$red10' : '$borderColor'}
             borderRadius="$6"
             backgroundColor="$backgroundPress"
             placeholderTextColor="$placeholderColor"
