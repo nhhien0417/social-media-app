@@ -1,0 +1,87 @@
+export interface ProfileHighlight {
+  id: string
+  label: string
+  coverImage: string
+}
+
+export interface ProfilePost {
+  id: string
+  imageUrl: string
+  type: 'post' | 'reel' | 'tagged'
+}
+
+export interface ProfileUser {
+  username: string
+  fullName: string
+  bio: string
+  link?: string
+  avatarUrl: string
+  isCurrentUser?: boolean
+  email?: string
+  stats: {
+    posts: number
+    followers: number
+    following: number
+  }
+  highlights: ProfileHighlight[]
+  posts: ProfilePost[]
+  reels: ProfilePost[]
+  tagged: ProfilePost[]
+}
+
+export const profileMock: ProfileUser = {
+  username: 'travel.with.ava',
+  fullName: 'Ava Summers',
+  bio: 'Capturing sunsets & city escapes ✈️📷\nDM for collaborations',
+  link: 'www.avasumm.com',
+  avatarUrl:
+    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
+  isCurrentUser: true,
+  email: 'ava.summers@example.com',
+  stats: {
+    posts: 428,
+    followers: 128000,
+    following: 342,
+  },
+  highlights: [
+    {
+      id: 'highlight-1',
+      label: 'Paris',
+      coverImage:
+        'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=200',
+    },
+    {
+      id: 'highlight-2',
+      label: 'Tokyo',
+      coverImage:
+        'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=200',
+    },
+    {
+      id: 'highlight-3',
+      label: 'NYC',
+      coverImage:
+        'https://images.unsplash.com/photo-1527259217374-7a88816c1bb0?w=200',
+    },
+    {
+      id: 'highlight-4',
+      label: 'Lisbon',
+      coverImage:
+        'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=200',
+    },
+  ],
+  posts: Array.from({ length: 12 }).map((_, index) => ({
+    id: `post-${index + 1}`,
+    imageUrl: `https://source.unsplash.com/random/800x800?travel&sig=${index + 1}`,
+    type: 'post',
+  })),
+  reels: Array.from({ length: 6 }).map((_, index) => ({
+    id: `reel-${index + 1}`,
+    imageUrl: `https://source.unsplash.com/random/800x800?city&sig=${index + 20}`,
+    type: 'reel',
+  })),
+  tagged: Array.from({ length: 4 }).map((_, index) => ({
+    id: `tagged-${index + 1}`,
+    imageUrl: `https://source.unsplash.com/random/800x800?friends&sig=${index + 40}`,
+    type: 'tagged',
+  })),
+}
