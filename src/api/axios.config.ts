@@ -7,8 +7,16 @@ import {
 } from './token'
 import { ENDPOINTS } from './endpoints'
 import { router } from 'expo-router'
+import { Platform } from 'react-native'
 
-export const API_BASE_URL = 'http://localhost:1208/api/v1'
+const getBaseURL = () => {
+  if (Platform.OS === 'web') {
+    return 'http://localhost:1208/api/v1'
+  }
+  return 'http://192.168.1.9:1208/api/v1'
+}
+
+export const API_BASE_URL = getBaseURL()
 
 const api = axios.create({
   baseURL: API_BASE_URL,
