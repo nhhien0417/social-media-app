@@ -181,6 +181,7 @@ export default function PostPreview({
                 borderWidth: 0,
                 borderColor: 'transparent',
               }}
+              color="$color"
             />
           </YStack>
         )}
