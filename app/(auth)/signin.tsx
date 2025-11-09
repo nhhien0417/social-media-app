@@ -225,7 +225,7 @@ export default function SignInScreen() {
             chromeless
             onPress={() => router.replace('/(tabs)')}
           >
-            Skip to Home 
+            Skip to Home
           </Button>
         )}
 
