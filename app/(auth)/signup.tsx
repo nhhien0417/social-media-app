@@ -21,6 +21,7 @@ type ValidationErrors = {
   email?: string
   username?: string
   password?: string
+  confirmPassword?: string
   api?: string
 }
 
@@ -30,7 +31,9 @@ export default function SignUpScreen() {
   const [email, setEmail] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [errors, setErrors] = useState<ValidationErrors>({})
   const [isLoading, setIsLoading] = useState(false)
 
@@ -55,6 +58,12 @@ export default function SignUpScreen() {
       newErrors.password = 'Password is required'
     } else if (password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters'
+    }
+
+    if (!confirmPassword) {
+      newErrors.confirmPassword = 'Please confirm your password'
+    } else if (password !== confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match'
     }
 
     setErrors(newErrors)
@@ -202,6 +211,44 @@ export default function SignUpScreen() {
               Icon={showPassword ? EyeOff : Eye}
               Size={20}
               onPress={() => setShowPassword(!showPassword)}
+            />
+          </XStack>
+
+          {/* Confirm Password */}
+          <XStack alignItems="center" justifyContent="space-between">
+            <Text fontWeight="600" fontSize="$4">
+              Confirm Password
+            </Text>
+            {errors.confirmPassword && (
+              <Text color="$red10" fontSize="$2" marginRight="$1">
+                {errors.confirmPassword}
+              </Text>
+            )}
+          </XStack>
+          <XStack alignItems="center" position="relative">
+            <Input
+              flex={1}
+              value={confirmPassword}
+              onChangeText={text => {
+                setConfirmPassword(text)
+                if (errors.confirmPassword)
+                  setErrors(prev => ({ ...prev, confirmPassword: undefined }))
+              }}
+              size="$5"
+              placeholder="••••••••"
+              secureTextEntry={!showConfirmPassword}
+              borderColor={errors.confirmPassword ? '$red10' : '$borderColor'}
+              borderRadius="$6"
+              backgroundColor="$backgroundPress"
+              paddingRight={50}
+              placeholderTextColor="$placeholderColor"
+            />
+            <ButtonIcon
+              position="absolute"
+              right={10}
+              Icon={showConfirmPassword ? EyeOff : Eye}
+              Size={20}
+              onPress={() => setShowConfirmPassword(!showConfirmPassword)}
             />
           </XStack>
 
