@@ -9,7 +9,8 @@ export const ENDPOINTS = {
   POSTS: {
     ALL: '/posts',
     DETAIL: (id: string | number) => `/posts/${id}`,
-    CREATE_POST: '/post/create-post',
+    CREATE: '/post/create-post',
+    LIKE: '/post/like-post',
   },
   USERS: {
     ALL: '/users',
