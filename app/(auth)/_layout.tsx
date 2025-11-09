@@ -1,7 +1,7 @@
 import { Stack, useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useEffect, useState } from 'react'
-import { getAccessToken } from '@/api/token'
+import { getAccessToken } from '@/utils/SecureStore'
 
 export default function AuthLayout() {
   const router = useRouter()

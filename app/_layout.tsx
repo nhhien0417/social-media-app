@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Slot, SplashScreen } from 'expo-router'
 import { useFonts } from 'expo-font'
 import { TamaguiProvider } from 'tamagui'
@@ -6,19 +6,42 @@ import config from '../tamagui.config'
 
 import { ThemeProvider, useAppTheme } from '@/providers/ThemeProvider'
 import { QueryProvider } from '@/providers/Query'
+import { getUserId } from '@/utils/SecureStore'
 
 SplashScreen.preventAutoHideAsync()
 
 function RootContent() {
   const { isLoading } = useAppTheme()
+  const [userId, setUserId] = useState<string | null>(null)
+  const [isLoadingUserId, setIsLoadingUserId] = useState(true)
 
   useEffect(() => {
-    if (!isLoading) {
+    const loadUserId = async () => {
+      try {
+        const storedUserId = await getUserId()
+        if (storedUserId) {
+          setUserId(storedUserId)
+          console.log('✅ Loaded userId from storage:', storedUserId)
+        } else {
+          console.log('⚠️ No userId found in storage')
+        }
+      } catch (error) {
+        console.error('❌ Failed to load userId:', error)
+      } finally {
+        setIsLoadingUserId(false)
+      }
+    }
+
+    loadUserId()
+  }, [])
+
+  useEffect(() => {
+    if (!isLoading && !isLoadingUserId) {
       SplashScreen.hideAsync()
     }
-  }, [isLoading])
+  }, [isLoading, isLoadingUserId])
 
-  if (isLoading) return null
+  if (isLoading || isLoadingUserId) return null
 
   return (
     <QueryProvider>

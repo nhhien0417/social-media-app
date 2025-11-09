@@ -4,7 +4,7 @@ import {
   getRefreshToken,
   saveTokens,
   removeTokens,
-} from './token'
+} from '../utils/SecureStore'
 import { ENDPOINTS } from './endpoints'
 import { router } from 'expo-router'
 import { Platform } from 'react-native'

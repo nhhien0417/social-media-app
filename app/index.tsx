@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router'
 import { useEffect } from 'react'
-import { getAccessToken } from '@/api/token'
+import { getAccessToken } from '@/utils/SecureStore'
 import { YStack, Spinner } from 'tamagui'
 
 export default function Index() {

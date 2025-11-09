@@ -10,7 +10,7 @@ import { ProfileActions } from '@/features/profile/ProfileActions'
 import { StoryHighlights } from '@/features/profile/StoryHighlights'
 import { ProfileTabBar } from '@/features/profile/ProfileTabBar'
 import type { ProfileTabKey } from '@/features/profile/types'
-import { removeTokens } from '@/api/token'
+import { removeTokens } from '@/utils/SecureStore'
 
 const chunkMedia = (items: ProfilePost[]) => {
   const rows: ProfilePost[][] = []

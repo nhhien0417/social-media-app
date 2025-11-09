@@ -6,7 +6,7 @@ import { YStack, useTheme } from 'tamagui'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useEffect, useState } from 'react'
 import Avatar from '@/components/Avatar'
-import { getAccessToken } from '@/api/token'
+import { getAccessToken } from '@/utils/SecureStore'
 
 export default function TabsLayout() {
   const theme = useTheme()

@@ -16,7 +16,7 @@ import ButtonIcon from '@/components/IconButton'
 import { Chrome, Eye, EyeOff } from '@tamagui/lucide-icons'
 import { Image } from 'react-native'
 import { signInApi } from '@/api/api.auth'
-import { saveTokens } from '@/api/token'
+import { saveTokens, saveUserId } from '@/utils/SecureStore'
 
 type ValidationErrors = {
   email?: string
@@ -67,6 +67,7 @@ export default function SignInScreen() {
 
       if (response && response.data && response.data.accessToken) {
         await saveTokens(response.data.accessToken, response.data.refreshToken)
+        await saveUserId(response.data.id)
       } else {
         throw new Error('Login failed: Invalid response structure.')
       }
