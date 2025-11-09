@@ -13,7 +13,7 @@ export const ENDPOINTS = {
     LIKE: '/post/like-post',
   },
   USERS: {
-    ALL: '/users',
-    DETAIL: (id: string | number) => `/users/${id}`,
+    ALL: 'profile/users',
+    DETAIL: (id: string | number) => `profile/users/${id}`,
   },
 }
