@@ -4,10 +4,29 @@ import { useFonts } from 'expo-font'
 import { TamaguiProvider } from 'tamagui'
 import config from '../tamagui.config'
 
-import { ThemeProvider } from '@/providers/ThemeProvider'
+import { ThemeProvider, useAppTheme } from '@/providers/ThemeProvider'
 import { QueryProvider } from '@/providers/Query'
 
 SplashScreen.preventAutoHideAsync()
+
+function RootContent() {
+  const { isLoading } = useAppTheme()
+
+  useEffect(() => {
+    if (!isLoading) {
+      SplashScreen.hideAsync()
+    }
+  }, [isLoading])
+
+  if (isLoading) return null
+
+  return (
+    <QueryProvider>
+      <Slot />
+    </QueryProvider>
+  )
+}
+
 export default function RootLayout() {
   const [loaded] = useFonts({
     Inter: require('@tamagui/font-inter/otf/Inter-Medium.otf'),
@@ -25,9 +44,7 @@ export default function RootLayout() {
   return (
     <TamaguiProvider config={config}>
       <ThemeProvider>
-        <QueryProvider>
-          <Slot />
-        </QueryProvider>
+        <RootContent />
       </ThemeProvider>
     </TamaguiProvider>
   )
