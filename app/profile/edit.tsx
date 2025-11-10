@@ -27,7 +27,6 @@ export default function EditProfileScreen() {
         <XStack
           alignItems="center"
           paddingHorizontal="$3"
-          paddingVertical="$3"
           borderBottomWidth={1}
           borderColor={borderColor}
           gap="$3"

@@ -160,7 +160,7 @@ export default function MessengerHeader({ type }: { type: 'list' | 'detail' }) {
           })}
           android_ripple={{ color: '#00000010', borderless: true }}
         >
-          <ChevronLeft size={22} color="#000" />
+          <ChevronLeft size={22} color="$color" />
         </Pressable>
 
         <Text fontSize="$6" fontWeight="700">

@@ -13,6 +13,8 @@ import {
 import ButtonIcon from '@/components/IconButton'
 import { formatDate } from '@/utils/FormatDate'
 import { Media } from '@/types/Media'
+import Comment from '@/features/comment/Comment'
+import { comments } from '@/mock/comments'
 
 function MediaItem({ item, width }: { item: Media; width: number }) {
   return <Image source={{ uri: item.url }} width={width} aspectRatio={1} />
@@ -48,7 +50,7 @@ function PaginationDots({
 }
 
 function PostCard({ post }: { post: Post }) {
-  const { author, media, caption, createdAt } = post
+  const { author, media = [], content, createdAt } = post
   const location = 'Tokyo, Japan'
 
   const [activeIndex, setActiveIndex] = useState(0)
@@ -56,7 +58,9 @@ function PostCard({ post }: { post: Post }) {
   const listRef = useRef<FlatList<Media>>(null)
 
   const [isCaptionExpanded, setIsCaptionExpanded] = useState(false)
-  const isLongCaption = !!caption && caption.length > 100
+  const isLongCaption = !!content && content.length > 100
+
+  const [commentSheetVisible, setCommentSheetVisible] = useState(false)
 
   const handleScroll = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -68,6 +72,16 @@ function PostCard({ post }: { post: Post }) {
     },
     [activeIndex, containerWidth]
   )
+
+  const handleSendComment = (content: string, parentId?: string) => {
+    // TODO: Implement send comment logic
+    console.log('Send comment:', content, 'parentId:', parentId)
+  }
+
+  const handleLikeComment = (commentId: string) => {
+    // TODO: Implement like comment logic
+    console.log('Like comment:', commentId)
+  }
 
   return (
     <YStack backgroundColor="$background">
@@ -129,21 +143,24 @@ function PostCard({ post }: { post: Post }) {
       >
         <XStack alignItems="center">
           <ButtonIcon Icon={Heart} />
-          <ButtonIcon Icon={MessageCircle} />
+          <ButtonIcon
+            Icon={MessageCircle}
+            onPress={() => setCommentSheetVisible(true)}
+          />
           <ButtonIcon Icon={Send} />
         </XStack>
         <ButtonIcon Icon={Bookmark} />
       </XStack>
 
       {/* Caption */}
-      {!!caption && (
+      {!!content && (
         <YStack paddingHorizontal="$3" marginTop="$1">
           <Text
             fontWeight="normal"
             fontSize={15}
             numberOfLines={isCaptionExpanded ? undefined : 2}
           >
-            {caption}
+            {content}
           </Text>
 
           {isLongCaption && !isCaptionExpanded && (
@@ -178,6 +195,17 @@ function PostCard({ post }: { post: Post }) {
       >
         {formatDate(createdAt)}
       </Text>
+
+      {/* Comment Sheet */}
+      <Comment
+        visible={commentSheetVisible}
+        onClose={() => setCommentSheetVisible(false)}
+        postId={post.id}
+        comments={comments.filter(c => c.postId === post.id)}
+        onSendComment={handleSendComment}
+        onLikeComment={handleLikeComment}
+        userAvatarUrl={author.avatarUrl}
+      />
     </YStack>
   )
 }

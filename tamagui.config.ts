@@ -10,6 +10,7 @@ const lightTheme = {
   backgroundPress: '#f5f5f5',
   backgroundFocus: '#f5f5f5',
   backgroundHover: '#f5f5f5',
+  backgroundModal: '#ffffffff',
 
   color: '#000000',
   colorPress: '#000000',
@@ -32,6 +33,7 @@ const darkTheme = {
   backgroundPress: '#191919',
   backgroundFocus: '#191919',
   backgroundHover: '#191919',
+  backgroundModal: '#232227',
 
   color: '#FFFFFF',
   colorPress: '#FFFFFF',
