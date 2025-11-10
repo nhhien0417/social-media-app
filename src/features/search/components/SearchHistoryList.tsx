@@ -1,7 +1,7 @@
 import { memo } from 'react'
 import { Clock, Search } from '@tamagui/lucide-icons'
 import { Text, XStack, YStack, useThemeName } from 'tamagui'
-import type { SearchHistoryItem } from '../data'
+import type { SearchHistoryItem } from './data'
 
 interface SearchHistoryListProps {
   items: SearchHistoryItem[]

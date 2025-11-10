@@ -1,8 +1,8 @@
 import { useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Button, Text, XStack, YStack, useThemeName } from 'tamagui'
-import { profileMock } from '@/features/profile/data'
-import { EditProfileForm } from '@/features/profile/EditProfileForm'
+import { profileMock } from '@/features/profile/components/data'
+import { EditProfileForm } from '@/features/profile/components/EditProfileForm'
 
 export default function EditProfileScreen() {
   const router = useRouter()
