@@ -11,6 +11,8 @@ type Props = {
   onLike: (id: string) => void
   onReply: (comment: Comment) => void
   onViewReplies: (commentId: string) => void
+  isReply?: boolean
+  isExpanded?: boolean
 }
 
 const styles = StyleSheet.create({
@@ -25,6 +27,8 @@ export default function CommentCard({
   onLike,
   onReply,
   onViewReplies,
+  isReply = false,
+  isExpanded = false,
 }: Props) {
   return (
     <YStack style={styles.container} paddingHorizontal="$3" marginVertical="$2">
@@ -55,10 +59,11 @@ export default function CommentCard({
               </SizableText>
             </TouchableOpacity>
 
-            {comment.replyCount > 0 && (
+            {!isReply && comment.replyCount > 0 && (
               <TouchableOpacity onPress={() => onViewReplies(comment.id)}>
-                <SizableText fontSize={13} color="#888">
-                  — View replies ({comment.replyCount})
+                <SizableText fontSize={13} fontWeight="600" color="#888">
+                  — {isExpanded ? 'Hide' : 'View'} replies ({comment.replyCount}
+                  )
                 </SizableText>
               </TouchableOpacity>
             )}

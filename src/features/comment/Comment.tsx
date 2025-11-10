@@ -11,6 +11,7 @@ import {
   Platform,
   TextInput as RNTextInput,
 } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { XStack, YStack, SizableText } from 'tamagui'
 import type { Comment } from '@/types/Comment'
 import CommentList from './components/CommentList'
@@ -57,8 +58,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   dragHandleArea: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
     alignItems: 'center',
     width: '100%',
   },
@@ -81,6 +80,9 @@ export default function Comment({
 }: Props) {
   const [commentText, setCommentText] = useState('')
   const [replyingTo, setReplyingTo] = useState<Comment | null>(null)
+  const [expandedComments, setExpandedComments] = useState<Set<string>>(
+    new Set()
+  )
   const inputRef = useRef<RNTextInput>(null)
 
   const translateY = useRef(new Animated.Value(SNAP_POINTS.HIDDEN)).current
@@ -191,7 +193,15 @@ export default function Comment({
   }
 
   const handleViewReplies = (commentId: string) => {
-    console.log('View replies for comment:', commentId)
+    setExpandedComments(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(commentId)) {
+        newSet.delete(commentId)
+      } else {
+        newSet.add(commentId)
+      }
+      return newSet
+    })
   }
 
   const handleSelectEmotion = (emoji: string) => {
@@ -218,71 +228,71 @@ export default function Comment({
         />
       </Animated.View>
 
-      {/* Bottom Sheet with KeyboardAvoidingView */}
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={0}
+      {/* Bottom Sheet */}
+      <Animated.View
+        style={[
+          styles.bottomSheet,
+          {
+            transform: [{ translateY }],
+          },
+        ]}
       >
-        <Animated.View
-          style={[
-            styles.bottomSheet,
-            {
-              height: SCREEN_HEIGHT,
-              transform: [{ translateY }],
-            },
-          ]}
-        >
-          {/* Draggable Header Area */}
-          <YStack {...panResponder.panHandlers}>
-            {/* Drag handle */}
-            <YStack
-              style={styles.dragHandleArea}
-              backgroundColor="$backgroundModal"
-            >
-              <YStack style={styles.dragHandle} />
+        <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
+          <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            keyboardVerticalOffset={0}
+          >
+            <YStack {...panResponder.panHandlers}>
+              {/* Header */}
+              <YStack
+                backgroundColor="$backgroundModal"
+                borderBottomWidth={StyleSheet.hairlineWidth}
+                borderColor="$borderColor"
+                paddingVertical="$3"
+              >
+                <YStack
+                  style={styles.dragHandleArea}
+                  backgroundColor="$backgroundModal"
+                >
+                  <YStack style={styles.dragHandle} />
+                </YStack>
+                <XStack justifyContent="center" alignItems="center">
+                  <SizableText fontSize={17} fontWeight="700" paddingTop="$1">
+                    Comments
+                  </SizableText>
+                </XStack>
+              </YStack>
             </YStack>
 
-            {/* Header */}
-            <YStack
-              backgroundColor="$backgroundModal"
-              borderBottomWidth={StyleSheet.hairlineWidth}
-              borderColor="$borderColor"
-            >
-              <XStack justifyContent="center" alignItems="center">
-                <SizableText fontSize={17} fontWeight="700">
-                  Comments
-                </SizableText>
-              </XStack>
+            {/* Comments List */}
+            <YStack flex={1}>
+              <CommentList
+                comments={comments}
+                onLike={onLikeComment}
+                onReply={handleReply}
+                onViewReplies={handleViewReplies}
+                expandedComments={expandedComments}
+              />
             </YStack>
-          </YStack>
 
-          {/* Comments List - takes remaining space */}
-          <YStack flex={1}>
-            <CommentList
-              comments={comments}
-              onLike={onLikeComment}
-              onReply={handleReply}
-              onViewReplies={handleViewReplies}
-            />
-          </YStack>
-
-          {/* Bottom Bar - Fixed at bottom */}
-          <YStack>
-            {/* Comment Input */}
-            <CommentInput
-              ref={inputRef}
-              value={commentText}
-              onChangeText={setCommentText}
-              onSend={handleSend}
-              userAvatarUrl={userAvatarUrl}
-              replyingTo={replyingTo}
-              onSelectEmotion={handleSelectEmotion}
-              onCancelReply={() => setReplyingTo(null)}
-            />
-          </YStack>
-        </Animated.View>
-      </KeyboardAvoidingView>
+            {/* Bottom Bar */}
+            <YStack>
+              {/* Comment Input */}
+              <CommentInput
+                ref={inputRef}
+                value={commentText}
+                onChangeText={setCommentText}
+                onSend={handleSend}
+                userAvatarUrl={userAvatarUrl}
+                replyingTo={replyingTo}
+                onSelectEmotion={handleSelectEmotion}
+                onCancelReply={() => setReplyingTo(null)}
+              />
+            </YStack>
+          </KeyboardAvoidingView>
+        </SafeAreaView>
+      </Animated.View>
     </Modal>
   )
 }

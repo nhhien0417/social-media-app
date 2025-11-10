@@ -107,8 +107,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   dragHandleArea: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
+    paddingVertical: 4,
     alignItems: 'center',
     width: '100%',
   },
@@ -421,23 +420,19 @@ export default function MediaPicker({
       >
         {/* Draggable Header Area */}
         <YStack {...panResponder.panHandlers}>
-          {/* Drag handle */}
-          <YStack style={styles.dragHandleArea} backgroundColor="$background">
-            <YStack style={styles.dragHandle} />
-          </YStack>
-
           {/* Header */}
           <YStack
+            padding="$3"
             backgroundColor="$background"
-            paddingBottom="$3"
             borderBottomWidth={StyleSheet.hairlineWidth}
             borderColor="$borderColor"
           >
-            <XStack
-              paddingHorizontal="$3"
-              alignItems="center"
-              justifyContent="space-between"
-            >
+            {/* Drag handle */}
+            <YStack style={styles.dragHandleArea} backgroundColor="$background">
+              <YStack style={styles.dragHandle} />
+            </YStack>
+
+            <XStack alignItems="center" justifyContent="space-between">
               <SizableText size="$8" fontWeight="700" color="$color">
                 Select Media
               </SizableText>
@@ -457,7 +452,7 @@ export default function MediaPicker({
             </XStack>
 
             {/* Media Type Tabs */}
-            <XStack gap="$3" paddingHorizontal="$3" paddingTop="$3">
+            <XStack gap="$3" paddingTop="$3">
               {(['all', 'photo', 'video'] as MediaType[]).map(type => (
                 <Button
                   key={type}
