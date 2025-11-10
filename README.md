@@ -48,5 +48,4 @@ npx expo start
 - Api post feed
 - Preview media before post
 - Fix incorrect stretch camera
-- Socket I/O to get notification
 - Signup need unique username

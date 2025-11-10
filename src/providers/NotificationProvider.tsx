@@ -4,9 +4,11 @@ import React, {
   useState,
   useCallback,
   ReactNode,
+  useEffect,
 } from 'react'
 import { useStomp, useStompEvent } from '@/stomp/useStomp'
 import { NotificationItem } from '@/types/Notification'
+import { notifications as mockNotifications } from '@/mock/notifications'
 
 /**
  * Notification Context value interface
@@ -52,6 +54,12 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   // TODO: Get userId from auth token/context when available
   // For now, use prop or fallback to 'guest'
   const userId = propUserId || 'guest'
+
+  // Load mock notifications on mount (for development)
+  useEffect(() => {
+    // Load mock data initially
+    setNotifications(mockNotifications as NotificationItem[])
+  }, [])
 
   // Connect to STOMP WebSocket
   const { isConnected } = useStomp({

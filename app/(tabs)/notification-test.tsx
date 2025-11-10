@@ -42,9 +42,6 @@ export default function NotificationTestScreen() {
         <Text fontSize="$8" fontWeight="700" color="$color">
           Notification Test
         </Text>
-        <Text fontSize="$3" color="$gray10">
-          Test WebSocket connection và nhận notifications
-        </Text>
       </YStack>
 
       {/* Connection Status Card */}
@@ -91,34 +88,6 @@ export default function NotificationTestScreen() {
           </XStack>
         </YStack>
       </YStack>
-
-      {/* Instructions */}
-      <YStack
-        backgroundColor="$blue2"
-        borderRadius="$4"
-        padding="$4"
-        marginBottom="$4"
-      >
-        <Text fontSize="$4" fontWeight="600" color="$blue10" marginBottom="$2">
-          📝 Hướng dẫn test:
-        </Text>
-        <YStack gap="$1">
-          <Text fontSize="$3" color="$blue11">
-            1. Đảm bảo WebSocket Status = Connected ✅
-          </Text>
-          <Text fontSize="$3" color="$blue11">
-            2. Ở client khác, gửi friend request
-          </Text>
-          <Text fontSize="$3" color="$blue11">
-            3. Notification sẽ xuất hiện ở danh sách bên dưới
-          </Text>
-          <Text fontSize="$3" color="$blue11">
-            4. Kiểm tra console logs để xem chi tiết
-          </Text>
-        </YStack>
-      </YStack>
-
-      <Separator marginBottom="$4" />
 
       {/* Notifications List */}
       <YStack flex={1}>

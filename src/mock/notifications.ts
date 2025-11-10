@@ -1,6 +1,7 @@
 export const notifications = [
   {
     id: 1,
+    senderId: 'user-5',
     section: 'Today',
     avatar: 'https://i.pravatar.cc/150?img=5',
     message: 'Ms.chinh, B Ray and 2 others recently shared 5 posts.',
@@ -10,6 +11,7 @@ export const notifications = [
   },
   {
     id: 2,
+    senderId: 'user-15',
     section: 'Earlier',
     avatar: 'https://i.pravatar.cc/150?img=15',
     message:
@@ -18,6 +20,7 @@ export const notifications = [
   },
   {
     id: 3,
+    senderId: 'user-10',
     section: 'Earlier',
     avatar: 'https://i.pravatar.cc/150?img=10',
     message:
@@ -27,6 +30,7 @@ export const notifications = [
   },
   {
     id: 4,
+    senderId: 'user-3',
     section: 'Earlier',
     avatar: 'https://i.pravatar.cc/150?img=3',
     message:
