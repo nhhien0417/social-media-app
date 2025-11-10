@@ -3,7 +3,7 @@ import { Stack } from 'expo-router'
 import { YStack } from 'tamagui'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-export default function MessengerLayout() {
+export default function MessageLayout() {
   return (
     <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
       <YStack flex={1} backgroundColor="$background">
@@ -15,7 +15,7 @@ export default function MessengerLayout() {
             }}
           />
           <Stack.Screen
-            name="[chatId]"
+            name="[id]"
             options={{
               header: () => <MessengerHeader type="detail" />,
             }}

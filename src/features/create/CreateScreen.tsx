@@ -88,7 +88,13 @@ export default function NewPostScreen() {
       <Header
         mode={mode}
         onChangeMode={setMode}
-        onBack={() => router.back()}
+        onBack={() => {
+          if (router.canGoBack()) {
+            router.back()
+          } else {
+            router.replace('/(tabs)')
+          }
+        }}
         onShare={handleShare}
         canShare={canShare}
       />

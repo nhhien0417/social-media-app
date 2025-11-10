@@ -49,7 +49,7 @@ function HeaderContent() {
         </Text>
       </XStack>
       <XStack alignItems="center" justifyContent="space-between">
-        <ButtonIcon Icon={Send} onPress={() => router.push('/(messenger)')} />
+        <ButtonIcon Icon={Send} onPress={() => router.push('/message')} />
         <ButtonIcon
           Icon={theme === 'light' ? Moon : Sun}
           onPress={toggleTheme}

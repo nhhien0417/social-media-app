@@ -38,11 +38,11 @@ const mockChats = [
 
 export default function MessengerHeader({ type }: { type: 'list' | 'detail' }) {
   const router = useRouter()
-  const { chatId } = useLocalSearchParams<{ chatId: string }>()
+  const { id } = useLocalSearchParams<{ id: string }>()
 
   if (type === 'detail') {
     // 🔹 Lấy dữ liệu chat hiện tại
-    const chat = mockChats.find(c => c.id === chatId)
+    const chat = mockChats.find(c => c.id === id)
 
     return (
       <XStack
@@ -55,7 +55,15 @@ export default function MessengerHeader({ type }: { type: 'list' | 'detail' }) {
       >
         {/* Nút Back + Avatar + Tên */}
         <XStack alignItems="center" gap="$2">
-          <Pressable onPress={() => router.back()}>
+          <Pressable
+            onPress={() => {
+              if (router.canGoBack()) {
+                router.back()
+              } else {
+                router.replace('/message')
+              }
+            }}
+          >
             <ChevronLeft size={24} />
           </Pressable>
 
@@ -134,7 +142,13 @@ export default function MessengerHeader({ type }: { type: 'list' | 'detail' }) {
     >
       <XStack alignItems="center" gap="$3">
         <Pressable
-          onPress={() => router.back()}
+          onPress={() => {
+            if (router.canGoBack()) {
+              router.back()
+            } else {
+              router.replace('/message')
+            }
+          }}
           style={({ pressed }) => ({
             padding: 0,
             margin: 0,

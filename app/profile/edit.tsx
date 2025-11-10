@@ -14,7 +14,11 @@ export default function EditProfileScreen() {
   const accentColor = '#1877F2'
 
   const handleSave = () => {
-    router.back()
+    router.replace('/profile')
+  }
+
+  const handleCancel = () => {
+    router.replace('/profile')
   }
 
   return (
@@ -32,7 +36,7 @@ export default function EditProfileScreen() {
             size="$3"
             backgroundColor="transparent"
             borderColor="transparent"
-            onPress={() => router.back()}
+            onPress={handleCancel}
             minWidth={72}
             paddingHorizontal={0}
           >

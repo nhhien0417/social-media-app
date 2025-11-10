@@ -69,7 +69,7 @@ export default function ChatList() {
             key={item.id}
             unstyled
             pressStyle={{ backgroundColor: '$black3' }}
-            onPress={() => router.push(`/(messenger)/${item.id}`)}
+            onPress={() => router.push(`/message/${item.id}`)}
             borderWidth={0}
             outlineWidth={0}
             shadowOpacity={0}

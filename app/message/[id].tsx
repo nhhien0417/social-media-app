@@ -4,7 +4,7 @@ import MessageBubble from '@/features/messenger/components/MessageBubble'
 import MessageInput from '@/features/messenger/components/MessageInput'
 
 export default function ChatDetail() {
-  const { chatId } = useLocalSearchParams<{ chatId: string }>()
+  const { id } = useLocalSearchParams<{ id: string }>()
 
   return (
     <YStack
@@ -12,8 +12,8 @@ export default function ChatDetail() {
       justifyContent="space-between"
       backgroundColor="$background"
     >
-      <MessageBubble chatId={chatId} />
-      <MessageInput chatId={chatId} />
+      <MessageBubble chatId={id} />
+      <MessageInput chatId={id} />
     </YStack>
   )
 }
