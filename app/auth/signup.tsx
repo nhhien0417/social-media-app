@@ -12,24 +12,28 @@ import {
   ScrollView,
   Spinner,
 } from 'tamagui'
-import ButtonIcon from '@/components/IconButton'
 import { Chrome, Eye, EyeOff } from '@tamagui/lucide-icons'
 import { Image } from 'react-native'
-import { signInApi } from '@/api/api.auth'
-import { saveTokens, saveUserId } from '@/utils/SecureStore'
+import { signUpApi } from '@/api/api.auth'
+import ButtonIcon from '@/components/IconButton'
 
 type ValidationErrors = {
   email?: string
+  username?: string
   password?: string
+  confirmPassword?: string
   api?: string
 }
 
-export default function SignInScreen() {
+export default function SignUpScreen() {
   const router = useRouter()
 
   const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [errors, setErrors] = useState<ValidationErrors>({})
   const [isLoading, setIsLoading] = useState(false)
 
@@ -46,15 +50,27 @@ export default function SignInScreen() {
       newErrors.email = 'Invalid email address'
     }
 
+    if (!username.trim()) {
+      newErrors.username = 'Username is required'
+    }
+
     if (!password) {
       newErrors.password = 'Password is required'
+    } else if (password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters'
+    }
+
+    if (!confirmPassword) {
+      newErrors.confirmPassword = 'Please confirm your password'
+    } else if (password !== confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match'
     }
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
-  const handleLogin = async () => {
+  const handleSignUp = async () => {
     if (!validate() || isLoading) {
       return
     }
@@ -62,19 +78,13 @@ export default function SignInScreen() {
     setErrors({})
 
     try {
-      const response = await signInApi({ email, password })
+      const response = await signUpApi({ email, username, password })
       console.log('✅ API Response:', response)
-
-      if (response && response.data && response.data.accessToken) {
-        await saveTokens(response.data.accessToken, response.data.refreshToken)
-        await saveUserId(response.data.id)
-      } else {
-        throw new Error('Login failed: Invalid response structure.')
-      }
-
-      router.replace('/(tabs)')
+      router.replace('/auth/signin')
     } catch (error: any) {
-      setErrors({ api: 'Invalid email or password' })
+      const apiError =
+        error?.response?.data?.message || 'An unknown error occurred.'
+      setErrors({ api: apiError })
     } finally {
       setIsLoading(false)
     }
@@ -98,10 +108,10 @@ export default function SignInScreen() {
 
         {/* Title */}
         <SizableText size="$8" fontWeight="700" marginTop="$2">
-          Welcome back
+          Create your account
         </SizableText>
         <Paragraph color="$gray11" marginBottom="$3" fontSize="$4">
-          Please enter your details to login
+          Please fill in your information to sign up
         </Paragraph>
 
         {/* Form */}
@@ -114,6 +124,11 @@ export default function SignInScreen() {
             {errors.email && (
               <Text color="$red10" fontSize="$2" marginRight="$1">
                 {errors.email}
+              </Text>
+            )}
+            {errors.api && (
+              <Text color="$red10" fontSize="$2" marginRight="$1">
+                {errors.api}
               </Text>
             )}
           </XStack>
@@ -130,6 +145,35 @@ export default function SignInScreen() {
             borderRadius="$6"
             backgroundColor="$backgroundPress"
             placeholderTextColor="$placeholderColor"
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+
+          {/* Username */}
+          <XStack alignItems="center" justifyContent="space-between">
+            <Text fontWeight="600" fontSize="$4">
+              Username
+            </Text>
+            {errors.username && (
+              <Text color="$red10" fontSize="$2" marginRight="$1">
+                {errors.username}
+              </Text>
+            )}
+          </XStack>
+          <Input
+            value={username}
+            onChangeText={text => {
+              setUsername(text)
+              if (errors.username)
+                setErrors(prev => ({ ...prev, username: undefined }))
+            }}
+            size="$5"
+            placeholder="John Doe"
+            borderColor={errors.username ? '$red10' : '$borderColor'}
+            borderRadius="$6"
+            backgroundColor="$backgroundPress"
+            placeholderTextColor="$placeholderColor"
+            autoCapitalize="words"
           />
 
           {/* Password */}
@@ -142,22 +186,18 @@ export default function SignInScreen() {
                 {errors.password}
               </Text>
             )}
-            {errors.api && (
-              <Text color="$red10" fontSize="$2" marginRight="$1">
-                {errors.api}
-              </Text>
-            )}
           </XStack>
           <XStack alignItems="center" position="relative">
             <Input
               flex={1}
+              value={password}
               onChangeText={text => {
                 setPassword(text)
                 if (errors.password)
                   setErrors(prev => ({ ...prev, password: undefined }))
               }}
               size="$5"
-              placeholder="••••••••••"
+              placeholder="••••••••"
               secureTextEntry={!showPassword}
               borderColor={errors.password ? '$red10' : '$borderColor'}
               borderRadius="$6"
@@ -174,16 +214,60 @@ export default function SignInScreen() {
             />
           </XStack>
 
-          {/* Remember + Forgot */}
-          <Text
-            marginTop="$1"
-            textAlign="right"
-            color="$primary"
-            fontWeight="500"
-            fontSize={15}
-          >
-            Forgot password?
-          </Text>
+          {/* Confirm Password */}
+          <XStack alignItems="center" justifyContent="space-between">
+            <Text fontWeight="600" fontSize="$4">
+              Confirm Password
+            </Text>
+            {errors.confirmPassword && (
+              <Text color="$red10" fontSize="$2" marginRight="$1">
+                {errors.confirmPassword}
+              </Text>
+            )}
+          </XStack>
+          <XStack alignItems="center" position="relative">
+            <Input
+              flex={1}
+              value={confirmPassword}
+              onChangeText={text => {
+                setConfirmPassword(text)
+                if (errors.confirmPassword)
+                  setErrors(prev => ({ ...prev, confirmPassword: undefined }))
+              }}
+              size="$5"
+              placeholder="••••••••"
+              secureTextEntry={!showConfirmPassword}
+              borderColor={errors.confirmPassword ? '$red10' : '$borderColor'}
+              borderRadius="$6"
+              backgroundColor="$backgroundPress"
+              paddingRight={50}
+              placeholderTextColor="$placeholderColor"
+            />
+            <ButtonIcon
+              position="absolute"
+              right={10}
+              Icon={showConfirmPassword ? EyeOff : Eye}
+              Size={20}
+              onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+            />
+          </XStack>
+
+          {/* Policy text */}
+          <Paragraph color="$gray11" fontSize="$3" marginTop="$1">
+            By signing up, you agree to our{' '}
+            <Text fontWeight="700" color="$color">
+              Terms
+            </Text>
+            ,{' '}
+            <Text fontWeight="700" color="$color">
+              Privacy Policy
+            </Text>
+            , and{' '}
+            <Text fontWeight="700" color="$color">
+              Cookies Policy
+            </Text>
+            .
+          </Paragraph>
 
           {/* CTA */}
           <Button
@@ -192,12 +276,13 @@ export default function SignInScreen() {
             borderRadius="$7"
             fontWeight="700"
             marginTop="$2"
-            onPress={handleLogin}
+            onPress={handleSignUp}
             disabled={isLoading}
             icon={isLoading ? <Spinner size="small" /> : null}
           >
-            {isLoading ? 'Logging in...' : 'Login'}
+            {isLoading ? 'Creating account...' : 'Sign up'}
           </Button>
+
           {/* Divider OR */}
           <XStack alignItems="center" gap="$3" marginVertical="$2">
             <Separator flex={1} />
@@ -218,24 +303,12 @@ export default function SignInScreen() {
           </Button>
         </YStack>
 
-        {/* DEV: Skip to Home for testing */}
-        {__DEV__ && (
-          <Button
-            marginTop="$4"
-            size="$3"
-            chromeless
-            onPress={() => router.replace('/(tabs)')}
-          >
-            Skip to Home
-          </Button>
-        )}
-
         {/* Footer */}
-        <XStack gap="$1" marginTop="$2" alignItems="center">
-          <Paragraph color="$gray11">Don't have an account?</Paragraph>
-          <Link href="/(auth)/signup" asChild>
+        <XStack marginTop="$2" gap="$1" alignItems="center">
+          <Paragraph color="$gray11">Already have an account?</Paragraph>
+          <Link href="/auth/signin" asChild>
             <Text marginLeft="$2" color="$primary" fontWeight="700">
-              Register
+              Log in
             </Text>
           </Link>
         </XStack>

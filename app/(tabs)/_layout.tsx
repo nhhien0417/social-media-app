@@ -23,10 +23,10 @@ export default function TabsLayout() {
 
         const token = await getAccessToken()
         if (!token) {
-          router.replace('/(auth)/signin')
+          router.replace('/auth/signin')
         }
       } catch (error) {
-        router.replace('/(auth)/signin')
+        router.replace('/auth/signin')
       } finally {
         setIsChecking(false)
       }

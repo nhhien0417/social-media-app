@@ -115,7 +115,7 @@ export default function ProfileScreen() {
 
   const handleLogout = async () => {
     await removeTokens()
-    router.replace('/(auth)/signin')
+    router.replace('/auth/signin')
   }
 
   return (

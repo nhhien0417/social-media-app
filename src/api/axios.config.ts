@@ -46,7 +46,7 @@ const processQueue = (error: any, token: string | null = null) => {
 
 const handleExpireRefreshToken = async () => {
   await removeTokens()
-  router.replace('/(auth)/signin')
+  router.replace('/auth/signin')
 }
 
 api.interceptors.request.use(

@@ -17,10 +17,10 @@ export default function Index() {
       if (token) {
         router.replace('/(tabs)')
       } else {
-        router.replace('/(auth)/signin')
+        router.replace('/auth/signin')
       }
     } catch (error) {
-      router.replace('/(auth)/signin')
+      router.replace('/auth/signin')
     } finally {
     }
   }
