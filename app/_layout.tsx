@@ -5,7 +5,7 @@ import { TamaguiProvider } from 'tamagui'
 import config from '../tamagui.config'
 
 import { ThemeProvider, useAppTheme } from '@/providers/ThemeProvider'
-import { QueryProvider } from '@/providers/Query'
+import { QueryProvider } from '@/providers/QueryProvider'
 import { NotificationProvider } from '@/providers/NotificationProvider'
 import { getUserId } from '@/utils/SecureStore'
 

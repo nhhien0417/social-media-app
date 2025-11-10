@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
-import { stompService } from './stomp'
+import { stompService } from '@/services/realTimeNotification'
 
 export interface UseStompOptions {
   /**

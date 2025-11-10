@@ -1,15 +1,26 @@
 import { useEffect } from 'react'
-import { View } from 'react-native'
-import { YStack, XStack, Text, Circle, ScrollView, Separator } from 'tamagui'
+import { View, Alert } from 'react-native'
+import {
+  YStack,
+  XStack,
+  Text,
+  Circle,
+  ScrollView,
+  Separator,
+  Button,
+} from 'tamagui'
 import { useNotifications } from '@/providers/NotificationProvider'
-import { Wifi, WifiOff, Bell } from '@tamagui/lucide-icons'
+import { Wifi, WifiOff, Bell, Send } from '@tamagui/lucide-icons'
+import { sendLocalNotification } from '@/services/pushNotifications'
 
 /**
  * Component để test WebSocket connection và nhận notifications real-time
  * Hiển thị status kết nối và danh sách notifications
+ * + Test Push Notifications
  */
 export default function NotificationTestScreen() {
-  const { notifications, unreadCount, isConnected } = useNotifications()
+  const { notifications, unreadCount, isConnected, pushToken } =
+    useNotifications()
 
   // Log mỗi khi có thay đổi
   useEffect(() => {
@@ -19,7 +30,8 @@ export default function NotificationTestScreen() {
     )
     console.log('🔔 Total notifications:', notifications.length)
     console.log('🔔 Unread count:', unreadCount)
-  }, [isConnected, notifications.length, unreadCount])
+    console.log('🔔 Push Token:', pushToken)
+  }, [isConnected, notifications.length, unreadCount, pushToken])
 
   // Log chi tiết khi có notification mới
   useEffect(() => {
@@ -34,6 +46,36 @@ export default function NotificationTestScreen() {
       })
     }
   }, [notifications])
+
+  /**
+   * Test gửi local push notification
+   */
+  const handleSendTestNotification = async () => {
+    try {
+      await sendLocalNotification(
+        'Test Push Notification',
+        'Đây là thông báo test từ ứng dụng!',
+        { type: 'test', timestamp: Date.now() }
+      )
+      Alert.alert('Thành công', 'Đã gửi test notification!')
+    } catch (error) {
+      Alert.alert('Lỗi', 'Không thể gửi notification')
+      console.error('Error sending test notification:', error)
+    }
+  }
+
+  /**
+   * Copy push token
+   */
+  const handleCopyToken = () => {
+    if (pushToken) {
+      // Copy to clipboard (sẽ cần expo-clipboard để implement)
+      Alert.alert('Push Token', pushToken)
+      console.log('📋 Push Token:', pushToken)
+    } else {
+      Alert.alert('Không có token', 'Push token chưa được tạo')
+    }
+  }
 
   return (
     <YStack flex={1} backgroundColor="$background" padding="$4">
@@ -86,7 +128,33 @@ export default function NotificationTestScreen() {
               {unreadCount > 0 && <Circle size={8} backgroundColor="$blue10" />}
             </XStack>
           </XStack>
+          <XStack justifyContent="space-between">
+            <Text color="$gray10">Push Token:</Text>
+            <Text color="$color" fontWeight="600" numberOfLines={1}>
+              {pushToken ? '✅' : '❌'}
+            </Text>
+          </XStack>
         </YStack>
+      </YStack>
+
+      {/* Push Notification Test Buttons */}
+      <YStack gap="$3" marginBottom="$4">
+        <Button
+          backgroundColor="$blue10"
+          color="white"
+          icon={<Send size={20} />}
+          onPress={handleSendTestNotification}
+        >
+          Gửi Test Push Notification
+        </Button>
+        <Button
+          backgroundColor="$green10"
+          color="white"
+          onPress={handleCopyToken}
+          disabled={!pushToken}
+        >
+          {pushToken ? 'Xem Push Token' : 'Chưa có Push Token'}
+        </Button>
       </YStack>
 
       {/* Notifications List */}
