@@ -49,3 +49,5 @@ npx expo start
 - Preview media before post
 - Fix incorrect stretch camera
 - Signup need unique username
+- BE Push notification
+- BE sign in with Google

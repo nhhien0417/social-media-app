@@ -13,10 +13,11 @@ import {
   Spinner,
 } from 'tamagui'
 import ButtonIcon from '@/components/IconButton'
-import { Chrome, Eye, EyeOff } from '@tamagui/lucide-icons'
+import { Eye, EyeOff } from '@tamagui/lucide-icons'
 import { Image } from 'react-native'
 import { signInApi } from '@/api/api.auth'
 import { saveTokens, saveUserId } from '@/utils/SecureStore'
+import { GoogleSignInButton } from '@/components/GoogleSignInButton'
 
 type ValidationErrors = {
   email?: string
@@ -206,16 +207,7 @@ export default function SignInScreen() {
           </XStack>
 
           {/* Social login */}
-          <Button
-            size="$5"
-            backgroundColor="$backgroundPress"
-            borderRadius="$6"
-            icon={Chrome}
-            justifyContent="center"
-            fontWeight="700"
-          >
-            Continue with Google
-          </Button>
+          <GoogleSignInButton />
         </YStack>
 
         {/* DEV: Skip to Home for testing */}

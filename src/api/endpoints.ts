@@ -3,6 +3,7 @@ export const ENDPOINTS = {
     LOGIN: 'identity/auth/login',
     LOGOUT: 'identity/auth/logout',
     REGISTER: 'identity/auth/register',
+    GOOGLE_LOGIN: 'identity/auth/google',
     TOKEN: 'identity/auth/refresh-token',
     PROFILE: 'identity/me',
   },

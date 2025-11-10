@@ -38,6 +38,12 @@ export type RefreshTokenResponse = {
   }
 }
 
+export type GoogleLoginData = {
+  idToken: string
+}
+
+export type GoogleLoginResponse = AuthResponse
+
 export const signInApi = (data: SignInData) => {
   return ApiClient.post<AuthResponse>(ENDPOINTS.IDENTITY.LOGIN, data)
 }
@@ -56,4 +62,11 @@ export const getProfileApi = () => {
 
 export const refreshTokenApi = (data: RefreshTokenData) => {
   return ApiClient.post<RefreshTokenResponse>(ENDPOINTS.IDENTITY.TOKEN, data)
+}
+
+export const googleLoginApi = (data: GoogleLoginData) => {
+  return ApiClient.post<GoogleLoginResponse>(
+    ENDPOINTS.IDENTITY.GOOGLE_LOGIN,
+    data
+  )
 }
