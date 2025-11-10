@@ -16,7 +16,12 @@ import {
   UserPlus,
   Users,
 } from '@tamagui/lucide-icons'
-import type { GroupResult, PostResult, SearchResult, UserResult } from './data'
+import type {
+  GroupResult,
+  PostResult,
+  SearchResult,
+  UserResult,
+} from '../../../mock/search'
 
 interface SearchResultCardProps {
   result: SearchResult

@@ -8,7 +8,7 @@ import {
   QrCode,
   Share2,
 } from '@tamagui/lucide-icons'
-import type { ProfileUser } from './data'
+import type { ProfileUser } from '../../../mock/profile'
 
 interface ShareProfileSheetProps {
   open: boolean

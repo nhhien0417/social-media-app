@@ -6,7 +6,7 @@ import type {
   SearchCategory,
   SearchResult,
   UserResult,
-} from './data'
+} from '../../../mock/search'
 import { SearchResultCard } from './SearchResultCard'
 
 interface SearchResultsProps {

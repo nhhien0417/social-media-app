@@ -11,7 +11,7 @@ import {
   type SearchResult,
   type SearchHistoryItem,
   type UserResult,
-} from './components/data'
+} from '../../mock/search'
 import { SearchFilters } from '@/features/search/components/SearchFilters'
 import { SearchResults } from '@/features/search/components/SearchResults'
 import { SearchHistoryList } from '@/features/search/components/SearchHistoryList'

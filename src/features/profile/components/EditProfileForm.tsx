@@ -13,7 +13,7 @@ import {
   useThemeName,
 } from 'tamagui'
 import { Camera } from '@tamagui/lucide-icons'
-import type { ProfileUser } from './data'
+import type { ProfileUser } from '../../../mock/profile'
 
 interface EditProfileFormProps {
   user: ProfileUser

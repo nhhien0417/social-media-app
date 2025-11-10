@@ -7,7 +7,7 @@ import {
   YStack,
   useThemeName,
 } from 'tamagui'
-import type { ProfileUser } from './data'
+import type { ProfileUser } from '../../../mock/profile'
 
 interface ProfileHeaderProps {
   user: ProfileUser

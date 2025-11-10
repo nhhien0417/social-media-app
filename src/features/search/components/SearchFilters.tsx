@@ -1,5 +1,5 @@
 import { XStack, Button, useThemeName } from 'tamagui'
-import type { SearchCategory } from './data'
+import type { SearchCategory } from '../../../mock/search'
 
 interface SearchFiltersProps {
   value: SearchCategory

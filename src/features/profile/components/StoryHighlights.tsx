@@ -2,7 +2,7 @@ import { memo } from 'react'
 import { ScrollView } from 'react-native'
 import { Text, YStack, useThemeName } from 'tamagui'
 import { Avatar, AvatarFallback, AvatarImage } from 'tamagui'
-import type { ProfileHighlight } from './data'
+import type { ProfileHighlight } from '../../../mock/profile'
 
 interface StoryHighlightsProps {
   highlights: ProfileHighlight[]

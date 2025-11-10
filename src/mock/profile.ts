@@ -1,3 +1,5 @@
+export type ProfileTabKey = 'posts' | 'reels' | 'tagged'
+
 export interface ProfileHighlight {
   id: string
   label: string

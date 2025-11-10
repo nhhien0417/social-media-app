@@ -1,6 +1,6 @@
 import { Link } from 'expo-router'
 import { Text, YStack, useThemeName } from 'tamagui'
-import type { ProfileUser } from './data'
+import type { ProfileUser } from '../../../mock/profile'
 
 interface ProfileBioProps {
   user: ProfileUser

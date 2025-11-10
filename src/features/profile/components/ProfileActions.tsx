@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Button, XStack, useThemeName } from 'tamagui'
 import { Share2 } from '@tamagui/lucide-icons'
 import { useRouter } from 'expo-router'
-import type { ProfileUser } from './data'
+import type { ProfileUser } from '../../../mock/profile'
 import { ShareProfileSheet } from './ShareProfileSheet'
 
 interface ProfileActionsProps {
