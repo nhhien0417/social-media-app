@@ -1,7 +1,7 @@
-import { Button, XStack, Text, Spinner } from 'tamagui'
+import { Button, XStack, Text, Spinner, YStack } from 'tamagui'
 import { useGoogleSignIn } from '../services/useGoogleSignIn'
-import { Alert } from 'react-native'
 import { useRouter } from 'expo-router'
+import Svg, { G, Path } from 'react-native-svg'
 
 export const GoogleSignInButton = () => {
   const { isLoading, handleGoogleSignIn } = useGoogleSignIn()
@@ -11,58 +11,85 @@ export const GoogleSignInButton = () => {
     const result = await handleGoogleSignIn()
 
     if (result.success) {
-      Alert.alert('Thành công', 'Đăng nhập Google thành công!', [
-        {
-          text: 'OK',
-          onPress: () => {
-            // Navigate to home screen
-            router.replace('/(tabs)')
-          },
-        },
-      ])
+      console.log('✅ Google sign-in success, navigating to home...')
+      router.replace('/(tabs)')
     } else {
-      Alert.alert('Lỗi', result.error || 'Đăng nhập thất bại')
+      console.log('❌ Google sign-in failed:', result.error)
     }
   }
 
   return (
     <Button
-      size="$4"
-      backgroundColor="$white"
-      borderColor="$gray8"
+      size="$5"
+      backgroundColor="white"
+      borderColor="#dadce0"
       borderWidth={1}
       onPress={onPress}
       disabled={isLoading}
+      height={48}
+      paddingHorizontal="$4"
+      borderRadius="$4"
       pressStyle={{
-        backgroundColor: '$gray2',
+        backgroundColor: '#f8f9fa',
+        borderColor: '#dadce0',
+        scale: 0.98,
+      }}
+      hoverStyle={{
+        backgroundColor: '#f8f9fa',
+        borderColor: '#d2d4d7',
+      }}
+      disabledStyle={{
+        backgroundColor: '#f5f5f5',
+        opacity: 0.6,
+      }}
+      focusStyle={{
+        borderColor: '#4285f4',
+        borderWidth: 2,
       }}
     >
-      <XStack gap="$3" alignItems="center">
+      <XStack gap="$4" alignItems="center" justifyContent="center">
         {isLoading ? (
-          <Spinner size="small" color="$gray10" />
+          <Spinner size="small" color="#4285F4" />
         ) : (
-          // Google logo SVG
-          <svg width="20" height="20" viewBox="0 0 20 20">
-            <path
-              fill="#4285F4"
-              d="M19.6 10.23c0-.82-.07-1.42-.21-2.05H10v3.72h5.51c-.11.86-.74 2.17-2.12 3.04l-.02.12 3.07 2.38.21.02c1.96-1.81 3.09-4.46 3.09-7.23z"
-            />
-            <path
-              fill="#34A853"
-              d="M10 20c2.8 0 5.15-.93 6.86-2.52l-3.26-2.52c-.85.57-2 .97-3.6.97-2.75 0-5.1-1.81-5.93-4.3l-.12.01-3.19 2.47-.04.12C2.48 17.31 5.97 20 10 20z"
-            />
-            <path
-              fill="#FBBC05"
-              d="M4.07 11.63c-.21-.62-.33-1.29-.33-1.98 0-.69.12-1.36.32-1.98l-.01-.13-3.23-2.51-.11.05C.31 6.32 0 7.83 0 9.65c0 1.82.31 3.33.74 4.58l3.33-2.6z"
-            />
-            <path
-              fill="#EB4335"
-              d="M10 3.96c1.95 0 3.27.84 4.02 1.54l2.93-2.86C15.13.89 12.8 0 10 0 5.97 0 2.48 2.69.74 6.57l3.32 2.6C4.9 5.77 7.25 3.96 10 3.96z"
-            />
-          </svg>
+          <YStack
+            width={25}
+            height={25}
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Svg width={25} height={25} viewBox="0 0 48 48">
+              <G>
+                {/* Blue */}
+                <Path
+                  fill="#4285F4"
+                  d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"
+                />
+                {/* Green */}
+                <Path
+                  fill="#34A853"
+                  d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"
+                />
+                {/* Yellow */}
+                <Path
+                  fill="#FBBC05"
+                  d="M11.69 28.18C11.25 26.86 11 25.45 11 24s.25-2.86.69-4.18v-5.7H4.34C2.85 17.09 2 20.45 2 24c0 3.55.85 6.91 2.34 9.88l7.35-5.7z"
+                />
+                {/* Red */}
+                <Path
+                  fill="#EA4335"
+                  d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"
+                />
+              </G>
+            </Svg>
+          </YStack>
         )}
-        <Text fontSize="$4" fontWeight="500" color="$gray11">
-          {isLoading ? 'Logging in...' : 'Sign in with Google'}
+        <Text
+          fontSize={18}
+          fontWeight="700"
+          color="#3c4043"
+          letterSpacing={0.25}
+        >
+          {isLoading ? 'Signing in...' : 'Sign in with Google'}
         </Text>
       </XStack>
     </Button>

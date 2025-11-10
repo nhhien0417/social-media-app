@@ -196,9 +196,11 @@ export default function SignInScreen() {
             onPress={handleLogin}
             disabled={isLoading}
             icon={isLoading ? <Spinner size="small" /> : null}
+            fontSize={18}
           >
             {isLoading ? 'Logging in...' : 'Login'}
           </Button>
+
           {/* Divider OR */}
           <XStack alignItems="center" gap="$3" marginVertical="$2">
             <Separator flex={1} />

@@ -12,10 +12,11 @@ import {
   ScrollView,
   Spinner,
 } from 'tamagui'
-import { Chrome, Eye, EyeOff } from '@tamagui/lucide-icons'
+import { Eye, EyeOff } from '@tamagui/lucide-icons'
 import { Image } from 'react-native'
 import { signUpApi } from '@/api/api.auth'
 import ButtonIcon from '@/components/IconButton'
+import { GoogleSignInButton } from '@/components/GoogleSignInButton'
 
 type ValidationErrors = {
   email?: string
@@ -279,6 +280,7 @@ export default function SignUpScreen() {
             onPress={handleSignUp}
             disabled={isLoading}
             icon={isLoading ? <Spinner size="small" /> : null}
+            fontSize={18}
           >
             {isLoading ? 'Creating account...' : 'Sign up'}
           </Button>
@@ -291,16 +293,7 @@ export default function SignUpScreen() {
           </XStack>
 
           {/* Social login */}
-          <Button
-            size="$5"
-            backgroundColor="$backgroundPress"
-            borderRadius="$6"
-            icon={Chrome}
-            justifyContent="center"
-            fontWeight="700"
-          >
-            Continue with Google
-          </Button>
+          <GoogleSignInButton />
         </YStack>
 
         {/* Footer */}

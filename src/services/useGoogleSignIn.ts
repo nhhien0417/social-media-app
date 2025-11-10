@@ -17,7 +17,7 @@ export const useGoogleSignIn = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+  const [request, , promptAsync] = Google.useIdTokenAuthRequest({
     clientId: WEB_CLIENT_ID,
     iosClientId: IOS_CLIENT_ID,
     androidClientId: ANDROID_CLIENT_ID,
@@ -28,23 +28,21 @@ export const useGoogleSignIn = () => {
       setIsLoading(true)
       setError(null)
 
-      // Bước 1: Prompt user đăng nhập Google
       const result = await promptAsync()
+      console.log('🔍 Google Sign-In Result:', result.type)
 
       if (result.type === 'success') {
         const { id_token } = result.params
 
         if (!id_token) {
-          throw new Error('Không nhận được ID token từ Google')
+          throw new Error('Missing ID token from Google response')
         }
 
-        // Bước 2: Gửi ID token lên backend
         const response = await googleLoginApi({ idToken: id_token })
 
         if (response.statusCode === 200 && response.data) {
           const { accessToken, refreshToken, id, email } = response.data
 
-          // Bước 3: Lưu access token và refresh token
           await saveTokens(accessToken, refreshToken)
 
           return {
@@ -57,17 +55,17 @@ export const useGoogleSignIn = () => {
             },
           }
         } else {
-          throw new Error(response.error || 'Đăng nhập thất bại')
+          throw new Error(response.error || 'Sign in failed')
         }
       } else if (result.type === 'cancel') {
-        setError('Đăng nhập bị hủy')
-        return { success: false, error: 'Đăng nhập bị hủy' }
+        setError('Sign-in canceled')
+        return { success: false, error: 'Sign-in canceled' }
       } else {
-        throw new Error('Đăng nhập thất bại')
+        throw new Error('Sign-in failed')
       }
     } catch (err: any) {
       const errorMessage =
-        err.message || 'Có lỗi xảy ra khi đăng nhập với Google'
+        err.message || 'An error occurred during Google sign-in'
       setError(errorMessage)
       return { success: false, error: errorMessage }
     } finally {

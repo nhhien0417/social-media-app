@@ -2,6 +2,7 @@
   "expo": {
     "name": "social-media-app",
     "slug": "social-media-app",
+    "scheme": "socialmediaapp",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
@@ -14,9 +15,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.anonymous.socialmediaapp",
       "infoPlist": {
-        "UIBackgroundModes": [
-          "remote-notification"
-        ]
+        "UIBackgroundModes": ["remote-notification"]
       }
     },
     "android": {
@@ -64,9 +63,7 @@
         {
           "icon": "./assets/notification-icon.png",
           "color": "#ffffff",
-          "sounds": [
-            "./assets/notification-sound.wav"
-          ]
+          "sounds": ["./assets/notification-sound.wav"]
         }
       ],
       "expo-web-browser"
