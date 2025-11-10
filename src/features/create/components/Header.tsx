@@ -8,7 +8,14 @@ import {
   Easing,
   StatusBar,
 } from 'react-native'
-import { XStack, YStack, Button, SizableText } from 'tamagui'
+import {
+  XStack,
+  YStack,
+  Button,
+  SizableText,
+  Paragraph,
+  useThemeName,
+} from 'tamagui'
 import {
   ChevronLeft,
   FileText,
@@ -70,6 +77,12 @@ export default function Header({
 }: Props) {
   const [showModal, setShowModal] = useState(false)
   const isPost = mode === 'post'
+  const themeName = useThemeName()
+  const isDark = themeName === 'dark'
+  const accentColor = '#1877F2'
+  const segmentBackground = isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0'
+  const segmentActiveBackground = isDark ? 'rgba(24,119,242,0.42)' : accentColor
+  const segmentInactiveText = isDark ? 'rgba(255,255,255,0.72)' : '#1f2937'
 
   const sheetY = useRef(new Animated.Value(-200)).current
   const overlayOpacity = useRef(new Animated.Value(0)).current
@@ -169,23 +182,68 @@ export default function Header({
       >
         <IconButton Icon={ChevronLeft} onPress={onBack} Size={30} />
 
-        <Button
-          size="$4"
-          onPress={openSheet}
-          backgroundColor="$background"
-          borderRadius="$20"
-          paddingHorizontal="$4"
-          iconAfter={<ChevronDown size={17.5} />}
-        >
-          <SizableText
-            size="$6"
-            fontWeight="700"
-            color="$color"
-            textTransform="capitalize"
+        <TouchableOpacity activeOpacity={0.85} onPress={openSheet}>
+          <XStack
+            alignItems="center"
+            backgroundColor={segmentBackground}
+            borderRadius={999}
+            paddingVertical={6}
+            paddingHorizontal={8}
+            gap="$3"
           >
-            {mode}
-          </SizableText>
-        </Button>
+            <XStack
+              flex={1}
+              borderRadius={999}
+              overflow="hidden"
+              backgroundColor="transparent"
+              borderWidth={StyleSheet.hairlineWidth}
+              borderColor="rgba(148,163,184,0.35)"
+              minWidth={160}
+            >
+              <XStack
+                flex={1}
+                paddingVertical={6}
+                paddingHorizontal={16}
+                borderRadius={999}
+                backgroundColor={
+                  isPost ? segmentActiveBackground : 'transparent'
+                }
+                alignItems="center"
+                justifyContent="center"
+              >
+                <SizableText
+                  size="$5"
+                  fontWeight="700"
+                  color={isPost ? '#ffffff' : segmentInactiveText}
+                >
+                  Post
+                </SizableText>
+              </XStack>
+
+              <XStack
+                flex={1}
+                paddingVertical={6}
+                paddingHorizontal={16}
+                borderRadius={999}
+                backgroundColor={
+                  !isPost ? segmentActiveBackground : 'transparent'
+                }
+                alignItems="center"
+                justifyContent="center"
+              >
+                <SizableText
+                  size="$5"
+                  fontWeight="700"
+                  color={!isPost ? '#ffffff' : segmentInactiveText}
+                >
+                  Story
+                </SizableText>
+              </XStack>
+            </XStack>
+
+            <ChevronDown size={16} color={isDark ? '#f8fafc' : '#1f2937'} />
+          </XStack>
+        </TouchableOpacity>
 
         <Button
           size="$4"
@@ -238,65 +296,111 @@ export default function Header({
             <YStack {...panResponder.panHandlers}>
               {/* Content */}
               <YStack padding="$3" gap="$3">
-                {/* Post Option */}
-                <Button
-                  size="$6"
-                  borderRadius={15}
-                  padding="$4"
-                  justifyContent="flex-start"
-                  alignItems="center"
-                  gap="$1"
-                  onPress={() => handleSelectMode('post')}
-                >
-                  {isPost ? (
-                    <Check size={30} color="$color" />
-                  ) : (
-                    <FileText size={30} color="$color" />
-                  )}
-
-                  <YStack flex={1} alignItems="flex-start">
-                    <SizableText size="$6" fontWeight="700" color="$color">
-                      Post
-                    </SizableText>
-                    <SizableText
-                      fontSize={12.5}
-                      fontWeight="400"
-                      color="$color"
+                {[
+                  {
+                    value: 'post' as const,
+                    title: 'Post',
+                    description: 'Share moments with your friends.',
+                    Icon: FileText,
+                  },
+                  {
+                    value: 'story' as const,
+                    title: 'Story',
+                    description:
+                      'Share content that disappears after 24 hours.',
+                    Icon: Image,
+                  },
+                ].map(({ value, title, description, Icon }) => {
+                  const isActive = mode === value
+                  return (
+                    <TouchableOpacity
+                      key={value}
+                      activeOpacity={0.85}
+                      onPress={() => handleSelectMode(value)}
                     >
-                      Share moment with your friends.
-                    </SizableText>
-                  </YStack>
-                </Button>
+                      <XStack
+                        alignItems="center"
+                        gap="$3"
+                        padding="$3"
+                        borderRadius={18}
+                        borderWidth={1}
+                        borderColor={
+                          isActive ? accentColor : 'rgba(148,163,184,0.35)'
+                        }
+                        backgroundColor={
+                          isActive
+                            ? isDark
+                              ? 'rgba(24,119,242,0.26)'
+                              : 'rgba(24,119,242,0.08)'
+                            : 'transparent'
+                        }
+                      >
+                        <YStack
+                          width={48}
+                          height={48}
+                          borderRadius={24}
+                          backgroundColor={
+                            isActive
+                              ? accentColor
+                              : isDark
+                                ? 'rgba(255,255,255,0.08)'
+                                : '#f1f5f9'
+                          }
+                          alignItems="center"
+                          justifyContent="center"
+                        >
+                          <Icon
+                            size={22}
+                            color={
+                              isActive
+                                ? '#ffffff'
+                                : isDark
+                                  ? '#f8fafc'
+                                  : '#1f2937'
+                            }
+                          />
+                        </YStack>
 
-                {/* Story Option */}
-                <Button
-                  size="$6"
-                  borderRadius={15}
-                  padding="$4"
-                  justifyContent="flex-start"
-                  alignItems="center"
-                  gap="$1"
-                  onPress={() => handleSelectMode('story')}
-                >
-                  {!isPost ? (
-                    <Check size={30} color="$color" />
-                  ) : (
-                    <Image size={30} color="$color" />
-                  )}
+                        <YStack flex={1} gap={2} alignItems="flex-start">
+                          <SizableText
+                            size="$6"
+                            fontWeight="700"
+                            color="$color"
+                          >
+                            {title}
+                          </SizableText>
+                          <Paragraph
+                            size="$3"
+                            color={
+                              isDark
+                                ? 'rgba(226,232,240,0.75)'
+                                : 'rgba(100,116,139,0.9)'
+                            }
+                          >
+                            {description}
+                          </Paragraph>
+                        </YStack>
 
-                  <YStack flex={1} alignItems="flex-start">
-                    <SizableText size="$6" fontWeight="700" color="$color">
-                      Story
-                    </SizableText>
-                    <SizableText
-                      fontSize={12.5}
-                      fontWeight="400"
-                      color="$color"
-                    >
-                      Share content that disappears after 24 hours.
-                    </SizableText>
-                  </YStack>
-                </Button>
+                        <YStack
+                          width={22}
+                          height={22}
+                          borderRadius={11}
+                          borderWidth={2}
+                          borderColor={
+                            isActive ? accentColor : 'rgba(148,163,184,0.65)'
+                          }
+                          backgroundColor={
+                            isActive ? accentColor : 'transparent'
+                          }
+                          alignItems="center"
+                          justifyContent="center"
+                        >
+                          {isActive && <Check size={12} color="#ffffff" />}
+                        </YStack>
+                      </XStack>
+                    </TouchableOpacity>
+                  )
+                })}
                 {/* Drag handle area */}
                 <YStack alignItems="center">
                   <YStack style={styles.dragHandle} />
