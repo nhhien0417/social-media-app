@@ -1,14 +1,6 @@
 import apiClient from './apiClient'
+import { ENDPOINTS } from './endpoints'
 import { formatPushTokenForBackend } from '@/services/pushNotifications'
-
-/**
- * API endpoints cho Push Notifications
- */
-const NOTIFICATION_ENDPOINTS = {
-  REGISTER_PUSH_TOKEN: '/api/notifications/register-token',
-  UNREGISTER_PUSH_TOKEN: '/api/notifications/unregister-token',
-  UPDATE_PUSH_SETTINGS: '/api/notifications/settings',
-}
 
 /**
  * Interface cho Push Token Request
@@ -46,7 +38,7 @@ export const registerPushToken = async (
     const formattedToken = formatPushTokenForBackend(token)
 
     const response = await apiClient.post(
-      NOTIFICATION_ENDPOINTS.REGISTER_PUSH_TOKEN,
+      ENDPOINTS.NOTIFICATIONS.REGISTER_PUSH_TOKEN,
       {
         ...formattedToken,
         ...deviceInfo,
@@ -66,7 +58,7 @@ export const registerPushToken = async (
  */
 export const unregisterPushToken = async (token: string): Promise<void> => {
   try {
-    await apiClient.post(NOTIFICATION_ENDPOINTS.UNREGISTER_PUSH_TOKEN, {
+    await apiClient.post(ENDPOINTS.NOTIFICATIONS.UNREGISTER_PUSH_TOKEN, {
       token,
     })
 
@@ -86,7 +78,7 @@ export const updatePushSettings = async (
 ): Promise<void> => {
   try {
     const response = await apiClient.put(
-      NOTIFICATION_ENDPOINTS.UPDATE_PUSH_SETTINGS,
+      ENDPOINTS.NOTIFICATIONS.UPDATE_SETTINGS,
       settings
     )
 
@@ -105,9 +97,7 @@ export const updatePushSettings = async (
  */
 export const getPushSettings = async (): Promise<PushNotificationSettings> => {
   try {
-    const response = await apiClient.get(
-      NOTIFICATION_ENDPOINTS.UPDATE_PUSH_SETTINGS
-    )
+    const response = await apiClient.get(ENDPOINTS.NOTIFICATIONS.GET_SETTINGS)
 
     return response.data
   } catch (error) {

@@ -3,7 +3,11 @@ import { ScrollView } from 'react-native'
 import { Image, Text, XStack, YStack, useThemeName, Button } from 'tamagui'
 import { Menu, PlusSquare, LogOut } from '@tamagui/lucide-icons'
 import { useRouter } from 'expo-router'
-import { profileMock, ProfileTabKey, type ProfilePost } from '../../mock/profile'
+import {
+  profileMock,
+  ProfileTabKey,
+  type ProfilePost,
+} from '../../mock/profile'
 import { ProfileHeader } from './components/ProfileHeader'
 import { ProfileBio } from './components/ProfileBio'
 import { ProfileActions } from './components/ProfileActions'
