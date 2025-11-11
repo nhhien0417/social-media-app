@@ -9,7 +9,7 @@ import { ProfileBio } from './components/ProfileBio'
 import { ProfileActions } from './components/ProfileActions'
 import { StoryHighlights } from './components/StoryHighlights'
 import { ProfileTabBar } from './components/ProfileTabBar'
-import { removeTokens } from '@/utils/SecureStore'
+import { removeTokensAndUserId } from '@/utils/SecureStore'
 
 const chunkMedia = (items: ProfilePost[]) => {
   const rows: ProfilePost[][] = []
@@ -113,7 +113,7 @@ export default function ProfileScreen() {
   const navIconColor = isDark ? '#f5f5f5' : '#111827'
 
   const handleLogout = async () => {
-    await removeTokens()
+    await removeTokensAndUserId()
     router.replace('/auth/signin')
   }
 

@@ -101,7 +101,7 @@ export default function SignInScreen() {
         <SizableText size="$8" fontWeight="700" marginTop="$2">
           Welcome back
         </SizableText>
-        <Paragraph color="$gray11" marginBottom="$3" fontSize="$4">
+        <Paragraph color="#888" marginBottom="$3" fontSize="$4">
           Please enter your details to login
         </Paragraph>
 
@@ -226,7 +226,7 @@ export default function SignInScreen() {
 
         {/* Footer */}
         <XStack gap="$1" marginTop="$2" alignItems="center">
-          <Paragraph color="$gray11">Don't have an account?</Paragraph>
+          <Paragraph color="#888">Don't have an account?</Paragraph>
           <Link href="/auth/signup" asChild>
             <Text marginLeft="$2" color="$primary" fontWeight="700">
               Register

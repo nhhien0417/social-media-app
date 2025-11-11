@@ -3,7 +3,7 @@ import {
   getAccessToken,
   getRefreshToken,
   saveTokens,
-  removeTokens,
+  removeTokensAndUserId,
 } from '../utils/SecureStore'
 import { ENDPOINTS } from './endpoints'
 import { router } from 'expo-router'
@@ -45,7 +45,7 @@ const processQueue = (error: any, token: string | null = null) => {
 }
 
 const handleExpireRefreshToken = async () => {
-  await removeTokens()
+  await removeTokensAndUserId()
   router.replace('/auth/signin')
 }
 

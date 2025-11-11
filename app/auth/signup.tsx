@@ -111,7 +111,7 @@ export default function SignUpScreen() {
         <SizableText size="$8" fontWeight="700" marginTop="$2">
           Create your account
         </SizableText>
-        <Paragraph color="$gray11" marginBottom="$3" fontSize="$4">
+        <Paragraph color="#888" marginBottom="$3" fontSize="$4">
           Please fill in your information to sign up
         </Paragraph>
 
@@ -254,7 +254,7 @@ export default function SignUpScreen() {
           </XStack>
 
           {/* Policy text */}
-          <Paragraph color="$gray11" fontSize="$3" marginTop="$1">
+          <Paragraph color="#888" fontSize="$3" marginTop="$1">
             By signing up, you agree to our{' '}
             <Text fontWeight="700" color="$color">
               Terms
@@ -298,7 +298,7 @@ export default function SignUpScreen() {
 
         {/* Footer */}
         <XStack marginTop="$2" gap="$1" alignItems="center">
-          <Paragraph color="$gray11">Already have an account?</Paragraph>
+          <Paragraph color="#888">Already have an account?</Paragraph>
           <Link href="/auth/signin" asChild>
             <Text marginLeft="$2" color="$primary" fontWeight="700">
               Log in
