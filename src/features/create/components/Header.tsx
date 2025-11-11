@@ -79,10 +79,26 @@ export default function Header({
   const isPost = mode === 'post'
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
-  const accentColor = '#1877F2'
-  const segmentBackground = isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0'
-  const segmentActiveBackground = isDark ? 'rgba(24,119,242,0.42)' : accentColor
-  const segmentInactiveText = isDark ? 'rgba(255,255,255,0.72)' : '#1f2937'
+  const accentColor = isDark ? '#0095F6' : '#1877F2'
+  const segmentBackground = isDark ? 'rgba(255,255,255,0.06)' : '#e2e8f0'
+  const segmentActiveBackground = isDark ? 'rgba(0,149,246,0.24)' : accentColor
+  const segmentInactiveText = isDark ? 'rgba(226,232,240,0.86)' : '#1f2937'
+  const sheetBackground = isDark ? 'rgba(18,18,18,0.96)' : '#ffffff'
+  const sheetBorderColor = isDark
+    ? 'rgba(255,255,255,0.08)'
+    : 'rgba(148,163,184,0.18)'
+  const sheetShadowColor = isDark ? 'rgba(0,0,0,0.82)' : 'rgba(15,23,42,0.12)'
+  const sheetLabelColor = isDark ? '#f8fafc' : '#0f172a'
+  const sheetDescriptionColor = isDark
+    ? 'rgba(209,213,219,0.82)'
+    : 'rgba(100,116,139,0.9)'
+  const optionBorderColor = isDark
+    ? 'rgba(255,255,255,0.08)'
+    : 'rgba(148,163,184,0.35)'
+  const optionIconBackground = isDark ? 'rgba(255,255,255,0.08)' : '#f1f5f9'
+  const optionActiveBackground = isDark
+    ? 'rgba(0,149,246,0.18)'
+    : 'rgba(24,119,242,0.08)'
 
   const sheetY = useRef(new Animated.Value(-200)).current
   const overlayOpacity = useRef(new Animated.Value(0)).current
@@ -288,9 +304,18 @@ export default function Header({
           ]}
         >
           <YStack
-            backgroundColor="$background"
             borderRadius={20}
             overflow="hidden"
+            backgroundColor={sheetBackground}
+            borderWidth={StyleSheet.hairlineWidth}
+            borderColor={sheetBorderColor}
+            style={{
+              shadowColor: sheetShadowColor,
+              shadowOpacity: isDark ? 0.6 : 0.35,
+              shadowRadius: 18,
+              shadowOffset: { width: 0, height: 18 },
+              elevation: 12,
+            }}
           >
             {/* Entire content area is draggable */}
             <YStack {...panResponder.panHandlers}>
@@ -324,15 +349,9 @@ export default function Header({
                         padding="$3"
                         borderRadius={18}
                         borderWidth={1}
-                        borderColor={
-                          isActive ? accentColor : 'rgba(148,163,184,0.35)'
-                        }
+                        borderColor={isActive ? accentColor : optionBorderColor}
                         backgroundColor={
-                          isActive
-                            ? isDark
-                              ? 'rgba(24,119,242,0.26)'
-                              : 'rgba(24,119,242,0.08)'
-                            : 'transparent'
+                          isActive ? optionActiveBackground : 'transparent'
                         }
                       >
                         <YStack
@@ -340,11 +359,7 @@ export default function Header({
                           height={48}
                           borderRadius={24}
                           backgroundColor={
-                            isActive
-                              ? accentColor
-                              : isDark
-                                ? 'rgba(255,255,255,0.08)'
-                                : '#f1f5f9'
+                            isActive ? accentColor : optionIconBackground
                           }
                           alignItems="center"
                           justifyContent="center"
@@ -365,18 +380,11 @@ export default function Header({
                           <SizableText
                             size="$6"
                             fontWeight="700"
-                            color="$color"
+                            color={sheetLabelColor}
                           >
                             {title}
                           </SizableText>
-                          <Paragraph
-                            size="$3"
-                            color={
-                              isDark
-                                ? 'rgba(226,232,240,0.75)'
-                                : 'rgba(100,116,139,0.9)'
-                            }
-                          >
+                          <Paragraph size="$3" color={sheetDescriptionColor}>
                             {description}
                           </Paragraph>
                         </YStack>
@@ -387,7 +395,7 @@ export default function Header({
                           borderRadius={11}
                           borderWidth={2}
                           borderColor={
-                            isActive ? accentColor : 'rgba(148,163,184,0.65)'
+                            isActive ? accentColor : optionBorderColor
                           }
                           backgroundColor={
                             isActive ? accentColor : 'transparent'

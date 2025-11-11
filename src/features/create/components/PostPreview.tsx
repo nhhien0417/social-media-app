@@ -101,13 +101,28 @@ export default function PostPreview({
 
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
-  const accentColor = '#1877F2'
+  const accentColor = isDark ? '#0095F6' : '#1877F2'
   const borderColor = isDark ? 'rgba(255,255,255,0.12)' : '#e5e7eb'
   const cardBackground = isDark ? 'rgba(255,255,255,0.05)' : '#ffffff'
   const chipBackground = isDark ? 'rgba(255,255,255,0.08)' : '#eff6ff'
   const chipBorder = isDark ? 'rgba(255,255,255,0.14)' : '#dbeafe'
   const mutedTextColor = isDark ? 'rgba(255,255,255,0.68)' : '#6b7280'
   const overlayColor = 'rgba(0,0,0,0.65)'
+  const modalBackground = isDark ? 'rgba(18,18,18,0.96)' : '#ffffff'
+  const modalBorderColor = isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0'
+  const modalTitleColor = isDark ? '#f7f7f8' : '#0f172a'
+  const modalSubtitleColor = isDark ? 'rgba(209,213,219,0.78)' : '#475569'
+  const modalShadowColor = isDark ? 'rgba(0,0,0,0.85)' : 'rgba(15,23,42,0.12)'
+  const privacyOptionActiveBackground = isDark
+    ? 'rgba(0,149,246,0.18)'
+    : '#eff6ff'
+  const privacyOptionInactiveBorder = isDark
+    ? 'rgba(255,255,255,0.08)'
+    : '#e2e8f0'
+  const privacyOptionIconBackground = isDark
+    ? 'rgba(255,255,255,0.08)'
+    : '#f1f5f9'
+  const privacyOptionCheckBorder = isDark ? 'rgba(148,163,184,0.5)' : '#94a3b8'
 
   const selectedOption =
     privacyOptions.find(option => option.value === privacy) ?? privacyOptions[0]
@@ -326,10 +341,19 @@ export default function PostPreview({
         >
           <YStack
             width="100%"
-            backgroundColor="$background"
+            backgroundColor={modalBackground}
             borderRadius={24}
             padding="$4"
             gap="$3"
+            borderWidth={StyleSheet.hairlineWidth}
+            borderColor={modalBorderColor}
+            style={{
+              shadowColor: modalShadowColor,
+              shadowOpacity: isDark ? 0.6 : 0.35,
+              shadowRadius: 18,
+              shadowOffset: { width: 0, height: 18 },
+              elevation: 12,
+            }}
           >
             <SizableText
               size="$5"
@@ -337,12 +361,13 @@ export default function PostPreview({
               textAlign="center"
               paddingBottom="$2"
               borderBottomWidth={StyleSheet.hairlineWidth}
-              borderColor="$borderColor"
+              borderColor={modalBorderColor}
+              color={modalTitleColor}
             >
               Post audience
             </SizableText>
 
-            <Paragraph size="$3" color={mutedTextColor} lineHeight={20}>
+            <Paragraph size="$3" color={modalSubtitleColor} lineHeight={20}>
               Choose who can see this post. You can change this anytime.
             </Paragraph>
 
@@ -360,15 +385,21 @@ export default function PostPreview({
                     gap="$3"
                     padding="$2.5"
                     borderRadius={16}
-                    backgroundColor={isActive ? chipBackground : 'transparent'}
+                    backgroundColor={
+                      isActive ? privacyOptionActiveBackground : 'transparent'
+                    }
                     borderWidth={1}
-                    borderColor={isActive ? accentColor : borderColor}
+                    borderColor={
+                      isActive ? accentColor : privacyOptionInactiveBorder
+                    }
                   >
                     <YStack
                       width={44}
                       height={44}
                       borderRadius={22}
-                      backgroundColor={isActive ? accentColor : chipBackground}
+                      backgroundColor={
+                        isActive ? accentColor : privacyOptionIconBackground
+                      }
                       alignItems="center"
                       justifyContent="center"
                     >
@@ -381,10 +412,14 @@ export default function PostPreview({
                     </YStack>
 
                     <YStack flex={1} gap={4}>
-                      <SizableText size="$4" fontWeight="700">
+                      <SizableText
+                        size="$4"
+                        fontWeight="700"
+                        color={modalTitleColor}
+                      >
                         {option.label}
                       </SizableText>
-                      <Paragraph size="$3" color={mutedTextColor}>
+                      <Paragraph size="$3" color={modalSubtitleColor}>
                         {option.explanation}
                       </Paragraph>
                     </YStack>
@@ -394,7 +429,9 @@ export default function PostPreview({
                       height={18}
                       borderRadius={9}
                       borderWidth={2}
-                      borderColor={isActive ? accentColor : mutedTextColor}
+                      borderColor={
+                        isActive ? accentColor : privacyOptionCheckBorder
+                      }
                       alignItems="center"
                       justifyContent="center"
                     >
