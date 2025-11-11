@@ -12,6 +12,8 @@ import PostAction from './components/PostAction'
 import MediaPicker from './components/MediaPicker'
 import Camera from './components/Camera'
 import DiscardChangesModal from './components/DiscardChanges'
+import { createPostApi } from '@/api/api.post'
+import { getUserId } from '@/utils/SecureStore'
 
 export type CreateMode = 'post' | 'story'
 
@@ -25,6 +27,7 @@ export default function NewPostScreen() {
   const [showMediaPicker, setShowMediaPicker] = useState(false)
   const [showCamera, setShowCamera] = useState(false)
   const [showDiscardModal, setShowDiscardModal] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const user: UserInfoData = useMemo(
     () => ({
@@ -80,11 +83,23 @@ export default function NewPostScreen() {
       type: 'photo' | 'video'
       duration?: number
     }) => {
+      const filename = media.uri.startsWith('data:')
+        ? `photo-${Date.now()}.jpg`
+        : media.uri.split('/').pop() || `photo-${Date.now()}.jpg`
+
+      const mimeType = media.uri.startsWith('data:')
+        ? media.uri.split(',')[0].split(':')[1].split(';')[0]
+        : media.type === 'video'
+          ? 'video/mp4'
+          : 'image/jpeg'
+
       const newMedia: MediaItem = {
         id: `captured-${Date.now()}`,
         url: media.uri,
         type: media.type,
         duration: media.duration,
+        fileName: filename,
+        mimeType: mimeType,
       }
       setMedia(prev => [...prev, newMedia])
       setShowCamera(false)
@@ -98,14 +113,61 @@ export default function NewPostScreen() {
       url: asset.uri,
       type: asset.mediaType === 'video' ? 'video' : 'photo',
       duration: asset.duration,
+      fileName: asset.fileName || asset.uri.split('/').pop() || 'file',
+      mimeType:
+        asset.mimeType ||
+        (asset.mediaType === 'video' ? 'video/mp4' : 'image/jpeg'),
     }))
     setMedia(prev => [...prev, ...newMedia])
     setShowMediaPicker(false)
   }, [])
 
-  const handleShare = useCallback(() => {
-    console.log('Share post', { caption, mediaCount: media.length })
-  }, [caption, media.length])
+  const handleShare = useCallback(async () => {
+    if (isSubmitting) return
+    setIsSubmitting(true)
+
+    try {
+      const userId = await getUserId()
+      if (!userId) {
+        console.error('❌ User not found')
+        setIsSubmitting(false)
+        return
+      }
+
+      const privacyMap: Record<PrivacyOption, 'PUBLIC' | 'PRIVATE' | 'FRIEND'> =
+        {
+          public: 'PUBLIC',
+          friends: 'FRIEND',
+          'only-me': 'PRIVATE',
+        }
+
+      const postData = {
+        userId,
+        content: caption.trim() || undefined,
+        groupId: undefined,
+        privacy: privacyMap[privacy],
+        media:
+          media.length > 0
+            ? media.map(m => ({
+                uri: m.url,
+                name: m.fileName || m.url.split('/').pop() || 'file',
+                type:
+                  m.mimeType ||
+                  (m.type === 'video' ? 'video/mp4' : 'image/jpeg'),
+              }))
+            : undefined,
+      }
+
+      const response = await createPostApi(postData)
+      console.log('✅ Post created successfully: ' + response)
+
+      setIsSubmitting(false)
+      router.replace('/(tabs)')
+    } catch (error) {
+      console.error('❌ Error creating post:', error)
+      setIsSubmitting(false)
+    }
+  }, [caption, media, privacy, isSubmitting, router])
 
   const navigateBack = useCallback(() => {
     if (router.canGoBack()) {
@@ -140,6 +202,7 @@ export default function NewPostScreen() {
         onBack={handleBack}
         onShare={handleShare}
         canShare={canShare}
+        isSubmitting={isSubmitting}
       />
 
       <KeyboardAvoidingView

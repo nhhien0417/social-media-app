@@ -44,6 +44,8 @@ export interface MediaItem {
   url: string
   type?: 'photo' | 'video'
   duration?: number
+  fileName?: string
+  mimeType?: string
 }
 
 export interface UserInfoData {

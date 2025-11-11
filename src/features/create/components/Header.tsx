@@ -29,6 +29,7 @@ import { CreateMode } from '../CreateScreen'
 type Props = {
   mode: CreateMode
   canShare?: boolean
+  isSubmitting?: boolean
   onBack?: () => void
   onShare?: () => void
   onChangeMode?: (mode: CreateMode) => void
@@ -70,6 +71,7 @@ const styles = StyleSheet.create({
 export default function Header({
   mode,
   canShare = true,
+  isSubmitting = false,
   onBack,
   onShare,
   onChangeMode,
@@ -262,14 +264,15 @@ export default function Header({
 
         <Button
           size="$4"
-          disabled={!canShare}
+          disabled={!canShare || isSubmitting}
           onPress={onShare}
           borderRadius={20}
           backgroundColor="#0095F6"
           paddingHorizontal="$4"
+          opacity={!canShare || isSubmitting ? 0.5 : 1}
         >
           <SizableText size="$6" fontWeight="700" color="white">
-            Post
+            {isSubmitting ? 'Posting...' : 'Post'}
           </SizableText>
         </Button>
       </XStack>
