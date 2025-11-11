@@ -1,7 +1,7 @@
 import { memo } from 'react'
-import { ScrollView } from 'react-native'
+import { ScrollView, StyleSheet, Image } from 'react-native'
 import { Text, YStack, useThemeName } from 'tamagui'
-import { Avatar, AvatarFallback, AvatarImage } from 'tamagui'
+import { LinearGradient } from 'expo-linear-gradient'
 import type { ProfileHighlight } from '../../../mock/profile'
 
 interface StoryHighlightsProps {
@@ -14,7 +14,8 @@ export const StoryHighlights = memo(function StoryHighlights({
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
   const labelColor = isDark ? 'rgba(255,255,255,0.8)' : '#111827'
-  const fallbackBackground = isDark ? '#1f2937' : '#e5e7eb'
+  const fallbackBackground = isDark ? '#10131a' : '#e2e8f0'
+  const ringBackground = isDark ? '#050506' : '#ffffff'
 
   if (!highlights.length) {
     return null
@@ -28,14 +29,39 @@ export const StoryHighlights = memo(function StoryHighlights({
     >
       {highlights.map(item => (
         <YStack key={item.id} alignItems="center" gap="$2">
-          <Avatar size="$6" borderWidth={2} borderColor="#d1d5db">
-            <AvatarImage src={item.coverImage} alt={item.label} />
-            <AvatarFallback backgroundColor={fallbackBackground}>
-              <Text fontSize="$3" fontWeight="600">
-                {item.label[0]?.toUpperCase() ?? 'S'}
-              </Text>
-            </AvatarFallback>
-          </Avatar>
+          <LinearGradient
+            colors={INSTAGRAM_GRADIENT}
+            start={{ x: 0, y: 0.35 }}
+            end={{ x: 1, y: 0.65 }}
+            style={styles.highlightRing}
+          >
+            <YStack
+              style={[
+                styles.highlightInner,
+                { backgroundColor: ringBackground },
+              ]}
+            >
+              <YStack style={styles.highlightImageWrapper}>
+                {item.coverImage ? (
+                  <Image
+                    source={{ uri: item.coverImage }}
+                    style={styles.highlightImage}
+                  />
+                ) : (
+                  <YStack
+                    flex={1}
+                    alignItems="center"
+                    justifyContent="center"
+                    backgroundColor={fallbackBackground}
+                  >
+                    <Text fontSize="$3" fontWeight="600" color="#f8fafc">
+                      {item.label[0]?.toUpperCase() ?? 'S'}
+                    </Text>
+                  </YStack>
+                )}
+              </YStack>
+            </YStack>
+          </LinearGradient>
           <Text fontSize="$2" color={labelColor}>
             {item.label}
           </Text>
@@ -43,4 +69,36 @@ export const StoryHighlights = memo(function StoryHighlights({
       ))}
     </ScrollView>
   )
+})
+
+const INSTAGRAM_GRADIENT = [
+  '#f58529',
+  '#feda77',
+  '#dd2a7b',
+  '#8134af',
+  '#515bd4',
+] as const
+
+const styles = StyleSheet.create({
+  highlightRing: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    padding: 2,
+  },
+  highlightInner: {
+    flex: 1,
+    borderRadius: 34,
+    padding: 3,
+  },
+  highlightImageWrapper: {
+    flex: 1,
+    borderRadius: 31,
+    overflow: 'hidden',
+  },
+  highlightImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
 })

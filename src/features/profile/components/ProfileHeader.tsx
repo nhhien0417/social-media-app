@@ -1,12 +1,6 @@
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-  Text,
-  XStack,
-  YStack,
-  useThemeName,
-} from 'tamagui'
+import { Text, XStack, YStack, useThemeName } from 'tamagui'
+import { LinearGradient } from 'expo-linear-gradient'
+import { Image, StyleSheet } from 'react-native'
 import type { ProfileUser } from '../../../mock/profile'
 
 interface ProfileHeaderProps {
@@ -27,6 +21,8 @@ export function ProfileHeader({ user }: ProfileHeaderProps) {
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
   const captionColor = isDark ? 'rgba(255,255,255,0.7)' : '#4b5563'
+  const ringBackground = isDark ? '#050506' : '#ffffff'
+  const fallbackBackground = isDark ? '#111827' : '#e2e8f0'
 
   return (
     <XStack
@@ -34,14 +30,42 @@ export function ProfileHeader({ user }: ProfileHeaderProps) {
       justifyContent="space-between"
       paddingHorizontal="$3"
     >
-      <Avatar size="$8">
-        <AvatarImage src={user.avatarUrl} alt={user.username} />
-        <AvatarFallback backgroundColor={isDark ? '#1f2937' : '#e5e7eb'}>
-          <Text fontSize="$6" fontWeight="700">
-            {user.username[0]?.toUpperCase() ?? 'A'}
-          </Text>
-        </AvatarFallback>
-      </Avatar>
+      <LinearGradient
+        colors={INSTAGRAM_GRADIENT}
+        start={{ x: 0, y: 0.35 }}
+        end={{ x: 1, y: 0.65 }}
+        style={styles.avatarRing}
+      >
+        <YStack
+          style={[styles.avatarInner, { backgroundColor: ringBackground }]}
+          alignItems="center"
+          justifyContent="center"
+        >
+          <YStack style={styles.avatarImageWrapper}>
+            {user.avatarUrl ? (
+              <Image
+                source={{ uri: user.avatarUrl }}
+                style={styles.avatarImage}
+              />
+            ) : (
+              <YStack
+                flex={1}
+                alignItems="center"
+                justifyContent="center"
+                backgroundColor={fallbackBackground}
+              >
+                <Text
+                  fontSize="$6"
+                  fontWeight="700"
+                  color={isDark ? '#f8fafc' : '#111827'}
+                >
+                  {user.username[0]?.toUpperCase() ?? 'A'}
+                </Text>
+              </YStack>
+            )}
+          </YStack>
+        </YStack>
+      </LinearGradient>
 
       <XStack flex={1} justifyContent="space-around" marginLeft="$6">
         {[
@@ -62,3 +86,45 @@ export function ProfileHeader({ user }: ProfileHeaderProps) {
     </XStack>
   )
 }
+
+const INSTAGRAM_GRADIENT = [
+  '#f58529',
+  '#feda77',
+  '#dd2a7b',
+  '#8134af',
+  '#515bd4',
+] as const
+
+const AVATAR_SIZE = 88
+const RING_PADDING = 4
+const RING_SIZE = AVATAR_SIZE + RING_PADDING * 2
+
+const styles = StyleSheet.create({
+  avatarRing: {
+    width: RING_SIZE,
+    height: RING_SIZE,
+    padding: RING_PADDING,
+    borderRadius: RING_SIZE / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarInner: {
+    width: AVATAR_SIZE + RING_PADDING,
+    height: AVATAR_SIZE + RING_PADDING,
+    padding: RING_PADDING / 2,
+    borderRadius: (AVATAR_SIZE + RING_PADDING) / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  avatarImageWrapper: {
+    width: AVATAR_SIZE,
+    height: AVATAR_SIZE,
+    borderRadius: AVATAR_SIZE / 2,
+    overflow: 'hidden',
+  },
+})

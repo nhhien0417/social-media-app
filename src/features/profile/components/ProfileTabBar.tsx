@@ -1,12 +1,12 @@
 import { memo } from 'react'
 import { Grid3x3, Film, Tag } from '@tamagui/lucide-icons'
 import { Text, XStack, useThemeName } from 'tamagui'
-import { ProfileTabKey } from '@/mock/profile';
+import { ProfileTabKey } from '@/mock/profile'
 
 const tabs: Array<{ key: ProfileTabKey; icon: typeof Grid3x3; label: string }> =
   [
     { key: 'posts', icon: Grid3x3, label: 'Posts' },
-    { key: 'reels', icon: Film, label: 'Reels' },
+    { key: 'reels', icon: Film, label: 'Stories' },
     { key: 'tagged', icon: Tag, label: 'Tagged' },
   ]
 
