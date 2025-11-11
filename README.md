@@ -45,9 +45,12 @@ npx expo start
 
 //TODO
 
-- Api post feed
+- Api post feed, Loading post feed
+- Discard post in create screen by tabbar
 - Preview media before post
 - Fix incorrect stretch camera
 - Signup need unique username
 - BE Push notification
-- BE sign in with Google
+- Fix keyboard avoiding action bar in device
+- UnAuthorized after login
+- Netword error on device
