@@ -1,10 +1,12 @@
 import { Text, XStack, YStack, useThemeName } from 'tamagui'
 import { LinearGradient } from 'expo-linear-gradient'
-import { Image, StyleSheet } from 'react-native'
+import { Image, StyleSheet, Pressable } from 'react-native'
+import { router } from 'expo-router'
 import type { ProfileUser } from '../../../mock/profile'
 
 interface ProfileHeaderProps {
   user: ProfileUser
+  isOwnProfile?: boolean
 }
 
 const formatNumber = (value: number) => {
@@ -17,12 +19,22 @@ const formatNumber = (value: number) => {
   return value.toLocaleString('en-US')
 }
 
-export function ProfileHeader({ user }: ProfileHeaderProps) {
+export function ProfileHeader({
+  user,
+  isOwnProfile = true,
+}: ProfileHeaderProps) {
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
   const captionColor = isDark ? 'rgba(255,255,255,0.7)' : '#4b5563'
   const ringBackground = isDark ? '#050506' : '#ffffff'
   const fallbackBackground = isDark ? '#111827' : '#e2e8f0'
+
+  const handleFriendsPress = () => {
+    router.push({
+      pathname: '/profile/friends' as any,
+      params: { isOwnProfile: isOwnProfile.toString() },
+    })
+  }
 
   return (
     <XStack
@@ -68,20 +80,25 @@ export function ProfileHeader({ user }: ProfileHeaderProps) {
       </LinearGradient>
 
       <XStack flex={1} justifyContent="space-around" marginLeft="$6">
-        {[
-          { label: 'Posts', value: user.stats.posts },
-          { label: 'Followers', value: user.stats.followers },
-          { label: 'Following', value: user.stats.following },
-        ].map(stat => (
-          <YStack key={stat.label} alignItems="center" gap="$1">
+        <YStack alignItems="center" gap="$1">
+          <Text fontSize="$5" fontWeight="700">
+            {formatNumber(user.stats.posts)}
+          </Text>
+          <Text fontSize="$2" color={captionColor}>
+            Posts
+          </Text>
+        </YStack>
+
+        <Pressable onPress={handleFriendsPress}>
+          <YStack alignItems="center" gap="$1">
             <Text fontSize="$5" fontWeight="700">
-              {formatNumber(stat.value)}
+              {formatNumber(user.stats.followers + user.stats.following)}
             </Text>
             <Text fontSize="$2" color={captionColor}>
-              {stat.label}
+              Friends
             </Text>
           </YStack>
-        ))}
+        </Pressable>
       </XStack>
     </XStack>
   )

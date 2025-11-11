@@ -147,7 +147,7 @@ export default function ProfileScreen() {
             </XStack>
           </XStack>
 
-          <ProfileHeader user={profileMock} />
+          <ProfileHeader user={profileMock} isOwnProfile={true} />
           <ProfileActions user={profileMock} />
           <ProfileBio user={profileMock} />
           <StoryHighlights highlights={profileMock.highlights} />
