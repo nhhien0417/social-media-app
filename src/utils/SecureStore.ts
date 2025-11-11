@@ -31,7 +31,7 @@ export async function saveTokens(accessToken: string, refreshToken: string) {
   }
 }
 
-export async function removeTokens() {
+export async function removeTokensAndUserId() {
   if (Platform.OS === 'web') {
     localStorage.removeItem(ACCESS_TOKEN_KEY)
     localStorage.removeItem(REFRESH_TOKEN_KEY)

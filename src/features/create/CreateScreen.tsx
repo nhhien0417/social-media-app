@@ -1,8 +1,8 @@
 import React, { useMemo, useState, useCallback } from 'react'
 import { KeyboardAvoidingView, Platform, StyleSheet } from 'react-native'
 import { ScrollView, YStack } from 'tamagui'
-import { useRouter } from 'expo-router'
-import Header, { type CreateMode } from './components/Header'
+import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router'
+import Header from './components/Header'
 import PostPreview, {
   type MediaItem,
   type UserInfoData,
@@ -11,15 +11,20 @@ import PostPreview, {
 import PostAction from './components/PostAction'
 import MediaPicker from './components/MediaPicker'
 import Camera from './components/Camera'
+import DiscardChangesModal from './components/DiscardChanges'
+
+export type CreateMode = 'post' | 'story'
 
 export default function NewPostScreen() {
   const router = useRouter()
+  const params = useLocalSearchParams<{ mode?: CreateMode }>()
   const [mode, setMode] = useState<CreateMode>('post')
   const [caption, setCaption] = useState('')
   const [media, setMedia] = useState<MediaItem[]>([])
   const [privacy, setPrivacy] = useState<PrivacyOption>('friends')
   const [showMediaPicker, setShowMediaPicker] = useState(false)
   const [showCamera, setShowCamera] = useState(false)
+  const [showDiscardModal, setShowDiscardModal] = useState(false)
 
   const user: UserInfoData = useMemo(
     () => ({
@@ -29,6 +34,25 @@ export default function NewPostScreen() {
     }),
     []
   )
+
+  useFocusEffect(
+    useCallback(() => {
+      const resetData = () => {
+        setCaption('')
+        setMedia([])
+        setPrivacy('public')
+        setShowMediaPicker(false)
+        setShowCamera(false)
+        setMode(params.mode || 'post')
+      }
+
+      resetData()
+    }, [params.mode])
+  )
+
+  const hasUnsavedChanges = useMemo(() => {
+    return caption.trim().length > 0 || media.length > 0
+  }, [caption, media])
 
   const canShare = useMemo(() => {
     const hasContent = caption.trim().length > 0 || media.length > 0
@@ -83,18 +107,37 @@ export default function NewPostScreen() {
     console.log('Share post', { caption, mediaCount: media.length })
   }, [caption, media.length])
 
+  const navigateBack = useCallback(() => {
+    if (router.canGoBack()) {
+      router.back()
+    } else {
+      router.replace('/(tabs)')
+    }
+  }, [router])
+
+  const handleBack = useCallback(() => {
+    if (hasUnsavedChanges) {
+      setShowDiscardModal(true)
+    } else {
+      navigateBack()
+    }
+  }, [hasUnsavedChanges, navigateBack])
+
+  const handleDiscard = useCallback(() => {
+    setShowDiscardModal(false)
+    navigateBack()
+  }, [navigateBack])
+
+  const handleCancelDiscard = useCallback(() => {
+    setShowDiscardModal(false)
+  }, [])
+
   return (
     <YStack flex={1} backgroundColor="$background">
       <Header
         mode={mode}
         onChangeMode={setMode}
-        onBack={() => {
-          if (router.canGoBack()) {
-            router.back()
-          } else {
-            router.replace('/(tabs)')
-          }
-        }}
+        onBack={handleBack}
         onShare={handleShare}
         canShare={canShare}
       />
@@ -131,6 +174,12 @@ export default function NewPostScreen() {
         visible={showCamera}
         onClose={() => setShowCamera(false)}
         onCapture={handlePhotoCapture}
+      />
+
+      <DiscardChangesModal
+        visible={showDiscardModal}
+        onDiscard={handleDiscard}
+        onCancel={handleCancelDiscard}
       />
     </YStack>
   )

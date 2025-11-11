@@ -2,7 +2,6 @@ import { memo } from 'react'
 import { ScrollView, Image, StyleSheet, Pressable } from 'react-native'
 import { XStack, YStack, Text, Button, useThemeName } from 'tamagui'
 import { Plus } from '@tamagui/lucide-icons'
-import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import { stories } from '@/mock/stories'
 import StoryItem from './StoryItem'
@@ -23,8 +22,10 @@ function CreateStoryItem() {
   const labelColor = isDark ? '#f5f5f5' : '#111827'
 
   const handlePress = () => {
-    // TODO: Open create story screen
-    console.log('Create story')
+    router.push({
+      pathname: '/(tabs)/create',
+      params: { mode: 'story' },
+    })
   }
 
   return (

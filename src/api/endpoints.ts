@@ -17,4 +17,10 @@ export const ENDPOINTS = {
     ALL: 'profile/users',
     DETAIL: (id: string | number) => `profile/users/${id}`,
   },
+  NOTIFICATIONS: {
+    REGISTER_PUSH_TOKEN: 'notification/push-token/register',
+    UNREGISTER_PUSH_TOKEN: 'notification/push-token/unregister',
+    UPDATE_SETTINGS: 'notification/settings',
+    GET_SETTINGS: 'notification/settings',
+  },
 }

@@ -88,6 +88,15 @@ export default function TabsLayout() {
         />
         <Tabs.Screen
           name="create"
+          listeners={{
+            tabPress: e => {
+              e.preventDefault()
+              router.push({
+                pathname: '/(tabs)/create',
+                params: { mode: 'post' },
+              })
+            },
+          }}
           options={{
             tabBarIcon: ({ focused }) => icon('add-circle', focused),
           }}

@@ -217,7 +217,12 @@ export default function StoryViewer({ initialStoryId }: StoryViewerProps) {
       </XStack>
 
       {/* Header */}
-      <XStack style={styles.header} alignItems="center" gap={10} paddingHorizontal={16}>
+      <XStack
+        style={styles.header}
+        alignItems="center"
+        gap={10}
+        paddingHorizontal={16}
+      >
         <LinearGradient
           colors={['#f58529', '#feda77', '#dd2a7b', '#8134af', '#515bd4']}
           start={{ x: 0, y: 0 }}

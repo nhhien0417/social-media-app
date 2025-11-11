@@ -12,6 +12,7 @@ import {
 } from 'tamagui'
 import { Check, UserPlus } from '@tamagui/lucide-icons'
 import { addFriend, getAllProfilesApi, ProfileData } from '@/api/api.profile'
+import { getUserId } from '@/utils/SecureStore'
 
 interface PeopleYouMayKnowProps {
   onAddFriend?: (user: ProfileData) => void
@@ -65,8 +66,9 @@ export const PeopleYouMayKnow = memo(function PeopleYouMayKnow({
 
   const handleAddFriend = async (friendId: string) => {
     try {
+      const userId = await getUserId()
       const res = await addFriend({
-        userId: 'fdab674a-8ec8-4959-a4fd-54455140e99e',
+        userId: userId || '',
         friendUserId: friendId,
       })
       console.log(res)
@@ -118,7 +120,7 @@ export const PeopleYouMayKnow = memo(function PeopleYouMayKnow({
 
             <YStack flex={1} gap="$1">
               <Text fontSize="$4" fontWeight="600" color={titleColor}>
-                {user.firstName}
+                {user.email}
               </Text>
               <Text fontSize="$3" color={subtitleColor}>
                 {user.lastName}

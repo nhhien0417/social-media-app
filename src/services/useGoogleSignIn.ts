@@ -2,7 +2,7 @@ import { useState } from 'react'
 import * as WebBrowser from 'expo-web-browser'
 import * as Google from 'expo-auth-session/providers/google'
 import { googleLoginApi } from '../api/api.auth'
-import { saveTokens } from '../utils/SecureStore'
+import { saveTokens, saveUserId } from '../utils/SecureStore'
 
 WebBrowser.maybeCompleteAuthSession()
 
@@ -44,6 +44,7 @@ export const useGoogleSignIn = () => {
           const { accessToken, refreshToken, id, email } = response.data
 
           await saveTokens(accessToken, refreshToken)
+          await saveUserId(id)
 
           return {
             success: true,
