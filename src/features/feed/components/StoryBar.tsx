@@ -2,12 +2,21 @@ import { memo } from 'react'
 import { ScrollView } from 'react-native'
 import { XStack, YStack, Text, Button } from 'tamagui'
 import { Plus } from '@tamagui/lucide-icons'
+import { useRouter } from 'expo-router'
 import { stories } from '@/mock/stories'
 import Avatar from '@/components/Avatar'
 import StoryItem from './StoryItem'
 
 function CreateStoryItem() {
   const userAvatar = 'https://i.pravatar.cc/100?img=40'
+  const router = useRouter()
+
+  const handleCreateStory = () => {
+    router.push({
+      pathname: '/(tabs)/create',
+      params: { mode: 'story' },
+    })
+  }
 
   return (
     <YStack alignItems="center" marginHorizontal="$1.5" width={85}>
@@ -16,6 +25,9 @@ function CreateStoryItem() {
         borderRadius={999}
         borderWidth={2}
         borderColor="$red10"
+        onPress={handleCreateStory}
+        pressStyle={{ opacity: 0.7 }}
+        cursor="pointer"
       >
         <Avatar uri={userAvatar} size={70} />
         <Button
@@ -29,6 +41,7 @@ function CreateStoryItem() {
           bottom={0}
           borderWidth={3}
           borderColor="$background"
+          onPress={handleCreateStory}
         />
       </YStack>
       <Text numberOfLines={1} marginTop="$1" fontSize={13} opacity={0.8}>

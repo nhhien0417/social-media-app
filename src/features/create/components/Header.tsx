@@ -24,8 +24,7 @@ import {
   Check,
 } from '@tamagui/lucide-icons'
 import IconButton from '@/components/IconButton'
-
-export type CreateMode = 'post' | 'story'
+import { CreateMode } from '../CreateScreen'
 
 type Props = {
   mode: CreateMode
