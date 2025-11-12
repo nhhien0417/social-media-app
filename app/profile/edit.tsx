@@ -22,11 +22,16 @@ export default function EditProfileScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: background }}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: background }}
+      edges={['bottom', 'left', 'right']}
+    >
       <YStack flex={1} backgroundColor={background}>
         <XStack
           alignItems="center"
           paddingHorizontal="$3"
+          paddingTop="$2"
+          paddingBottom="$3"
           borderBottomWidth={1}
           borderColor={borderColor}
           gap="$3"

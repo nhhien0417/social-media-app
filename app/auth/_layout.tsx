@@ -35,7 +35,7 @@ export default function AuthLayout() {
         flex: 1,
         backgroundColor: theme?.background?.val ?? 'white',
       }}
-      edges={['top', 'bottom']}
+      edges={['bottom', 'left', 'right']}
     >
       <Stack screenOptions={{ headerShown: false }} />
     </SafeAreaView>
