@@ -48,37 +48,56 @@ export default function FriendsScreen({
   // Fetch friends list
   const { data: friendsData, isLoading: friendsLoading } = useQuery({
     queryKey: ['friends', userId],
-    queryFn: () => getFriendApi(userId),
+    queryFn: async () => {
+      const response = await getFriendApi(userId)
+      console.log('Get Friends API Response:', response)
+      return response
+    },
     enabled: !!userId,
   })
 
   // Fetch sent requests (only for own profile)
   const { data: sentData, isLoading: sentLoading } = useQuery({
     queryKey: ['sent', userId],
-    queryFn: () => getSentApi(userId),
+    queryFn: async () => {
+      const response = await getSentApi(userId)
+      console.log('Get Sent Requests API Response:', response)
+      return response
+    },
     enabled: !!userId && isOwnProfile,
   })
 
   // Fetch pending requests (only for own profile)
   const { data: pendingData, isLoading: pendingLoading } = useQuery({
     queryKey: ['pending', userId],
-    queryFn: () => getPendingApi(userId),
+    queryFn: async () => {
+      const response = await getPendingApi(userId)
+      console.log('Get Pending Requests API Response:', response)
+      return response
+    },
     enabled: !!userId && isOwnProfile,
   })
 
   // Fetch all profiles for suggestions (for all tabs when own profile)
   const { data: allProfilesData, isLoading: suggestionsLoading } = useQuery({
     queryKey: ['allProfiles'],
-    queryFn: () => getAllProfilesApi(),
+    queryFn: async () => {
+      const response = await getAllProfilesApi()
+      console.log('All Profiles API Response:', response)
+      return response
+    },
     enabled: isOwnProfile,
   })
 
   // Mutations
   const addFriendMutation = useMutation({
-    mutationFn: (friendUserId: string) =>
-      addFriendApi({ userId, friendUserId }),
-    onSuccess: () => {
-      console.log('Successfully request friend')
+    mutationFn: async (friendUserId: string) => {
+      const response = await addFriendApi({ userId, friendUserId })
+      console.log('Add Friend API Response:', response)
+      return response
+    },
+    onSuccess: data => {
+      console.log('Successfully request friend - Success data:', data)
       queryClient.invalidateQueries({ queryKey: ['sent', userId] })
       queryClient.invalidateQueries({ queryKey: ['allProfiles'] })
     },
@@ -88,10 +107,13 @@ export default function FriendsScreen({
   })
 
   const acceptFriendMutation = useMutation({
-    mutationFn: (friendUserId: string) =>
-      acceptFriendApi({ userId, friendUserId }),
-    onSuccess: () => {
-      console.log('Successfully accepting friend')
+    mutationFn: async (friendUserId: string) => {
+      const response = await acceptFriendApi({ userId, friendUserId })
+      console.log('Accept Friend API Response:', response)
+      return response
+    },
+    onSuccess: data => {
+      console.log('Successfully accepting friend - Success data:', data)
       queryClient.invalidateQueries({ queryKey: ['friends', userId] })
       queryClient.invalidateQueries({ queryKey: ['pending', userId] })
     },
@@ -101,10 +123,13 @@ export default function FriendsScreen({
   })
 
   const rejectFriendMutation = useMutation({
-    mutationFn: (friendUserId: string) =>
-      rejectFriendAPi({ userId, friendUserId }),
-    onSuccess: () => {
-      console.log('Successfully rejecting friend')
+    mutationFn: async (friendUserId: string) => {
+      const response = await rejectFriendAPi({ userId, friendUserId })
+      console.log('Reject Friend API Response:', response)
+      return response
+    },
+    onSuccess: data => {
+      console.log('Successfully rejecting friend - Success data:', data)
       queryClient.invalidateQueries({ queryKey: ['pending', userId] })
       queryClient.invalidateQueries({ queryKey: ['sent', userId] })
     },
