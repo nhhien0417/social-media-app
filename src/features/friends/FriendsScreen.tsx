@@ -91,50 +91,41 @@ export default function FriendsScreen({
 
   // Mutations
   const addFriendMutation = useMutation({
-    mutationFn: async (friendUserId: string) => {
-      const response = await addFriendApi({ userId, friendUserId })
-      console.log('Add Friend API Response:', response)
-      return response
-    },
+    mutationFn: (friendUserId: string) =>
+      addFriendApi({ userId, friendUserId }),
     onSuccess: data => {
-      console.log('Successfully request friend - Success data:', data)
+      console.log('Success request friend:', data)
       queryClient.invalidateQueries({ queryKey: ['sent', userId] })
       queryClient.invalidateQueries({ queryKey: ['allProfiles'] })
     },
-    onError: (error: any) => {
-      console.error('Error adding friend:', error)
+    onError: error => {
+      console.error('Error add friend:', error)
     },
   })
 
   const acceptFriendMutation = useMutation({
-    mutationFn: async (friendUserId: string) => {
-      const response = await acceptFriendApi({ userId, friendUserId })
-      console.log('Accept Friend API Response:', response)
-      return response
-    },
+    mutationFn: (friendUserId: string) =>
+      acceptFriendApi({ userId, friendUserId }),
     onSuccess: data => {
-      console.log('Successfully accepting friend - Success data:', data)
+      console.log('Success accept friend:', data)
       queryClient.invalidateQueries({ queryKey: ['friends', userId] })
       queryClient.invalidateQueries({ queryKey: ['pending', userId] })
     },
-    onError: (error: any) => {
-      console.error('Error accepting friend:', error)
+    onError: error => {
+      console.error('Error accept friend:', error)
     },
   })
 
   const rejectFriendMutation = useMutation({
-    mutationFn: async (friendUserId: string) => {
-      const response = await rejectFriendAPi({ userId, friendUserId })
-      console.log('Reject Friend API Response:', response)
-      return response
-    },
+    mutationFn: (friendUserId: string) =>
+      rejectFriendAPi({ userId, friendUserId }),
     onSuccess: data => {
-      console.log('Successfully rejecting friend - Success data:', data)
+      console.log('Success reject friend:', data)
       queryClient.invalidateQueries({ queryKey: ['pending', userId] })
       queryClient.invalidateQueries({ queryKey: ['sent', userId] })
     },
-    onError: (error: any) => {
-      console.error('Error rejecting friend:', error)
+    onError: error => {
+      console.error('Error reject friend:', error)
     },
   })
 
