@@ -8,6 +8,7 @@ import {
   Easing,
   StatusBar,
 } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import {
   XStack,
   YStack,
@@ -51,7 +52,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    top: (StatusBar.currentHeight ?? 0) + 12.5,
     alignSelf: 'center',
     paddingHorizontal: 12.5,
     width: '100%',
@@ -77,6 +77,7 @@ export default function Header({
   onChangeMode,
 }: Props) {
   const [showModal, setShowModal] = useState(false)
+  const insets = useSafeAreaInsets()
   const isPost = mode === 'post'
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
@@ -188,6 +189,7 @@ export default function Header({
   return (
     <>
       <XStack
+        paddingTop={insets.top}
         paddingHorizontal="$3"
         paddingVertical="$3"
         alignItems="center"
@@ -199,7 +201,11 @@ export default function Header({
       >
         <IconButton Icon={ChevronLeft} onPress={onBack} Size={30} />
 
-        <TouchableOpacity activeOpacity={0.85} onPress={openSheet}>
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={openSheet}
+          style={{ flex: 1, alignItems: 'center' }}
+        >
           <XStack
             alignItems="center"
             backgroundColor={segmentBackground}
@@ -209,13 +215,12 @@ export default function Header({
             gap="$3"
           >
             <XStack
-              flex={1}
               borderRadius={999}
               overflow="hidden"
               backgroundColor="transparent"
               borderWidth={StyleSheet.hairlineWidth}
               borderColor="rgba(148,163,184,0.35)"
-              minWidth={160}
+              width={180}
             >
               <XStack
                 flex={1}
@@ -301,6 +306,7 @@ export default function Header({
           style={[
             styles.topSheet,
             {
+              top: insets.top + 12.5,
               transform: [{ translateY: sheetY }],
             },
           ]}

@@ -31,11 +31,11 @@ export default function FriendsScreen({
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
 
-  const backgroundColor = isDark ? '#000000' : '#ffffff'
+  const backgroundColor = isDark ? '#000000' : '#FAFAFA' // Instagram colors
   const textColor = isDark ? '#f5f5f5' : '#111827'
   const subtitleColor = isDark ? 'rgba(255,255,255,0.6)' : '#6b7280'
-  const borderColor = isDark ? 'rgba(255,255,255,0.1)' : '#e5e7eb'
-  const searchBackground = isDark ? 'rgba(255,255,255,0.08)' : '#f3f4f6'
+  const borderColor = isDark ? '#262626' : '#DBDBDB' // Instagram borders
+  const searchBackground = isDark ? 'rgba(255,255,255,0.08)' : '#EFEFEF'
   const tabActiveColor = isDark ? '#ffffff' : '#111827'
   const tabInactiveColor = isDark ? 'rgba(255,255,255,0.6)' : '#9ca3af'
   const buttonBackground = '#0095F6'

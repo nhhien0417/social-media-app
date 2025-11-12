@@ -8,10 +8,10 @@ export default function EditProfileScreen() {
   const router = useRouter()
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
-  const background = isDark ? '#111418' : '#ffffff'
-  const borderColor = isDark ? 'rgba(255,255,255,0.1)' : '#e5e7eb'
-  const textColor = isDark ? '#f5f5f5' : '#111827'
-  const accentColor = '#1877F2'
+  const background = isDark ? '#000000' : '#FAFAFA' // Instagram colors
+  const borderColor = isDark ? '#262626' : '#DBDBDB' // Instagram borders
+  const textColor = isDark ? '#FAFAFA' : '#000000'
+  const accentColor = '#0095F6' // Instagram blue
 
   const handleSave = () => {
     router.replace('/profile')
@@ -22,11 +22,16 @@ export default function EditProfileScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: background }}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: background }}
+      edges={['bottom', 'left', 'right']}
+    >
       <YStack flex={1} backgroundColor={background}>
         <XStack
           alignItems="center"
           paddingHorizontal="$3"
+          paddingTop="$2"
+          paddingBottom="$3"
           borderBottomWidth={1}
           borderColor={borderColor}
           gap="$3"

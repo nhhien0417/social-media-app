@@ -12,7 +12,7 @@ import {
   TextInput as RNTextInput,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { XStack, YStack, SizableText } from 'tamagui'
+import { XStack, YStack, SizableText, useTheme } from 'tamagui'
 import type { Comment } from '@/types/Comment'
 import CommentList from './components/CommentList'
 import CommentInput from './components/CommentInput'
@@ -84,6 +84,7 @@ export default function Comment({
     new Set()
   )
   const inputRef = useRef<RNTextInput>(null)
+  const theme = useTheme()
 
   const translateY = useRef(new Animated.Value(SNAP_POINTS.HIDDEN)).current
   const overlayOpacity = useRef(new Animated.Value(0)).current
@@ -237,7 +238,13 @@ export default function Comment({
           },
         ]}
       >
-        <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
+        <SafeAreaView
+          style={{
+            flex: 1,
+            backgroundColor: theme?.backgroundModal?.val ?? 'white',
+          }}
+          edges={['top', 'bottom']}
+        >
           <KeyboardAvoidingView
             style={{ flex: 1 }}
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}

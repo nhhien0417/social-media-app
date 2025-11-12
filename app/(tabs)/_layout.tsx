@@ -61,7 +61,13 @@ export default function TabsLayout() {
   const userAvatar = 'https://i.pravatar.cc/100?img=40'
 
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        backgroundColor: theme?.background?.val ?? 'white',
+      }}
+      edges={['top', 'bottom']}
+    >
       <Tabs
         screenOptions={{
           headerShown: false,
