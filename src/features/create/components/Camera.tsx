@@ -8,6 +8,7 @@ import {
   Animated,
   Text,
   Dimensions,
+  ScrollView,
 } from 'react-native'
 import { YStack, XStack, SizableText } from 'tamagui'
 import { Ionicons } from '@expo/vector-icons'
@@ -35,6 +36,16 @@ type Props = {
 
 type CameraMode = 'photo' | 'video'
 type TimerOption = 0 | 3 | 10
+type FilterType = 'none' | 'vivid' | 'warm' | 'cool' | 'bw' | 'sepia'
+
+const FILTERS = [
+  { id: 'none', name: 'Normal', colors: undefined },
+  { id: 'vivid', name: 'Vivid', colors: 'rgba(255,100,100,0.15)' },
+  { id: 'warm', name: 'Warm', colors: 'rgba(255,150,50,0.2)' },
+  { id: 'cool', name: 'Cool', colors: 'rgba(50,150,255,0.2)' },
+  { id: 'bw', name: 'B&W', colors: 'rgba(0,0,0,0.4)' }, // Darker overlay for B&W effect
+  { id: 'sepia', name: 'Sepia', colors: 'rgba(150,100,50,0.25)' },
+] as const
 
 const styles = StyleSheet.create({
   container: {
@@ -245,6 +256,50 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255,255,255,0.2)',
   },
+  filterOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    pointerEvents: 'none',
+    zIndex: 2,
+  },
+  filtersContainer: {
+    position: 'absolute',
+    bottom: 160,
+    left: 0,
+    right: 0,
+    height: 100,
+    zIndex: 100,
+  },
+  filterScroll: {
+    paddingHorizontal: 16,
+  },
+  filterItem: {
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  filterPreview: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  filterPreviewActive: {
+    borderColor: '#0095F6',
+    borderWidth: 3,
+  },
+  filterName: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    marginTop: 6,
+    fontWeight: '600',
+  },
 })
 
 export default function Camera({ visible, onClose, onCapture }: Props) {
@@ -257,6 +312,9 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
   const [countdown, setCountdown] = useState<number | null>(null)
   const [zoom, setZoom] = useState(0)
   const [showZoomControls, setShowZoomControls] = useState(false)
+  const [filter, setFilter] = useState<FilterType>('none')
+  const [showGrid, setShowGrid] = useState(false)
+  const [showFilters, setShowFilters] = useState(false)
   const [showMinDurationWarning, setShowMinDurationWarning] = useState(false)
   const [isZoomChanging, setIsZoomChanging] = useState(false)
   const [cameraPermission, requestCameraPermission] = useCameraPermissions()
@@ -723,6 +781,28 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
                   <Ionicons name="flash" size={24} color="#FFCC00" />
                 )}
               </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.iconButton,
+                  showGrid && { backgroundColor: 'rgba(255,255,255,0.25)' },
+                ]}
+                onPress={() => setShowGrid(!showGrid)}
+              >
+                <Ionicons name="grid-outline" size={24} color="white" />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.iconButton,
+                  filter !== 'none' && {
+                    backgroundColor: 'rgba(255,255,255,0.25)',
+                  },
+                ]}
+                onPress={() => setShowFilters(!showFilters)}
+              >
+                <Ionicons name="color-filter-outline" size={24} color="white" />
+              </TouchableOpacity>
             </XStack>
           </View>
 
@@ -760,6 +840,82 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
                   }}
                 />
               </TouchableOpacity>
+            </View>
+          )}
+
+          {/* Filter Overlay */}
+          {filter !== 'none' && (
+            <View
+              style={[
+                styles.filterOverlay,
+                {
+                  backgroundColor:
+                    FILTERS.find(f => f.id === filter)?.colors || 'transparent',
+                },
+              ]}
+            />
+          )}
+
+          {/* Grid Lines */}
+          {showGrid && (
+            <View style={styles.gridOverlay}>
+              {[0, 1, 2].map(col => (
+                <View
+                  key={col}
+                  style={[
+                    styles.gridColumn,
+                    col === 2 && { borderRightWidth: 0 }, // Remove right border from last column
+                  ]}
+                >
+                  {[0, 1, 2].map(row => (
+                    <View
+                      key={row}
+                      style={[
+                        styles.gridRow,
+                        row === 2 && { borderBottomWidth: 0 }, // Remove bottom border from last row
+                      ]}
+                    />
+                  ))}
+                </View>
+              ))}
+            </View>
+          )}
+
+          {/* Filters Selection */}
+          {showFilters && (
+            <View style={styles.filtersContainer}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.filterScroll}
+              >
+                {FILTERS.map(f => (
+                  <TouchableOpacity
+                    key={f.id}
+                    style={styles.filterItem}
+                    onPress={() => {
+                      setFilter(f.id as FilterType)
+                      setShowFilters(false)
+                    }}
+                  >
+                    <View
+                      style={[
+                        styles.filterPreview,
+                        filter === f.id && styles.filterPreviewActive,
+                        { backgroundColor: f.colors || 'rgba(0,0,0,0.4)' },
+                      ]}
+                    >
+                      <Ionicons
+                        name="image-outline"
+                        size={24}
+                        color="white"
+                        style={{ opacity: 0.8 }}
+                      />
+                    </View>
+                    <Text style={styles.filterName}>{f.name}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
             </View>
           )}
 
