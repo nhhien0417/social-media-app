@@ -199,7 +199,11 @@ export default function Header({
       >
         <IconButton Icon={ChevronLeft} onPress={onBack} Size={30} />
 
-        <TouchableOpacity activeOpacity={0.85} onPress={openSheet}>
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={openSheet}
+          style={{ flex: 1, alignItems: 'center' }}
+        >
           <XStack
             alignItems="center"
             backgroundColor={segmentBackground}
@@ -209,13 +213,12 @@ export default function Header({
             gap="$3"
           >
             <XStack
-              flex={1}
               borderRadius={999}
               overflow="hidden"
               backgroundColor="transparent"
               borderWidth={StyleSheet.hairlineWidth}
               borderColor="rgba(148,163,184,0.35)"
-              minWidth={160}
+              width={180}
             >
               <XStack
                 flex={1}
