@@ -154,6 +154,13 @@ export default function StoryViewer({ initialStoryId }: StoryViewerProps) {
     setIsPaused(false)
   }
 
+  const handleDismissInput = () => {
+    if (showReplyInput) {
+      setShowReplyInput(false)
+      setIsPaused(false)
+    }
+  }
+
   // Swipe gesture handler
   const panResponder = useRef(
     PanResponder.create({
@@ -343,13 +350,25 @@ export default function StoryViewer({ initialStoryId }: StoryViewerProps) {
       <View style={styles.tapContainer} pointerEvents="box-none">
         <Pressable
           style={styles.tapLeft}
-          onPress={handleTapLeft}
+          onPress={() => {
+            if (showReplyInput) {
+              handleDismissInput()
+            } else {
+              handleTapLeft()
+            }
+          }}
           onLongPress={handleLongPressIn}
           onPressOut={handleLongPressOut}
         />
         <Pressable
           style={styles.tapRight}
-          onPress={handleTapRight}
+          onPress={() => {
+            if (showReplyInput) {
+              handleDismissInput()
+            } else {
+              handleTapRight()
+            }
+          }}
           onLongPress={handleLongPressIn}
           onPressOut={handleLongPressOut}
         />
