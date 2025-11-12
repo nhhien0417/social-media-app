@@ -10,16 +10,7 @@ import {
   Dimensions,
 } from 'react-native'
 import { YStack, XStack, SizableText } from 'tamagui'
-import {
-  X,
-  FlipHorizontal,
-  Zap,
-  ZapOff,
-  Video,
-  Timer,
-  ZoomIn,
-  ZoomOut,
-} from '@tamagui/lucide-icons'
+import { Ionicons } from '@expo/vector-icons'
 import {
   CameraView,
   CameraType,
@@ -48,11 +39,11 @@ type TimerOption = 0 | 3 | 10
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'black',
+    backgroundColor: '#000000',
   },
   topBar: {
     position: 'absolute',
-    top: 40,
+    top: 50,
     left: 0,
     right: 0,
     flexDirection: 'row',
@@ -63,7 +54,7 @@ const styles = StyleSheet.create({
   },
   bottomBar: {
     position: 'absolute',
-    bottom: 30,
+    bottom: 40,
     left: 0,
     right: 0,
     alignItems: 'center',
@@ -71,151 +62,167 @@ const styles = StyleSheet.create({
     zIndex: 100,
   },
   captureButton: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: 'white',
-    borderWidth: 6,
-    borderColor: 'rgba(255,255,255,0.3)',
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    backgroundColor: 'transparent',
+    borderWidth: 5,
+    borderColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
   },
   captureButtonInner: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    backgroundColor: 'white',
+    width: 62,
+    height: 62,
+    borderRadius: 31,
+    backgroundColor: '#FFFFFF',
   },
   iconButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(0,0,0,0.4)',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
   },
   controls: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
     width: '100%',
-    marginTop: 20,
+    marginTop: 24,
   },
   permissionContainer: {
     flex: 1,
-    backgroundColor: 'black',
+    backgroundColor: '#000000',
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 40,
   },
   recordingButton: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: 'red',
-    borderWidth: 6,
-    borderColor: 'rgba(255,255,255,0.3)',
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    backgroundColor: 'transparent',
+    borderWidth: 5,
+    borderColor: '#FF3B30',
     justifyContent: 'center',
     alignItems: 'center',
   },
   recordingInner: {
-    width: 30,
-    height: 30,
+    width: 28,
+    height: 28,
     borderRadius: 6,
-    backgroundColor: 'red',
+    backgroundColor: '#FF3B30',
   },
   modeSelector: {
     flexDirection: 'row',
-    gap: 20,
-    marginBottom: 20,
+    gap: 8,
+    marginBottom: 24,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    borderRadius: 25,
+    padding: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
   },
   modeButton: {
     paddingVertical: 8,
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     borderRadius: 20,
   },
   modeButtonActive: {
-    backgroundColor: 'rgba(255,255,255,0.3)',
+    backgroundColor: '#FFFFFF',
   },
   modeText: {
-    color: 'white',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
+    letterSpacing: 0.3,
   },
   modeTextInactive: {
-    color: 'rgba(255,255,255,0.6)',
+    color: 'rgba(255,255,255,0.7)',
   },
   timerText: {
     position: 'absolute',
     top: '45%',
     alignSelf: 'center',
-    fontSize: 80,
-    fontWeight: 'bold',
-    color: 'white',
-    textShadowColor: 'rgba(0,0,0,0.75)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 10,
+    fontSize: 90,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    textShadowColor: 'rgba(0,0,0,0.8)',
+    textShadowOffset: { width: 0, height: 3 },
+    textShadowRadius: 12,
     zIndex: 50,
   },
   recordingTime: {
     position: 'absolute',
-    top: 100,
+    top: 110,
     alignSelf: 'center',
-    backgroundColor: 'rgba(255,0,0,0.8)',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    backgroundColor: 'rgba(255,59,48,0.9)',
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: 22,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
     zIndex: 100,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
   },
   recordingDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: 'white',
+    backgroundColor: '#FFFFFF',
   },
   recordingTimeText: {
-    color: 'white',
+    color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
   warningMessage: {
     position: 'absolute',
-    bottom: 200,
+    bottom: 220,
     alignSelf: 'center',
-    backgroundColor: 'rgba(255,165,0,0.9)',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 25,
+    backgroundColor: 'rgba(255,149,0,0.95)',
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: 28,
     zIndex: 100,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
   },
   warningText: {
-    color: 'white',
+    color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '600',
     textAlign: 'center',
+    letterSpacing: 0.3,
   },
   zoomContainer: {
     position: 'absolute',
-    bottom: 200,
+    bottom: 220,
     alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    borderRadius: 25,
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    gap: 10,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    borderRadius: 28,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    gap: 12,
     zIndex: 100,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
   },
   zoomText: {
-    color: 'white',
+    color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '600',
-    minWidth: 40,
+    fontWeight: '700',
+    minWidth: 44,
     textAlign: 'center',
+    letterSpacing: 0.5,
   },
   gridOverlay: {
     position: 'absolute',
@@ -230,13 +237,13 @@ const styles = StyleSheet.create({
   gridColumn: {
     flex: 1,
     borderRightWidth: 1,
-    borderRightColor: 'rgba(255,255,255,0.3)',
+    borderRightColor: 'rgba(255,255,255,0.2)',
     justifyContent: 'space-between',
   },
   gridRow: {
     height: '33.33%',
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.3)',
+    borderBottomColor: 'rgba(255,255,255,0.2)',
   },
 })
 
@@ -249,6 +256,7 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
   const [timer, setTimer] = useState<TimerOption>(0)
   const [countdown, setCountdown] = useState<number | null>(null)
   const [zoom, setZoom] = useState(0)
+  const [showZoomControls, setShowZoomControls] = useState(false)
   const [showMinDurationWarning, setShowMinDurationWarning] = useState(false)
   const [isZoomChanging, setIsZoomChanging] = useState(false)
   const [cameraPermission, requestCameraPermission] = useCameraPermissions()
@@ -373,6 +381,7 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
 
   useEffect(() => {
     if (visible) {
+      console.log('Camera opened, current zoom:', zoom)
       // Request both camera and microphone permissions when visible
       if (!cameraPermission?.granted) {
         requestCameraPermission()
@@ -397,6 +406,9 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
       isRecordingRef.current = false
       setRecordingTime(0)
       setCountdown(null)
+      console.log('Resetting zoom to 0')
+      setZoom(0) // Reset zoom to 1.0x
+      setShowZoomControls(false) // Hide zoom controls
       if (recordingInterval.current) {
         clearInterval(recordingInterval.current)
         recordingInterval.current = null
@@ -445,14 +457,41 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
   const increaseZoom = () => {
     if (isZoomChanging) return
     setIsZoomChanging(true)
-    setZoom(current => Math.min(current + 0.1, 1))
+
+    // If zoom controls not showing, show them first at 1.0x
+    if (!showZoomControls) {
+      console.log('Showing zoom controls at 1.0x')
+      setShowZoomControls(true)
+      setZoom(0) // Start at 1.0x
+      setTimeout(() => setIsZoomChanging(false), 200)
+      return
+    }
+
+    setZoom(current => {
+      console.log('Current zoom before increase:', current)
+      const newZoom = Math.min(current + 0.1, 1)
+      console.log('Increasing to', newZoom)
+      return newZoom
+    })
     setTimeout(() => setIsZoomChanging(false), 200)
   }
 
   const decreaseZoom = () => {
     if (isZoomChanging) return
     setIsZoomChanging(true)
-    setZoom(current => Math.max(current - 0.1, 0))
+    setZoom(current => {
+      console.log('Current zoom before decrease:', current)
+      const newZoom = Math.max(current - 0.1, 0)
+      console.log('Decreasing to', newZoom)
+
+      // If back to 1.0x (0), hide controls
+      if (newZoom === 0) {
+        console.log('Back to 1.0x - hide popup')
+        setShowZoomControls(false)
+      }
+
+      return newZoom
+    })
     setTimeout(() => setIsZoomChanging(false), 200)
   }
 
@@ -629,61 +668,96 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
           {/* Top Bar */}
           <View style={styles.topBar}>
             <TouchableOpacity style={styles.iconButton} onPress={onClose}>
-              <X size={28} color="white" />
+              <Ionicons name="close" size={28} color="white" />
             </TouchableOpacity>
 
-            <XStack gap="$2">
-              <TouchableOpacity style={styles.iconButton} onPress={cycleTimer}>
-                <Timer size={24} color="white" />
+            <XStack gap="$2.5">
+              <TouchableOpacity
+                style={[
+                  styles.iconButton,
+                  timer > 0 && { backgroundColor: 'rgba(255,255,255,0.25)' },
+                ]}
+                onPress={cycleTimer}
+              >
+                <Ionicons name="timer-outline" size={24} color="white" />
                 {timer > 0 && (
-                  <Text
+                  <View
                     style={{
                       position: 'absolute',
-                      color: 'white',
-                      fontSize: 10,
-                      fontWeight: 'bold',
-                      bottom: 4,
+                      top: -4,
+                      right: -4,
+                      backgroundColor: '#0095F6',
+                      borderRadius: 10,
+                      minWidth: 20,
+                      height: 20,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      paddingHorizontal: 4,
+                      borderWidth: 2,
+                      borderColor: '#000000',
                     }}
                   >
-                    {timer}
-                  </Text>
+                    <Text
+                      style={{
+                        color: '#FFFFFF',
+                        fontSize: 11,
+                        fontWeight: '700',
+                      }}
+                    >
+                      {timer}
+                    </Text>
+                  </View>
                 )}
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.iconButton} onPress={toggleFlash}>
+              <TouchableOpacity
+                style={[
+                  styles.iconButton,
+                  flash === 'on' && { backgroundColor: 'rgba(255,204,0,0.25)' },
+                ]}
+                onPress={toggleFlash}
+              >
                 {flash === 'off' ? (
-                  <ZapOff size={24} color="white" />
+                  <Ionicons name="flash-off-outline" size={24} color="white" />
                 ) : (
-                  <Zap size={24} color="white" />
+                  <Ionicons name="flash" size={24} color="#FFCC00" />
                 )}
               </TouchableOpacity>
             </XStack>
           </View>
 
           {/* Zoom Controls */}
-          {zoom > 0 && (
+          {showZoomControls && (
             <View style={styles.zoomContainer}>
               <TouchableOpacity
                 onPress={decreaseZoom}
-                disabled={isZoomChanging}
-                activeOpacity={isZoomChanging ? 1 : 0.7}
+                disabled={isZoomChanging || zoom === 0}
+                activeOpacity={isZoomChanging || zoom === 0 ? 1 : 0.7}
+                style={{ padding: 4 }}
               >
-                <ZoomOut
+                <Ionicons
+                  name="remove-circle-outline"
                   size={24}
                   color="white"
-                  opacity={isZoomChanging ? 0.5 : 1}
+                  style={{
+                    opacity: zoom === 0 ? 0.3 : isZoomChanging ? 0.5 : 1,
+                  }}
                 />
               </TouchableOpacity>
-              <Text style={styles.zoomText}>{(zoom * 10 + 1).toFixed(1)}x</Text>
+              <Text style={styles.zoomText}>{(zoom + 1).toFixed(1)}x</Text>
               <TouchableOpacity
                 onPress={increaseZoom}
-                disabled={isZoomChanging}
-                activeOpacity={isZoomChanging ? 1 : 0.7}
+                disabled={isZoomChanging || zoom >= 1}
+                activeOpacity={isZoomChanging || zoom >= 1 ? 1 : 0.7}
+                style={{ padding: 4 }}
               >
-                <ZoomIn
+                <Ionicons
+                  name="add-circle-outline"
                   size={24}
                   color="white"
-                  opacity={isZoomChanging ? 0.5 : 1}
+                  style={{
+                    opacity: zoom >= 1 ? 0.3 : isZoomChanging ? 0.5 : 1,
+                  }}
                 />
               </TouchableOpacity>
             </View>
@@ -703,7 +777,9 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
                 <Text
                   style={[
                     styles.modeText,
-                    mode !== 'photo' && styles.modeTextInactive,
+                    mode === 'photo'
+                      ? { color: '#000000' }
+                      : styles.modeTextInactive,
                   ]}
                 >
                   Photo
@@ -719,7 +795,9 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
                 <Text
                   style={[
                     styles.modeText,
-                    mode !== 'video' && styles.modeTextInactive,
+                    mode === 'video'
+                      ? { color: '#000000' }
+                      : styles.modeTextInactive,
                   ]}
                 >
                   Video
@@ -728,22 +806,23 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
             </View>
 
             <View style={styles.controls}>
-              {/* Zoom In Button - only show when zoom popup is not visible */}
-              {zoom === 0 && (
+              {/* Zoom In Button - only show when zoom controls not visible */}
+              {!showZoomControls && (
                 <TouchableOpacity
                   style={styles.iconButton}
                   onPress={increaseZoom}
                   disabled={isZoomChanging}
                   activeOpacity={isZoomChanging ? 1 : 0.7}
                 >
-                  <ZoomIn
-                    size={28}
+                  <Ionicons
+                    name="add-circle-outline"
+                    size={26}
                     color="white"
-                    opacity={isZoomChanging ? 0.5 : 1}
+                    style={{ opacity: isZoomChanging ? 0.5 : 1 }}
                   />
                 </TouchableOpacity>
               )}
-              {zoom > 0 && <View style={{ width: 50 }} />}
+              {showZoomControls && <View style={{ width: 44 }} />}
 
               {/* Capture/Record Button */}
               <TouchableOpacity
@@ -760,7 +839,18 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
                 ) : isRecording ? (
                   <View style={styles.recordingInner} />
                 ) : (
-                  <Video size={32} color="white" />
+                  <View
+                    style={[
+                      styles.captureButtonInner,
+                      {
+                        backgroundColor: '#FF3B30',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                      },
+                    ]}
+                  >
+                    <Ionicons name="videocam" size={28} color="white" />
+                  </View>
                 )}
               </TouchableOpacity>
 
@@ -769,7 +859,11 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
                 style={styles.iconButton}
                 onPress={toggleCameraFacing}
               >
-                <FlipHorizontal size={28} color="white" />
+                <Ionicons
+                  name="camera-reverse-outline"
+                  size={28}
+                  color="white"
+                />
               </TouchableOpacity>
             </View>
           </View>
