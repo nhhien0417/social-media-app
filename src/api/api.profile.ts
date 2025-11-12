@@ -43,16 +43,34 @@ export const getUserApi = (userId: string) => {
   return ApiClient.get<UserProfileResponse>(ENDPOINTS.PROFILE.DETAIL(userId))
 }
 
-export const getFriendApi = (userId: string) => {
-  return ApiClient.get<AllProfileResponse>(ENDPOINTS.PROFILE.FRIENDS(userId))
+export const getFriendApi = (
+  userId: string,
+  page: number = 0,
+  size: number = 100
+) => {
+  return ApiClient.get<AllProfileResponse>(
+    `${ENDPOINTS.PROFILE.FRIENDS(userId)}?page=${page}&size=${size}`
+  )
 }
 
-export const getSentApi = (userId: string) => {
-  return ApiClient.get<AllProfileResponse>(ENDPOINTS.PROFILE.SENT(userId))
+export const getSentApi = (
+  userId: string,
+  page: number = 0,
+  size: number = 100
+) => {
+  return ApiClient.get<AllProfileResponse>(
+    `${ENDPOINTS.PROFILE.SENT(userId)}?page=${page}&size=${size}`
+  )
 }
 
-export const getPendingApi = (userId: string) => {
-  return ApiClient.get<AllProfileResponse>(ENDPOINTS.PROFILE.PENDING(userId))
+export const getPendingApi = (
+  userId: string,
+  page: number = 0,
+  size: number = 100
+) => {
+  return ApiClient.get<AllProfileResponse>(
+    `${ENDPOINTS.PROFILE.PENDING(userId)}?page=${page}&size=${size}`
+  )
 }
 
 export const addFriendApi = (data: FriendActionRequest) => {
@@ -60,9 +78,9 @@ export const addFriendApi = (data: FriendActionRequest) => {
 }
 
 export const acceptFriendApi = (data: FriendActionRequest) => {
-  return ApiClient.post<FriendActionResponse>(ENDPOINTS.PROFILE.REQUEST, data)
+  return ApiClient.post<FriendActionResponse>(ENDPOINTS.PROFILE.ACCEPT, data)
 }
 
 export const rejectFriendAPi = (data: FriendActionRequest) => {
-  return ApiClient.post<FriendActionResponse>(ENDPOINTS.PROFILE.REQUEST, data)
+  return ApiClient.post<FriendActionResponse>(ENDPOINTS.PROFILE.REJECT, data)
 }

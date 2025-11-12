@@ -8,9 +8,9 @@ export const ENDPOINTS = {
   },
   PROFILE: {
     ALL: 'profile/users',
-    DETAIL: (id: string | number) => `posts/${id}`,
+    DETAIL: (id: string | number) => `profile/users/${id}`,
     FRIENDS: (id: string | number) => `profile/friendships/${id}`,
-    SENT: (id: string | number) => `profile/friendships/send/${id}`,
+    SENT: (id: string | number) => `profile/friendships/sent/${id}`,
     PENDING: (id: string | number) => `profile/friendships/pending/${id}`,
     REQUEST: 'profile/friendships/request',
     ACCEPT: 'profile/friendships/accept',
