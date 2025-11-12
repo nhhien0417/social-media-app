@@ -13,6 +13,7 @@ import Animated, {
 
 import StoryBar from './components/StoryBar'
 import PostCard from './components/PostCard'
+import PostingStatus from './components/PostingStatus'
 import { posts } from '@/mock/posts'
 import ButtonIcon from '@/components/IconButton'
 import { useAppTheme } from '@/providers/ThemeProvider'
@@ -145,6 +146,7 @@ export default function FeedScreen() {
           <>
             <AnimatedSpacer style={spacerStyle} />
             <StoryBar />
+            <PostingStatus />
             <Separator />
           </>
         }

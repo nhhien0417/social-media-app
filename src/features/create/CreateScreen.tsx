@@ -14,12 +14,14 @@ import Camera from './components/Camera'
 import DiscardChangesModal from './components/DiscardChanges'
 import { createPostApi } from '@/api/api.post'
 import { getUserId } from '@/utils/SecureStore'
+import { usePostStatus } from '@/providers/PostStatusProvider'
 
 export type CreateMode = 'post' | 'story'
 
 export default function NewPostScreen() {
   const router = useRouter()
   const params = useLocalSearchParams<{ mode?: CreateMode }>()
+  const { startPosting, finishPosting, failPosting } = usePostStatus()
   const [mode, setMode] = useState<CreateMode>('post')
   const [caption, setCaption] = useState('')
   const [media, setMedia] = useState<MediaItem[]>([])
@@ -126,48 +128,62 @@ export default function NewPostScreen() {
     if (isSubmitting) return
     setIsSubmitting(true)
 
-    try {
-      const userId = await getUserId()
-      if (!userId) {
-        console.error('❌ User not found')
-        setIsSubmitting(false)
-        return
-      }
-
-      const privacyMap: Record<PrivacyOption, 'PUBLIC' | 'PRIVATE' | 'FRIEND'> =
-        {
-          public: 'PUBLIC',
-          friends: 'FRIEND',
-          'only-me': 'PRIVATE',
-        }
-
-      const postData = {
-        userId,
-        content: caption.trim() || undefined,
-        groupId: undefined,
-        privacy: privacyMap[privacy],
-        media:
-          media.length > 0
-            ? media.map(m => ({
-                uri: m.url,
-                name: m.fileName || m.url.split('/').pop() || 'file',
-                type:
-                  m.mimeType ||
-                  (m.type === 'video' ? 'video/mp4' : 'image/jpeg'),
-              }))
-            : undefined,
-      }
-
-      const response = await createPostApi(postData)
-      console.log('✅ Post created successfully: ' + response)
-
+    const userId = await getUserId()
+    if (!userId) {
+      console.error('❌ User not found')
       setIsSubmitting(false)
-      router.replace('/(tabs)')
-    } catch (error) {
-      console.error('❌ Error creating post:', error)
-      setIsSubmitting(false)
+      return
     }
-  }, [caption, media, privacy, isSubmitting, router])
+
+    const firstMediaUrl = media.length > 0 ? media[0].url : undefined
+    router.replace('/(tabs)')
+    startPosting(firstMediaUrl)
+
+    const privacyMap: Record<PrivacyOption, 'PUBLIC' | 'PRIVATE' | 'FRIEND'> = {
+      public: 'PUBLIC',
+      friends: 'FRIEND',
+      'only-me': 'PRIVATE',
+    }
+
+    const postData = {
+      userId,
+      content: caption.trim() || undefined,
+      groupId: undefined,
+      privacy: privacyMap[privacy],
+      media:
+        media.length > 0
+          ? media.map(m => ({
+              uri: m.url,
+              name: m.fileName || m.url.split('/').pop() || 'file',
+              type:
+                m.mimeType || (m.type === 'video' ? 'video/mp4' : 'image/jpeg'),
+            }))
+          : undefined,
+    }
+
+    createPostApi(postData)
+      .then(response => {
+        console.log('✅ Post created successfully:', response)
+        finishPosting()
+        setIsSubmitting(false)
+      })
+      .catch(error => {
+        console.error('❌ Error creating post:', error)
+        const errorMessage =
+          error?.message || 'Network error. Please check your connection.'
+        failPosting(errorMessage)
+        setIsSubmitting(false)
+      })
+  }, [
+    caption,
+    media,
+    privacy,
+    isSubmitting,
+    router,
+    startPosting,
+    finishPosting,
+    failPosting,
+  ])
 
   const navigateBack = useCallback(() => {
     if (router.canGoBack()) {

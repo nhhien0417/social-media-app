@@ -4,7 +4,6 @@ import { YStack, XStack, Text, Input, useThemeName } from 'tamagui'
 import { ChevronLeft, Search, X } from '@tamagui/lucide-icons'
 import { router } from 'expo-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import Toast from 'react-native-toast-message'
 import {
   getFriendApi,
   getSentApi,
