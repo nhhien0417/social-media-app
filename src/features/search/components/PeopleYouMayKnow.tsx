@@ -11,7 +11,7 @@ import {
   useThemeName,
 } from 'tamagui'
 import { Check, UserPlus } from '@tamagui/lucide-icons'
-import { addFriend, getAllProfilesApi, ProfileData } from '@/api/api.profile'
+import { addFriendApi, getAllProfilesApi, ProfileData } from '@/api/api.profile'
 import { getUserId } from '@/utils/SecureStore'
 
 interface PeopleYouMayKnowProps {
@@ -67,7 +67,7 @@ export const PeopleYouMayKnow = memo(function PeopleYouMayKnow({
   const handleAddFriend = async (friendId: string) => {
     try {
       const userId = await getUserId()
-      const res = await addFriend({
+      const res = await addFriendApi({
         userId: userId || '',
         friendUserId: friendId,
       })
