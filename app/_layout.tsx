@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Slot, SplashScreen } from 'expo-router'
+import { StatusBar } from 'react-native'
 import { useFonts } from 'expo-font'
 import { TamaguiProvider } from 'tamagui'
 import config from '../tamagui.config'
@@ -12,9 +13,16 @@ import { getUserId } from '@/utils/SecureStore'
 SplashScreen.preventAutoHideAsync()
 
 function RootContent() {
-  const { isLoading } = useAppTheme()
+  const { isLoading, themeName } = useAppTheme()
   const [userId, setUserId] = useState<string | null>(null)
   const [isLoadingUserId, setIsLoadingUserId] = useState(true)
+
+  // Update StatusBar style based on theme
+  useEffect(() => {
+    StatusBar.setBarStyle(
+      themeName === 'dark' ? 'light-content' : 'dark-content'
+    )
+  }, [themeName])
 
   useEffect(() => {
     const loadUserId = async () => {

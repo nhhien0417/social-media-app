@@ -11,12 +11,14 @@ import config from '../../tamagui.config'
 
 type ThemeContextType = {
   theme: 'light' | 'dark'
+  themeName: 'light' | 'dark'
   toggleTheme: () => void
   isLoading: boolean
 }
 
 const ThemeContext = createContext<ThemeContextType>({
   theme: 'light',
+  themeName: 'light',
   isLoading: true,
   toggleTheme: () => {},
 })
@@ -64,7 +66,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     setTheme(prev => (prev === 'light' ? 'dark' : 'light'))
 
   const value = useMemo(
-    () => ({ theme, toggleTheme, isLoading }),
+    () => ({ theme, themeName: theme, toggleTheme, isLoading }),
     [theme, isLoading]
   )
 

@@ -113,7 +113,6 @@ export default function ProfileScreen() {
     return profileMock.posts
   }, [tab])
 
-  const pageBackground = isDark ? '#111418' : '#ffffff'
   const navIconColor = isDark ? '#f5f5f5' : '#111827'
 
   const handleLogout = async () => {
@@ -122,7 +121,7 @@ export default function ProfileScreen() {
   }
 
   return (
-    <YStack flex={1} backgroundColor={pageBackground}>
+    <YStack flex={1} backgroundColor="$background">
       <ScrollView showsVerticalScrollIndicator={false}>
         <YStack gap="$4" paddingTop="$5" paddingBottom="$8">
           <XStack

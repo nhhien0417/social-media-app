@@ -33,7 +33,6 @@ export default function SearchScreen() {
   const inputTextColor = isDark ? '#f5f5f5' : '#1f2937'
   const clearButtonBackground = isDark ? 'rgba(255,255,255,0.12)' : '#e5e7eb'
   const clearIconColor = isDark ? 'rgba(255,255,255,0.8)' : '#4b5563'
-  const pageBackground = isDark ? '#111418' : '#ffffff'
 
   const filteredResults = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
@@ -119,7 +118,7 @@ export default function SearchScreen() {
 
   return (
     <ScrollView
-      style={{ backgroundColor: pageBackground }}
+      style={{ backgroundColor: isDark ? '#000000' : '#FAFAFA' }}
       contentContainerStyle={{ padding: 12 }}
     >
       <YStack gap="$3">

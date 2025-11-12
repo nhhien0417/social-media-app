@@ -8,6 +8,7 @@ import {
   Easing,
   StatusBar,
 } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import {
   XStack,
   YStack,
@@ -50,7 +51,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    top: (StatusBar.currentHeight ?? 0) + 12.5,
     alignSelf: 'center',
     paddingHorizontal: 12.5,
     width: '100%',
@@ -75,6 +75,7 @@ export default function Header({
   onChangeMode,
 }: Props) {
   const [showModal, setShowModal] = useState(false)
+  const insets = useSafeAreaInsets()
   const isPost = mode === 'post'
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
@@ -186,6 +187,7 @@ export default function Header({
   return (
     <>
       <XStack
+        paddingTop={insets.top}
         paddingHorizontal="$3"
         paddingVertical="$3"
         alignItems="center"
@@ -298,6 +300,7 @@ export default function Header({
           style={[
             styles.topSheet,
             {
+              top: insets.top + 12.5,
               transform: [{ translateY: sheetY }],
             },
           ]}
