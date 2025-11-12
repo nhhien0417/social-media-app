@@ -113,7 +113,7 @@ export const createPostApi = (
         reject(new Error('Network error'))
       }
 
-      xhr.open('POST', `${API_BASE_URL}${ENDPOINTS.POSTS.CREATE}`)
+      xhr.open('POST', `${API_BASE_URL}/${ENDPOINTS.POSTS.CREATE}`)
 
       if (token) {
         xhr.setRequestHeader('Authorization', `Bearer ${token}`)

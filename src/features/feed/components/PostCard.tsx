@@ -15,6 +15,8 @@ import { formatDate } from '@/utils/FormatDate'
 import { Media } from '@/types/Media'
 import Comment from '@/features/comment/Comment'
 import { comments } from '@/mock/comments'
+import { getUserId } from '@/utils/SecureStore'
+import { likePostApi } from '@/api/api.post'
 
 function MediaItem({ item, width }: { item: Media; width: number }) {
   return <Image source={{ uri: item.url }} width={width} aspectRatio={1} />
@@ -61,6 +63,7 @@ function PostCard({ post }: { post: Post }) {
   const isLongCaption = !!content && content.length > 100
 
   const [commentSheetVisible, setCommentSheetVisible] = useState(false)
+  const [isLiked, setIsLiked] = useState(false)
 
   const handleScroll = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -72,6 +75,30 @@ function PostCard({ post }: { post: Post }) {
     },
     [activeIndex, containerWidth]
   )
+
+  const handleLikePost = async () => {
+    try {
+      const previousLikedState = isLiked
+      setIsLiked(!previousLikedState)
+
+      const userId = await getUserId()
+      if (!userId) {
+        console.error('❌ User not found')
+        return
+      }
+
+      const postData = {
+        postId: post.id,
+        userId,
+      }
+
+      const response = await likePostApi(postData)
+      console.log('✅ API response:', response.data)
+      setIsLiked(!previousLikedState)
+    } catch (error) {
+      console.error('❌ Error like post:', error)
+    }
+  }
 
   const handleSendComment = (content: string, parentId?: string) => {
     // TODO: Implement send comment logic
@@ -142,7 +169,12 @@ function PostCard({ post }: { post: Post }) {
         alignItems="center"
       >
         <XStack alignItems="center">
-          <ButtonIcon Icon={Heart} />
+          <ButtonIcon
+            Icon={Heart}
+            Fill={isLiked}
+            Color={isLiked ? '#ee4444' : '$color'}
+            onPress={handleLikePost}
+          />
           <ButtonIcon
             Icon={MessageCircle}
             onPress={() => setCommentSheetVisible(true)}

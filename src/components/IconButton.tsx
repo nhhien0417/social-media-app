@@ -4,9 +4,17 @@ import React from 'react'
 type Props = {
   Icon: React.ElementType
   Size?: number
+  Fill?: boolean
+  Color?: string
 } & YStackProps
 
-export default function ButtonIcon({ Icon, Size = 24, ...rest }: Props) {
+export default function ButtonIcon({
+  Icon,
+  Size = 24,
+  Fill = false,
+  Color = '$color',
+  ...rest
+}: Props) {
   return (
     <YStack
       padding="$2"
@@ -15,7 +23,11 @@ export default function ButtonIcon({ Icon, Size = 24, ...rest }: Props) {
       justifyContent="center"
       {...rest}
     >
-      <Icon size={Size} />
+      {Fill ? (
+        <Icon size={Size} color={Color} fill={Color} />
+      ) : (
+        <Icon size={Size} color={Color} />
+      )}
     </YStack>
   )
 }
