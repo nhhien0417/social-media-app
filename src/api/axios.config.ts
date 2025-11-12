@@ -8,6 +8,7 @@ import {
 import { ENDPOINTS } from './endpoints'
 import { router } from 'expo-router'
 import { Platform } from 'react-native'
+import { refreshTokenApi } from './api.auth'
 
 const getBaseURL = () => {
   if (Platform.OS === 'web') {
@@ -100,18 +101,9 @@ api.interceptors.response.use(
           throw new Error('No refresh token available')
         }
 
-        const response = await axios.post(
-          `${API_BASE_URL}/${ENDPOINTS.IDENTITY.TOKEN}`,
-          { refreshToken },
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              Accept: 'application/json',
-            },
-          }
-        )
-
-        const accessToken = response.data.data
+        const refreshRequest = { refreshToken }
+        const response = await refreshTokenApi(refreshRequest)
+        const accessToken = response.data.accessToken
         await saveTokens(accessToken, refreshToken)
 
         if (originalRequest.headers) {

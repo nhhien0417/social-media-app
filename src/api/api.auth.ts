@@ -56,10 +56,6 @@ export const signOutApi = () => {
   return ApiClient.post(ENDPOINTS.IDENTITY.LOGOUT)
 }
 
-export const getProfileApi = () => {
-  return ApiClient.get(ENDPOINTS.IDENTITY.PROFILE)
-}
-
 export const refreshTokenApi = (data: RefreshTokenData) => {
   return ApiClient.post<RefreshTokenResponse>(ENDPOINTS.IDENTITY.TOKEN, data)
 }
