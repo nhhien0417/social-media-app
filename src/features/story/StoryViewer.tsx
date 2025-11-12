@@ -10,6 +10,7 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  Keyboard,
 } from 'react-native'
 import { YStack, XStack, Text } from 'tamagui'
 import { X, Heart, Send, MoreHorizontal } from '@tamagui/lucide-icons'
@@ -40,6 +41,7 @@ export default function StoryViewer({ initialStoryId }: StoryViewerProps) {
   const [isPaused, setIsPaused] = useState(false)
   const [isLiked, setIsLiked] = useState(false)
   const [showReplyInput, setShowReplyInput] = useState(false)
+  const [keyboardHeight, setKeyboardHeight] = useState(0)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
 
   const currentUser = sortedStories[currentUserIndex]
@@ -52,6 +54,27 @@ export default function StoryViewer({ initialStoryId }: StoryViewerProps) {
       router.back()
     }
   }, [currentUser, totalStories])
+
+  // Keyboard listeners
+  useEffect(() => {
+    const keyboardWillShow = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      e => {
+        setKeyboardHeight(e.endCoordinates.height)
+      }
+    )
+    const keyboardWillHide = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => {
+        setKeyboardHeight(0)
+      }
+    )
+
+    return () => {
+      keyboardWillShow.remove()
+      keyboardWillHide.remove()
+    }
+  }, [])
 
   useEffect(() => {
     if (isPaused) return
@@ -283,7 +306,21 @@ export default function StoryViewer({ initialStoryId }: StoryViewerProps) {
 
       {/* Reply Input */}
       {showReplyInput && (
-        <XStack style={styles.replyInputContainer} alignItems="center" gap={12}>
+        <XStack
+          style={[
+            styles.replyInputContainer,
+            {
+              bottom:
+                keyboardHeight > 0
+                  ? keyboardHeight + 8
+                  : Platform.OS === 'ios'
+                    ? 48
+                    : 24,
+            },
+          ]}
+          alignItems="center"
+          gap={12}
+        >
           <View style={styles.replyInputWrapper}>
             <TextInput
               style={styles.textInput}
