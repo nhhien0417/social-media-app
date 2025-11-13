@@ -44,6 +44,17 @@ export default function FriendsScreen({
 
   const userId = propUserId || currentUserId || ''
 
+  // Fetch all profiles for suggestions (for all tabs when own profile)
+  const { data: allProfilesData, isLoading: suggestionsLoading } = useQuery({
+    queryKey: ['allProfiles'],
+    queryFn: async () => {
+      const response = await getAllProfilesApi()
+      console.log('All Profiles API Response:', response)
+      return response
+    },
+    enabled: isOwnProfile,
+  })
+
   // Fetch friends list
   const { data: friendsData, isLoading: friendsLoading } = useQuery({
     queryKey: ['friends', userId],
@@ -53,17 +64,6 @@ export default function FriendsScreen({
       return response
     },
     enabled: !!userId,
-  })
-
-  // Fetch sent requests (only for own profile)
-  const { data: sentData, isLoading: sentLoading } = useQuery({
-    queryKey: ['sent', userId],
-    queryFn: async () => {
-      const response = await getSentApi(userId)
-      console.log('Get Sent Requests API Response:', response)
-      return response
-    },
-    enabled: !!userId && isOwnProfile,
   })
 
   // Fetch pending requests (only for own profile)
@@ -77,15 +77,15 @@ export default function FriendsScreen({
     enabled: !!userId && isOwnProfile,
   })
 
-  // Fetch all profiles for suggestions (for all tabs when own profile)
-  const { data: allProfilesData, isLoading: suggestionsLoading } = useQuery({
-    queryKey: ['allProfiles'],
+  // Fetch sent requests (only for own profile)
+  const { data: sentData, isLoading: sentLoading } = useQuery({
+    queryKey: ['sent', userId],
     queryFn: async () => {
-      const response = await getAllProfilesApi()
-      console.log('All Profiles API Response:', response)
+      const response = await getSentApi(userId)
+      console.log('Get Sent Requests API Response:', response)
       return response
     },
-    enabled: isOwnProfile,
+    enabled: !!userId && isOwnProfile,
   })
 
   // Mutations
@@ -120,6 +120,8 @@ export default function FriendsScreen({
       rejectFriendAPi({ userId, friendUserId }),
     onSuccess: data => {
       console.log('Success reject friend:', data)
+      queryClient.invalidateQueries({ queryKey: ['allProfiles'] })
+      queryClient.invalidateQueries({ queryKey: ['friends', userId] })
       queryClient.invalidateQueries({ queryKey: ['pending', userId] })
       queryClient.invalidateQueries({ queryKey: ['sent', userId] })
     },
