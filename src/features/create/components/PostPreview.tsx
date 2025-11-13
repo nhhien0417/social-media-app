@@ -110,7 +110,6 @@ export default function PostPreview({
   const chipBorder = isDark ? 'rgba(255,255,255,0.14)' : '#dbeafe'
   const mutedTextColor = isDark ? 'rgba(255,255,255,0.68)' : '#6b7280'
   const overlayColor = 'rgba(0,0,0,0.65)'
-  const modalBackground = isDark ? 'rgba(18,18,18,0.96)' : '#ffffff'
   const modalBorderColor = isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0'
   const modalTitleColor = isDark ? '#f7f7f8' : '#0f172a'
   const modalSubtitleColor = isDark ? 'rgba(209,213,219,0.78)' : '#475569'
@@ -343,7 +342,7 @@ export default function PostPreview({
         >
           <YStack
             width="100%"
-            backgroundColor={modalBackground}
+            backgroundColor="$backgroundModal"
             borderRadius={24}
             padding="$4"
             gap="$3"
@@ -413,7 +412,7 @@ export default function PostPreview({
                       />
                     </YStack>
 
-                    <YStack flex={1} gap={4}>
+                    <YStack flex={1}>
                       <SizableText
                         size="$4"
                         fontWeight="700"
@@ -421,9 +420,13 @@ export default function PostPreview({
                       >
                         {option.label}
                       </SizableText>
-                      <Paragraph size="$3" color={modalSubtitleColor}>
+                      <SizableText
+                        size="$3"
+                        color={modalSubtitleColor}
+                        lineHeight="$1"
+                      >
                         {option.explanation}
-                      </Paragraph>
+                      </SizableText>
                     </YStack>
 
                     <YStack

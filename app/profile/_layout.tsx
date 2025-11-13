@@ -1,15 +1,13 @@
 import { Stack } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { YStack, useTheme } from 'tamagui'
+import { YStack } from 'tamagui'
 
 export default function ProfileLayout() {
-  const theme = useTheme()
-
   return (
     <SafeAreaView
       style={{
         flex: 1,
-        backgroundColor: theme?.background?.val ?? 'white',
+        backgroundColor: 'transparent',
       }}
       edges={['top', 'bottom']}
     >

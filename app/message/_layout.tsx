@@ -1,16 +1,14 @@
 import MessengerHeader from '@/features/messenger/components/Header'
 import { Stack } from 'expo-router'
-import { YStack, useTheme } from 'tamagui'
+import { YStack } from 'tamagui'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 export default function MessageLayout() {
-  const theme = useTheme()
-
   return (
     <SafeAreaView
       style={{
         flex: 1,
-        backgroundColor: theme?.background?.val ?? 'white',
+        backgroundColor: 'transparent',
       }}
       edges={['top', 'bottom']}
     >

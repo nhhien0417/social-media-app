@@ -84,7 +84,6 @@ export default function Comment({
     new Set()
   )
   const inputRef = useRef<RNTextInput>(null)
-  const theme = useTheme()
 
   const translateY = useRef(new Animated.Value(SNAP_POINTS.HIDDEN)).current
   const overlayOpacity = useRef(new Animated.Value(0)).current
@@ -241,7 +240,7 @@ export default function Comment({
         <SafeAreaView
           style={{
             flex: 1,
-            backgroundColor: theme?.backgroundModal?.val ?? 'white',
+            backgroundColor: 'transparent',
           }}
           edges={['top', 'bottom']}
         >

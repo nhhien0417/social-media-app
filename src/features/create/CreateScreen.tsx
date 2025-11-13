@@ -222,9 +222,9 @@ export default function NewPostScreen() {
       />
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardAvoiding}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={0}
       >
         <ScrollView flex={1} showsVerticalScrollIndicator={false}>
           <PostPreview
@@ -263,9 +263,3 @@ export default function NewPostScreen() {
     </YStack>
   )
 }
-
-const styles = StyleSheet.create({
-  keyboardAvoiding: {
-    flex: 1,
-  },
-})

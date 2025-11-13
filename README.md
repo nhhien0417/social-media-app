@@ -45,7 +45,6 @@ npx expo start
 
 //TODO
 
-- Api post feed, Loading post feed
 - Discard post in create screen by tabbar
 - Preview media before post
 - Fix incorrect stretch camera

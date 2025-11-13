@@ -216,7 +216,7 @@ export default function PostingStatus() {
             {/* Track */}
             <YStack
               height={TRACK_H}
-              backgroundColor="$gray5"
+              backgroundColor="$color"
               borderRadius={2}
               overflow="hidden"
               position="relative"

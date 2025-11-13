@@ -1,5 +1,4 @@
 import { useRouter } from 'expo-router'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import { Button, Text, XStack, YStack, useThemeName } from 'tamagui'
 import { profileMock } from '@/mock/profile'
 import { EditProfileForm } from '@/features/profile/components/EditProfileForm'
@@ -22,59 +21,54 @@ export default function EditProfileScreen() {
   }
 
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: background }}
-      edges={['bottom', 'left', 'right']}
-    >
-      <YStack flex={1} backgroundColor={background}>
-        <XStack
-          alignItems="center"
-          paddingHorizontal="$3"
-          paddingTop="$2"
-          paddingBottom="$3"
-          borderBottomWidth={1}
-          borderColor={borderColor}
-          gap="$3"
+    <YStack flex={1} backgroundColor={background}>
+      <XStack
+        alignItems="center"
+        paddingHorizontal="$3"
+        paddingTop="$2"
+        paddingBottom="$3"
+        borderBottomWidth={1}
+        borderColor={borderColor}
+        gap="$3"
+      >
+        <Button
+          size="$3"
+          backgroundColor="transparent"
+          borderColor="transparent"
+          onPress={handleCancel}
+          minWidth={72}
+          paddingHorizontal={0}
         >
-          <Button
-            size="$3"
-            backgroundColor="transparent"
-            borderColor="transparent"
-            onPress={handleCancel}
-            minWidth={72}
-            paddingHorizontal={0}
-          >
-            <Text fontSize="$4" color={textColor}>
-              Cancel
-            </Text>
-          </Button>
-
-          <Text
-            flex={1}
-            textAlign="center"
-            fontSize="$6"
-            fontWeight="700"
-            color={textColor}
-          >
-            Edit Profile
+          <Text fontSize="$4" color={textColor}>
+            Cancel
           </Text>
+        </Button>
 
-          <Button
-            size="$3"
-            backgroundColor="transparent"
-            borderColor="transparent"
-            onPress={handleSave}
-            minWidth={72}
-            paddingHorizontal={0}
-          >
-            <Text fontSize="$4" fontWeight="700" color={accentColor}>
-              Done
-            </Text>
-          </Button>
-        </XStack>
+        <Text
+          flex={1}
+          textAlign="center"
+          fontSize="$6"
+          fontWeight="700"
+          color={textColor}
+        >
+          Edit Profile
+        </Text>
 
-        <EditProfileForm user={profileMock} />
-      </YStack>
-    </SafeAreaView>
+        <Button
+          size="$3"
+          backgroundColor="transparent"
+          borderColor="transparent"
+          onPress={handleSave}
+          minWidth={72}
+          paddingHorizontal={0}
+        >
+          <Text fontSize="$4" fontWeight="700" color={accentColor}>
+            Done
+          </Text>
+        </Button>
+      </XStack>
+
+      <EditProfileForm user={profileMock} />
+    </YStack>
   )
 }
