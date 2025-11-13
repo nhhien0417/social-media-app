@@ -52,27 +52,47 @@ export function UserCard({
         </Text>
       </YStack>
 
+      {/* FRIEND */}
       {type === 'friend' && (
-        <Button
-          size="$3"
-          backgroundColor={isDark ? 'rgba(255,255,255,0.1)' : '#efefef'}
-          color={textColor}
-          borderRadius={8}
-          paddingHorizontal="$4"
-          fontWeight="600"
-          fontSize={14}
-          pressStyle={{ opacity: 0.8 }}
-          onPress={() => router.push(`/message/${user.id}` as any)}
-        >
-          Message
-        </Button>
+        <XStack gap="$2">
+          <Button
+            size="$3"
+            backgroundColor={isDark ? 'rgba(255,255,255,0.1)' : '#efefef'}
+            color={textColor}
+            borderRadius={8}
+            paddingHorizontal="$4"
+            fontWeight="600"
+            fontSize={14}
+            pressStyle={{ opacity: 0.8 }}
+            onPress={() => router.push(`/message/${user.id}` as any)}
+            disabled={isLoading}
+          >
+            Message
+          </Button>
+
+          <Button
+            size="$3"
+            backgroundColor={isDark ? 'rgba(255,255,255,0.08)' : '#fee2e2'}
+            color={isDark ? '#d99797ff' : '#b91c1c'}
+            borderRadius={8}
+            paddingHorizontal="$4"
+            fontWeight="600"
+            fontSize={14}
+            pressStyle={{ opacity: 0.9 }}
+            onPress={() => onReject?.(user.id)}
+            disabled={isLoading}
+          >
+            Unfriend
+          </Button>
+        </XStack>
       )}
 
+      {/* REQUEST */}
       {type === 'request' && (
         <XStack gap="$2">
           <Button
             size="$3"
-            backgroundColor="#0095F6"
+            backgroundColor="#0099ffff"
             color="#ffffff"
             borderRadius={8}
             paddingHorizontal="$4"
@@ -101,6 +121,7 @@ export function UserCard({
         </XStack>
       )}
 
+      {/* SENT */}
       {type === 'sent' && (
         <Button
           size="$3"
