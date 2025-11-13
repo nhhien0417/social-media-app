@@ -1,7 +1,8 @@
 import React, { useMemo, useState, useCallback } from 'react'
-import { KeyboardAvoidingView, Platform, StyleSheet } from 'react-native'
+import { KeyboardAvoidingView, Platform } from 'react-native'
 import { ScrollView, YStack } from 'tamagui'
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router'
+
 import Header from './components/Header'
 import PostPreview, {
   type MediaItem,
@@ -22,6 +23,7 @@ export default function NewPostScreen() {
   const router = useRouter()
   const params = useLocalSearchParams<{ mode?: CreateMode }>()
   const { startPosting, finishPosting, failPosting } = usePostStatus()
+
   const [mode, setMode] = useState<CreateMode>('post')
   const [caption, setCaption] = useState('')
   const [media, setMedia] = useState<MediaItem[]>([])
@@ -42,22 +44,20 @@ export default function NewPostScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      const resetData = () => {
-        setCaption('')
-        setMedia([])
-        setPrivacy('public')
-        setShowMediaPicker(false)
-        setShowCamera(false)
-        setMode(params.mode || 'post')
-      }
-
-      resetData()
+      setMedia([])
+      setCaption('')
+      setPrivacy('friends')
+      setShowCamera(false)
+      setShowMediaPicker(false)
+      setShowDiscardModal(false)
+      setMode((params.mode as CreateMode) || 'post')
     }, [params.mode])
   )
 
-  const hasUnsavedChanges = useMemo(() => {
-    return caption.trim().length > 0 || media.length > 0
-  }, [caption, media])
+  const hasUnsavedChanges = useMemo(
+    () => caption.trim().length > 0 || media.length > 0,
+    [caption, media]
+  )
 
   const canShare = useMemo(() => {
     const hasContent = caption.trim().length > 0 || media.length > 0
@@ -101,7 +101,7 @@ export default function NewPostScreen() {
         type: media.type,
         duration: media.duration,
         fileName: filename,
-        mimeType: mimeType,
+        mimeType,
       }
       setMedia(prev => [...prev, newMedia])
       setShowCamera(false)
@@ -136,7 +136,6 @@ export default function NewPostScreen() {
     }
 
     const firstMediaUrl = media.length > 0 ? media[0].url : undefined
-    router.replace('/(tabs)')
     startPosting(firstMediaUrl)
 
     const privacyMap: Record<PrivacyOption, 'PUBLIC' | 'PRIVATE' | 'FRIEND'> = {
@@ -160,6 +159,8 @@ export default function NewPostScreen() {
             }))
           : undefined,
     }
+
+    router.replace('/(tabs)')
 
     createPostApi(postData)
       .then(response => {

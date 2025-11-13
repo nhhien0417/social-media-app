@@ -35,22 +35,20 @@ export default function TabsLayout() {
     checkAuth()
   }, [])
 
-  if (isChecking) {
-    return null
-  }
+  if (isChecking) return null
 
   const icon = (
     iconName: ComponentProps<typeof Ionicons>['name'],
     focused: boolean
   ) => {
-    const iconUsername = (
+    const iconNameFinal = (
       focused ? iconName : `${iconName}-outline`
     ) as ComponentProps<typeof Ionicons>['name']
 
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <Ionicons
-          name={iconUsername}
+          name={iconNameFinal}
           size={25}
           color={theme?.color?.val ?? '#111'}
         />
@@ -62,10 +60,7 @@ export default function TabsLayout() {
 
   return (
     <SafeAreaView
-      style={{
-        flex: 1,
-        backgroundColor: 'transparent',
-      }}
+      style={{ flex: 1, backgroundColor: 'transparent' }}
       edges={['top', 'bottom']}
     >
       <Tabs
@@ -86,19 +81,21 @@ export default function TabsLayout() {
             tabBarIcon: ({ focused }) => icon('home', focused),
           }}
         />
+
         <Tabs.Screen
           name="search"
           options={{
             tabBarIcon: ({ focused }) => icon('search', focused),
           }}
         />
+
         <Tabs.Screen
           name="create"
           listeners={{
             tabPress: e => {
               e.preventDefault()
               router.push({
-                pathname: '/(tabs)/create',
+                pathname: '/create',
                 params: { mode: 'post' },
               })
             },
@@ -107,6 +104,7 @@ export default function TabsLayout() {
             tabBarIcon: ({ focused }) => icon('add-circle', focused),
           }}
         />
+
         <Tabs.Screen
           name="activity"
           options={{

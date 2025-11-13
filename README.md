@@ -45,7 +45,6 @@ npx expo start
 
 //TODO
 
-- Discard post in create screen by tabbar
 - Fix keyboard avoiding action bar in device
 - UI None user in each tab friend
 - UnAuthorized after login
