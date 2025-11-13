@@ -13,6 +13,7 @@ import { Camera } from '@tamagui/lucide-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Image, StyleSheet } from 'react-native'
 import type { ProfileUser } from '../../../mock/profile'
+import { INSTAGRAM_GRADIENT } from '@/utils/InstagramGradient'
 
 interface EditProfileFormProps {
   user: ProfileUser
@@ -164,14 +165,6 @@ export function EditProfileForm({ user }: EditProfileFormProps) {
     </ScrollView>
   )
 }
-
-const INSTAGRAM_GRADIENT = [
-  '#f58529',
-  '#feda77',
-  '#dd2a7b',
-  '#8134af',
-  '#515bd4',
-] as const
 
 const AVATAR_SIZE = 88
 const RING_PADDING = 4

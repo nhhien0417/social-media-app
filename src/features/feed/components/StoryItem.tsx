@@ -3,14 +3,7 @@ import React from 'react'
 import { Image, StyleSheet, Pressable } from 'react-native'
 import { YStack, Text, useThemeName } from 'tamagui'
 import { LinearGradient } from 'expo-linear-gradient'
-
-const INSTAGRAM_GRADIENT = [
-  '#f58529',
-  '#feda77',
-  '#dd2a7b',
-  '#8134af',
-  '#515bd4',
-] as const
+import { INSTAGRAM_GRADIENT } from '@/utils/InstagramGradient'
 
 interface StoryItemProps {
   story: Story

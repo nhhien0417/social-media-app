@@ -7,10 +7,10 @@ export default function EditProfileScreen() {
   const router = useRouter()
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
-  const background = isDark ? '#000000' : '#FAFAFA' // Instagram colors
-  const borderColor = isDark ? '#262626' : '#DBDBDB' // Instagram borders
+  const background = isDark ? '#000000' : '#FAFAFA' 
+  const borderColor = isDark ? '#262626' : '#DBDBDB' 
   const textColor = isDark ? '#FAFAFA' : '#000000'
-  const accentColor = '#0095F6' // Instagram blue
+  const accentColor = '#0095F6' 
 
   const handleSave = () => {
     router.replace('/profile')

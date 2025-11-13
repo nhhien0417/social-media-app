@@ -13,18 +13,11 @@ import Animated, {
 import { LinearGradient } from 'expo-linear-gradient'
 import { CheckCircle2, AlertCircle } from '@tamagui/lucide-icons'
 import { usePostStatus } from '@/providers/PostStatusProvider'
+import { INSTAGRAM_GRADIENT } from '@/utils/InstagramGradient'
 
 const AnimatedYStack = Animated.createAnimatedComponent(YStack)
 const AnimatedXStack = Animated.createAnimatedComponent(XStack)
 const AnimatedImage = Animated.createAnimatedComponent(Image)
-
-const INSTAGRAM_GRADIENT = [
-  '#f58529',
-  '#feda77',
-  '#dd2a7b',
-  '#8134af',
-  '#515bd4',
-] as const
 
 const TRACK_H = 4
 const BAR_RATIO = 0.35

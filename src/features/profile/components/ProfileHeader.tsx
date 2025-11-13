@@ -3,6 +3,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { Image, StyleSheet, Pressable } from 'react-native'
 import { router } from 'expo-router'
 import type { ProfileUser } from '../../../mock/profile'
+import { INSTAGRAM_GRADIENT } from '@/utils/InstagramGradient'
 
 interface ProfileHeaderProps {
   user: ProfileUser
@@ -103,14 +104,6 @@ export function ProfileHeader({
     </XStack>
   )
 }
-
-const INSTAGRAM_GRADIENT = [
-  '#f58529',
-  '#feda77',
-  '#dd2a7b',
-  '#8134af',
-  '#515bd4',
-] as const
 
 const AVATAR_SIZE = 88
 const RING_PADDING = 4

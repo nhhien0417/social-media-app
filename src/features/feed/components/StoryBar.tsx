@@ -6,14 +6,6 @@ import { router } from 'expo-router'
 import { stories } from '@/mock/stories'
 import StoryItem from './StoryItem'
 
-const INSTAGRAM_GRADIENT = [
-  '#f58529',
-  '#feda77',
-  '#dd2a7b',
-  '#8134af',
-  '#515bd4',
-] as const
-
 function CreateStoryItem() {
   const userAvatar = 'https://i.pravatar.cc/100?img=40'
   const themeName = useThemeName()

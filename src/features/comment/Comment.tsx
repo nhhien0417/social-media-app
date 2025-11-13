@@ -12,7 +12,7 @@ import {
   TextInput as RNTextInput,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { XStack, YStack, SizableText, useTheme } from 'tamagui'
+import { XStack, YStack, SizableText } from 'tamagui'
 import type { Comment } from '@/types/Comment'
 import CommentList from './components/CommentList'
 import CommentInput from './components/CommentInput'

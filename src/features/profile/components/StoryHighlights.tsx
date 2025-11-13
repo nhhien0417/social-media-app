@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, Image } from 'react-native'
 import { Text, YStack, useThemeName } from 'tamagui'
 import { LinearGradient } from 'expo-linear-gradient'
 import type { ProfileHighlight } from '../../../mock/profile'
+import { INSTAGRAM_GRADIENT } from '@/utils/InstagramGradient'
 
 interface StoryHighlightsProps {
   highlights: ProfileHighlight[]
@@ -70,14 +71,6 @@ export const StoryHighlights = memo(function StoryHighlights({
     </ScrollView>
   )
 })
-
-const INSTAGRAM_GRADIENT = [
-  '#f58529',
-  '#feda77',
-  '#dd2a7b',
-  '#8134af',
-  '#515bd4',
-] as const
 
 const styles = StyleSheet.create({
   highlightRing: {
