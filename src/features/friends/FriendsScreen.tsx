@@ -274,7 +274,10 @@ export default function FriendsScreen({
         alignItems="center"
         gap="$3"
       >
-        <Pressable onPress={() => router.back()} hitSlop={8}>
+        <Pressable
+          onPress={() => router.replace('/(tabs)/profile')}
+          hitSlop={8}
+        >
           <ChevronLeft size={25} color={textColor} />
         </Pressable>
         <Text fontSize={20} fontWeight="700" color={textColor}>

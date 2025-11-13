@@ -305,7 +305,7 @@ export default function PostingStatus() {
               Couldn't share your post
             </Text>
             <Text fontSize="$3" color="$gray10" numberOfLines={2}>
-              {errorMessage || 'Something went wrong. Please try again.'}
+              Something went wrong. Please try again.
             </Text>
           </YStack>
         </AnimatedXStack>
