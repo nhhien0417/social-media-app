@@ -246,8 +246,11 @@ export default function Comment({
         >
           <KeyboardAvoidingView
             style={{ flex: 1 }}
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            keyboardVerticalOffset={0}
+            behavior={Platform.select({
+              ios: 'padding',
+              android: 'height',
+            })}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 55 : 0}
           >
             <YStack {...panResponder.panHandlers}>
               {/* Header */}

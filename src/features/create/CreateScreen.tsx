@@ -224,8 +224,11 @@ export default function NewPostScreen() {
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={0}
+        behavior={Platform.select({
+          ios: 'padding',
+          android: 'height',
+        })}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 55 : 0}
       >
         <ScrollView flex={1} showsVerticalScrollIndicator={false}>
           <PostPreview

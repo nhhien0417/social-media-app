@@ -204,8 +204,12 @@ export default function StoryViewer({ initialStoryId }: StoryViewerProps) {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1 }}
+      behavior={Platform.select({
+        ios: 'padding',
+        android: 'height',
+      })}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 55 : 0}
       {...panResponder.panHandlers}
     >
       <StatusBar barStyle="light-content" backgroundColor="#000000" />
@@ -378,10 +382,6 @@ export default function StoryViewer({ initialStoryId }: StoryViewerProps) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000000',
-  },
   storyMedia: {
     width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT,
