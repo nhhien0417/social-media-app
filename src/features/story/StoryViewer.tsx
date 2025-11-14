@@ -16,6 +16,7 @@ import { YStack, XStack, Text } from 'tamagui'
 import { X, Heart, Send, MoreHorizontal } from '@tamagui/lucide-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { stories as allStories } from '@/mock/stories'
 import StoryProgressBar from './components/StoryProgressBar'
 
@@ -27,6 +28,8 @@ interface StoryViewerProps {
 }
 
 export default function StoryViewer({ initialStoryId }: StoryViewerProps) {
+  const insets = useSafeAreaInsets()
+
   // Sort stories: new stories first
   const sortedStories = [...allStories].sort((a, b) => {
     if (a.hasNew === b.hasNew) return 0
@@ -203,219 +206,198 @@ export default function StoryViewer({ initialStoryId }: StoryViewerProps) {
   ).current
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.select({
-        ios: 'padding',
-        android: 'height',
-      })}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 55 : 0}
-      {...panResponder.panHandlers}
-    >
+    <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#000000" />
 
-      {/* Story Image/Video */}
+      {/* Story Image/Video Background */}
       {currentStory && (
         <Image
           source={{ uri: currentStory.mediaUrl }}
-          style={styles.storyMedia}
+          style={StyleSheet.absoluteFill}
           resizeMode="contain"
         />
       )}
 
-      {/* Top Gradient Overlay */}
-      <LinearGradient
-        colors={['rgba(0,0,0,0.7)', 'transparent']}
-        style={styles.topGradient}
-        pointerEvents="none"
-      />
-
-      {/* Bottom Gradient Overlay */}
-      <LinearGradient
-        colors={['transparent', 'rgba(0,0,0,0.7)']}
-        style={styles.bottomGradient}
-        pointerEvents="none"
-      />
-
-      {/* Progress Bars */}
-      <XStack style={styles.progressContainer} gap={4} paddingHorizontal={16}>
-        {Array.from({ length: totalStories }).map((_, index) => (
-          <StoryProgressBar
-            key={index}
-            duration={STORY_DURATION}
-            isPaused={isPaused}
-            isActive={index === currentStoryIndex}
-            isCompleted={index < currentStoryIndex}
-          />
-        ))}
-      </XStack>
-
-      {/* Header */}
-      <XStack
-        style={styles.header}
-        alignItems="center"
-        gap={10}
-        paddingHorizontal={16}
-      >
+      {/* Content Overlay with Flexbox */}
+      <View style={styles.contentOverlay} {...panResponder.panHandlers}>
+        {/* Top Section with Gradient */}
         <LinearGradient
-          colors={['#f58529', '#feda77', '#dd2a7b', '#8134af', '#515bd4']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.avatarGradient}
+          colors={['rgba(0,0,0,0.7)', 'transparent']}
+          style={styles.topSection}
         >
-          <View style={styles.avatarInner}>
-            <Image
-              source={{ uri: currentUser.author.avatarUrl }}
-              style={styles.avatar}
-            />
-          </View>
-        </LinearGradient>
-        <YStack flex={1}>
-          <Text color="#ffffff" fontSize={14} fontWeight="600" lineHeight={18}>
-            {currentUser.author.username}
-          </Text>
-          <Text color="rgba(255,255,255,0.7)" fontSize={12} lineHeight={16}>
-            {new Date().toLocaleTimeString('en-US', {
-              hour: 'numeric',
-              minute: '2-digit',
-            })}
-          </Text>
-        </YStack>
-        <Pressable onPress={handleClose} style={styles.closeButton} hitSlop={8}>
-          <X size={26} color="#ffffff" strokeWidth={2.5} />
-        </Pressable>
-        <Pressable style={styles.moreButton} hitSlop={8}>
-          <MoreHorizontal size={24} color="#ffffff" strokeWidth={2.5} />
-        </Pressable>
-      </XStack>
+          {/* Progress Bars */}
+          <XStack gap={4} paddingHorizontal={16} paddingTop={insets.top + 8}>
+            {Array.from({ length: totalStories }).map((_, index) => (
+              <StoryProgressBar
+                key={index}
+                duration={STORY_DURATION}
+                isPaused={isPaused}
+                isActive={index === currentStoryIndex}
+                isCompleted={index < currentStoryIndex}
+              />
+            ))}
+          </XStack>
 
-      {/* Bottom Actions */}
-      {!showReplyInput && (
-        <XStack style={styles.bottomActions} alignItems="center" gap={16}>
-          <Pressable style={styles.replyInput} onPress={handleReply}>
-            <Text color="rgba(255,255,255,0.7)" fontSize={14}>
-              Send message
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={handleLike}
-            style={styles.actionButton}
-            hitSlop={8}
+          {/* Header */}
+          <XStack
+            alignItems="center"
+            gap={10}
+            paddingHorizontal={16}
+            paddingTop={12}
           >
-            <Heart
-              size={28}
-              color="#ffffff"
-              fill={isLiked ? '#ff3040' : 'transparent'}
-              strokeWidth={2}
-            />
-          </Pressable>
-          <Pressable style={styles.actionButton} hitSlop={8}>
-            <Send size={26} color="#ffffff" strokeWidth={2} />
-          </Pressable>
-        </XStack>
-      )}
+            <LinearGradient
+              colors={['#f58529', '#feda77', '#dd2a7b', '#8134af', '#515bd4']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.avatarGradient}
+            >
+              <View style={styles.avatarInner}>
+                <Image
+                  source={{ uri: currentUser.author.avatarUrl }}
+                  style={styles.avatar}
+                />
+              </View>
+            </LinearGradient>
+            <YStack flex={1}>
+              <Text
+                color="#ffffff"
+                fontSize={14}
+                fontWeight="600"
+                lineHeight={18}
+              >
+                {currentUser.author.username}
+              </Text>
+              <Text color="rgba(255,255,255,0.7)" fontSize={12} lineHeight={16}>
+                {new Date().toLocaleTimeString('en-US', {
+                  hour: 'numeric',
+                  minute: '2-digit',
+                })}
+              </Text>
+            </YStack>
+            <Pressable
+              onPress={handleClose}
+              style={styles.closeButton}
+              hitSlop={8}
+            >
+              <X size={26} color="#ffffff" strokeWidth={2.5} />
+            </Pressable>
+            <Pressable style={styles.moreButton} hitSlop={8}>
+              <MoreHorizontal size={24} color="#ffffff" strokeWidth={2.5} />
+            </Pressable>
+          </XStack>
+        </LinearGradient>
 
-      {/* Reply Input */}
-      {showReplyInput && (
-        <XStack
-          style={[
-            styles.replyInputContainer,
-            {
-              bottom:
-                keyboardHeight > 0
-                  ? keyboardHeight + 8
-                  : Platform.OS === 'ios'
-                    ? 48
-                    : 24,
-            },
-          ]}
-          alignItems="center"
-          gap={12}
+        {/* Middle Section - Tap Areas */}
+        <View style={styles.middleSection}>
+          <Pressable
+            style={styles.tapLeft}
+            onPress={() => {
+              if (showReplyInput) {
+                handleDismissInput()
+              } else {
+                handleTapLeft()
+              }
+            }}
+            onLongPress={handleLongPressIn}
+            onPressOut={handleLongPressOut}
+          />
+          <Pressable
+            style={styles.tapRight}
+            onPress={() => {
+              if (showReplyInput) {
+                handleDismissInput()
+              } else {
+                handleTapRight()
+              }
+            }}
+            onLongPress={handleLongPressIn}
+            onPressOut={handleLongPressOut}
+          />
+        </View>
+
+        {/* Bottom Section with Gradient */}
+        <KeyboardAvoidingView
+          behavior={Platform.select({ ios: 'padding', android: 'height' })}
+          keyboardVerticalOffset={0}
         >
-          <View style={styles.replyInputWrapper}>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Send message..."
-              placeholderTextColor="rgba(255,255,255,0.5)"
-              autoFocus
-              onBlur={() => {
-                setShowReplyInput(false)
-                setIsPaused(false)
-              }}
-            />
-          </View>
-          <Pressable onPress={handleSendReply} style={styles.sendButton}>
-            <Send size={22} color="#ffffff" strokeWidth={2} />
-          </Pressable>
-        </XStack>
-      )}
+          <LinearGradient
+            colors={['transparent', 'rgba(0,0,0,0.7)']}
+            style={[
+              styles.bottomSection,
+              { paddingBottom: insets.bottom + 16 },
+            ]}
+          >
+            {/* Bottom Actions */}
+            {!showReplyInput && (
+              <XStack alignItems="center" gap={16} paddingHorizontal={16}>
+                <Pressable style={styles.replyInput} onPress={handleReply}>
+                  <Text color="rgba(255,255,255,0.7)" fontSize={14}>
+                    Send message
+                  </Text>
+                </Pressable>
+                <Pressable
+                  onPress={handleLike}
+                  style={styles.actionButton}
+                  hitSlop={8}
+                >
+                  <Heart
+                    size={28}
+                    color="#ffffff"
+                    fill={isLiked ? '#ff3040' : 'transparent'}
+                    strokeWidth={2}
+                  />
+                </Pressable>
+                <Pressable style={styles.actionButton} hitSlop={8}>
+                  <Send size={26} color="#ffffff" strokeWidth={2} />
+                </Pressable>
+              </XStack>
+            )}
 
-      {/* Tap Areas */}
-      <View style={styles.tapContainer} pointerEvents="box-none">
-        <Pressable
-          style={styles.tapLeft}
-          onPress={() => {
-            if (showReplyInput) {
-              handleDismissInput()
-            } else {
-              handleTapLeft()
-            }
-          }}
-          onLongPress={handleLongPressIn}
-          onPressOut={handleLongPressOut}
-        />
-        <Pressable
-          style={styles.tapRight}
-          onPress={() => {
-            if (showReplyInput) {
-              handleDismissInput()
-            } else {
-              handleTapRight()
-            }
-          }}
-          onLongPress={handleLongPressIn}
-          onPressOut={handleLongPressOut}
-        />
+            {/* Reply Input */}
+            {showReplyInput && (
+              <XStack alignItems="center" gap={12} paddingHorizontal={16}>
+                <View style={styles.replyInputWrapper}>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="Send message..."
+                    placeholderTextColor="rgba(255,255,255,0.5)"
+                    autoFocus
+                    onBlur={() => {
+                      setShowReplyInput(false)
+                      setIsPaused(false)
+                    }}
+                  />
+                </View>
+                <Pressable onPress={handleSendReply} style={styles.sendButton}>
+                  <Send size={22} color="#ffffff" strokeWidth={2} />
+                </Pressable>
+              </XStack>
+            )}
+          </LinearGradient>
+        </KeyboardAvoidingView>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
-  storyMedia: {
-    width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT,
-    position: 'absolute',
+  container: {
+    flex: 1,
+    backgroundColor: '#000000',
   },
-  topGradient: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 180,
-    zIndex: 1,
+  contentOverlay: {
+    flex: 1,
+    justifyContent: 'space-between',
   },
-  bottomGradient: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 200,
-    zIndex: 1,
+  topSection: {
+    paddingBottom: 12,
   },
-  progressContainer: {
-    position: 'absolute',
-    top: 48,
-    left: 0,
-    right: 0,
-    zIndex: 10,
+  middleSection: {
+    flex: 1,
+    flexDirection: 'row',
   },
-  header: {
-    position: 'absolute',
-    top: 64,
-    left: 0,
-    right: 0,
-    zIndex: 10,
+  bottomSection: {
+    paddingTop: 16,
   },
   avatarGradient: {
     width: 38,
@@ -442,13 +424,6 @@ const styles = StyleSheet.create({
   moreButton: {
     padding: 2,
   },
-  bottomActions: {
-    position: 'absolute',
-    bottom: Platform.OS === 'ios' ? 48 : 24,
-    left: 16,
-    right: 16,
-    zIndex: 10,
-  },
   replyInput: {
     flex: 1,
     height: 44,
@@ -460,13 +435,6 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     padding: 4,
-  },
-  replyInputContainer: {
-    position: 'absolute',
-    bottom: Platform.OS === 'ios' ? 48 : 24,
-    left: 16,
-    right: 16,
-    zIndex: 10,
   },
   replyInputWrapper: {
     flex: 1,
@@ -490,14 +458,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#0095F6',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  tapContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    flexDirection: 'row',
   },
   tapLeft: {
     flex: 1,
