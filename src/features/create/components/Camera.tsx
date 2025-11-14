@@ -9,6 +9,7 @@ import {
   Text,
   Dimensions,
   ScrollView,
+  Image,
 } from 'react-native'
 import { YStack, XStack, SizableText } from 'tamagui'
 import { Ionicons } from '@expo/vector-icons'
@@ -20,6 +21,7 @@ import {
   useMicrophonePermissions,
 } from 'expo-camera'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Video, ResizeMode } from 'expo-av'
 
 interface CapturedMedia {
   uri: string
@@ -167,7 +169,6 @@ const styles = StyleSheet.create({
   },
   recordingTime: {
     position: 'absolute',
-    top: 110,
     alignSelf: 'center',
     backgroundColor: 'rgba(255,59,48,0.9)',
     paddingHorizontal: 18,
@@ -296,6 +297,51 @@ const styles = StyleSheet.create({
     marginTop: 6,
     fontWeight: '600',
   },
+  previewContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#000000',
+    zIndex: 1000,
+  },
+  previewContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  previewMedia: {
+    width: '100%',
+    height: '100%',
+  },
+  previewActionsContainer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    zIndex: 1001,
+    paddingHorizontal: 20,
+  },
+  previewControls: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    width: '100%',
+  },
+  previewButton: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
+  },
+  previewButtonUse: {
+    backgroundColor: '#0095F6',
+    borderColor: '#0095F6',
+  },
 })
 
 export default function Camera({ visible, onClose, onCapture }: Props) {
@@ -314,6 +360,7 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
   const [showFilters, setShowFilters] = useState(false)
   const [showMinDurationWarning, setShowMinDurationWarning] = useState(false)
   const [isZoomChanging, setIsZoomChanging] = useState(false)
+  const [capturedMedia, setCapturedMedia] = useState<CapturedMedia | null>(null)
   const [cameraPermission, requestCameraPermission] = useCameraPermissions()
   const [microphonePermission, requestMicrophonePermission] =
     useMicrophonePermissions()
@@ -336,13 +383,12 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
 
         console.log('Picture taken:', photo)
         if (photo && photo.uri) {
-          onCapture({
+          setCapturedMedia({
             uri: photo.uri,
             width: photo.width,
             height: photo.height,
             type: 'photo',
           })
-          onClose()
         }
       } catch (error) {
         console.error('Error taking picture:', error)
@@ -354,20 +400,19 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
             quality: 0.8,
           })
           if (photo && photo.uri) {
-            onCapture({
+            setCapturedMedia({
               uri: photo.uri,
               width: photo.width,
               height: photo.height,
               type: 'photo',
             })
-            onClose()
           }
         } catch (retryError) {
           console.error('Retry failed:', retryError)
         }
       }
     }
-  }, [onCapture, onClose])
+  }, [])
 
   const startRecording = useCallback(async () => {
     if (cameraRef.current && !isRecordingRef.current) {
@@ -405,12 +450,11 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
               isRecordingRef.current = false
 
               console.log('Video captured with duration:', duration)
-              onCapture({
+              setCapturedMedia({
                 uri: video.uri,
                 type: 'video',
                 duration: duration > 0 ? duration : 1, // Ensure at least 1 second
               })
-              onClose()
             }
           })
           .catch(error => {
@@ -464,6 +508,7 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
       console.log('Resetting zoom to 0')
       setZoom(0) // Reset zoom to 1.0x
       setShowZoomControls(false) // Hide zoom controls
+      setCapturedMedia(null) // Reset captured media
       if (recordingInterval.current) {
         clearInterval(recordingInterval.current)
         recordingInterval.current = null
@@ -617,6 +662,18 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
 
+  const handleUseMedia = () => {
+    if (capturedMedia) {
+      onCapture(capturedMedia)
+      setCapturedMedia(null)
+      onClose()
+    }
+  }
+
+  const handleRetake = () => {
+    setCapturedMedia(null)
+  }
+
   if (!visible) return null
 
   if (!cameraPermission || !microphonePermission) {
@@ -698,334 +755,421 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
           zoom={zoom}
           mode={mode === 'video' ? 'video' : 'picture'}
         >
-          {/* Countdown Timer */}
-          {countdown !== null && countdown > 0 && (
-            <Animated.Text style={styles.timerText}>{countdown}</Animated.Text>
-          )}
-
-          {/* Recording Indicator */}
-          {isRecording && (
-            <View style={styles.recordingTime}>
-              <View style={styles.recordingDot} />
-              <Text style={styles.recordingTimeText}>
-                {formatTime(recordingTime)}
-              </Text>
-            </View>
-          )}
-
-          {/* Minimum Duration Warning */}
-          {showMinDurationWarning && (
-            <View
-              style={[styles.warningMessage, { bottom: insets.bottom + 220 }]}
-            >
-              <Text style={styles.warningText}>Hold for at least 1 second</Text>
-            </View>
-          )}
-
-          {/* Top Bar */}
-          <View style={[styles.topBar, { top: insets.top + 10 }]}>
-            <TouchableOpacity style={styles.iconButton} onPress={onClose}>
-              <Ionicons name="close" size={28} color="white" />
-            </TouchableOpacity>
-
-            <XStack gap="$2.5">
-              <TouchableOpacity
-                style={[
-                  styles.iconButton,
-                  timer > 0 && { backgroundColor: 'rgba(255,255,255,0.25)' },
-                ]}
-                onPress={cycleTimer}
-              >
-                <Ionicons name="timer-outline" size={24} color="white" />
-                {timer > 0 && (
-                  <View
-                    style={{
-                      position: 'absolute',
-                      top: -4,
-                      right: -4,
-                      backgroundColor: '#0095F6',
-                      borderRadius: 10,
-                      minWidth: 20,
-                      height: 20,
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      paddingHorizontal: 4,
-                      borderWidth: 2,
-                      borderColor: '#000000',
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: '#FFFFFF',
-                        fontSize: 11,
-                        fontWeight: '700',
-                      }}
-                    >
-                      {timer}
-                    </Text>
-                  </View>
-                )}
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.iconButton,
-                  flash === 'on' && { backgroundColor: 'rgba(255,204,0,0.25)' },
-                ]}
-                onPress={toggleFlash}
-              >
-                {flash === 'off' ? (
-                  <Ionicons name="flash-off-outline" size={24} color="white" />
-                ) : (
-                  <Ionicons name="flash" size={24} color="#FFCC00" />
-                )}
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.iconButton,
-                  showGrid && { backgroundColor: 'rgba(255,255,255,0.25)' },
-                ]}
-                onPress={() => setShowGrid(!showGrid)}
-              >
-                <Ionicons name="grid-outline" size={24} color="white" />
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.iconButton,
-                  filter !== 'none' && {
-                    backgroundColor: 'rgba(255,255,255,0.25)',
-                  },
-                ]}
-                onPress={() => setShowFilters(!showFilters)}
-              >
-                <Ionicons name="color-filter-outline" size={24} color="white" />
-              </TouchableOpacity>
-            </XStack>
-          </View>
-
-          {/* Zoom Controls */}
-          {showZoomControls && (
-            <View
-              style={[styles.zoomContainer, { bottom: insets.bottom + 220 }]}
-            >
-              <TouchableOpacity
-                onPress={decreaseZoom}
-                disabled={isZoomChanging || zoom === 0}
-                activeOpacity={isZoomChanging || zoom === 0 ? 1 : 0.7}
-                style={{ padding: 4 }}
-              >
-                <Ionicons
-                  name="remove-circle-outline"
-                  size={24}
-                  color="white"
-                  style={{
-                    opacity: zoom === 0 ? 0.3 : isZoomChanging ? 0.5 : 1,
-                  }}
-                />
-              </TouchableOpacity>
-              <Text style={styles.zoomText}>{(zoom + 1).toFixed(1)}x</Text>
-              <TouchableOpacity
-                onPress={increaseZoom}
-                disabled={isZoomChanging || zoom >= 1}
-                activeOpacity={isZoomChanging || zoom >= 1 ? 1 : 0.7}
-                style={{ padding: 4 }}
-              >
-                <Ionicons
-                  name="add-circle-outline"
-                  size={24}
-                  color="white"
-                  style={{
-                    opacity: zoom >= 1 ? 0.3 : isZoomChanging ? 0.5 : 1,
-                  }}
-                />
-              </TouchableOpacity>
-            </View>
-          )}
-
-          {/* Filter Overlay */}
-          {filter !== 'none' && (
-            <View
-              style={[
-                styles.filterOverlay,
-                {
-                  backgroundColor:
-                    FILTERS.find(f => f.id === filter)?.colors || 'transparent',
-                },
-              ]}
-            />
-          )}
-
-          {/* Grid Lines */}
-          {showGrid && (
-            <View style={styles.gridOverlay}>
-              {[0, 1, 2].map(col => (
-                <View
-                  key={col}
-                  style={[
-                    styles.gridColumn,
-                    col === 2 && { borderRightWidth: 0 }, // Remove right border from last column
-                  ]}
-                >
-                  {[0, 1, 2].map(row => (
-                    <View
-                      key={row}
-                      style={[
-                        styles.gridRow,
-                        row === 2 && { borderBottomWidth: 0 }, // Remove bottom border from last row
-                      ]}
-                    />
-                  ))}
-                </View>
-              ))}
-            </View>
-          )}
-
-          {/* Filters Selection */}
-          {showFilters && (
-            <View
-              style={[styles.filtersContainer, { bottom: insets.bottom + 240 }]}
-            >
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.filterScroll}
-              >
-                {FILTERS.map(f => (
-                  <TouchableOpacity
-                    key={f.id}
-                    style={styles.filterItem}
-                    onPress={() => {
-                      setFilter(f.id as FilterType)
-                      setShowFilters(false)
-                    }}
-                  >
-                    <View
-                      style={[
-                        styles.filterPreview,
-                        filter === f.id && styles.filterPreviewActive,
-                        { backgroundColor: f.colors || 'rgba(0,0,0,0.4)' },
-                      ]}
-                    >
-                      <Ionicons
-                        name="image-outline"
-                        size={24}
-                        color="white"
-                        style={{ opacity: 0.8 }}
-                      />
-                    </View>
-                    <Text style={styles.filterName}>{f.name}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-          )}
-
-          {/* Bottom Bar */}
-          <View style={[styles.bottomBar, { bottom: insets.bottom + 20 }]}>
-            {/* Mode Selector */}
-            <View style={styles.modeSelector}>
-              <TouchableOpacity
-                style={[
-                  styles.modeButton,
-                  mode === 'photo' && styles.modeButtonActive,
-                ]}
-                onPress={() => setMode('photo')}
-              >
-                <Text
-                  style={[
-                    styles.modeText,
-                    mode === 'photo'
-                      ? { color: '#000000' }
-                      : styles.modeTextInactive,
-                  ]}
-                >
-                  Photo
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.modeButton,
-                  mode === 'video' && styles.modeButtonActive,
-                ]}
-                onPress={() => setMode('video')}
-              >
-                <Text
-                  style={[
-                    styles.modeText,
-                    mode === 'video'
-                      ? { color: '#000000' }
-                      : styles.modeTextInactive,
-                  ]}
-                >
-                  Video
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.controls}>
-              {/* Zoom In Button - only show when zoom controls not visible */}
-              {!showZoomControls && (
-                <TouchableOpacity
-                  style={styles.iconButton}
-                  onPress={increaseZoom}
-                  disabled={isZoomChanging}
-                  activeOpacity={isZoomChanging ? 1 : 0.7}
-                >
-                  <Ionicons
-                    name="add-circle-outline"
-                    size={26}
-                    color="white"
-                    style={{ opacity: isZoomChanging ? 0.5 : 1 }}
-                  />
-                </TouchableOpacity>
+          {!capturedMedia && (
+            <>
+              {/* Countdown Timer */}
+              {countdown !== null && countdown > 0 && (
+                <Animated.Text style={styles.timerText}>
+                  {countdown}
+                </Animated.Text>
               )}
-              {showZoomControls && <View style={{ width: 44 }} />}
 
-              {/* Capture/Record Button */}
-              <TouchableOpacity
-                style={
-                  mode === 'video' && isRecording
-                    ? styles.recordingButton
-                    : styles.captureButton
-                }
-                onPress={handleCapture}
-                activeOpacity={0.8}
-              >
-                {mode === 'photo' ? (
-                  <View style={styles.captureButtonInner} />
-                ) : isRecording ? (
-                  <View style={styles.recordingInner} />
-                ) : (
-                  <View
+              {/* Recording Indicator */}
+              {isRecording && (
+                <View style={[styles.recordingTime, { top: insets.top + 70 }]}>
+                  <View style={styles.recordingDot} />
+                  <Text style={styles.recordingTimeText}>
+                    {formatTime(recordingTime)}
+                  </Text>
+                </View>
+              )}
+
+              {/* Minimum Duration Warning */}
+              {showMinDurationWarning && (
+                <View
+                  style={[
+                    styles.warningMessage,
+                    { bottom: insets.bottom + 220 },
+                  ]}
+                >
+                  <Text style={styles.warningText}>
+                    Hold for at least 1 second
+                  </Text>
+                </View>
+              )}
+
+              {/* Top Bar */}
+              <View style={[styles.topBar, { top: insets.top + 10 }]}>
+                <TouchableOpacity style={styles.iconButton} onPress={onClose}>
+                  <Ionicons name="close" size={28} color="white" />
+                </TouchableOpacity>
+
+                <XStack gap="$2.5">
+                  <TouchableOpacity
                     style={[
-                      styles.captureButtonInner,
-                      {
-                        backgroundColor: '#FF3B30',
-                        justifyContent: 'center',
-                        alignItems: 'center',
+                      styles.iconButton,
+                      timer > 0 && {
+                        backgroundColor: 'rgba(255,255,255,0.25)',
                       },
                     ]}
+                    onPress={cycleTimer}
                   >
-                    <Ionicons name="videocam" size={28} color="white" />
-                  </View>
-                )}
-              </TouchableOpacity>
+                    <Ionicons name="timer-outline" size={24} color="white" />
+                    {timer > 0 && (
+                      <View
+                        style={{
+                          position: 'absolute',
+                          top: -4,
+                          right: -4,
+                          backgroundColor: '#0095F6',
+                          borderRadius: 10,
+                          minWidth: 20,
+                          height: 20,
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          paddingHorizontal: 4,
+                          borderWidth: 2,
+                          borderColor: '#000000',
+                        }}
+                      >
+                        <Text
+                          style={{
+                            color: '#FFFFFF',
+                            fontSize: 11,
+                            fontWeight: '700',
+                          }}
+                        >
+                          {timer}
+                        </Text>
+                      </View>
+                    )}
+                  </TouchableOpacity>
 
-              {/* Flip Camera */}
-              <TouchableOpacity
-                style={styles.iconButton}
-                onPress={toggleCameraFacing}
-              >
-                <Ionicons
-                  name="camera-reverse-outline"
-                  size={28}
-                  color="white"
+                  <TouchableOpacity
+                    style={[
+                      styles.iconButton,
+                      flash === 'on' && {
+                        backgroundColor: 'rgba(255,204,0,0.25)',
+                      },
+                    ]}
+                    onPress={toggleFlash}
+                  >
+                    {flash === 'off' ? (
+                      <Ionicons
+                        name="flash-off-outline"
+                        size={24}
+                        color="white"
+                      />
+                    ) : (
+                      <Ionicons name="flash" size={24} color="#FFCC00" />
+                    )}
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.iconButton,
+                      showGrid && { backgroundColor: 'rgba(255,255,255,0.25)' },
+                    ]}
+                    onPress={() => setShowGrid(!showGrid)}
+                  >
+                    <Ionicons name="grid-outline" size={24} color="white" />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.iconButton,
+                      filter !== 'none' && {
+                        backgroundColor: 'rgba(255,255,255,0.25)',
+                      },
+                    ]}
+                    onPress={() => setShowFilters(!showFilters)}
+                  >
+                    <Ionicons
+                      name="color-filter-outline"
+                      size={24}
+                      color="white"
+                    />
+                  </TouchableOpacity>
+                </XStack>
+              </View>
+
+              {/* Zoom Controls */}
+              {showZoomControls && (
+                <View
+                  style={[
+                    styles.zoomContainer,
+                    { bottom: insets.bottom + 220 },
+                  ]}
+                >
+                  <TouchableOpacity
+                    onPress={decreaseZoom}
+                    disabled={isZoomChanging || zoom === 0}
+                    activeOpacity={isZoomChanging || zoom === 0 ? 1 : 0.7}
+                    style={{ padding: 4 }}
+                  >
+                    <Ionicons
+                      name="remove-circle-outline"
+                      size={24}
+                      color="white"
+                      style={{
+                        opacity: zoom === 0 ? 0.3 : isZoomChanging ? 0.5 : 1,
+                      }}
+                    />
+                  </TouchableOpacity>
+                  <Text style={styles.zoomText}>{(zoom + 1).toFixed(1)}x</Text>
+                  <TouchableOpacity
+                    onPress={increaseZoom}
+                    disabled={isZoomChanging || zoom >= 1}
+                    activeOpacity={isZoomChanging || zoom >= 1 ? 1 : 0.7}
+                    style={{ padding: 4 }}
+                  >
+                    <Ionicons
+                      name="add-circle-outline"
+                      size={24}
+                      color="white"
+                      style={{
+                        opacity: zoom >= 1 ? 0.3 : isZoomChanging ? 0.5 : 1,
+                      }}
+                    />
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              {/* Filter Overlay */}
+              {filter !== 'none' && (
+                <View
+                  style={[
+                    styles.filterOverlay,
+                    {
+                      backgroundColor:
+                        FILTERS.find(f => f.id === filter)?.colors ||
+                        'transparent',
+                    },
+                  ]}
                 />
-              </TouchableOpacity>
+              )}
+
+              {/* Grid Lines */}
+              {showGrid && (
+                <View style={styles.gridOverlay}>
+                  {[0, 1, 2].map(col => (
+                    <View
+                      key={col}
+                      style={[
+                        styles.gridColumn,
+                        col === 2 && { borderRightWidth: 0 }, // Remove right border from last column
+                      ]}
+                    >
+                      {[0, 1, 2].map(row => (
+                        <View
+                          key={row}
+                          style={[
+                            styles.gridRow,
+                            row === 2 && { borderBottomWidth: 0 }, // Remove bottom border from last row
+                          ]}
+                        />
+                      ))}
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {/* Filters Selection */}
+              {showFilters && (
+                <View
+                  style={[
+                    styles.filtersContainer,
+                    { bottom: insets.bottom + 240 },
+                  ]}
+                >
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.filterScroll}
+                  >
+                    {FILTERS.map(f => (
+                      <TouchableOpacity
+                        key={f.id}
+                        style={styles.filterItem}
+                        onPress={() => {
+                          setFilter(f.id as FilterType)
+                          setShowFilters(false)
+                        }}
+                      >
+                        <View
+                          style={[
+                            styles.filterPreview,
+                            filter === f.id && styles.filterPreviewActive,
+                            { backgroundColor: f.colors || 'rgba(0,0,0,0.4)' },
+                          ]}
+                        >
+                          <Ionicons
+                            name="image-outline"
+                            size={24}
+                            color="white"
+                            style={{ opacity: 0.8 }}
+                          />
+                        </View>
+                        <Text style={styles.filterName}>{f.name}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+              )}
+
+              {/* Bottom Bar */}
+              <View style={[styles.bottomBar, { bottom: insets.bottom + 20 }]}>
+                {/* Mode Selector */}
+                <View style={styles.modeSelector}>
+                  <TouchableOpacity
+                    style={[
+                      styles.modeButton,
+                      mode === 'photo' && styles.modeButtonActive,
+                    ]}
+                    onPress={() => setMode('photo')}
+                  >
+                    <Text
+                      style={[
+                        styles.modeText,
+                        mode === 'photo'
+                          ? { color: '#000000' }
+                          : styles.modeTextInactive,
+                      ]}
+                    >
+                      Photo
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.modeButton,
+                      mode === 'video' && styles.modeButtonActive,
+                    ]}
+                    onPress={() => setMode('video')}
+                  >
+                    <Text
+                      style={[
+                        styles.modeText,
+                        mode === 'video'
+                          ? { color: '#000000' }
+                          : styles.modeTextInactive,
+                      ]}
+                    >
+                      Video
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.controls}>
+                  {/* Zoom In Button - only show when zoom controls not visible */}
+                  {!showZoomControls && (
+                    <TouchableOpacity
+                      style={styles.iconButton}
+                      onPress={increaseZoom}
+                      disabled={isZoomChanging}
+                      activeOpacity={isZoomChanging ? 1 : 0.7}
+                    >
+                      <Ionicons
+                        name="add-circle-outline"
+                        size={26}
+                        color="white"
+                        style={{ opacity: isZoomChanging ? 0.5 : 1 }}
+                      />
+                    </TouchableOpacity>
+                  )}
+                  {showZoomControls && <View style={{ width: 44 }} />}
+
+                  {/* Capture/Record Button */}
+                  <TouchableOpacity
+                    style={
+                      mode === 'video' && isRecording
+                        ? styles.recordingButton
+                        : styles.captureButton
+                    }
+                    onPress={handleCapture}
+                    activeOpacity={0.8}
+                  >
+                    {mode === 'photo' ? (
+                      <View style={styles.captureButtonInner} />
+                    ) : isRecording ? (
+                      <View style={styles.recordingInner} />
+                    ) : (
+                      <View
+                        style={[
+                          styles.captureButtonInner,
+                          {
+                            backgroundColor: '#FF3B30',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                          },
+                        ]}
+                      >
+                        <Ionicons name="videocam" size={28} color="white" />
+                      </View>
+                    )}
+                  </TouchableOpacity>
+
+                  {/* Flip Camera */}
+                  <TouchableOpacity
+                    style={styles.iconButton}
+                    onPress={toggleCameraFacing}
+                  >
+                    <Ionicons
+                      name="camera-reverse-outline"
+                      size={28}
+                      color="white"
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </>
+          )}
+
+          {/* Preview Screen */}
+          {capturedMedia && (
+            <View style={styles.previewContainer}>
+              {/* Preview Content */}
+              <View style={styles.previewContent}>
+                {capturedMedia.type === 'photo' ? (
+                  <Image
+                    source={{ uri: capturedMedia.uri }}
+                    style={styles.previewMedia}
+                    resizeMode="contain"
+                  />
+                ) : (
+                  <Video
+                    source={{ uri: capturedMedia.uri }}
+                    style={styles.previewMedia}
+                    resizeMode={ResizeMode.CONTAIN}
+                    shouldPlay
+                    isLooping
+                    useNativeControls={false}
+                  />
+                )}
+              </View>
+
+              {/* Preview Actions */}
+              <View
+                style={[
+                  styles.previewActionsContainer,
+                  {
+                    bottom: 0,
+                    paddingBottom: insets.bottom + 40,
+                  },
+                ]}
+              >
+                <View style={styles.previewControls}>
+                  {/* Retake Button */}
+                  <TouchableOpacity
+                    style={styles.previewButton}
+                    onPress={handleRetake}
+                  >
+                    <Ionicons name="close" size={32} color="white" />
+                  </TouchableOpacity>
+
+                  {/* Spacer */}
+                  <View style={{ width: 60 }} />
+
+                  {/* Use Button */}
+                  <TouchableOpacity
+                    style={[styles.previewButton, styles.previewButtonUse]}
+                    onPress={handleUseMedia}
+                  >
+                    <Ionicons name="checkmark" size={32} color="white" />
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
-          </View>
+          )}
         </CameraView>
       </View>
     </Modal>
