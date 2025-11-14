@@ -5,17 +5,14 @@ export type PostPrivacy = 'PUBLIC' | 'PRIVATE' | 'FRIENDS'
 
 export interface Post {
   id: string
-  userId: string
   author: User
-  content: string
-  media?: Media[]
   groupId?: string
-  privacy: PostPrivacy
-  likeCount: number
-  commentCount: number
-  shareCount: number
+  type?: string
+  content?: string
+  media?: Media[]
   createdAt: string
   updatedAt?: string
-  liked?: boolean
-  saved?: boolean
+  privacy: PostPrivacy
+  likes: []
+  commentsCount: number
 }

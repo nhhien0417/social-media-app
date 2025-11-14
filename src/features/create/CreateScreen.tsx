@@ -16,6 +16,7 @@ import DiscardChangesModal from './components/DiscardChanges'
 import { createPostApi } from '@/api/api.post'
 import { getUserId } from '@/utils/SecureStore'
 import { usePostStatus } from '@/providers/PostStatusProvider'
+import { PostPrivacy } from '@/types/Post'
 
 export type CreateMode = 'post' | 'story'
 
@@ -138,9 +139,9 @@ export default function NewPostScreen() {
     const firstMediaUrl = media.length > 0 ? media[0].url : undefined
     startPosting(firstMediaUrl)
 
-    const privacyMap: Record<PrivacyOption, 'PUBLIC' | 'PRIVATE' | 'FRIEND'> = {
+    const privacyMap: Record<PrivacyOption, PostPrivacy> = {
       public: 'PUBLIC',
-      friends: 'FRIEND',
+      friends: 'FRIENDS',
       'only-me': 'PRIVATE',
     }
 

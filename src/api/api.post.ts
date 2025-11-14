@@ -1,6 +1,6 @@
 import ApiClient from './apiClient'
 import { ENDPOINTS } from './endpoints'
-import { Post } from '@/types/Post'
+import { Post, PostPrivacy } from '@/types/Post'
 import { getAccessToken } from '@/utils/SecureStore'
 import { API_BASE_URL } from './axios.config'
 
@@ -8,7 +8,7 @@ export type CreatePostRequest = {
   userId: string
   content?: string
   groupId?: string
-  privacy: 'PUBLIC' | 'PRIVATE' | 'FRIEND'
+  privacy: PostPrivacy
   media?: Array<{
     uri: string
     name: string

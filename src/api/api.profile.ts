@@ -1,26 +1,19 @@
+import { User } from '@/types/User'
 import ApiClient from './apiClient'
 import { ENDPOINTS } from './endpoints'
-
-export type ProfileData = {
-  id: string
-  email: string
-  firstName: string
-  lastName: string
-  dob: string
-}
 
 export type AllProfileResponse = {
   statusCode: number
   error: null | string
   message: string
-  data: ProfileData[]
+  data: User[]
 }
 
 export type UserProfileResponse = {
   statusCode: number
   error: null | string
   message: string
-  data: ProfileData
+  data: User
 }
 
 export type FriendActionRequest = {
