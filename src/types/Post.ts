@@ -9,7 +9,7 @@ export interface Post {
   groupId?: string
   type?: string
   content?: string
-  media?: Media[]
+  media?: string[]
   createdAt: string
   updatedAt?: string
   privacy: PostPrivacy

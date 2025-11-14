@@ -1,7 +1,7 @@
 import { memo } from 'react'
 import { Grid3x3, Film, Tag } from '@tamagui/lucide-icons'
 import { Text, XStack, useThemeName } from 'tamagui'
-import { ProfileTabKey } from '@/mock/profile'
+import { ProfileTabKey } from '../ProfileScreen'
 
 const tabs: Array<{ key: ProfileTabKey; icon: typeof Grid3x3; label: string }> =
   [
@@ -43,8 +43,8 @@ export const ProfileTabBar = memo(function ProfileTabBar({
             pressStyle={{ opacity: 0.7 }}
             onPress={() => onChange(tab.key)}
           >
-            <Icon size={20} color={isActive ? activeColor : inactiveColor} />
-            <Text fontSize="$3" color={isActive ? activeColor : inactiveColor}>
+            <Icon size={22} color={isActive ? activeColor : inactiveColor} />
+            <Text fontSize="$4" color={isActive ? activeColor : inactiveColor}>
               {tab.label}
             </Text>
           </XStack>

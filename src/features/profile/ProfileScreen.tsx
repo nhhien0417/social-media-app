@@ -1,105 +1,24 @@
 import { useMemo, useState } from 'react'
-import { ScrollView } from 'react-native'
-import { Image, Text, XStack, YStack, useThemeName, Button } from 'tamagui'
+import { ActivityIndicator, ScrollView } from 'react-native'
+import { Text, XStack, YStack, useThemeName, Button } from 'tamagui'
 import { Menu, PlusSquare, LogOut } from '@tamagui/lucide-icons'
 import { useRouter } from 'expo-router'
-import {
-  profileMock,
-  ProfileTabKey,
-  type ProfilePost,
-} from '../../mock/profile'
-import { ProfileHeader } from './components/ProfileHeader'
+import { ProfileInfo } from './components/ProfileInfo'
 import { ProfileBio } from './components/ProfileBio'
 import { ProfileActions } from './components/ProfileActions'
 import { StoryHighlights } from './components/StoryHighlights'
 import { ProfileTabBar } from './components/ProfileTabBar'
 import { removeTokensAndUserId } from '@/utils/SecureStore'
+import { useCurrentUser } from '@/services/useCurrentUser'
+import MediaGrid from './components/MediaGrid'
+import { profileMock } from '@/mock/profile'
+import { User } from '@/types/User'
 
-const chunkMedia = (items: ProfilePost[]) => {
-  const rows: ProfilePost[][] = []
-  for (let index = 0; index < items.length; index += 3) {
-    rows.push(items.slice(index, index + 3))
-  }
-  return rows
-}
+export type ProfileTabKey = 'posts' | 'reels' | 'tagged'
 
-function MediaGrid({
-  items,
-  isDark,
-}: {
-  items: ProfilePost[]
-  isDark: boolean
-}) {
-  const rows = useMemo(() => chunkMedia(items), [items])
-  const placeholderColor = isDark ? '#1f2937' : '#e5e7eb'
-
-  if (!items.length) {
-    return (
-      <YStack
-        paddingHorizontal="$3"
-        paddingVertical="$6"
-        alignItems="center"
-        gap="$2"
-      >
-        <Text fontSize="$5" fontWeight="600">
-          No posts yet
-        </Text>
-        <Text
-          fontSize="$3"
-          color={isDark ? 'rgba(255,255,255,0.7)' : '#6b7280'}
-        >
-          Once you share photos and reels, they will appear here.
-        </Text>
-      </YStack>
-    )
-  }
-
-  return (
-    <YStack gap="$1" paddingHorizontal="$1" paddingBottom="$6">
-      {rows.map((row, rowIndex) => {
-        const paddedRow: Array<ProfilePost | null> = [...row]
-        while (paddedRow.length < 3) {
-          paddedRow.push(null)
-        }
-        const rowKey =
-          row.map(item => item.id).join('-') || `empty-row-${rowIndex}`
-
-        return (
-          <XStack key={rowKey} gap="$1">
-            {paddedRow.map((item, columnIndex) => {
-              if (!item) {
-                return (
-                  <YStack
-                    key={`placeholder-${rowKey}-${columnIndex}`}
-                    flex={1}
-                    aspectRatio={1}
-                  />
-                )
-              }
-
-              return (
-                <YStack
-                  key={item.id}
-                  flex={1}
-                  aspectRatio={1}
-                  overflow="hidden"
-                  borderRadius="$3"
-                  backgroundColor={placeholderColor}
-                >
-                  <Image
-                    source={{ uri: item.imageUrl }}
-                    width="100%"
-                    height="100%"
-                    resizeMode="cover"
-                  />
-                </YStack>
-              )
-            })}
-          </XStack>
-        )
-      })}
-    </YStack>
-  )
+export interface ProfileProps {
+  user: User
+  isOwnProfile: boolean
 }
 
 export default function ProfileScreen() {
@@ -107,11 +26,12 @@ export default function ProfileScreen() {
   const [tab, setTab] = useState<ProfileTabKey>('posts')
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
+  const { data: currentUser, isLoading, error } = useCurrentUser()
+
+  const posts = Array.isArray(currentUser?.posts) ? currentUser.posts : []
   const mediaItems = useMemo(() => {
-    if (tab === 'reels') return profileMock.reels
-    if (tab === 'tagged') return profileMock.tagged
-    return profileMock.posts
-  }, [tab])
+    return posts
+  }, [posts, tab])
 
   const navIconColor = isDark ? '#f5f5f5' : '#111827'
 
@@ -120,35 +40,80 @@ export default function ProfileScreen() {
     router.replace('/auth/signin')
   }
 
+  if (isLoading) {
+    return (
+      <YStack
+        flex={1}
+        backgroundColor="$background"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <ActivityIndicator size="large" />
+      </YStack>
+    )
+  }
+
+  if (error || !currentUser) {
+    return (
+      <YStack
+        flex={1}
+        backgroundColor="$background"
+        alignItems="center"
+        justifyContent="center"
+        gap="$3"
+      >
+        <Text fontSize="$6" fontWeight="700">
+          Unable to load profile
+        </Text>
+        <Button onPress={handleLogout}>Go to Login</Button>
+      </YStack>
+    )
+  }
+
+  if (!currentUser) {
+    return (
+      <YStack
+        flex={1}
+        backgroundColor="$background"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Text fontSize="$6" fontWeight="700">
+          Loading...
+        </Text>
+      </YStack>
+    )
+  }
+
   return (
     <YStack flex={1} backgroundColor="$background">
       <ScrollView showsVerticalScrollIndicator={false}>
-        <YStack gap="$4" paddingTop="$5" paddingBottom="$8">
+        <YStack gap="$3" paddingVertical="$3">
           <XStack
             alignItems="center"
             justifyContent="space-between"
             paddingHorizontal="$3"
           >
-            <Text fontSize="$6" fontWeight="700">
-              {profileMock.username}
+            <Text fontSize="$7" fontWeight="700">
+              {currentUser.username}
             </Text>
             <XStack gap="$3" alignItems="center">
-              <PlusSquare size={22} color={navIconColor} />
-              <Menu size={22} color={navIconColor} />
-              <Button
-                unstyled
+              <PlusSquare size={25} color={navIconColor} />
+              <Menu size={25} color={navIconColor} />
+
+              <LogOut
                 onPress={handleLogout}
                 padding="$0"
                 pressStyle={{ opacity: 0.7 }}
-              >
-                <LogOut size={22} color={navIconColor} />
-              </Button>
+                size={25}
+                color={navIconColor}
+              />
             </XStack>
           </XStack>
 
-          <ProfileHeader user={profileMock} isOwnProfile={true} />
-          <ProfileActions user={profileMock} />
-          <ProfileBio user={profileMock} />
+          <ProfileInfo user={currentUser} isOwnProfile={true} />
+          <ProfileBio user={currentUser} isOwnProfile={true} />
+          <ProfileActions user={currentUser} isOwnProfile={true} />
           <StoryHighlights highlights={profileMock.highlights} />
           <ProfileTabBar value={tab} onChange={setTab} />
           <MediaGrid items={mediaItems} isDark={isDark} />

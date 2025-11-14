@@ -4,12 +4,12 @@ export interface User {
   id: string
   email: string
   username: string
-  firstName?: string
-  lastName?: string
-  avatarUrl?: string
-  gender?: string
-  bio?: string
-  dob?: string
-  post?: Post[]
-  friendships?: User[]
+  firstName: string | null
+  lastName: string | null
+  avatarUrl: string | null
+  gender: string | null
+  bio: string | null
+  dob: string | null
+  posts: Post[] | null
+  friendships: User[] | null
 }

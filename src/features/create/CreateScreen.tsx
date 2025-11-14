@@ -17,6 +17,7 @@ import { createPostApi } from '@/api/api.post'
 import { getUserId } from '@/utils/SecureStore'
 import { usePostStatus } from '@/providers/PostStatusProvider'
 import { PostPrivacy } from '@/types/Post'
+import { useCurrentUser } from '@/services/useCurrentUser'
 
 export type CreateMode = 'post' | 'story'
 
@@ -24,6 +25,7 @@ export default function NewPostScreen() {
   const router = useRouter()
   const params = useLocalSearchParams<{ mode?: CreateMode }>()
   const { startPosting, finishPosting, failPosting } = usePostStatus()
+  const { data: currentUser } = useCurrentUser()
 
   const [mode, setMode] = useState<CreateMode>('post')
   const [caption, setCaption] = useState('')
@@ -34,14 +36,21 @@ export default function NewPostScreen() {
   const [showDiscardModal, setShowDiscardModal] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const user: UserInfoData = useMemo(
-    () => ({
-      id: 'me',
-      name: 'Adewale Martins',
-      avatarUrl: 'https://picsum.photos/id/237/200/200',
-    }),
-    []
-  )
+  const user: UserInfoData = useMemo(() => {
+    if (!currentUser) {
+      return {
+        id: '',
+        name: '',
+        avatarUrl: undefined,
+      }
+    }
+
+    return {
+      id: currentUser.id,
+      name: currentUser.username,
+      avatarUrl: currentUser.avatarUrl || undefined,
+    }
+  }, [currentUser])
 
   useFocusEffect(
     useCallback(() => {

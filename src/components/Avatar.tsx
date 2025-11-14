@@ -1,7 +1,7 @@
 import { Image, type ImageProps } from 'tamagui'
 
 type Props = {
-  uri: string
+  uri?: string
   size?: number
 } & Partial<ImageProps>
 
