@@ -7,7 +7,10 @@ export default function FriendsPage() {
     isOwnProfile?: string
     userId?: string
   }>()
-  const isOwnProfile = params.isOwnProfile === 'true'
+
+  const isOwnProfile = params.userId
+    ? false
+    : params.isOwnProfile === 'true' || !params.isOwnProfile
   const userId = params.userId
 
   return <FriendsScreen userId={userId} isOwnProfile={isOwnProfile} />

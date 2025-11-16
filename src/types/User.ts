@@ -1,5 +1,12 @@
 import { Post } from './Post'
 
+export type FriendStatus =
+  | 'NONE'
+  | 'SELF'
+  | 'FRIEND'
+  | 'INCOMING_PENDING'
+  | 'OUTGOING_PENDING'
+
 export interface User {
   id: string
   email: string
@@ -12,4 +19,5 @@ export interface User {
   dob: string | null
   posts: Post[] | null
   friendships: User[] | null
+  friendStatus: string | null
 }

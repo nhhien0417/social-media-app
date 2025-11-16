@@ -17,6 +17,7 @@ const normalizeUser = (user: User | null) => {
     dob: user.dob ?? '',
     post: user.posts ?? [],
     friendships: user.friendships ?? [],
+    friendStatus: user.friendStatus ?? '',
   }
 }
 

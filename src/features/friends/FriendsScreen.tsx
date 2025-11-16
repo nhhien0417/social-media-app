@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { Pressable } from 'react-native'
 import { YStack, XStack, Text, Input, useThemeName } from 'tamagui'
 import { ChevronLeft, Search, X } from '@tamagui/lucide-icons'
-import { router } from 'expo-router'
+import { router, useLocalSearchParams } from 'expo-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   getFriendApi,
@@ -18,14 +18,24 @@ import { Tab, TabBar, TabValue } from './components/Tabs'
 import { FriendsList } from './components/List'
 
 interface FriendsScreenProps {
-  isOwnProfile?: boolean
   userId?: string
+  isOwnProfile?: boolean
 }
 
 export default function FriendsScreen({
-  isOwnProfile = true,
   userId: propUserId,
+  isOwnProfile: propIsOwnProfile,
 }: FriendsScreenProps) {
+  const params = useLocalSearchParams()
+  const paramsIsOwnProfile = params.isOwnProfile === 'true'
+  const paramsUserId = params.userId as string | undefined
+
+  const isOwnProfile =
+    propIsOwnProfile !== undefined
+      ? propIsOwnProfile
+      : paramsIsOwnProfile || !paramsUserId
+  const targetUserId = propUserId ?? paramsUserId
+
   const [activeTab, setActiveTab] = useState<TabValue>('friends')
   const [searchQuery, setSearchQuery] = useState('')
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
@@ -42,7 +52,7 @@ export default function FriendsScreen({
     loadUserId()
   }, [])
 
-  const userId = propUserId || currentUserId || ''
+  const userId = isOwnProfile ? currentUserId || '' : targetUserId || ''
 
   // Fetch all profiles for suggestions (for all tabs when own profile)
   const { data: allProfilesData, isLoading: suggestionsLoading } = useQuery({
@@ -275,13 +285,19 @@ export default function FriendsScreen({
         gap="$3"
       >
         <Pressable
-          onPress={() => router.replace('/(tabs)/profile')}
+          onPress={() => {
+            if (isOwnProfile) {
+              router.replace('/(tabs)/profile')
+            } else {
+              router.back()
+            }
+          }}
           hitSlop={8}
         >
           <ChevronLeft size={25} color={textColor} />
         </Pressable>
         <Text fontSize={20} fontWeight="700" color={textColor}>
-          Username
+          Friends
         </Text>
       </XStack>
 

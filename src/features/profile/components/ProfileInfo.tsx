@@ -1,23 +1,23 @@
 import { Text, XStack, YStack, useThemeName } from 'tamagui'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Image, StyleSheet, Pressable } from 'react-native'
-import { router } from 'expo-router'
 import { INSTAGRAM_GRADIENT } from '@/utils/InstagramGradient'
 import { formatNumber } from '@/utils/FormatNumber'
 import { ProfileComponentProps } from '../ProfileScreen'
 
-export function ProfileInfo({ user, isOwnProfile }: ProfileComponentProps) {
+interface ProfileInfoProps extends ProfileComponentProps {
+  onFriendsPress?: () => void
+}
+
+export function ProfileInfo({
+  user,
+  isOwnProfile,
+  onFriendsPress,
+}: ProfileInfoProps) {
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
   const captionColor = isDark ? 'rgba(255,255,255,0.7)' : '#4b5563'
   const ringBackground = isDark ? '#050506' : '#ffffff'
-
-  const handleFriendsPress = () => {
-    router.push({
-      pathname: '/profile/friends',
-      params: { isOwnProfile: isOwnProfile.toString() },
-    })
-  }
 
   return (
     <XStack
@@ -55,7 +55,7 @@ export function ProfileInfo({ user, isOwnProfile }: ProfileComponentProps) {
           </Text>
         </YStack>
 
-        <Pressable onPress={handleFriendsPress}>
+        <Pressable onPress={onFriendsPress}>
           <YStack alignItems="center" gap="$1">
             <Text fontSize="$6" fontWeight="700">
               {formatNumber(

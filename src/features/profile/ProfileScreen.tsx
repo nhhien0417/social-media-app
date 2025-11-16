@@ -60,6 +60,20 @@ export default function ProfileScreen({ userId }: ProfileScreenProps) {
     router.replace('/auth/signin')
   }
 
+  const handleFriendsPress = () => {
+    if (isOwnProfile) {
+      router.push({
+        pathname: '/profile/friends',
+        params: { isOwnProfile: 'true' },
+      })
+    } else if (displayUser) {
+      router.push({
+        pathname: '/profile/friends',
+        params: { userId: displayUser.id, isOwnProfile: 'false' },
+      })
+    }
+  }
+
   if (isLoading) {
     return (
       <YStack
@@ -104,27 +118,45 @@ export default function ProfileScreen({ userId }: ProfileScreenProps) {
           >
             {!isOwnProfile && (
               <Pressable onPress={() => router.back()} hitSlop={8}>
-                <ChevronLeft size={25} color={navIconColor} marginRight={8} />
+                <ChevronLeft size={25} color={navIconColor} />
               </Pressable>
             )}
 
-            <Text fontSize="$7" fontWeight="700" flex={1}>
+            <Text
+              fontSize="$7"
+              fontWeight="700"
+              flex={1}
+              marginLeft={!isOwnProfile ? '$3' : 0}
+            >
               {displayUser.username}
             </Text>
 
             <XStack gap="$3" alignItems="center">
-              <Plus size={25} color={navIconColor} />
-              <MoreVertical size={25} color={navIconColor} />
-              <LogOut
-                onPress={handleLogout}
-                pressStyle={{ opacity: 0.7 }}
-                size={25}
-                color={navIconColor}
-              />
+              {isOwnProfile ? (
+                <>
+                  <Pressable hitSlop={8}>
+                    <Plus size={25} color={navIconColor} />
+                  </Pressable>
+                  <Pressable hitSlop={8}>
+                    <MoreVertical size={25} color={navIconColor} />
+                  </Pressable>
+                  <Pressable onPress={handleLogout} hitSlop={8}>
+                    <LogOut size={25} color={navIconColor} />
+                  </Pressable>
+                </>
+              ) : (
+                <Pressable hitSlop={8}>
+                  <MoreVertical size={25} color={navIconColor} />
+                </Pressable>
+              )}
             </XStack>
           </XStack>
 
-          <ProfileInfo user={displayUser} isOwnProfile={isOwnProfile} />
+          <ProfileInfo
+            user={displayUser}
+            isOwnProfile={isOwnProfile}
+            onFriendsPress={handleFriendsPress}
+          />
           <ProfileBio user={displayUser} isOwnProfile={isOwnProfile} />
           <ProfileActions user={displayUser} isOwnProfile={isOwnProfile} />
           <StoryHighlights highlights={profileMock.highlights} />

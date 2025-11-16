@@ -1,4 +1,3 @@
-import { Media } from './Media'
 import { User } from './User'
 
 export type PostPrivacy = 'PUBLIC' | 'PRIVATE' | 'FRIENDS'
