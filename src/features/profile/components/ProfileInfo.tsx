@@ -4,9 +4,9 @@ import { Image, StyleSheet, Pressable } from 'react-native'
 import { router } from 'expo-router'
 import { INSTAGRAM_GRADIENT } from '@/utils/InstagramGradient'
 import { formatNumber } from '@/utils/FormatNumber'
-import { ProfileProps } from '../ProfileScreen'
+import { ProfileComponentProps } from '../ProfileScreen'
 
-export function ProfileInfo({ user, isOwnProfile }: ProfileProps) {
+export function ProfileInfo({ user, isOwnProfile }: ProfileComponentProps) {
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
   const captionColor = isDark ? 'rgba(255,255,255,0.7)' : '#4b5563'

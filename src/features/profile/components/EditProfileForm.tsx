@@ -17,7 +17,7 @@ import { Camera, ChevronDown } from '@tamagui/lucide-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 
 import { INSTAGRAM_GRADIENT } from '@/utils/InstagramGradient'
-import { ProfileProps } from '../ProfileScreen'
+import { ProfileComponentProps } from '../ProfileScreen'
 
 type FormValues = {
   name: string
@@ -28,7 +28,7 @@ type FormValues = {
   dob: string
 }
 
-export function EditProfileForm({ user }: ProfileProps) {
+export function EditProfileForm({ user }: ProfileComponentProps) {
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
 

@@ -17,7 +17,7 @@ import { createPostApi } from '@/api/api.post'
 import { getUserId } from '@/utils/SecureStore'
 import { usePostStatus } from '@/providers/PostStatusProvider'
 import { PostPrivacy } from '@/types/Post'
-import { useCurrentUser } from '@/services/useCurrentUser'
+import { useCurrentUser } from '@/services/useProfile'
 
 export type CreateMode = 'post' | 'story'
 

@@ -1,7 +1,7 @@
 import { Text, YStack, useThemeName } from 'tamagui'
-import { ProfileProps } from '../ProfileScreen'
+import { ProfileComponentProps } from '../ProfileScreen'
 
-export function ProfileBio({ user }: ProfileProps) {
+export function ProfileBio({ user }: ProfileComponentProps) {
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
   const bioColor = isDark ? 'rgba(255,255,255,0.8)' : '#111827'

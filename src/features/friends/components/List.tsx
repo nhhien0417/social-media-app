@@ -1,18 +1,18 @@
 import { ScrollView, ActivityIndicator } from 'react-native'
 import { YStack, Text } from 'tamagui'
 import { UserCard } from './Card'
-import type { ProfileData } from '@/api/api.profile'
+import { User } from '@/types/User'
 
 type CardType = 'friend' | 'request' | 'sent' | 'suggestion'
 
 interface FriendsListProps {
-  users: ProfileData[]
+  users: User[]
   type: CardType
   isDark: boolean
   isLoading?: boolean
   emptyMessage?: string
   showSuggestions?: boolean
-  suggestions?: ProfileData[]
+  suggestions?: User[]
   suggestionsLoading?: boolean
   onAcceptFriend?: (userId: string) => void
   onRejectFriend?: (userId: string) => void

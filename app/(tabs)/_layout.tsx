@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useEffect, useState } from 'react'
 import Avatar from '@/components/Avatar'
 import { getAccessToken } from '@/utils/SecureStore'
-import { useCurrentUser } from '@/services/useCurrentUser'
+import { useCurrentUser } from '@/services/useProfile'
 
 export default function TabsLayout() {
   const theme = useTheme()

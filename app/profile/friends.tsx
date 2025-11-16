@@ -10,5 +10,5 @@ export default function FriendsPage() {
   const isOwnProfile = params.isOwnProfile === 'true'
   const userId = params.userId
 
-  return <FriendsScreen isOwnProfile={isOwnProfile} userId={userId} />
+  return <FriendsScreen userId={userId} isOwnProfile={isOwnProfile} />
 }

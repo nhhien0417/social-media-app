@@ -31,14 +31,38 @@ export const useCurrentUser = () => {
 
       try {
         const response = await getUserApi(userId)
-        console.log('Success fetching current user:', response.data)
-
-        return normalizeUser(response.data)
+        const userData = response.data
+        console.log('Success fetching current user:', userData)
+        return normalizeUser(userData)
       } catch (error) {
         console.error('Error fetching current user:', error)
         return null
       }
     },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  })
+}
+
+export const useUserProfile = (userId: string | undefined) => {
+  return useQuery<User | null>({
+    queryKey: ['userProfile', userId],
+    queryFn: async () => {
+      if (!userId) {
+        return null
+      }
+
+      try {
+        const response = await getUserApi(userId)
+        const userData = response.data
+        console.log('Success fetching user profile:', userData)
+        return normalizeUser(userData)
+      } catch (error) {
+        console.error('Error fetching user profile:', error)
+        return null
+      }
+    },
+    enabled: !!userId,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
   })

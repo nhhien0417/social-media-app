@@ -5,7 +5,7 @@ import { Plus } from '@tamagui/lucide-icons'
 import { router } from 'expo-router'
 import { stories } from '@/mock/stories'
 import StoryItem from './StoryItem'
-import { useCurrentUser } from '@/services/useCurrentUser'
+import { useCurrentUser } from '@/services/useProfile'
 
 function CreateStoryItem() {
   const themeName = useThemeName()
@@ -78,7 +78,7 @@ function StoryBar() {
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ paddingVertical: 12}}
+      contentContainerStyle={{ paddingVertical: 12 }}
     >
       <XStack gap="$1">
         <CreateStoryItem />

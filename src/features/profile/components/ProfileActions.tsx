@@ -3,9 +3,9 @@ import { Button, XStack, useThemeName } from 'tamagui'
 import { Share2 } from '@tamagui/lucide-icons'
 import { useRouter } from 'expo-router'
 import { ShareProfileSheet } from './ShareProfileSheet'
-import { ProfileProps } from '../ProfileScreen'
+import { ProfileComponentProps } from '../ProfileScreen'
 
-export function ProfileActions({ user, isOwnProfile }: ProfileProps) {
+export function ProfileActions({ user, isOwnProfile }: ProfileComponentProps) {
   const router = useRouter()
   const [showShare, setShowShare] = useState(false)
   const themeName = useThemeName()

@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router'
 import { Button, Text, XStack, YStack, useThemeName } from 'tamagui'
 import { EditProfileForm } from '@/features/profile/components/EditProfileForm'
-import { useCurrentUser } from '@/services/useCurrentUser'
+import { useCurrentUser } from '@/services/useProfile'
 
 export default function EditProfileScreen() {
   const router = useRouter()
