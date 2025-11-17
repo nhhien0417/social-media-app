@@ -10,9 +10,11 @@ interface UserCardProps {
   user: User
   type: CardType
   isDark: boolean
+  onAddFriend?: (userId: string) => void
   onAccept?: (userId: string) => void
   onReject?: (userId: string) => void
-  onAddFriend?: (userId: string) => void
+  onCancel?: (userId: string) => void
+  onUnfriend?: (userId: string) => void
   isLoading?: boolean
 }
 
@@ -20,9 +22,11 @@ export function UserCard({
   user,
   type,
   isDark,
+  onAddFriend,
   onAccept,
   onReject,
-  onAddFriend,
+  onCancel,
+  onUnfriend,
   isLoading = false,
 }: UserCardProps) {
   const textColor = isDark ? '#f5f5f5' : '#111827'
@@ -86,7 +90,7 @@ export function UserCard({
             fontWeight="600"
             fontSize={14}
             pressStyle={{ opacity: 0.9 }}
-            onPress={() => onReject?.(user.id)}
+            onPress={() => onUnfriend?.(user.id)}
             disabled={isLoading}
           >
             Unfriend
@@ -139,7 +143,7 @@ export function UserCard({
           fontWeight="600"
           fontSize={14}
           pressStyle={{ opacity: 0.8 }}
-          onPress={() => onReject?.(user.id)}
+          onPress={() => onCancel?.(user.id)}
           disabled={isLoading}
         >
           Cancel

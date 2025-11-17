@@ -8,8 +8,8 @@ import { ProfileBio } from './components/ProfileBio'
 import { ProfileActions } from './components/ProfileActions'
 import { StoryHighlights } from './components/StoryHighlights'
 import { ProfileTabBar } from './components/ProfileTabBar'
-import { removeTokensAndUserId, getUserId } from '@/utils/SecureStore'
-import { useCurrentUser, useUserProfile } from '@/services/useProfile'
+import { removeTokensAndUserId } from '@/utils/SecureStore'
+import { useCurrentUser, useUser } from '@/hooks/useProfile'
 import MediaGrid from './components/MediaGrid'
 import { profileMock } from '@/mock/profile'
 import { User } from '@/types/User'
@@ -30,23 +30,13 @@ export default function ProfileScreen({ userId }: ProfileScreenProps) {
   const [tab, setTab] = useState<ProfileTabKey>('posts')
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
-  useEffect(() => {
-    getUserId().then(setCurrentUserId)
-  }, [])
-
-  const { data: currentUser } = useCurrentUser()
-  const {
-    data: otherUser,
-    isLoading: otherUserLoading,
-    error: otherUserError,
-  } = useUserProfile(userId)
+  const currentUser = useCurrentUser()
+  const otherUser = useUser(userId)
 
   const displayUser = userId ? otherUser : currentUser
-  const isOwnProfile = !userId || userId === currentUserId
-  const isLoading = userId ? otherUserLoading : !currentUser
-  const error = userId ? otherUserError : !currentUser && !isLoading
+  const isOwnProfile = !userId || userId === currentUser?.id
+  const isLoading = !displayUser
 
   const posts = Array.isArray(displayUser?.posts) ? displayUser.posts : []
   const mediaItems = useMemo(() => {
@@ -87,7 +77,7 @@ export default function ProfileScreen({ userId }: ProfileScreenProps) {
     )
   }
 
-  if (error || !displayUser) {
+  if (!displayUser) {
     return (
       <YStack
         flex={1}

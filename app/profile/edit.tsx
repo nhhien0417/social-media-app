@@ -1,12 +1,12 @@
 import { useRouter } from 'expo-router'
 import { Button, Text, XStack, YStack, useThemeName } from 'tamagui'
 import { EditProfileForm } from '@/features/profile/components/EditProfileForm'
-import { useCurrentUser } from '@/services/useProfile'
+import { useCurrentUser } from '@/hooks/useProfile'
 
 export default function EditProfileScreen() {
   const router = useRouter()
   const themeName = useThemeName()
-  const { data: currentUser } = useCurrentUser()
+  const currentUser = useCurrentUser()
   const isDark = themeName === 'dark'
   const background = isDark ? '#000000' : '#FAFAFA'
   const borderColor = isDark ? '#262626' : '#DBDBDB'

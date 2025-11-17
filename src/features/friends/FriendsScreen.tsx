@@ -1,19 +1,16 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { Pressable } from 'react-native'
 import { YStack, XStack, Text, Input, useThemeName } from 'tamagui'
 import { ChevronLeft, Search, X } from '@tamagui/lucide-icons'
 import { router, useLocalSearchParams } from 'expo-router'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useCurrentUser } from '@/hooks/useProfile'
 import {
-  getFriendApi,
-  getSentApi,
-  getPendingApi,
-  getAllProfilesApi,
-  addFriendApi,
-  acceptFriendApi,
-  rejectFriendAPi,
-} from '@/api/api.profile'
-import { getUserId } from '@/utils/SecureStore'
+  useFriends,
+  usePending,
+  useSent,
+  useSuggestions,
+  useProfileActions,
+} from '@/hooks/useProfile'
 import { Tab, TabBar, TabValue } from './components/Tabs'
 import { FriendsList } from './components/List'
 
@@ -38,152 +35,68 @@ export default function FriendsScreen({
 
   const [activeTab, setActiveTab] = useState<TabValue>('friends')
   const [searchQuery, setSearchQuery] = useState('')
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
-  const queryClient = useQueryClient()
 
-  // Get current user ID
-  useEffect(() => {
-    const loadUserId = async () => {
-      const id = await getUserId()
-      setCurrentUserId(id)
-    }
-    loadUserId()
-  }, [])
+  const currentUser = useCurrentUser()
+  const userId = isOwnProfile ? currentUser?.id : targetUserId
 
-  const userId = isOwnProfile ? currentUserId || '' : targetUserId || ''
+  // Fetch data
+  const { friends, isLoading: friendsLoading } = useFriends(userId)
+  const pending = usePending(isOwnProfile)
+  const sent = useSent(isOwnProfile)
+  const suggestions = useSuggestions(isOwnProfile)
 
-  // Fetch all profiles for suggestions (for all tabs when own profile)
-  const { data: allProfilesData, isLoading: suggestionsLoading } = useQuery({
-    queryKey: ['allProfiles'],
-    queryFn: async () => {
-      const response = await getAllProfilesApi()
-      console.log('All Profiles API Response:', response)
-      return response
-    },
-    enabled: isOwnProfile,
-  })
+  // Actions
+  const { addFriend, acceptFriend, cancelFriend, rejectFriend, unfriend } =
+    useProfileActions()
 
-  // Fetch friends list
-  const { data: friendsData, isLoading: friendsLoading } = useQuery({
-    queryKey: ['friends', userId],
-    queryFn: async () => {
-      const response = await getFriendApi(userId)
-      console.log('Get Friends API Response:', response)
-      return response
-    },
-    enabled: !!userId,
-  })
-
-  // Fetch pending requests (only for own profile)
-  const { data: pendingData, isLoading: pendingLoading } = useQuery({
-    queryKey: ['pending', userId],
-    queryFn: async () => {
-      const response = await getPendingApi(userId)
-      console.log('Get Pending Requests API Response:', response)
-      return response
-    },
-    enabled: !!userId && isOwnProfile,
-  })
-
-  // Fetch sent requests (only for own profile)
-  const { data: sentData, isLoading: sentLoading } = useQuery({
-    queryKey: ['sent', userId],
-    queryFn: async () => {
-      const response = await getSentApi(userId)
-      console.log('Get Sent Requests API Response:', response)
-      return response
-    },
-    enabled: !!userId && isOwnProfile,
-  })
-
-  // Mutations
-  const addFriendMutation = useMutation({
-    mutationFn: (friendUserId: string) =>
-      addFriendApi({ userId, friendUserId }),
-    onSuccess: data => {
-      console.log('Success request friend:', data)
-      queryClient.invalidateQueries({ queryKey: ['sent', userId] })
-      queryClient.invalidateQueries({ queryKey: ['allProfiles'] })
-    },
-    onError: error => {
-      console.error('Error add friend:', error)
-    },
-  })
-
-  const acceptFriendMutation = useMutation({
-    mutationFn: (friendUserId: string) =>
-      acceptFriendApi({ userId, friendUserId }),
-    onSuccess: data => {
-      console.log('Success accept friend:', data)
-      queryClient.invalidateQueries({ queryKey: ['friends', userId] })
-      queryClient.invalidateQueries({ queryKey: ['pending', userId] })
-    },
-    onError: error => {
-      console.error('Error accept friend:', error)
-    },
-  })
-
-  const rejectFriendMutation = useMutation({
-    mutationFn: (friendUserId: string) =>
-      rejectFriendAPi({ userId, friendUserId }),
-    onSuccess: data => {
-      console.log('Success reject friend:', data)
-      queryClient.invalidateQueries({ queryKey: ['allProfiles'] })
-      queryClient.invalidateQueries({ queryKey: ['friends', userId] })
-      queryClient.invalidateQueries({ queryKey: ['pending', userId] })
-      queryClient.invalidateQueries({ queryKey: ['sent', userId] })
-    },
-    onError: error => {
-      console.error('Error reject friend:', error)
-    },
-  })
+  const [isProcessing, setIsProcessing] = useState(false)
 
   // Handlers
-  const handleAcceptFriend = (friendUserId: string) => {
-    acceptFriendMutation.mutate(friendUserId)
+  const handleAddFriend = async (friendUserId: string) => {
+    setIsProcessing(true)
+    await addFriend(friendUserId)
+    setIsProcessing(false)
   }
 
-  const handleRejectFriend = (friendUserId: string) => {
-    rejectFriendMutation.mutate(friendUserId)
+  const handleAcceptFriend = async (friendUserId: string) => {
+    setIsProcessing(true)
+    await acceptFriend(friendUserId)
+    setIsProcessing(false)
   }
 
-  const handleAddFriend = (friendUserId: string) => {
-    addFriendMutation.mutate(friendUserId)
+  const handleCancelRequest = async (friendUserId: string) => {
+    setIsProcessing(true)
+    await cancelFriend(friendUserId)
+    setIsProcessing(false)
+  }
+
+  const handleRejectFriend = async (friendUserId: string) => {
+    setIsProcessing(true)
+    await rejectFriend(friendUserId)
+    setIsProcessing(false)
+  }
+
+  const handleUnfriend = async (friendUserId: string) => {
+    setIsProcessing(true)
+    await unfriend(friendUserId)
+    setIsProcessing(false)
   }
 
   // Get current data based on active tab
   const currentData = useMemo(() => {
     switch (activeTab) {
       case 'friends':
-        return friendsData?.data || []
+        return friends || []
       case 'sent':
-        return sentData?.data || []
+        return sent || []
       case 'requests':
-        return pendingData?.data || []
+        return pending || []
       default:
         return []
     }
-  }, [activeTab, friendsData, sentData, pendingData])
-
-  // Get suggestions (exclude friends, sent, and pending)
-  const suggestions = useMemo(() => {
-    if (!allProfilesData?.data) return []
-    const friendIds = new Set(friendsData?.data.map(f => f.id) || [])
-    const sentIds = new Set(sentData?.data.map(f => f.id) || [])
-    const pendingIds = new Set(pendingData?.data.map(f => f.id) || [])
-
-    return allProfilesData.data
-      .filter(
-        profile =>
-          profile.id !== userId &&
-          !friendIds.has(profile.id) &&
-          !sentIds.has(profile.id) &&
-          !pendingIds.has(profile.id)
-      )
-      .slice(0, 10)
-  }, [allProfilesData, friendsData, sentData, pendingData, userId])
+  }, [activeTab, friends, sent, pending])
 
   // Filter data by search query
   const filteredData = useMemo(() => {
@@ -201,45 +114,27 @@ export default function FriendsScreen({
     })
   }, [currentData, searchQuery])
 
-  // Loading states
-  const isLoading = useMemo(() => {
-    switch (activeTab) {
-      case 'friends':
-        return friendsLoading
-      case 'requests':
-        return pendingLoading
-      case 'sent':
-        return sentLoading
-      default:
-        return false
-    }
-  }, [activeTab, friendsLoading, pendingLoading, sentLoading])
-
-  const actionPending =
-    addFriendMutation.isPending ||
-    acceptFriendMutation.isPending ||
-    rejectFriendMutation.isPending
-
-  // Theme colors
+  const isLoading = friendsLoading
   const backgroundColor = isDark ? '#000000' : '#FAFAFA'
   const textColor = isDark ? '#f5f5f5' : '#111827'
   const searchBackground = isDark ? 'rgba(255,255,255,0.08)' : '#EFEFEF'
+
   // Tabs configuration (only for own profile)
   const tabs: Tab[] = [
     {
       value: 'friends',
       label: 'Friends',
-      count: friendsData?.data.length || 0,
+      count: friends?.length || 0,
     },
     {
       value: 'requests',
       label: 'Requests',
-      count: pendingData?.data.length || 0,
+      count: pending?.length || 0,
     },
     {
       value: 'sent',
       label: 'Sent',
-      count: sentData?.data.length || 0,
+      count: sent?.length || 0,
     },
   ]
 
@@ -350,12 +245,13 @@ export default function FriendsScreen({
         isLoading={isLoading}
         emptyMessage={getEmptyMessage()}
         showSuggestions={isOwnProfile && !searchQuery}
-        suggestions={suggestions}
-        suggestionsLoading={suggestionsLoading}
-        actionPending={actionPending}
+        suggestions={suggestions || []}
+        actionPending={isProcessing}
         onAddFriend={handleAddFriend}
         onAcceptFriend={handleAcceptFriend}
+        onCancelRequest={handleCancelRequest}
         onRejectFriend={handleRejectFriend}
+        onUnfriend={handleUnfriend}
       />
     </YStack>
   )

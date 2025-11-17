@@ -45,9 +45,9 @@ export const registerPushToken = async (
       }
     )
 
-    console.log('✅ Push Token đã được đăng ký thành công:', response.data)
+    console.log('Push Token đã được đăng ký thành công:', response.data)
   } catch (error) {
-    console.error('❌ Lỗi khi đăng ký Push Token:', error)
+    console.error('Lỗi khi đăng ký Push Token:', error)
     throw error
   }
 }
@@ -62,9 +62,9 @@ export const unregisterPushToken = async (token: string): Promise<void> => {
       token,
     })
 
-    console.log('✅ Push Token đã được hủy đăng ký')
+    console.log('Push Token đã được hủy đăng ký')
   } catch (error) {
-    console.error('❌ Lỗi khi hủy đăng ký Push Token:', error)
+    console.error('Lỗi khi hủy đăng ký Push Token:', error)
     throw error
   }
 }
@@ -82,12 +82,9 @@ export const updatePushSettings = async (
       settings
     )
 
-    console.log(
-      '✅ Cài đặt Push Notifications đã được cập nhật:',
-      response.data
-    )
+    console.log('Cài đặt Push Notifications đã được cập nhật:', response.data)
   } catch (error) {
-    console.error('❌ Lỗi khi cập nhật cài đặt:', error)
+    console.error('Lỗi khi cập nhật cài đặt:', error)
     throw error
   }
 }
@@ -101,7 +98,7 @@ export const getPushSettings = async (): Promise<PushNotificationSettings> => {
 
     return response.data
   } catch (error) {
-    console.error('❌ Lỗi khi lấy cài đặt:', error)
+    console.error('Lỗi khi lấy cài đặt:', error)
     throw error
   }
 }

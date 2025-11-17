@@ -14,10 +14,9 @@ import MediaPicker from './components/MediaPicker'
 import Camera from './components/Camera'
 import DiscardChangesModal from './components/DiscardChanges'
 import { createPostApi } from '@/api/api.post'
-import { getUserId } from '@/utils/SecureStore'
 import { usePostStatus } from '@/providers/PostStatusProvider'
 import { PostPrivacy } from '@/types/Post'
-import { useCurrentUser } from '@/services/useProfile'
+import { useCurrentUser } from '@/hooks/useProfile'
 
 export type CreateMode = 'post' | 'story'
 
@@ -25,7 +24,7 @@ export default function NewPostScreen() {
   const router = useRouter()
   const params = useLocalSearchParams<{ mode?: CreateMode }>()
   const { startPosting, finishPosting, failPosting } = usePostStatus()
-  const { data: currentUser } = useCurrentUser()
+  const currentUser = useCurrentUser()
 
   const [mode, setMode] = useState<CreateMode>('post')
   const [caption, setCaption] = useState('')
@@ -138,9 +137,8 @@ export default function NewPostScreen() {
     if (isSubmitting) return
     setIsSubmitting(true)
 
-    const userId = await getUserId()
-    if (!userId) {
-      console.error('❌ User not found')
+    if (!currentUser?.id) {
+      console.error('User not found')
       setIsSubmitting(false)
       return
     }
@@ -155,7 +153,7 @@ export default function NewPostScreen() {
     }
 
     const postData = {
-      userId,
+      userId: currentUser.id,
       content: caption.trim() || undefined,
       groupId: undefined,
       privacy: privacyMap[privacy],
@@ -174,18 +172,19 @@ export default function NewPostScreen() {
 
     createPostApi(postData)
       .then(response => {
-        console.log('✅ Post created successfully:', response)
+        console.log('Post created successfully:', response)
         finishPosting()
         setIsSubmitting(false)
       })
       .catch(error => {
-        console.error('❌ Error creating post:', error)
+        console.error('Error creating post:', error)
         const errorMessage =
           error?.message || 'Network error. Please check your connection.'
         failPosting(errorMessage)
         setIsSubmitting(false)
       })
   }, [
+    currentUser,
     caption,
     media,
     privacy,

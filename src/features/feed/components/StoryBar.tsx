@@ -5,14 +5,14 @@ import { Plus } from '@tamagui/lucide-icons'
 import { router } from 'expo-router'
 import { stories } from '@/mock/stories'
 import StoryItem from './StoryItem'
-import { useCurrentUser } from '@/services/useProfile'
+import { useCurrentUser } from '@/hooks/useProfile'
 
 function CreateStoryItem() {
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
   const ringBackground = isDark ? '#121212' : '#ffffff'
   const labelColor = isDark ? '#f5f5f5' : '#111827'
-  const { data: currentUser } = useCurrentUser()
+  const currentUser = useCurrentUser()
 
   const handlePress = () => {
     router.push({

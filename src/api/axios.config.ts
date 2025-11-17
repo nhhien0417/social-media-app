@@ -125,7 +125,7 @@ api.interceptors.response.use(
     }
 
     console.warn(
-      `❌ API Error [${status}]:`,
+      `API Error [${status}]:`,
       error?.response?.data || error.message
     )
 

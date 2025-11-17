@@ -2,15 +2,9 @@ import { useState } from 'react'
 import { Button, XStack, useThemeName } from 'tamagui'
 import { Share2, UserPlus, UserMinus, UserCheck } from '@tamagui/lucide-icons'
 import { useRouter } from 'expo-router'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ShareProfileSheet } from './ShareProfileSheet'
 import { ProfileComponentProps } from '../ProfileScreen'
-import {
-  addFriendApi,
-  acceptFriendApi,
-  rejectFriendAPi,
-} from '@/api/api.profile'
-import { getUserId } from '@/utils/SecureStore'
+import { useProfileActions } from '@/hooks/useProfile'
 
 export function ProfileActions({ user, isOwnProfile }: ProfileComponentProps) {
   const router = useRouter()
@@ -20,57 +14,42 @@ export function ProfileActions({ user, isOwnProfile }: ProfileComponentProps) {
   const secondaryBackground = isDark ? 'rgba(255,255,255,0.08)' : '#e3e8f1ff'
   const secondaryTextColor = isDark ? '#f5f5f5' : '#0d131eff'
   const outlineColor = isDark ? 'rgba(255,255,255,0.4)' : '#9fa2a7ff'
-  const queryClient = useQueryClient()
 
-  // Mutations
-  const addFriendMutation = useMutation({
-    mutationFn: async () => {
-      const currentUserId = await getUserId()
-      if (!currentUserId) throw new Error('Not logged in')
-      return addFriendApi({ userId: currentUserId, friendUserId: user.id })
-    },
-    onSuccess: data => {
-      console.log('Success request friend:', data)
-      queryClient.invalidateQueries({ queryKey: ['userProfile', user.id] })
-      queryClient.invalidateQueries({ queryKey: ['allProfiles'] })
-      queryClient.invalidateQueries({ queryKey: ['sent'] })
-    },
-  })
-
-  const acceptFriendMutation = useMutation({
-    mutationFn: async () => {
-      const currentUserId = await getUserId()
-      if (!currentUserId) throw new Error('Not logged in')
-      return acceptFriendApi({ userId: currentUserId, friendUserId: user.id })
-    },
-    onSuccess: data => {
-      console.log('Success accept friend:', data)
-      queryClient.invalidateQueries({ queryKey: ['userProfile', user.id] })
-      queryClient.invalidateQueries({ queryKey: ['friends'] })
-      queryClient.invalidateQueries({ queryKey: ['pending'] })
-    },
-  })
-
-  const cancelFriendMutation = useMutation({
-    mutationFn: async () => {
-      const currentUserId = await getUserId()
-      if (!currentUserId) throw new Error('Not logged in')
-      return rejectFriendAPi({ userId: currentUserId, friendUserId: user.id })
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['userProfile', user.id] })
-      queryClient.invalidateQueries({ queryKey: ['allProfiles'] })
-      queryClient.invalidateQueries({ queryKey: ['friends'] })
-      queryClient.invalidateQueries({ queryKey: ['pending'] })
-      queryClient.invalidateQueries({ queryKey: ['sent'] })
-    },
-  })
+  const { addFriend, cancelFriend, acceptFriend, rejectFriend, unfriend } =
+    useProfileActions()
 
   const friendStatus = user.friendStatus
-  const isPending =
-    addFriendMutation.isPending ||
-    acceptFriendMutation.isPending ||
-    cancelFriendMutation.isPending
+  const [isProcessing, setIsProcessing] = useState(false)
+
+  const handleAddFriend = async () => {
+    setIsProcessing(true)
+    await addFriend(user.id)
+    setIsProcessing(false)
+  }
+  
+  const handleAccept = async () => {
+    setIsProcessing(true)
+    await acceptFriend(user.id)
+    setIsProcessing(false)
+  }
+  
+  const handleCancel = async () => {
+    setIsProcessing(true)
+    await cancelFriend(user.id)
+    setIsProcessing(false)
+  }
+  
+  const handleReject = async () => {
+    setIsProcessing(true)
+    await rejectFriend(user.id)
+    setIsProcessing(false)
+  }
+
+  const handleUnfriend = async () => {
+    setIsProcessing(true)
+    await unfriend(user.id)
+    setIsProcessing(false)
+  }
 
   const renderFriendButton = () => {
     switch (friendStatus) {
@@ -87,8 +66,8 @@ export function ProfileActions({ user, isOwnProfile }: ProfileComponentProps) {
               fontSize={15}
               fontWeight={500}
               icon={<UserCheck size={18} color={secondaryTextColor} />}
-              onPress={() => cancelFriendMutation.mutate()}
-              disabled={isPending}
+              onPress={handleUnfriend}
+              disabled={isProcessing}
             >
               Friends
             </Button>
@@ -120,8 +99,8 @@ export function ProfileActions({ user, isOwnProfile }: ProfileComponentProps) {
             fontSize={15}
             fontWeight={500}
             icon={<UserMinus size={18} color={secondaryTextColor} />}
-            onPress={() => cancelFriendMutation.mutate()}
-            disabled={isPending}
+            onPress={handleCancel}
+            disabled={isProcessing}
           >
             Cancel Request
           </Button>
@@ -138,8 +117,8 @@ export function ProfileActions({ user, isOwnProfile }: ProfileComponentProps) {
               fontSize={15}
               fontWeight={500}
               icon={<UserPlus size={18} color="#ffffff" />}
-              onPress={() => acceptFriendMutation.mutate()}
-              disabled={isPending}
+              onPress={handleAccept}
+              disabled={isProcessing}
             >
               Accept
             </Button>
@@ -152,8 +131,8 @@ export function ProfileActions({ user, isOwnProfile }: ProfileComponentProps) {
               borderWidth={1}
               fontSize={15}
               fontWeight={500}
-              onPress={() => cancelFriendMutation.mutate()}
-              disabled={isPending}
+              onPress={handleReject}
+              disabled={isProcessing}
             >
               Decline
             </Button>
@@ -171,8 +150,8 @@ export function ProfileActions({ user, isOwnProfile }: ProfileComponentProps) {
             fontSize={15}
             fontWeight={500}
             icon={<UserPlus size={18} color="#ffffff" />}
-            onPress={() => addFriendMutation.mutate()}
-            disabled={isPending}
+            onPress={handleAddFriend}
+            disabled={isProcessing}
           >
             Add Friend
           </Button>

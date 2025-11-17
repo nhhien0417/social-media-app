@@ -7,13 +7,15 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useEffect, useState } from 'react'
 import Avatar from '@/components/Avatar'
 import { getAccessToken } from '@/utils/SecureStore'
-import { useCurrentUser } from '@/services/useProfile'
+import { useInitProfile, useCurrentUser } from '@/hooks/useProfile'
 
 export default function TabsLayout() {
   const theme = useTheme()
   const router = useRouter()
   const [isChecking, setIsChecking] = useState(true)
-  const { data: currentUser } = useCurrentUser()
+
+  useInitProfile()
+  const currentUser = useCurrentUser()
 
   useEffect(() => {
     const checkAuth = async () => {
