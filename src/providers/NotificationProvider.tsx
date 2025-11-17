@@ -8,7 +8,7 @@ import React, {
   useRef,
 } from 'react'
 import * as Notifications from 'expo-notifications'
-import { useStomp, useStompEvent } from '@/services/useRealTimeNotification'
+import { useStomp, useStompEvent } from '@/hooks/useRealTimeNotification'
 import { NotificationItem, NotificationType } from '@/types/Notification'
 import { notifications as mockNotifications } from '@/mock/notifications'
 import {

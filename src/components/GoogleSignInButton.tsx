@@ -1,5 +1,5 @@
 import { Button, XStack, Text, Spinner, YStack } from 'tamagui'
-import { useGoogleSignIn } from '../services/useGoogleSignIn'
+import { useGoogleSignIn } from '../hooks/useGoogleSignIn'
 import { useRouter } from 'expo-router'
 import Svg, { G, Path } from 'react-native-svg'
 
