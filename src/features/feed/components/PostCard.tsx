@@ -1,4 +1,4 @@
-import { memo, useState, useRef, useCallback, useEffect } from 'react'
+import { memo, useState, useRef, useCallback } from 'react'
 import { FlatList, NativeScrollEvent, NativeSyntheticEvent } from 'react-native'
 import { YStack, XStack, Text, Image, View } from 'tamagui'
 import Avatar from '@/components/Avatar'
@@ -16,7 +16,7 @@ import { Media } from '@/types/Media'
 import Comment from '@/features/comment/Comment'
 import { comments } from '@/mock/comments'
 import { getUserId } from '@/utils/SecureStore'
-import { usePostStore } from '@/stores/postStore'
+import { likePostApi } from '@/api/api.post'
 
 function MediaItem({ item, width }: { item: Media; width: number }) {
   return <Image source={{ uri: item.url }} width={width} aspectRatio={1} />
@@ -52,7 +52,7 @@ function PaginationDots({
 }
 
 function PostCard({ post }: { post: Post }) {
-  const { authorId: author, media = [], content, createdAt, likes } = post
+  const { author, media = [], content, createdAt } = post
   const location = 'Tokyo, Japan'
 
   const [activeIndex, setActiveIndex] = useState(0)
@@ -63,32 +63,7 @@ function PostCard({ post }: { post: Post }) {
   const isLongCaption = !!content && content.length > 100
 
   const [commentSheetVisible, setCommentSheetVisible] = useState(false)
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
-
-  const { likePost: likePostStore } = usePostStore()
-
-  // Convert media strings to Media objects if needed
-  const mediaItems: Media[] = media.map((item, index) => {
-    if (typeof item === 'string') {
-      return {
-        id: `media-${post.id}-${index}`,
-        type: 'image',
-        url: item,
-        ratio: 1,
-      }
-    }
-    return item as any as Media
-  })
-
-  // Get current user ID on mount
-  useEffect(() => {
-    getUserId().then(setCurrentUserId)
-  }, [])
-
-  // Check if current user has liked this post
-  const isLiked = currentUserId
-    ? likes.some((like: any) => like.userId === currentUserId)
-    : false
+  const [isLiked, setIsLiked] = useState(false)
 
   const handleScroll = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -103,13 +78,23 @@ function PostCard({ post }: { post: Post }) {
 
   const handleLikePost = async () => {
     try {
-      if (!currentUserId) {
+      const previousLikedState = isLiked
+      setIsLiked(!previousLikedState)
+
+      const userId = await getUserId()
+      if (!userId) {
         console.error('User not found')
         return
       }
 
-      // Use store action for optimistic update
-      await likePostStore(post.id, currentUserId)
+      const postData = {
+        postId: post.id,
+        userId,
+      }
+
+      const response = await likePostApi(postData)
+      console.log('API response:', response.data)
+      setIsLiked(!previousLikedState)
     } catch (error) {
       console.error('Error like post:', error)
     }
@@ -135,7 +120,7 @@ function PostCard({ post }: { post: Post }) {
         justifyContent="space-between"
       >
         <XStack alignItems="center" gap="$2.5">
-          <Avatar uri={author.avatarUrl || undefined} size={40} />
+          <Avatar uri={author.avatarUrl} size={40} />
           <YStack>
             <Text fontWeight="600" fontSize={15}>
               {author.username}
@@ -158,7 +143,7 @@ function PostCard({ post }: { post: Post }) {
         {containerWidth > 0 && (
           <FlatList
             ref={listRef}
-            data={mediaItems}
+            data={media}
             keyExtractor={it => it.id}
             renderItem={({ item }) => (
               <MediaItem item={item} width={containerWidth} />
@@ -174,7 +159,7 @@ function PostCard({ post }: { post: Post }) {
       </YStack>
 
       {/* Dots */}
-      <PaginationDots media={mediaItems} activeIndex={activeIndex} />
+      <PaginationDots media={media} activeIndex={activeIndex} />
 
       {/* Actions */}
       <XStack
@@ -251,7 +236,7 @@ function PostCard({ post }: { post: Post }) {
         comments={comments.filter(c => c.postId === post.id)}
         onSendComment={handleSendComment}
         onLikeComment={handleLikeComment}
-        userAvatarUrl={author.avatarUrl || undefined}
+        userAvatarUrl={author.avatarUrl}
       />
     </YStack>
   )

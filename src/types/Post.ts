@@ -4,7 +4,7 @@ export type PostPrivacy = 'PUBLIC' | 'PRIVATE' | 'FRIENDS'
 
 export interface Post {
   id: string
-  authorId: User
+  author: User
   groupId?: string
   type?: string
   content?: string
