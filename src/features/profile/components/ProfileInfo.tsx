@@ -1,41 +1,23 @@
 import { Text, XStack, YStack, useThemeName } from 'tamagui'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Image, StyleSheet, Pressable } from 'react-native'
-import { router } from 'expo-router'
-import type { ProfileUser } from '../../../mock/profile'
 import { INSTAGRAM_GRADIENT } from '@/utils/InstagramGradient'
+import { formatNumber } from '@/utils/FormatNumber'
+import { ProfileComponentProps } from '../ProfileScreen'
 
-interface ProfileHeaderProps {
-  user: ProfileUser
-  isOwnProfile?: boolean
+interface ProfileInfoProps extends ProfileComponentProps {
+  onFriendsPress?: () => void
 }
 
-const formatNumber = (value: number) => {
-  if (value >= 1_000_000) {
-    return `${(value / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`
-  }
-  if (value >= 1_000) {
-    return `${(value / 1_000).toFixed(1).replace(/\.0$/, '')}K`
-  }
-  return value.toLocaleString('en-US')
-}
-
-export function ProfileHeader({
+export function ProfileInfo({
   user,
-  isOwnProfile = true,
-}: ProfileHeaderProps) {
+  isOwnProfile,
+  onFriendsPress,
+}: ProfileInfoProps) {
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
   const captionColor = isDark ? 'rgba(255,255,255,0.7)' : '#4b5563'
   const ringBackground = isDark ? '#050506' : '#ffffff'
-  const fallbackBackground = isDark ? '#111827' : '#e2e8f0'
-
-  const handleFriendsPress = () => {
-    router.push({
-      pathname: '/profile/friends' as any,
-      params: { isOwnProfile: isOwnProfile.toString() },
-    })
-  }
 
   return (
     <XStack
@@ -55,47 +37,32 @@ export function ProfileHeader({
           justifyContent="center"
         >
           <YStack style={styles.avatarImageWrapper}>
-            {user.avatarUrl ? (
-              <Image
-                source={{ uri: user.avatarUrl }}
-                style={styles.avatarImage}
-              />
-            ) : (
-              <YStack
-                flex={1}
-                alignItems="center"
-                justifyContent="center"
-                backgroundColor={fallbackBackground}
-              >
-                <Text
-                  fontSize="$6"
-                  fontWeight="700"
-                  color={isDark ? '#f8fafc' : '#111827'}
-                >
-                  {user.username[0]?.toUpperCase() ?? 'A'}
-                </Text>
-              </YStack>
-            )}
+            <Image
+              source={{ uri: user.avatarUrl || undefined }}
+              style={styles.avatarImage}
+            />
           </YStack>
         </YStack>
       </LinearGradient>
 
-      <XStack flex={1} justifyContent="space-around" marginLeft="$6">
+      <XStack flex={1} justifyContent="space-around" marginLeft="$5">
         <YStack alignItems="center" gap="$1">
-          <Text fontSize="$5" fontWeight="700">
-            {formatNumber(user.stats.posts)}
+          <Text fontSize="$6" fontWeight="700">
+            {formatNumber(Array.isArray(user.posts) ? user.posts.length : 0)}
           </Text>
-          <Text fontSize="$2" color={captionColor}>
+          <Text fontSize="$3" fontWeight="500" color={captionColor}>
             Posts
           </Text>
         </YStack>
 
-        <Pressable onPress={handleFriendsPress}>
+        <Pressable onPress={onFriendsPress}>
           <YStack alignItems="center" gap="$1">
-            <Text fontSize="$5" fontWeight="700">
-              {formatNumber(user.stats.followers + user.stats.following)}
+            <Text fontSize="$6" fontWeight="700">
+              {formatNumber(
+                Array.isArray(user.friendships) ? user.friendships.length : 0
+              )}
             </Text>
-            <Text fontSize="$2" color={captionColor}>
+            <Text fontSize="$3" fontWeight="500" color={captionColor}>
               Friends
             </Text>
           </YStack>
@@ -105,8 +72,8 @@ export function ProfileHeader({
   )
 }
 
-const AVATAR_SIZE = 88
-const RING_PADDING = 4
+const AVATAR_SIZE = 90
+const RING_PADDING = 5
 const RING_SIZE = AVATAR_SIZE + RING_PADDING * 2
 
 const styles = StyleSheet.create({

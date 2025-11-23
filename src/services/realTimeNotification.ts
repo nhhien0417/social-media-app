@@ -56,7 +56,7 @@ class StompService {
 
       // Event handlers
       onConnect: (frame: IFrame) => {
-        console.log('✅ STOMP Connected successfully')
+        console.log('STOMP Connected successfully')
         console.log('📋 Connection frame:', frame)
         this.connected = true
 
@@ -68,7 +68,7 @@ class StompService {
       },
 
       onStompError: (frame: IFrame) => {
-        console.error('❌ STOMP Error:', frame.headers['message'])
+        console.error('STOMP Error:', frame.headers['message'])
         console.error('📋 Error details:', frame.body)
         this.connected = false
 
@@ -137,7 +137,7 @@ class StompService {
         // Emit notification event to all listeners
         this.emit('notification', notification)
       } catch (error) {
-        console.error('❌ Failed to parse notification:', error)
+        console.error('Failed to parse notification:', error)
       }
     })
   }
@@ -212,7 +212,7 @@ class StompService {
         try {
           callback(data)
         } catch (error) {
-          console.error(`❌ Error in ${event} callback:`, error)
+          console.error(`Error in ${event} callback:`, error)
         }
       })
     }
@@ -235,7 +235,7 @@ class StompService {
       })
       console.log('📤 Message sent to:', destination)
     } catch (error) {
-      console.error('❌ Failed to send message:', error)
+      console.error('Failed to send message:', error)
     }
   }
 

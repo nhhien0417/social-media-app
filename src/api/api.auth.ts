@@ -32,10 +32,7 @@ export type RefreshTokenResponse = {
   statusCode: number
   error: null | string
   message: string
-  data: {
-    accessToken: string
-    refreshToken: string
-  }
+  data: string
 }
 
 export type GoogleLoginData = {

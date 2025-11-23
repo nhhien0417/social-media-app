@@ -51,7 +51,7 @@ export interface MediaItem {
 export interface UserInfoData {
   id: string
   name: string
-  avatarUrl: string
+  avatarUrl?: string
 }
 
 type Props = {

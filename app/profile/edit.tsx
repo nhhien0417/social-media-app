@@ -1,16 +1,17 @@
 import { useRouter } from 'expo-router'
 import { Button, Text, XStack, YStack, useThemeName } from 'tamagui'
-import { profileMock } from '@/mock/profile'
 import { EditProfileForm } from '@/features/profile/components/EditProfileForm'
+import { useCurrentUser } from '@/hooks/useProfile'
 
 export default function EditProfileScreen() {
   const router = useRouter()
   const themeName = useThemeName()
+  const currentUser = useCurrentUser()
   const isDark = themeName === 'dark'
-  const background = isDark ? '#000000' : '#FAFAFA' 
-  const borderColor = isDark ? '#262626' : '#DBDBDB' 
+  const background = isDark ? '#000000' : '#FAFAFA'
+  const borderColor = isDark ? '#262626' : '#DBDBDB'
   const textColor = isDark ? '#FAFAFA' : '#000000'
-  const accentColor = '#0095F6' 
+  const accentColor = '#0095F6'
 
   const handleSave = () => {
     router.replace('/profile')
@@ -20,13 +21,26 @@ export default function EditProfileScreen() {
     router.replace('/profile')
   }
 
+  if (!currentUser) {
+    return (
+      <YStack
+        flex={1}
+        backgroundColor="$background"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Text fontSize="$6" fontWeight="700">
+          Loading...
+        </Text>
+      </YStack>
+    )
+  }
+
   return (
     <YStack flex={1} backgroundColor={background}>
       <XStack
         alignItems="center"
-        paddingHorizontal="$3"
-        paddingTop="$2"
-        paddingBottom="$3"
+        padding="$3"
         borderBottomWidth={1}
         borderColor={borderColor}
         gap="$3"
@@ -36,8 +50,7 @@ export default function EditProfileScreen() {
           backgroundColor="transparent"
           borderColor="transparent"
           onPress={handleCancel}
-          minWidth={72}
-          paddingHorizontal={0}
+          paddingHorizontal="$3"
         >
           <Text fontSize="$4" color={textColor}>
             Cancel
@@ -59,8 +72,7 @@ export default function EditProfileScreen() {
           backgroundColor="transparent"
           borderColor="transparent"
           onPress={handleSave}
-          minWidth={72}
-          paddingHorizontal={0}
+          paddingHorizontal="$3"
         >
           <Text fontSize="$4" fontWeight="700" color={accentColor}>
             Done
@@ -68,7 +80,7 @@ export default function EditProfileScreen() {
         </Button>
       </XStack>
 
-      <EditProfileForm user={profileMock} />
+      <EditProfileForm user={currentUser} isOwnProfile={true} />
     </YStack>
   )
 }

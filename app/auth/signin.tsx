@@ -64,7 +64,7 @@ export default function SignInScreen() {
 
     try {
       const response = await signInApi({ email, password })
-      console.log('✅ API Response:', response)
+      console.log('API Response:', response)
 
       if (response && response.data && response.data.accessToken) {
         await saveTokens(response.data.accessToken, response.data.refreshToken)

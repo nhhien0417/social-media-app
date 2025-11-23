@@ -103,7 +103,8 @@ api.interceptors.response.use(
 
         const refreshRequest = { refreshToken }
         const response = await refreshTokenApi(refreshRequest)
-        const accessToken = response.data.accessToken
+        const accessToken = response.data
+
         await saveTokens(accessToken, refreshToken)
 
         if (originalRequest.headers) {
@@ -124,7 +125,7 @@ api.interceptors.response.use(
     }
 
     console.warn(
-      `❌ API Error [${status}]:`,
+      `API Error [${status}]:`,
       error?.response?.data || error.message
     )
 

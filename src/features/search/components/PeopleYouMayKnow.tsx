@@ -11,17 +11,18 @@ import {
   useThemeName,
 } from 'tamagui'
 import { Check, UserPlus } from '@tamagui/lucide-icons'
-import { addFriendApi, getAllProfilesApi, ProfileData } from '@/api/api.profile'
+import { addFriendApi, getAllProfilesApi } from '@/api/api.profile'
 import { getUserId } from '@/utils/SecureStore'
+import { User } from '@/types/User'
 
 interface PeopleYouMayKnowProps {
-  onAddFriend?: (user: ProfileData) => void
+  onAddFriend?: (user: User) => void
 }
 
 export const PeopleYouMayKnow = memo(function PeopleYouMayKnow({
   onAddFriend,
 }: PeopleYouMayKnowProps) {
-  const [users, setUsers] = useState<ProfileData[]>([])
+  const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 

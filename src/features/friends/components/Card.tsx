@@ -1,18 +1,20 @@
-import { Image, StyleSheet } from 'react-native'
+import { Image, StyleSheet, Pressable } from 'react-native'
 import { XStack, YStack, Text, Button } from 'tamagui'
 import { UserPlus } from '@tamagui/lucide-icons'
 import { router } from 'expo-router'
-import type { ProfileData } from '@/api/api.profile'
+import { User } from '@/types/User'
 
 type CardType = 'friend' | 'request' | 'sent' | 'suggestion'
 
 interface UserCardProps {
-  user: ProfileData
+  user: User
   type: CardType
   isDark: boolean
+  onAddFriend?: (userId: string) => void
   onAccept?: (userId: string) => void
   onReject?: (userId: string) => void
-  onAddFriend?: (userId: string) => void
+  onCancel?: (userId: string) => void
+  onUnfriend?: (userId: string) => void
   isLoading?: boolean
 }
 
@@ -20,9 +22,11 @@ export function UserCard({
   user,
   type,
   isDark,
+  onAddFriend,
   onAccept,
   onReject,
-  onAddFriend,
+  onCancel,
+  onUnfriend,
   isLoading = false,
 }: UserCardProps) {
   const textColor = isDark ? '#f5f5f5' : '#111827'
@@ -39,18 +43,25 @@ export function UserCard({
       alignItems="center"
       gap="$3"
     >
-      <YStack style={styles.avatar}>
-        <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
-      </YStack>
+      <Pressable onPress={() => router.push(`/profile/${user.id}`)}>
+        <YStack style={styles.avatar}>
+          <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
+        </YStack>
+      </Pressable>
 
-      <YStack flex={1} gap="$1">
-        <Text fontSize={14} fontWeight="600" color={textColor}>
-          {displayName}
-        </Text>
-        <Text fontSize={13} color={subtitleColor}>
-          {user.email}
-        </Text>
-      </YStack>
+      <Pressable
+        style={{ flex: 1 }}
+        onPress={() => router.push(`/profile/${user.id}`)}
+      >
+        <YStack gap="$1">
+          <Text fontSize={14} fontWeight="600" color={textColor}>
+            {displayName}
+          </Text>
+          <Text fontSize={13} color={subtitleColor}>
+            {user.email}
+          </Text>
+        </YStack>
+      </Pressable>
 
       {/* FRIEND */}
       {type === 'friend' && (
@@ -79,7 +90,7 @@ export function UserCard({
             fontWeight="600"
             fontSize={14}
             pressStyle={{ opacity: 0.9 }}
-            onPress={() => onReject?.(user.id)}
+            onPress={() => onUnfriend?.(user.id)}
             disabled={isLoading}
           >
             Unfriend
@@ -132,7 +143,7 @@ export function UserCard({
           fontWeight="600"
           fontSize={14}
           pressStyle={{ opacity: 0.8 }}
-          onPress={() => onReject?.(user.id)}
+          onPress={() => onCancel?.(user.id)}
           disabled={isLoading}
         >
           Cancel

@@ -31,12 +31,12 @@ function RootContent() {
         const storedUserId = await getUserId()
         if (storedUserId) {
           setUserId(storedUserId)
-          console.log('✅ Loaded userId from storage:', storedUserId)
+          console.log('Loaded userId from storage:', storedUserId)
         } else {
           console.log('⚠️ No userId found in storage')
         }
       } catch (error) {
-        console.error('❌ Failed to load userId:', error)
+        console.error('Failed to load userId:', error)
       } finally {
         setIsLoadingUserId(false)
       }

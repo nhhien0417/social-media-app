@@ -14,8 +14,9 @@ import MediaPicker from './components/MediaPicker'
 import Camera from './components/Camera'
 import DiscardChangesModal from './components/DiscardChanges'
 import { createPostApi } from '@/api/api.post'
-import { getUserId } from '@/utils/SecureStore'
 import { usePostStatus } from '@/providers/PostStatusProvider'
+import { PostPrivacy } from '@/types/Post'
+import { useCurrentUser } from '@/hooks/useProfile'
 
 export type CreateMode = 'post' | 'story'
 
@@ -23,6 +24,7 @@ export default function NewPostScreen() {
   const router = useRouter()
   const params = useLocalSearchParams<{ mode?: CreateMode }>()
   const { startPosting, finishPosting, failPosting } = usePostStatus()
+  const currentUser = useCurrentUser()
 
   const [mode, setMode] = useState<CreateMode>('post')
   const [caption, setCaption] = useState('')
@@ -33,14 +35,21 @@ export default function NewPostScreen() {
   const [showDiscardModal, setShowDiscardModal] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const user: UserInfoData = useMemo(
-    () => ({
-      id: 'me',
-      name: 'Adewale Martins',
-      avatarUrl: 'https://picsum.photos/id/237/200/200',
-    }),
-    []
-  )
+  const user: UserInfoData = useMemo(() => {
+    if (!currentUser) {
+      return {
+        id: '',
+        name: '',
+        avatarUrl: undefined,
+      }
+    }
+
+    return {
+      id: currentUser.id,
+      name: currentUser.username,
+      avatarUrl: currentUser.avatarUrl || undefined,
+    }
+  }, [currentUser])
 
   useFocusEffect(
     useCallback(() => {
@@ -128,9 +137,8 @@ export default function NewPostScreen() {
     if (isSubmitting) return
     setIsSubmitting(true)
 
-    const userId = await getUserId()
-    if (!userId) {
-      console.error('❌ User not found')
+    if (!currentUser?.id) {
+      console.error('User not found')
       setIsSubmitting(false)
       return
     }
@@ -138,14 +146,14 @@ export default function NewPostScreen() {
     const firstMediaUrl = media.length > 0 ? media[0].url : undefined
     startPosting(firstMediaUrl)
 
-    const privacyMap: Record<PrivacyOption, 'PUBLIC' | 'PRIVATE' | 'FRIEND'> = {
+    const privacyMap: Record<PrivacyOption, PostPrivacy> = {
       public: 'PUBLIC',
-      friends: 'FRIEND',
+      friends: 'FRIENDS',
       'only-me': 'PRIVATE',
     }
 
     const postData = {
-      userId,
+      userId: currentUser.id,
       content: caption.trim() || undefined,
       groupId: undefined,
       privacy: privacyMap[privacy],
@@ -164,18 +172,19 @@ export default function NewPostScreen() {
 
     createPostApi(postData)
       .then(response => {
-        console.log('✅ Post created successfully:', response)
+        console.log('Post created successfully:', response)
         finishPosting()
         setIsSubmitting(false)
       })
       .catch(error => {
-        console.error('❌ Error creating post:', error)
+        console.error('Error creating post:', error)
         const errorMessage =
           error?.message || 'Network error. Please check your connection.'
         failPosting(errorMessage)
         setIsSubmitting(false)
       })
   }, [
+    currentUser,
     caption,
     media,
     privacy,

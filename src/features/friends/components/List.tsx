@@ -1,22 +1,23 @@
 import { ScrollView, ActivityIndicator } from 'react-native'
 import { YStack, Text } from 'tamagui'
 import { UserCard } from './Card'
-import type { ProfileData } from '@/api/api.profile'
+import { User } from '@/types/User'
 
 type CardType = 'friend' | 'request' | 'sent' | 'suggestion'
 
 interface FriendsListProps {
-  users: ProfileData[]
+  users: User[]
   type: CardType
   isDark: boolean
   isLoading?: boolean
   emptyMessage?: string
   showSuggestions?: boolean
-  suggestions?: ProfileData[]
-  suggestionsLoading?: boolean
-  onAcceptFriend?: (userId: string) => void
-  onRejectFriend?: (userId: string) => void
+  suggestions?: User[]
   onAddFriend?: (userId: string) => void
+  onAcceptFriend?: (userId: string) => void
+  onCancelRequest?: (userId: string) => void
+  onRejectFriend?: (userId: string) => void
+  onUnfriend?: (userId: string) => void
   actionPending?: boolean
 }
 
@@ -28,10 +29,11 @@ export function FriendsList({
   emptyMessage = 'No users found',
   showSuggestions = false,
   suggestions = [],
-  suggestionsLoading = false,
-  onAcceptFriend,
-  onRejectFriend,
   onAddFriend,
+  onAcceptFriend,
+  onCancelRequest,
+  onRejectFriend,
+  onUnfriend,
   actionPending = false,
 }: FriendsListProps) {
   const textColor = isDark ? '#f5f5f5' : '#111827'
@@ -90,7 +92,9 @@ export function FriendsList({
                   type={type}
                   isDark={isDark}
                   onAccept={onAcceptFriend}
+                  onCancel={onCancelRequest}
                   onReject={onRejectFriend}
+                  onUnfriend={onUnfriend}
                   isLoading={actionPending}
                 />
               ))}
@@ -111,22 +115,16 @@ export function FriendsList({
                 Suggestions For You
               </Text>
 
-              {suggestionsLoading ? (
-                <YStack padding="$4" alignItems="center">
-                  <ActivityIndicator size="small" color="#0095F6" />
-                </YStack>
-              ) : (
-                suggestions.map(user => (
-                  <UserCard
-                    key={user.id}
-                    user={user}
-                    type="suggestion"
-                    isDark={isDark}
-                    onAddFriend={onAddFriend}
-                    isLoading={actionPending}
-                  />
-                ))
-              )}
+              {suggestions.map(user => (
+                <UserCard
+                  key={user.id}
+                  user={user}
+                  type="suggestion"
+                  isDark={isDark}
+                  onAddFriend={onAddFriend}
+                  isLoading={actionPending}
+                />
+              ))}
             </YStack>
           )}
         </YStack>

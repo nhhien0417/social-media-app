@@ -1,5 +1,5 @@
 import { Button, XStack, Text, Spinner, YStack } from 'tamagui'
-import { useGoogleSignIn } from '../services/useGoogleSignIn'
+import { useGoogleSignIn } from '../hooks/useGoogleSignIn'
 import { useRouter } from 'expo-router'
 import Svg, { G, Path } from 'react-native-svg'
 
@@ -11,10 +11,10 @@ export const GoogleSignInButton = () => {
     const result = await handleGoogleSignIn()
 
     if (result.success) {
-      console.log('✅ Google sign-in success, navigating to home...')
+      console.log('Google sign-in success, navigating to home...')
       router.replace('/(tabs)')
     } else {
-      console.log('❌ Google sign-in failed:', result.error)
+      console.log('Google sign-in failed:', result.error)
     }
   }
 

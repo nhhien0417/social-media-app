@@ -5,13 +5,14 @@ import { Plus } from '@tamagui/lucide-icons'
 import { router } from 'expo-router'
 import { stories } from '@/mock/stories'
 import StoryItem from './StoryItem'
+import { useCurrentUser } from '@/hooks/useProfile'
 
 function CreateStoryItem() {
-  const userAvatar = 'https://i.pravatar.cc/100?img=40'
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
   const ringBackground = isDark ? '#121212' : '#ffffff'
   const labelColor = isDark ? '#f5f5f5' : '#111827'
+  const currentUser = useCurrentUser()
 
   const handlePress = () => {
     router.push({
@@ -30,7 +31,10 @@ function CreateStoryItem() {
             justifyContent="center"
           >
             <YStack style={styles.storyImageWrapper}>
-              <Image source={{ uri: userAvatar }} style={styles.storyImage} />
+              <Image
+                source={{ uri: currentUser?.avatarUrl || undefined }}
+                style={styles.storyImage}
+              />
             </YStack>
           </YStack>
           <Button
@@ -74,7 +78,7 @@ function StoryBar() {
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ paddingVertical: 12, paddingHorizontal: 8 }}
+      contentContainerStyle={{ paddingVertical: 12 }}
     >
       <XStack gap="$1">
         <CreateStoryItem />

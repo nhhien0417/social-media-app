@@ -83,7 +83,7 @@ function PostCard({ post }: { post: Post }) {
 
       const userId = await getUserId()
       if (!userId) {
-        console.error('❌ User not found')
+        console.error('User not found')
         return
       }
 
@@ -93,10 +93,10 @@ function PostCard({ post }: { post: Post }) {
       }
 
       const response = await likePostApi(postData)
-      console.log('✅ API response:', response.data)
+      console.log('API response:', response.data)
       setIsLiked(!previousLikedState)
     } catch (error) {
-      console.error('❌ Error like post:', error)
+      console.error('Error like post:', error)
     }
   }
 

@@ -8,7 +8,7 @@ import React, {
   useRef,
 } from 'react'
 import * as Notifications from 'expo-notifications'
-import { useStomp, useStompEvent } from '@/services/useRealTimeNotification'
+import { useStomp, useStompEvent } from '@/hooks/useRealTimeNotification'
 import { NotificationItem, NotificationType } from '@/types/Notification'
 import { notifications as mockNotifications } from '@/mock/notifications'
 import {
@@ -88,14 +88,14 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
           if (userId && userId !== 'guest') {
             try {
               await registerPushToken(token)
-              console.log('✅ Đã đăng ký Push Token với backend')
+              console.log('Đã đăng ký Push Token với backend')
             } catch (error) {
-              console.error('❌ Lỗi khi đăng ký Push Token:', error)
+              console.error('Lỗi khi đăng ký Push Token:', error)
             }
           }
         }
       } catch (error) {
-        console.error('❌ Lỗi setup Push Notifications:', error)
+        console.error('Lỗi setup Push Notifications:', error)
       }
     }
 

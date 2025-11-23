@@ -80,7 +80,7 @@ export default function SignUpScreen() {
 
     try {
       const response = await signUpApi({ email, username, password })
-      console.log('✅ API Response:', response)
+      console.log('API Response:', response)
       router.replace('/auth/signin')
     } catch (error: any) {
       const apiError =

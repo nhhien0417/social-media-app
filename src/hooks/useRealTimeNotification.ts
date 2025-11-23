@@ -65,7 +65,7 @@ export const useStomp = (options: UseStompOptions = {}) => {
     }
 
     const handleError = (error: any) => {
-      console.error('❌ STOMP error:', error)
+      console.error('STOMP error:', error)
     }
 
     stompService.on('connect', handleConnect)

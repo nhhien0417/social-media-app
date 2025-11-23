@@ -7,11 +7,15 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useEffect, useState } from 'react'
 import Avatar from '@/components/Avatar'
 import { getAccessToken } from '@/utils/SecureStore'
+import { useInitProfile, useCurrentUser } from '@/hooks/useProfile'
 
 export default function TabsLayout() {
   const theme = useTheme()
   const router = useRouter()
   const [isChecking, setIsChecking] = useState(true)
+
+  useInitProfile()
+  const currentUser = useCurrentUser()
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -55,8 +59,6 @@ export default function TabsLayout() {
       </View>
     )
   }
-
-  const userAvatar = 'https://i.pravatar.cc/100?img=40'
 
   return (
     <SafeAreaView
@@ -125,7 +127,7 @@ export default function TabsLayout() {
                 }
                 borderRadius={999}
               >
-                <Avatar uri={userAvatar} size={25} />
+                <Avatar uri={currentUser?.avatarUrl || undefined} size={25} />
               </YStack>
             ),
           }}
