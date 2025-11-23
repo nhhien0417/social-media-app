@@ -102,13 +102,13 @@ export default function MessengerHeader({ type }: { type: 'list' | 'detail' }) {
             onPress={() => {
               router.push({
                 pathname: '/call/[id]',
-                params: { 
+                params: {
                   id: id || '1',
                   type: 'voice',
                   name: chat?.name || 'Unknown',
                   avatar: chat?.avatar || '',
-                  chatId: id || '1'
-                }
+                  chatId: id || '1',
+                },
               })
             }}
             style={({ pressed }) => ({
@@ -128,13 +128,13 @@ export default function MessengerHeader({ type }: { type: 'list' | 'detail' }) {
             onPress={() => {
               router.push({
                 pathname: '/call/[id]',
-                params: { 
+                params: {
                   id: id || '1',
                   type: 'video',
                   name: chat?.name || 'Unknown',
                   avatar: chat?.avatar || '',
-                  chatId: id || '1'
-                }
+                  chatId: id || '1',
+                },
               })
             }}
             style={({ pressed }) => ({

@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { StyleSheet, Animated, Dimensions, Platform, TouchableOpacity, StatusBar } from 'react-native'
+import {
+  StyleSheet,
+  Animated,
+  Dimensions,
+  Platform,
+  TouchableOpacity,
+  StatusBar,
+} from 'react-native'
 import { useLocalSearchParams, router } from 'expo-router'
 import { YStack, XStack, SizableText, Avatar, Text } from 'tamagui'
 import { Feather } from '@expo/vector-icons'
@@ -14,14 +21,20 @@ type CallType = 'voice' | 'video'
 type CallState = 'calling' | 'connected' | 'ended'
 
 export default function CallScreen() {
-  const { id, type = 'voice', name, avatar, chatId } = useLocalSearchParams<{
+  const {
+    id,
+    type = 'voice',
+    name,
+    avatar,
+    chatId,
+  } = useLocalSearchParams<{
     id: string
     type?: string
     name?: string
     avatar?: string
     chatId?: string
   }>()
-  
+
   const insets = useSafeAreaInsets()
   const [callState, setCallState] = useState<CallState>('calling')
   const [isMuted, setIsMuted] = useState(false)
@@ -30,7 +43,7 @@ export default function CallScreen() {
   const [duration, setDuration] = useState(0)
   const [isVideoCall] = useState<boolean>(type === 'video')
   const [isMinimized, setIsMinimized] = useState(false)
-  
+
   // Animation values
   const pulseAnim = useRef(new Animated.Value(1)).current
   const fadeAnim = useRef(new Animated.Value(0)).current
@@ -120,7 +133,7 @@ export default function CallScreen() {
       if (chatId || id) {
         router.replace({
           pathname: '/message/[id]' as any,
-          params: { id: chatId || id }
+          params: { id: chatId || id },
         })
       } else {
         router.back()
@@ -139,10 +152,19 @@ export default function CallScreen() {
         <YStack flex={1} backgroundColor="#000">
           <StatusBar barStyle="light-content" />
           {/* Remote Video View - Placeholder */}
-          <YStack flex={1} backgroundColor="#1a1a1a" justifyContent="center" alignItems="center">
+          <YStack
+            flex={1}
+            backgroundColor="#1a1a1a"
+            justifyContent="center"
+            alignItems="center"
+          >
             {callState === 'connected' ? (
               <YStack alignItems="center" gap="$3">
-                <Feather name="video" size={80} color="rgba(255,255,255,0.15)" />
+                <Feather
+                  name="video"
+                  size={80}
+                  color="rgba(255,255,255,0.15)"
+                />
                 <Text color="rgba(255,255,255,0.3)" fontSize={16}>
                   {user.name}
                 </Text>
@@ -150,7 +172,11 @@ export default function CallScreen() {
             ) : (
               <YStack alignItems="center" gap="$4">
                 {/* Avatar with rings */}
-                <YStack position="relative" alignItems="center" justifyContent="center">
+                <YStack
+                  position="relative"
+                  alignItems="center"
+                  justifyContent="center"
+                >
                   {callState === 'calling' && (
                     <>
                       <Animated.View
@@ -159,15 +185,17 @@ export default function CallScreen() {
                           {
                             opacity: waveAnim.interpolate({
                               inputRange: [0, 1],
-                              outputRange: [0.4, 0]
+                              outputRange: [0.4, 0],
                             }),
-                            transform: [{
-                              scale: waveAnim.interpolate({
-                                inputRange: [0, 1],
-                                outputRange: [1, 1.3]
-                              })
-                            }]
-                          }
+                            transform: [
+                              {
+                                scale: waveAnim.interpolate({
+                                  inputRange: [0, 1],
+                                  outputRange: [1, 1.3],
+                                }),
+                              },
+                            ],
+                          },
                         ]}
                       />
                     </>
@@ -194,10 +222,10 @@ export default function CallScreen() {
             <Animated.View
               style={[
                 styles.pipContainer,
-                { 
+                {
                   top: insets.top + 20,
-                  opacity: fadeAnim 
-                }
+                  opacity: fadeAnim,
+                },
               ]}
             >
               <TouchableOpacity
@@ -232,11 +260,19 @@ export default function CallScreen() {
           style={StyleSheet.absoluteFill}
         >
           <StatusBar barStyle="light-content" />
-          <YStack flex={1} justifyContent="space-between" paddingTop={insets.top + 40}>
+          <YStack
+            flex={1}
+            justifyContent="space-between"
+            paddingTop={insets.top + 40}
+          >
             {/* Top Section */}
             <YStack alignItems="center" paddingTop="$8">
               {/* Avatar with ring animations */}
-              <YStack alignItems="center" justifyContent="center" position="relative">
+              <YStack
+                alignItems="center"
+                justifyContent="center"
+                position="relative"
+              >
                 {/* Outer rings for calling state */}
                 {callState === 'calling' && (
                   <>
@@ -246,15 +282,17 @@ export default function CallScreen() {
                         {
                           opacity: waveAnim.interpolate({
                             inputRange: [0, 1],
-                            outputRange: [0.6, 0]
+                            outputRange: [0.6, 0],
                           }),
-                          transform: [{
-                            scale: waveAnim.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [1, 1.4]
-                            })
-                          }]
-                        }
+                          transform: [
+                            {
+                              scale: waveAnim.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [1, 1.4],
+                              }),
+                            },
+                          ],
+                        },
                       ]}
                     />
                     <Animated.View
@@ -263,20 +301,22 @@ export default function CallScreen() {
                         {
                           opacity: waveAnim.interpolate({
                             inputRange: [0, 1],
-                            outputRange: [0.4, 0]
+                            outputRange: [0.4, 0],
                           }),
-                          transform: [{
-                            scale: waveAnim.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [1, 1.3]
-                            })
-                          }]
-                        }
+                          transform: [
+                            {
+                              scale: waveAnim.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [1, 1.3],
+                              }),
+                            },
+                          ],
+                        },
                       ]}
                     />
                   </>
                 )}
-                
+
                 {/* Avatar */}
                 <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
                   <YStack
@@ -296,10 +336,10 @@ export default function CallScreen() {
               </YStack>
 
               {/* User Name */}
-              <Text 
-                color="white" 
+              <Text
+                color="white"
                 fontSize={32}
-                fontWeight="600" 
+                fontWeight="600"
                 marginTop={24}
                 textAlign="center"
               >
@@ -307,11 +347,7 @@ export default function CallScreen() {
               </Text>
 
               {/* Call Status */}
-              <Text 
-                color="rgba(255,255,255,0.85)" 
-                fontSize={18}
-                marginTop={8}
-              >
+              <Text color="rgba(255,255,255,0.85)" fontSize={18} marginTop={8}>
                 {callState === 'calling' && 'Calling...'}
                 {callState === 'connected' && formatDuration(duration)}
                 {callState === 'ended' && 'Call ended'}
@@ -334,7 +370,11 @@ export default function CallScreen() {
         paddingHorizontal="$5"
       >
         {/* Main Controls Row */}
-        <XStack justifyContent="space-around" alignItems="center" paddingHorizontal="$4">
+        <XStack
+          justifyContent="space-around"
+          alignItems="center"
+          paddingHorizontal="$4"
+        >
           {/* Mute Button */}
           <YStack alignItems="center" gap="$2">
             <TouchableOpacity
@@ -344,14 +384,20 @@ export default function CallScreen() {
                 width: 64,
                 height: 64,
                 borderRadius: 32,
-                backgroundColor: isMuted ? 'rgba(255,59,48,0.9)' : 'rgba(255,255,255,0.25)',
+                backgroundColor: isMuted
+                  ? 'rgba(255,59,48,0.9)'
+                  : 'rgba(255,255,255,0.25)',
                 justifyContent: 'center',
                 alignItems: 'center',
                 borderWidth: isMuted ? 0 : 1,
                 borderColor: 'rgba(255,255,255,0.3)',
               }}
             >
-              <Feather name={isMuted ? 'mic-off' : 'mic'} size={26} color="white" />
+              <Feather
+                name={isMuted ? 'mic-off' : 'mic'}
+                size={26}
+                color="white"
+              />
             </TouchableOpacity>
           </YStack>
 
@@ -388,14 +434,20 @@ export default function CallScreen() {
                   width: 64,
                   height: 64,
                   borderRadius: 32,
-                  backgroundColor: !isVideoEnabled ? 'rgba(255,59,48,0.9)' : 'rgba(255,255,255,0.25)',
+                  backgroundColor: !isVideoEnabled
+                    ? 'rgba(255,59,48,0.9)'
+                    : 'rgba(255,255,255,0.25)',
                   justifyContent: 'center',
                   alignItems: 'center',
                   borderWidth: !isVideoEnabled ? 0 : 1,
                   borderColor: 'rgba(255,255,255,0.3)',
                 }}
               >
-                <Feather name={isVideoEnabled ? 'video' : 'video-off'} size={26} color="white" />
+                <Feather
+                  name={isVideoEnabled ? 'video' : 'video-off'}
+                  size={26}
+                  color="white"
+                />
               </TouchableOpacity>
             </YStack>
           ) : (
@@ -407,14 +459,20 @@ export default function CallScreen() {
                   width: 64,
                   height: 64,
                   borderRadius: 32,
-                  backgroundColor: isSpeakerOn ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.25)',
+                  backgroundColor: isSpeakerOn
+                    ? 'rgba(255,255,255,0.4)'
+                    : 'rgba(255,255,255,0.25)',
                   justifyContent: 'center',
                   alignItems: 'center',
                   borderWidth: 1,
                   borderColor: 'rgba(255,255,255,0.3)',
                 }}
               >
-                <Feather name={isSpeakerOn ? 'volume-2' : 'volume-x'} size={26} color="white" />
+                <Feather
+                  name={isSpeakerOn ? 'volume-2' : 'volume-x'}
+                  size={26}
+                  color="white"
+                />
               </TouchableOpacity>
             </YStack>
           )}

@@ -10,17 +10,23 @@ import { TouchableOpacity } from 'react-native'
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
 
 export default function IncomingCallScreen() {
-  const { id, type = 'voice', name, avatar, chatId } = useLocalSearchParams<{
+  const {
+    id,
+    type = 'voice',
+    name,
+    avatar,
+    chatId,
+  } = useLocalSearchParams<{
     id: string
     type?: string
     name?: string
     avatar?: string
     chatId?: string
   }>()
-  
+
   const insets = useSafeAreaInsets()
   const isVideoCall = type === 'video'
-  
+
   // Animations
   const pulseAnim = useRef(new Animated.Value(1)).current
   const slideAnim = useRef(new Animated.Value(50)).current
@@ -55,7 +61,7 @@ export default function IncomingCallScreen() {
     router.replace({
       // @ts-ignore
       pathname: '/call/[id]',
-      params: { id, type, name, avatar, chatId }
+      params: { id, type, name, avatar, chatId },
     })
   }
 
@@ -64,7 +70,7 @@ export default function IncomingCallScreen() {
     if (chatId || id) {
       router.replace({
         pathname: '/message/[id]' as any,
-        params: { id: chatId || id }
+        params: { id: chatId || id },
       })
     } else {
       router.back()
@@ -79,7 +85,11 @@ export default function IncomingCallScreen() {
       style={StyleSheet.absoluteFill}
     >
       <StatusBar barStyle="light-content" />
-      <YStack flex={1} paddingTop={insets.top + 60} paddingBottom={insets.bottom + 40}>
+      <YStack
+        flex={1}
+        paddingTop={insets.top + 60}
+        paddingBottom={insets.bottom + 40}
+      >
         {/* Avatar and Info */}
         <YStack flex={1} alignItems="center" justifyContent="center">
           <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
@@ -92,48 +102,42 @@ export default function IncomingCallScreen() {
               borderColor="rgba(255,255,255,0.3)"
             >
               <Avatar circular size={140}>
-                <Avatar.Image src={avatar || 'https://i.pravatar.cc/150?img=1'} />
+                <Avatar.Image
+                  src={avatar || 'https://i.pravatar.cc/150?img=1'}
+                />
                 <Avatar.Fallback backgroundColor="rgba(255,255,255,0.2)" />
               </Avatar>
             </YStack>
           </Animated.View>
 
           <Text
-            color="white" 
+            color="white"
             fontSize={32}
-            fontWeight="600" 
+            fontWeight="600"
             marginTop={24}
             textAlign="center"
           >
             {name || 'Unknown'}
           </Text>
 
-          <Text
-            color="rgba(255,255,255,0.85)" 
-            fontSize={18}
-            marginTop={8}
-          >
+          <Text color="rgba(255,255,255,0.85)" fontSize={18} marginTop={8}>
             {isVideoCall ? 'Messenger Video Chat' : 'Messenger Audio Call'}
           </Text>
 
           {/* Ringing text */}
-          <Text
-            color="rgba(255,255,255,0.7)" 
-            fontSize={16}
-            marginTop={4}
-          >
+          <Text color="rgba(255,255,255,0.7)" fontSize={16} marginTop={4}>
             Ringing...
           </Text>
         </YStack>
 
         {/* Action Buttons - Messenger Style */}
-        <Animated.View 
-          style={{ 
+        <Animated.View
+          style={{
             transform: [{ translateY: slideAnim }],
             opacity: slideAnim.interpolate({
               inputRange: [0, 50],
-              outputRange: [1, 0]
-            })
+              outputRange: [1, 0],
+            }),
           }}
         >
           <XStack justifyContent="center" gap={80} paddingHorizontal="$4">
@@ -182,7 +186,11 @@ export default function IncomingCallScreen() {
                   elevation: 8,
                 }}
               >
-                <Feather name={isVideoCall ? 'video' : 'phone'} size={30} color="white" />
+                <Feather
+                  name={isVideoCall ? 'video' : 'phone'}
+                  size={30}
+                  color="white"
+                />
               </TouchableOpacity>
               <Text color="white" fontSize={15} fontWeight="500">
                 Accept
@@ -199,7 +207,7 @@ export default function IncomingCallScreen() {
                   if (chatId || id) {
                     router.replace({
                       pathname: '/message/[id]' as any,
-                      params: { id: chatId || id }
+                      params: { id: chatId || id },
                     })
                   }
                 }}
