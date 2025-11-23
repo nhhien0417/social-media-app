@@ -9,7 +9,7 @@ const getWebSocketURL = (): string => {
     if (Platform.OS === 'web') {
       return 'http://localhost:9101/ws'
     }
-    return 'http://192.168.1.2:9101/ws'
+    return 'http://192.168.1.6:9101/ws'
   }
 
   // Production mode - Use Gateway route or direct connection

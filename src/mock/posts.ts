@@ -9,7 +9,7 @@ const longCaption =
 export const posts: Post[] = [
   {
     id: 'p1',
-    author: users[0],
+    authorId: users[0],
     media: [
       {
         id: 'm1',
@@ -27,7 +27,7 @@ export const posts: Post[] = [
   },
   {
     id: 'p2',
-    author: users[1],
+    authorId: users[1],
     media: [
       {
         id: 'm2',
@@ -63,7 +63,7 @@ export const posts: Post[] = [
   },
   {
     id: 'p5',
-    author: users[0],
+    authorId: users[0],
     media: [
       {
         id: 'm6',
@@ -93,7 +93,7 @@ export const posts: Post[] = [
   },
   {
     id: 'p6',
-    author: users[1],
+    authorId: users[1],
     media: [
       {
         id: 'm9',
@@ -111,7 +111,7 @@ export const posts: Post[] = [
   },
   {
     id: 'p7',
-    author: users[0],
+    authorId: users[0],
     media: [
       {
         id: 'm10',

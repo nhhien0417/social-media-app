@@ -16,12 +16,31 @@ export type CreatePostRequest = {
   }>
 }
 
+export type UpdatePostRequest = {
+  userId: string
+  content?: string
+  groupId?: string
+  privacy: PostPrivacy
+  media?: Array<{
+    uri: string
+    name: string
+    type: string
+  }>
+}
+
 export type LikePostRequest = {
   postId: string
   userId: string
 }
 
 export type CreatePostResponse = {
+  statusCode: number
+  error: null | string
+  message: string
+  data: Post
+}
+
+export type UpdatePostResponse = {
   statusCode: number
   error: null | string
   message: string
@@ -35,7 +54,7 @@ export type LikePostResponse = {
   data: Post
 }
 
-export type GetPostsResponse = {
+export type GetFeedResponse = {
   statusCode: number
   error: null | string
   message: string
@@ -126,12 +145,20 @@ export const createPostApi = (
   })
 }
 
+export const updatePostApi = (data: UpdatePostRequest) => {
+  return ApiClient.put<UpdatePostResponse>(ENDPOINTS.POSTS.UPDATE, data)
+}
+
+export const deletePostApi = (postId: string) => {
+  return ApiClient.delete<string>(ENDPOINTS.POSTS.DELETE(postId))
+}
+
 export const likePostApi = (data: LikePostRequest) => {
   return ApiClient.post<LikePostResponse>(ENDPOINTS.POSTS.LIKE, data)
 }
 
-export const getPostsApi = () => {
-  return ApiClient.get<GetPostsResponse>(ENDPOINTS.POSTS.ALL)
+export const getFeedApi = () => {
+  return ApiClient.get<GetFeedResponse>(ENDPOINTS.POSTS.ALL)
 }
 
 export const getPostDetailApi = (postId: string) => {

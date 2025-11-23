@@ -1,8 +1,14 @@
-import { FlatList, StyleSheet, BackHandler } from 'react-native'
-import { YStack, XStack, Text, Separator } from 'tamagui'
+import {
+  FlatList,
+  StyleSheet,
+  BackHandler,
+  RefreshControl,
+  ActivityIndicator,
+} from 'react-native'
+import { YStack, XStack, Text, Separator, Spinner } from 'tamagui'
 import { Send, Moon, Sun } from '@tamagui/lucide-icons'
 import { Image } from 'react-native'
-import { useEffect } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -14,10 +20,10 @@ import Animated, {
 import StoryBar from './components/StoryBar'
 import PostCard from './components/PostCard'
 import PostingStatus from './components/PostingStatus'
-import { posts } from '@/mock/posts'
 import ButtonIcon from '@/components/IconButton'
 import { useAppTheme } from '@/providers/ThemeProvider'
 import { router } from 'expo-router'
+import { usePostStore } from '@/stores/postStore'
 
 const HEADER_VIEW_HEIGHT = 50
 const AnimatedHeader = Animated.createAnimatedComponent(
@@ -65,6 +71,14 @@ export default function FeedScreen() {
 
   const offset = useSharedValue(0)
   const lastY = useSharedValue(0)
+  const [refreshing, setRefreshing] = useState(false)
+
+  const { posts, loading, error, fetchFeed, refreshFeed, clearError } =
+    usePostStore()
+
+  useEffect(() => {
+    fetchFeed()
+  }, [fetchFeed])
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(
@@ -77,6 +91,12 @@ export default function FeedScreen() {
 
     return () => backHandler.remove()
   }, [])
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true)
+    await refreshFeed()
+    setRefreshing(false)
+  }, [refreshFeed])
 
   const onScroll = useAnimatedScrollHandler({
     onScroll: e => {
@@ -120,6 +140,80 @@ export default function FeedScreen() {
     }),
   }))
 
+  // Loading initial state
+  if (loading && (!posts || posts.length === 0)) {
+    return (
+      <YStack flex={1} backgroundColor="$background">
+        <XStack
+          paddingHorizontal="$3"
+          height={HEADER_VIEW_HEIGHT}
+          alignItems="center"
+          justifyContent="space-between"
+          backgroundColor="$background"
+          borderBottomWidth={StyleSheet.hairlineWidth}
+          borderColor="$borderColor"
+        >
+          <HeaderContent />
+        </XStack>
+        <YStack flex={1} justifyContent="center" alignItems="center">
+          <Spinner size="large" color="$primary" />
+          <Text marginTop="$3" color="$color" opacity={0.6}>
+            Loading feed...
+          </Text>
+        </YStack>
+      </YStack>
+    )
+  }
+
+  // Error state
+  if (error && (!posts || posts.length === 0)) {
+    return (
+      <YStack flex={1} backgroundColor="$background">
+        <XStack
+          paddingHorizontal="$3"
+          height={HEADER_VIEW_HEIGHT}
+          alignItems="center"
+          justifyContent="space-between"
+          backgroundColor="$background"
+          borderBottomWidth={StyleSheet.hairlineWidth}
+          borderColor="$borderColor"
+        >
+          <HeaderContent />
+        </XStack>
+        <YStack
+          flex={1}
+          justifyContent="center"
+          alignItems="center"
+          padding="$4"
+        >
+          <Text fontSize={16} color="$red10" marginBottom="$3">
+            Failed to load feed
+          </Text>
+          <Text
+            fontSize={14}
+            color="$color"
+            opacity={0.6}
+            marginBottom="$4"
+            textAlign="center"
+          >
+            {error}
+          </Text>
+          <Text
+            fontSize={14}
+            color="$primary"
+            fontWeight="600"
+            onPress={() => {
+              clearError()
+              fetchFeed()
+            }}
+          >
+            Try Again
+          </Text>
+        </YStack>
+      </YStack>
+    )
+  }
+
   return (
     <YStack flex={1} backgroundColor="$background">
       <AnimatedHeader
@@ -137,11 +231,19 @@ export default function FeedScreen() {
       </AnimatedHeader>
 
       <AnimatedList
-        data={posts}
+        data={posts || []}
         keyExtractor={item => item.id}
         onScroll={onScroll}
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#999"
+            progressViewOffset={TOTAL_HEADER_HEIGHT}
+          />
+        }
         ListHeaderComponent={
           <>
             <AnimatedSpacer style={spacerStyle} />
@@ -149,6 +251,16 @@ export default function FeedScreen() {
             <PostingStatus />
             <Separator />
           </>
+        }
+        ListEmptyComponent={
+          <YStack padding="$6" alignItems="center">
+            <Text fontSize={16} color="$color" opacity={0.6}>
+              No posts yet
+            </Text>
+            <Text fontSize={14} color="$color" opacity={0.4} marginTop="$2">
+              Pull down to refresh
+            </Text>
+          </YStack>
         }
         renderItem={({ item }) => <PostCard post={item} />}
       />

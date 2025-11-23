@@ -17,9 +17,11 @@ export const ENDPOINTS = {
     REJECT: 'profile/friendships/reject',
   },
   POSTS: {
-    ALL: 'posts',
-    DETAIL: (id: string | number) => `posts/${id}`,
+    ALL: 'post/get-post',
+    DETAIL: (id: string | number) => `post/${id}`,
     CREATE: 'post/create-post',
+    UPDATE: 'post/update-post',
+    DELETE: (id: string | number) => `post/delete-post/${id}`,
     LIKE: 'post/like-post',
   },
   NOTIFICATIONS: {
