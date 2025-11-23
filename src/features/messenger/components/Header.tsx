@@ -99,6 +99,18 @@ export default function MessengerHeader({ type }: { type: 'list' | 'detail' }) {
         {/* Nút Gọi */}
         <XStack gap="$4">
           <Pressable
+            onPress={() => {
+              router.push({
+                pathname: '/call/[id]',
+                params: { 
+                  id: id || '1',
+                  type: 'voice',
+                  name: chat?.name || 'Unknown',
+                  avatar: chat?.avatar || '',
+                  chatId: id || '1'
+                }
+              })
+            }}
             style={({ pressed }) => ({
               padding: 0,
               margin: 0,
@@ -106,13 +118,25 @@ export default function MessengerHeader({ type }: { type: 'list' | 'detail' }) {
               alignItems: 'center',
               justifyContent: 'center',
               backgroundColor: 'transparent',
-              opacity: pressed ? 0.5 : 1, // hiệu ứng nhấn nhẹ
+              opacity: pressed ? 0.5 : 1,
             })}
             android_ripple={{ color: '#00000010', borderless: true }}
           >
             <Phone size={20} />
           </Pressable>
           <Pressable
+            onPress={() => {
+              router.push({
+                pathname: '/call/[id]',
+                params: { 
+                  id: id || '1',
+                  type: 'video',
+                  name: chat?.name || 'Unknown',
+                  avatar: chat?.avatar || '',
+                  chatId: id || '1'
+                }
+              })
+            }}
             style={({ pressed }) => ({
               padding: 0,
               margin: 0,
@@ -120,7 +144,7 @@ export default function MessengerHeader({ type }: { type: 'list' | 'detail' }) {
               alignItems: 'center',
               justifyContent: 'center',
               backgroundColor: 'transparent',
-              opacity: pressed ? 0.5 : 1, // hiệu ứng nhấn nhẹ
+              opacity: pressed ? 0.5 : 1,
             })}
             android_ripple={{ color: '#00000010', borderless: true }}
           >
