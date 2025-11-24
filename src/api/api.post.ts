@@ -201,7 +201,7 @@ export const updatePostApi = (
         reject(new Error('Network error'))
       }
 
-      xhr.open('PUT', `${API_BASE_URL}/${ENDPOINTS.POSTS.UPDATE}`)
+      xhr.open('POST', `${API_BASE_URL}/${ENDPOINTS.POSTS.UPDATE}`)
 
       if (token) {
         xhr.setRequestHeader('Authorization', `Bearer ${token}`)

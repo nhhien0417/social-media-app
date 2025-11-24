@@ -22,10 +22,25 @@ export type CreateMode = 'post' | 'story'
 
 export default function NewPostScreen() {
   const router = useRouter()
-  const params = useLocalSearchParams<{ mode?: CreateMode }>()
-  const { startPosting, finishPosting, failPosting } = usePostStatus()
+  const params = useLocalSearchParams<{
+    mode?: CreateMode
+    editPostId?: string
+  }>()
+  const {
+    startPosting,
+    finishPosting,
+    failPosting,
+    startUpdating,
+    finishUpdating,
+    failUpdating,
+  } = usePostStatus()
   const currentUser = useCurrentUser()
   const createPost = usePostStore(state => state.createPost)
+  const updatePost = usePostStore(state => state.updatePost)
+  const getPostDetail = usePostStore(state => state.getPostDetail)
+
+  const editPostId = params.editPostId
+  const isEditMode = !!editPostId
 
   const [mode, setMode] = useState<CreateMode>('post')
   const [caption, setCaption] = useState('')
@@ -54,14 +69,80 @@ export default function NewPostScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      setMedia([])
-      setCaption('')
-      setPrivacy('friends')
-      setShowCamera(false)
-      setShowMediaPicker(false)
-      setShowDiscardModal(false)
-      setMode((params.mode as CreateMode) || 'post')
-    }, [params.mode])
+      const loadPostData = async () => {
+        if (isEditMode && editPostId) {
+          try {
+            await getPostDetail(editPostId)
+            const post = usePostStore.getState().currentPost
+
+            if (post) {
+              setCaption(post.content || '')
+
+              if (post.media && post.media.length > 0) {
+                try {
+                  const mediaBlobs = await Promise.all(
+                    post.media.map(async (url, index) => {
+                      try {
+                        const response = await fetch(url)
+                        if (!response.ok) throw new Error('Download failed')
+
+                        const blob = await response.blob()
+                        const fileName =
+                          url.split('/').pop() || `media-${index}.jpg`
+
+                        const objectUrl = URL.createObjectURL(blob)
+
+                        return {
+                          id: `media-${index}`,
+                          url: objectUrl,
+                          type: 'photo' as const,
+                          fileName: fileName,
+                          mimeType: blob.type || 'image/jpeg',
+                          blob: blob,
+                        }
+                      } catch (err) {
+                        console.error('Failed to download media:', url, err)
+                        return null
+                      }
+                    })
+                  )
+
+                  // Filter out failed downloads
+                  const validMedia = mediaBlobs.filter(
+                    (m): m is NonNullable<typeof m> => m !== null
+                  )
+                  setMedia(validMedia)
+                } catch (error) {
+                  console.error('Error loading media:', error)
+                  setMedia([])
+                }
+              } else {
+                setMedia([])
+              }
+
+              const privacyMap: Record<string, PrivacyOption> = {
+                PUBLIC: 'public',
+                FRIENDS: 'friends',
+                PRIVATE: 'only-me',
+              }
+              setPrivacy(privacyMap[post.privacy] || 'friends')
+            }
+          } catch (error) {
+            console.error('Failed to load post:', error)
+          }
+        } else {
+          setMedia([])
+          setCaption('')
+          setPrivacy('friends')
+        }
+        setShowCamera(false)
+        setShowMediaPicker(false)
+        setShowDiscardModal(false)
+        setMode((params.mode as CreateMode) || 'post')
+      }
+
+      loadPostData()
+    }, [params.mode, isEditMode, editPostId, getPostDetail])
   )
 
   const hasUnsavedChanges = useMemo(
@@ -145,7 +226,6 @@ export default function NewPostScreen() {
     }
 
     const firstMediaUrl = media.length > 0 ? media[0].url : undefined
-    startPosting(firstMediaUrl)
 
     const privacyMap: Record<PrivacyOption, PostPrivacy> = {
       public: 'PUBLIC',
@@ -153,39 +233,101 @@ export default function NewPostScreen() {
       'only-me': 'PRIVATE',
     }
 
-    const postData = {
-      userId: currentUser.id,
-      content: caption.trim() || undefined,
-      groupId: undefined,
-      privacy: privacyMap[privacy],
-      media:
+    if (isEditMode && editPostId) {
+      startUpdating(firstMediaUrl)
+
+      const mediaPromises =
         media.length > 0
-          ? media.map(m => ({
-              uri: m.url,
-              name: m.fileName || m.url.split('/').pop() || 'file',
-              type:
-                m.mimeType || (m.type === 'video' ? 'video/mp4' : 'image/jpeg'),
-            }))
-          : undefined,
+          ? media.map(m => {
+              if (m.blob) {
+                return new Promise<{ uri: string; name: string; type: string }>(
+                  resolve => {
+                    const reader = new FileReader()
+                    reader.onloadend = () => {
+                      resolve({
+                        uri: reader.result as string,
+                        name: m.fileName || 'image.jpg',
+                        type: m.mimeType || 'image/jpeg',
+                      })
+                    }
+                    reader.readAsDataURL(m.blob!)
+                  }
+                )
+              } else {
+                return Promise.resolve({
+                  uri: m.url,
+                  name: m.fileName || m.url.split('/').pop() || 'file',
+                  type:
+                    m.mimeType ||
+                    (m.type === 'video' ? 'video/mp4' : 'image/jpeg'),
+                })
+              }
+            })
+          : []
+
+      const mediaData = await Promise.all(mediaPromises)
+
+      const updateData = {
+        postId: editPostId,
+        content: caption.trim() || undefined,
+        privacy: privacyMap[privacy],
+        media: mediaData.length > 0 ? mediaData : undefined,
+      }
+
+      router.replace('/(tabs)')
+
+      updatePost(updateData)
+        .then(response => {
+          console.log('Post updated successfully:', response)
+          usePostStore.getState().refreshFeed()
+          finishUpdating()
+          setIsSubmitting(false)
+        })
+        .catch(error => {
+          console.error('Error updating post:', error)
+          const errorMessage =
+            error?.message || 'Failed to update post. Please try again.'
+          failUpdating(errorMessage)
+          setIsSubmitting(false)
+        })
+    } else {
+      // Create new post
+      startPosting(firstMediaUrl)
+
+      const postData = {
+        userId: currentUser.id,
+        content: caption.trim() || undefined,
+        groupId: undefined,
+        privacy: privacyMap[privacy],
+        media:
+          media.length > 0
+            ? media.map(m => ({
+                uri: m.url,
+                name: m.fileName || m.url.split('/').pop() || 'file',
+                type:
+                  m.mimeType ||
+                  (m.type === 'video' ? 'video/mp4' : 'image/jpeg'),
+              }))
+            : undefined,
+      }
+
+      router.replace('/(tabs)')
+
+      createPost(postData)
+        .then(response => {
+          console.log('Post created successfully:', response)
+          usePostStore.getState().refreshFeed()
+          finishPosting()
+          setIsSubmitting(false)
+        })
+        .catch(error => {
+          console.error('Error creating post:', error)
+          const errorMessage =
+            error?.message || 'Network error. Please check your connection.'
+          failPosting(errorMessage)
+          setIsSubmitting(false)
+        })
     }
-
-    router.replace('/(tabs)')
-
-    createPost(postData)
-      .then(response => {
-        console.log('Post created successfully:', response)
-        // Refresh feed to show new post
-        usePostStore.getState().refreshFeed()
-        finishPosting()
-        setIsSubmitting(false)
-      })
-      .catch(error => {
-        console.error('Error creating post:', error)
-        const errorMessage =
-          error?.message || 'Network error. Please check your connection.'
-        failPosting(errorMessage)
-        setIsSubmitting(false)
-      })
   }, [
     currentUser,
     caption,
@@ -193,9 +335,16 @@ export default function NewPostScreen() {
     privacy,
     isSubmitting,
     router,
+    isEditMode,
+    editPostId,
     startPosting,
     finishPosting,
     failPosting,
+    startUpdating,
+    finishUpdating,
+    failUpdating,
+    createPost,
+    updatePost,
   ])
 
   const navigateBack = useCallback(() => {
@@ -232,6 +381,7 @@ export default function NewPostScreen() {
         onShare={handleShare}
         canShare={canShare}
         isSubmitting={isSubmitting}
+        isEditMode={isEditMode}
       />
 
       <KeyboardAvoidingView

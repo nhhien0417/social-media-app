@@ -6,16 +6,29 @@ import React, {
   PropsWithChildren,
 } from 'react'
 
-type PostStatus = 'idle' | 'posting' | 'success' | 'error'
+type PostStatus =
+  | 'idle'
+  | 'posting'
+  | 'updating'
+  | 'deleting'
+  | 'success'
+  | 'error'
 
 type PostStatusContextType = {
   status: PostStatus
   errorMessage?: string
   mediaUrl?: string
+  lastOperation?: 'posting' | 'updating' | 'deleting'
   startPosting: (mediaUrl?: string) => void
   finishPosting: () => void
   failPosting: (error: string) => void
   resetPosting: () => void
+  startDeleting: (mediaUrl?: string) => void
+  finishDeleting: () => void
+  failDeleting: (error: string) => void
+  startUpdating: (mediaUrl?: string) => void
+  finishUpdating: () => void
+  failUpdating: (error: string) => void
 }
 
 const PostStatusContext = createContext<PostStatusContextType | undefined>(
@@ -26,11 +39,15 @@ export function PostStatusProvider({ children }: PropsWithChildren) {
   const [status, setStatus] = useState<PostStatus>('idle')
   const [mediaUrl, setMediaUrl] = useState<string>()
   const [errorMessage, setErrorMessage] = useState<string>()
+  const [lastOperation, setLastOperation] = useState<
+    'posting' | 'updating' | 'deleting'
+  >()
 
   const startPosting = useCallback((media?: string) => {
     setStatus('posting')
     setMediaUrl(media)
     setErrorMessage(undefined)
+    setLastOperation('posting')
   }, [])
 
   const finishPosting = useCallback(() => {
@@ -60,16 +77,79 @@ export function PostStatusProvider({ children }: PropsWithChildren) {
     setMediaUrl(undefined)
   }, [])
 
+  const startDeleting = useCallback((media?: string) => {
+    setStatus('deleting')
+    setMediaUrl(media)
+    setErrorMessage(undefined)
+    setLastOperation('deleting')
+  }, [])
+
+  const finishDeleting = useCallback(() => {
+    setStatus('success')
+    setErrorMessage(undefined)
+
+    setTimeout(() => {
+      setStatus('idle')
+      setMediaUrl(undefined)
+    }, 3000)
+  }, [])
+
+  const failDeleting = useCallback((error: string) => {
+    setStatus('error')
+    setErrorMessage(error)
+
+    setTimeout(() => {
+      setStatus('idle')
+      setErrorMessage(undefined)
+      setMediaUrl(undefined)
+    }, 3000)
+  }, [])
+
+  const startUpdating = useCallback((media?: string) => {
+    setStatus('updating')
+    setMediaUrl(media)
+    setErrorMessage(undefined)
+    setLastOperation('updating')
+  }, [])
+
+  const finishUpdating = useCallback(() => {
+    setStatus('success')
+    setErrorMessage(undefined)
+
+    setTimeout(() => {
+      setStatus('idle')
+      setMediaUrl(undefined)
+    }, 3000)
+  }, [])
+
+  const failUpdating = useCallback((error: string) => {
+    setStatus('error')
+    setErrorMessage(error)
+
+    setTimeout(() => {
+      setStatus('idle')
+      setErrorMessage(undefined)
+      setMediaUrl(undefined)
+    }, 3000)
+  }, [])
+
   return (
     <PostStatusContext.Provider
       value={{
         status,
         errorMessage,
         mediaUrl,
+        lastOperation,
         startPosting,
         finishPosting,
         failPosting,
         resetPosting,
+        startDeleting,
+        finishDeleting,
+        failDeleting,
+        startUpdating,
+        finishUpdating,
+        failUpdating,
       }}
     >
       {children}

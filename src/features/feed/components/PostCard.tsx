@@ -21,6 +21,8 @@ import Comment from '@/features/comment/Comment'
 import { getUserId } from '@/utils/SecureStore'
 import { usePostStore } from '@/stores/postStore'
 import { router } from 'expo-router'
+import PostOptionsSheet from './PostOptionsSheet'
+import DeleteConfirmModal from './DeleteConfirmModal'
 
 function MediaItem({ url, width }: { url: string; width: number }) {
   return <Image source={{ uri: url }} width={width} aspectRatio={1} />
@@ -68,8 +70,12 @@ function PostCard({ post }: { post: Post }) {
   const isLongCaption = !!content && content.length > 100
 
   const [commentSheetVisible, setCommentSheetVisible] = useState(false)
+  const [optionsSheetVisible, setOptionsSheetVisible] = useState(false)
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false)
   const [isLiked, setIsLiked] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+
+  const isOwner = currentUserId === author.id
 
   useEffect(() => {
     getUserId().then(id => {
@@ -109,6 +115,17 @@ function PostCard({ post }: { post: Post }) {
     console.log('Like comment:', commentId)
   }
 
+  const handleEdit = () => {
+    router.push({
+      pathname: '/create',
+      params: { editPostId: post.id },
+    })
+  }
+
+  const handleDelete = () => {
+    setDeleteModalVisible(true)
+  }
+
   return (
     <YStack backgroundColor="$background">
       {/* Header */}
@@ -136,7 +153,11 @@ function PostCard({ post }: { post: Post }) {
             {author.username}
           </Text>
         </Pressable>
-        <ButtonIcon Icon={MoreVertical} Size={20} />
+        <ButtonIcon
+          Icon={MoreVertical}
+          Size={20}
+          onPress={() => setOptionsSheetVisible(true)}
+        />
       </XStack>
 
       {/* Media carousel */}
@@ -268,6 +289,21 @@ function PostCard({ post }: { post: Post }) {
         onSendComment={handleSendComment}
         onLikeComment={handleLikeComment}
         userAvatarUrl={author.avatarUrl || undefined}
+      />
+
+      <PostOptionsSheet
+        visible={optionsSheetVisible}
+        onClose={() => setOptionsSheetVisible(false)}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        isOwner={isOwner}
+      />
+
+      <DeleteConfirmModal
+        visible={deleteModalVisible}
+        onClose={() => setDeleteModalVisible(false)}
+        postId={post.id}
+        thumbnailUrl={media[0]}
       />
     </YStack>
   )

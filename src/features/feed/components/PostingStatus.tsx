@@ -23,7 +23,7 @@ const TRACK_H = 4
 const BAR_RATIO = 0.35
 
 export default function PostingStatus() {
-  const { status, errorMessage, mediaUrl } = usePostStatus()
+  const { status, mediaUrl, lastOperation } = usePostStatus()
   const isVisible = status !== 'idle'
 
   const containerOpacity = useSharedValue(0)
@@ -36,8 +36,52 @@ export default function PostingStatus() {
   const imageScale = useSharedValue(1)
   const iconScale = useSharedValue(0)
 
+  const getSuccessMessage = () => {
+    switch (lastOperation) {
+      case 'updating':
+        return {
+          title: 'Post updated successfully!',
+          subtitle: 'Your changes have been saved',
+        }
+      case 'deleting':
+        return {
+          title: 'Post deleted successfully!',
+          subtitle: 'Your post has been removed',
+        }
+      default:
+        return {
+          title: 'Post shared successfully!',
+          subtitle: 'Your friends can now see your post',
+        }
+    }
+  }
+
+  const getErrorMessage = () => {
+    switch (lastOperation) {
+      case 'updating':
+        return {
+          title: "Couldn't update your post",
+          subtitle: 'Something went wrong. Please try again.',
+        }
+      case 'deleting':
+        return {
+          title: "Couldn't delete your post",
+          subtitle: 'Something went wrong. Please try again.',
+        }
+      default:
+        return {
+          title: "Couldn't share your post",
+          subtitle: 'Something went wrong. Please try again.',
+        }
+    }
+  }
+
   useEffect(() => {
-    if (status === 'posting') {
+    if (
+      status === 'posting' ||
+      status === 'deleting' ||
+      status === 'updating'
+    ) {
       containerOpacity.value = withTiming(1, {
         duration: 300,
         easing: Easing.out(Easing.cubic),
@@ -243,6 +287,118 @@ export default function PostingStatus() {
         </AnimatedXStack>
       )}
 
+      {status === 'updating' && (
+        <AnimatedXStack style={contentStyle} gap="$3" alignItems="center">
+          {mediaUrl && (
+            <AnimatedImage
+              source={{ uri: mediaUrl }}
+              style={[
+                imageStyle,
+                {
+                  width: 45,
+                  height: 45,
+                  borderRadius: 10,
+                },
+              ]}
+              resizeMode="cover"
+            />
+          )}
+          <YStack flex={1} gap="$2.5" justifyContent="center">
+            <Text fontSize="$5" fontWeight="600" color="$color">
+              Updating your post...
+            </Text>
+
+            <YStack
+              height={TRACK_H}
+              backgroundColor="$color"
+              borderRadius={2}
+              overflow="hidden"
+              position="relative"
+              width="100%"
+              onLayout={e => {
+                trackWidth.value = e.nativeEvent.layout.width
+              }}
+            >
+              <Animated.View
+                style={[
+                  progressStyle,
+                  {
+                    height: TRACK_H,
+                    borderRadius: 2,
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                  },
+                ]}
+              >
+                <LinearGradient
+                  colors={INSTAGRAM_GRADIENT}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={{ flex: 1 }}
+                />
+              </Animated.View>
+            </YStack>
+          </YStack>
+        </AnimatedXStack>
+      )}
+
+      {status === 'deleting' && (
+        <AnimatedXStack style={contentStyle} gap="$3" alignItems="center">
+          {mediaUrl && (
+            <AnimatedImage
+              source={{ uri: mediaUrl }}
+              style={[
+                imageStyle,
+                {
+                  width: 45,
+                  height: 45,
+                  borderRadius: 10,
+                },
+              ]}
+              resizeMode="cover"
+            />
+          )}
+          <YStack flex={1} gap="$2.5" justifyContent="center">
+            <Text fontSize="$5" fontWeight="600" color="$color">
+              Deleting your post...
+            </Text>
+
+            <YStack
+              height={TRACK_H}
+              backgroundColor="$color"
+              borderRadius={2}
+              overflow="hidden"
+              position="relative"
+              width="100%"
+              onLayout={e => {
+                trackWidth.value = e.nativeEvent.layout.width
+              }}
+            >
+              <Animated.View
+                style={[
+                  progressStyle,
+                  {
+                    height: TRACK_H,
+                    borderRadius: 2,
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                  },
+                ]}
+              >
+                <LinearGradient
+                  colors={INSTAGRAM_GRADIENT}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={{ flex: 1 }}
+                />
+              </Animated.View>
+            </YStack>
+          </YStack>
+        </AnimatedXStack>
+      )}
+
       {status === 'success' && (
         <AnimatedXStack style={contentStyle} gap="$3" alignItems="center">
           <YStack
@@ -272,10 +428,10 @@ export default function PostingStatus() {
           </YStack>
           <YStack flex={1} justifyContent="center">
             <Text fontSize="$5" fontWeight="700" color="$color">
-              Post shared successfully!
+              {getSuccessMessage().title}
             </Text>
             <Text fontSize="$3" color="$gray10">
-              Your friends can now see your post
+              {getSuccessMessage().subtitle}
             </Text>
           </YStack>
         </AnimatedXStack>
@@ -295,10 +451,10 @@ export default function PostingStatus() {
           </YStack>
           <YStack flex={1} justifyContent="center">
             <Text fontSize="$5" fontWeight="700" color="#ef4444">
-              Couldn't share your post
+              {getErrorMessage().title}
             </Text>
             <Text fontSize="$3" color="$gray10" numberOfLines={2}>
-              Something went wrong. Please try again.
+              {getErrorMessage().subtitle}
             </Text>
           </YStack>
         </AnimatedXStack>

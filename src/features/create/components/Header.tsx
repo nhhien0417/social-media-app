@@ -31,6 +31,7 @@ type Props = {
   mode: CreateMode
   canShare?: boolean
   isSubmitting?: boolean
+  isEditMode?: boolean
   onBack?: () => void
   onShare?: () => void
   onChangeMode?: (mode: CreateMode) => void
@@ -72,6 +73,7 @@ export default function Header({
   mode,
   canShare = true,
   isSubmitting = false,
+  isEditMode = false,
   onBack,
   onShare,
   onChangeMode,
@@ -198,71 +200,79 @@ export default function Header({
       >
         <IconButton Icon={ChevronLeft} onPress={onBack} Size={30} />
 
-        <TouchableOpacity
-          activeOpacity={0.85}
-          onPress={openSheet}
-          style={{ flex: 1, alignItems: 'center' }}
-        >
-          <XStack
-            alignItems="center"
-            backgroundColor={segmentBackground}
-            borderRadius={999}
-            paddingVertical={6}
-            paddingHorizontal={8}
-            gap="$3"
+        {isEditMode ? (
+          <YStack flex={1} alignItems="center" justifyContent="center">
+            <SizableText size="$6" fontWeight="700" color="$color">
+              Update post
+            </SizableText>
+          </YStack>
+        ) : (
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={openSheet}
+            style={{ flex: 1, alignItems: 'center' }}
           >
             <XStack
+              alignItems="center"
+              backgroundColor={segmentBackground}
               borderRadius={999}
-              overflow="hidden"
-              backgroundColor="transparent"
-              borderWidth={StyleSheet.hairlineWidth}
-              borderColor="rgba(148,163,184,0.35)"
-              width={180}
+              paddingVertical={6}
+              paddingHorizontal={8}
+              gap="$3"
             >
               <XStack
-                flex={1}
-                paddingVertical={6}
-                paddingHorizontal={16}
                 borderRadius={999}
-                backgroundColor={
-                  isPost ? segmentActiveBackground : 'transparent'
-                }
-                alignItems="center"
-                justifyContent="center"
+                overflow="hidden"
+                backgroundColor="transparent"
+                borderWidth={StyleSheet.hairlineWidth}
+                borderColor="rgba(148,163,184,0.35)"
+                width={180}
               >
-                <SizableText
-                  size="$5"
-                  fontWeight="700"
-                  color={isPost ? '#ffffff' : segmentInactiveText}
+                <XStack
+                  flex={1}
+                  paddingVertical={6}
+                  paddingHorizontal={16}
+                  borderRadius={999}
+                  backgroundColor={
+                    isPost ? segmentActiveBackground : 'transparent'
+                  }
+                  alignItems="center"
+                  justifyContent="center"
                 >
-                  Post
-                </SizableText>
+                  <SizableText
+                    size="$5"
+                    fontWeight="700"
+                    color={isPost ? '#ffffff' : segmentInactiveText}
+                  >
+                    Post
+                  </SizableText>
+                </XStack>
+
+                <XStack
+                  flex={1}
+                  paddingVertical={6}
+                  paddingHorizontal={16}
+                  borderRadius={999}
+                  backgroundColor={
+                    !isPost ? segmentActiveBackground : 'transparent'
+                  }
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <SizableText
+                    size="$5"
+                    fontWeight="700"
+                    color={!isPost ? '#ffffff' : segmentInactiveText}
+                  >
+                    Story
+                  </SizableText>
+                </XStack>
               </XStack>
 
-              <XStack
-                flex={1}
-                paddingVertical={6}
-                paddingHorizontal={16}
-                borderRadius={999}
-                backgroundColor={
-                  !isPost ? segmentActiveBackground : 'transparent'
-                }
-                alignItems="center"
-                justifyContent="center"
-              >
-                <SizableText
-                  size="$5"
-                  fontWeight="700"
-                  color={!isPost ? '#ffffff' : segmentInactiveText}
-                >
-                  Story
-                </SizableText>
-              </XStack>
+              <ChevronDown size={16} color={isDark ? '#f8fafc' : '#1f2937'} />
             </XStack>
-
-            <ChevronDown size={16} color={isDark ? '#f8fafc' : '#1f2937'} />
-          </XStack>
-        </TouchableOpacity>
+          </TouchableOpacity>
+        )}
 
         <Button
           size="$4"

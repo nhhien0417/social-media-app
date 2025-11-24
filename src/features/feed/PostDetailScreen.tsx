@@ -23,6 +23,8 @@ import { getUserId } from '@/utils/SecureStore'
 import { usePostStore } from '@/stores/postStore'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useProfileStore } from '@/stores/profileStore'
+import PostOptionsSheet from './components/PostOptionsSheet'
+import DeleteConfirmModal from './components/DeleteConfirmModal'
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window')
 
@@ -129,8 +131,12 @@ function PostDetailScreen() {
   const isLongCaption = !!content && content.length > 100
 
   const [commentSheetVisible, setCommentSheetVisible] = useState(false)
+  const [optionsSheetVisible, setOptionsSheetVisible] = useState(false)
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false)
   const [isLiked, setIsLiked] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+
+  const isOwner = currentUserId === author.id
 
   useEffect(() => {
     getUserId().then(id => {
@@ -177,6 +183,17 @@ function PostDetailScreen() {
     console.log('Like comment:', commentId)
   }
 
+  const handleEdit = () => {
+    router.push({
+      pathname: '/create',
+      params: { editPostId: post.id },
+    })
+  }
+
+  const handleDelete = () => {
+    setDeleteModalVisible(true)
+  }
+
   return (
     <YStack flex={1} backgroundColor="$background">
       {/* Expanded Background Overlay */}
@@ -207,7 +224,12 @@ function PostDetailScreen() {
           <Pressable onPress={() => router.back()} hitSlop={8}>
             <X size={28} color="white" />
           </Pressable>
-          <ButtonIcon Icon={MoreVertical} Size={24} Color="white" />
+          <ButtonIcon
+            Icon={MoreVertical}
+            Size={24}
+            Color="white"
+            onPress={() => setOptionsSheetVisible(true)}
+          />
         </XStack>
       </Animated.View>
 
@@ -368,6 +390,21 @@ function PostDetailScreen() {
         comments={[]}
         onSendComment={handleSendComment}
         onLikeComment={handleLikeComment}
+      />
+
+      <PostOptionsSheet
+        visible={optionsSheetVisible}
+        onClose={() => setOptionsSheetVisible(false)}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        isOwner={isOwner}
+      />
+
+      <DeleteConfirmModal
+        visible={deleteModalVisible}
+        onClose={() => setDeleteModalVisible(false)}
+        postId={post.id}
+        thumbnailUrl={media[0]}
       />
     </YStack>
   )

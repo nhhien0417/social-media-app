@@ -46,6 +46,7 @@ export interface MediaItem {
   duration?: number
   fileName?: string
   mimeType?: string
+  blob?: Blob
 }
 
 export interface UserInfoData {
