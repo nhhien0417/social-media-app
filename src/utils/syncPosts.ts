@@ -231,4 +231,13 @@ export async function toggleLikeInStores(
   return snapshot
 }
 
+export async function updatePostWithSnapshot(
+  postId: string,
+  updatedPost: Post
+): Promise<PostSnapshot> {
+  const snapshot = await capturePostSnapshot(postId)
+  await updatePostInStores(postId, () => updatedPost)
+  return snapshot
+}
+
 export { restorePostSnapshot }

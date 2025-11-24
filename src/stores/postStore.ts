@@ -16,7 +16,7 @@ import {
 } from '@/api/api.post'
 import {
   addPostToStores,
-  updatePostInStores,
+  updatePostWithSnapshot,
   deletePostFromStores,
   toggleLikeInStores,
   restorePostSnapshot,
@@ -104,15 +104,19 @@ export const usePostStore = create<PostState>((set, get) => ({
   },
 
   updatePost: async (data: UpdatePostRequest) => {
+    let snapshot
     try {
       const response = await updatePostApi(data)
       console.log('Successful update post:', response)
       const updatedPost = response.data
-      await updatePostInStores(updatedPost.id, () => updatedPost)
+      snapshot = await updatePostWithSnapshot(updatedPost.id, updatedPost)
 
       return response
     } catch (error) {
       console.error('Error updating post:', error)
+      if (snapshot) {
+        await restorePostSnapshot(snapshot)
+      }
       throw error
     }
   },
@@ -133,12 +137,6 @@ export const usePostStore = create<PostState>((set, get) => ({
   },
 
   likePost: async (data: LikePostRequest) => {
-    const { posts } = get()
-    const postIndex = posts.findIndex(p => p.id === data.postId)
-    if (postIndex === -1) {
-      throw new Error('Post not found')
-    }
-
     let snapshot
     try {
       snapshot = await toggleLikeInStores(data.postId, data.userId)
