@@ -53,6 +53,8 @@ function PaginationDots({
 function PostCard({ post }: { post: Post }) {
   const { authorProfile: author, media = [], content, createdAt } = post
 
+  if (!author) return null
+
   const [activeIndex, setActiveIndex] = useState(0)
   const [containerWidth, setContainerWidth] = useState(0)
   const listRef = useRef<FlatList<Media>>(null)
@@ -128,57 +130,36 @@ function PostCard({ post }: { post: Post }) {
       </XStack>
 
       {/* Media carousel */}
-      <YStack
-        aspectRatio={1}
-        onLayout={e => setContainerWidth(e.nativeEvent.layout.width)}
-      >
-        {containerWidth > 0 && (
-          <FlatList
-            ref={listRef}
-            data={mediaItems}
-            keyExtractor={it => it.id}
-            renderItem={({ item }) => (
-              <MediaItem item={item} width={containerWidth} />
-            )}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            bounces={false}
-            onScroll={handleScroll}
-            scrollEventThrottle={16}
-          />
-        )}
-      </YStack>
+      {mediaItems.length > 0 && (
+        <YStack
+          aspectRatio={1}
+          onLayout={e => setContainerWidth(e.nativeEvent.layout.width)}
+        >
+          {containerWidth > 0 && (
+            <FlatList
+              ref={listRef}
+              data={mediaItems}
+              keyExtractor={it => it.id}
+              renderItem={({ item }) => (
+                <MediaItem item={item} width={containerWidth} />
+              )}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              bounces={false}
+              onScroll={handleScroll}
+              scrollEventThrottle={16}
+            />
+          )}
+        </YStack>
+      )}
 
       {/* Dots */}
       <PaginationDots media={mediaItems} activeIndex={activeIndex} />
 
-      {/* Actions */}
-      <XStack
-        paddingHorizontal="$1.5"
-        paddingTop="$1"
-        justifyContent="space-between"
-        alignItems="center"
-      >
-        <XStack alignItems="center">
-          <ButtonIcon
-            Icon={Heart}
-            Fill={isLiked}
-            Color={isLiked ? '#ee4444' : '$color'}
-            onPress={handleLikePost}
-          />
-          <ButtonIcon
-            Icon={MessageCircle}
-            onPress={() => setCommentSheetVisible(true)}
-          />
-          <ButtonIcon Icon={Send} />
-        </XStack>
-        <ButtonIcon Icon={Bookmark} />
-      </XStack>
-
       {/* Caption */}
       {!!content && (
-        <YStack paddingHorizontal="$3" marginTop="$1">
+        <YStack paddingHorizontal="$3" marginTop="$3" paddingBottom="$2">
           <Text
             fontWeight="normal"
             fontSize={15}
@@ -208,6 +189,28 @@ function PostCard({ post }: { post: Post }) {
           )}
         </YStack>
       )}
+
+      {/* Actions */}
+      <XStack
+        paddingHorizontal="$1.5"
+        justifyContent="space-between"
+        alignItems="center"
+      >
+        <XStack alignItems="center">
+          <ButtonIcon
+            Icon={Heart}
+            Fill={isLiked}
+            Color={isLiked ? '#ee4444' : '$color'}
+            onPress={handleLikePost}
+          />
+          <ButtonIcon
+            Icon={MessageCircle}
+            onPress={() => setCommentSheetVisible(true)}
+          />
+          <ButtonIcon Icon={Send} />
+        </XStack>
+        <ButtonIcon Icon={Bookmark} />
+      </XStack>
 
       {/* Time */}
       <Text
