@@ -20,7 +20,7 @@ import {
   deletePostFromStores,
   toggleLikeInStores,
   restorePostSnapshot,
-} from '@/utils/syncPosts'
+} from '@/utils/SyncPosts'
 
 interface PostState {
   // State
