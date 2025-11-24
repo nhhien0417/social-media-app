@@ -1,4 +1,4 @@
-import { memo, useState, useRef, useCallback } from 'react'
+import { memo, useState, useRef, useCallback, useEffect } from 'react'
 import { FlatList, NativeScrollEvent, NativeSyntheticEvent } from 'react-native'
 import { YStack, XStack, Text, Image, View } from 'tamagui'
 import Avatar from '@/components/Avatar'
@@ -14,9 +14,8 @@ import ButtonIcon from '@/components/IconButton'
 import { formatDate } from '@/utils/FormatDate'
 import { Media } from '@/types/Media'
 import Comment from '@/features/comment/Comment'
-import { comments } from '@/mock/comments'
 import { getUserId } from '@/utils/SecureStore'
-import { likePostApi } from '@/api/api.post'
+import { usePostStore } from '@/stores/postStore'
 
 function MediaItem({ item, width }: { item: Media; width: number }) {
   return <Image source={{ uri: item.url }} width={width} aspectRatio={1} />
@@ -52,18 +51,35 @@ function PaginationDots({
 }
 
 function PostCard({ post }: { post: Post }) {
-  const { author, media = [], content, createdAt } = post
-  const location = 'Tokyo, Japan'
+  const { authorProfile: author, media = [], content, createdAt } = post
 
   const [activeIndex, setActiveIndex] = useState(0)
   const [containerWidth, setContainerWidth] = useState(0)
   const listRef = useRef<FlatList<Media>>(null)
+
+  const mediaItems: Media[] = media.map((url, index) => ({
+    id: `${post.id}-media-${index}`,
+    type: 'image',
+    url: url,
+    ratio: 1,
+  }))
 
   const [isCaptionExpanded, setIsCaptionExpanded] = useState(false)
   const isLongCaption = !!content && content.length > 100
 
   const [commentSheetVisible, setCommentSheetVisible] = useState(false)
   const [isLiked, setIsLiked] = useState(false)
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+
+  useEffect(() => {
+    getUserId().then(id => {
+      setCurrentUserId(id)
+      if (id && post.likes) {
+        const isLikedByMe = post.likes.includes(id)
+        setIsLiked(isLikedByMe)
+      }
+    })
+  }, [post.likes])
 
   const handleScroll = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -76,37 +92,20 @@ function PostCard({ post }: { post: Post }) {
     [activeIndex, containerWidth]
   )
 
+  const likePost = usePostStore(state => state.likePost)
   const handleLikePost = async () => {
-    try {
-      const previousLikedState = isLiked
-      setIsLiked(!previousLikedState)
-
-      const userId = await getUserId()
-      if (!userId) {
-        console.error('User not found')
-        return
-      }
-
-      const postData = {
-        postId: post.id,
-        userId,
-      }
-
-      const response = await likePostApi(postData)
-      console.log('API response:', response.data)
-      setIsLiked(!previousLikedState)
-    } catch (error) {
-      console.error('Error like post:', error)
+    if (!currentUserId) {
+      console.error('User not found')
+      return
     }
+    await likePost({ postId: post.id, userId: currentUserId })
   }
 
   const handleSendComment = (content: string, parentId?: string) => {
-    // TODO: Implement send comment logic
     console.log('Send comment:', content, 'parentId:', parentId)
   }
 
   const handleLikeComment = (commentId: string) => {
-    // TODO: Implement like comment logic
     console.log('Like comment:', commentId)
   }
 
@@ -120,17 +119,10 @@ function PostCard({ post }: { post: Post }) {
         justifyContent="space-between"
       >
         <XStack alignItems="center" gap="$2.5">
-          <Avatar uri={author.avatarUrl} size={40} />
-          <YStack>
-            <Text fontWeight="600" fontSize={15}>
-              {author.username}
-            </Text>
-            {!!location && (
-              <Text fontSize={12} opacity={0.75}>
-                {location}
-              </Text>
-            )}
-          </YStack>
+          <Avatar uri={author.avatarUrl || undefined} size={40} />
+          <Text fontWeight="600" fontSize={15}>
+            {author.username}
+          </Text>
         </XStack>
         <ButtonIcon Icon={MoreVertical} Size={20} />
       </XStack>
@@ -143,7 +135,7 @@ function PostCard({ post }: { post: Post }) {
         {containerWidth > 0 && (
           <FlatList
             ref={listRef}
-            data={media}
+            data={mediaItems}
             keyExtractor={it => it.id}
             renderItem={({ item }) => (
               <MediaItem item={item} width={containerWidth} />
@@ -159,7 +151,7 @@ function PostCard({ post }: { post: Post }) {
       </YStack>
 
       {/* Dots */}
-      <PaginationDots media={media} activeIndex={activeIndex} />
+      <PaginationDots media={mediaItems} activeIndex={activeIndex} />
 
       {/* Actions */}
       <XStack
@@ -233,10 +225,10 @@ function PostCard({ post }: { post: Post }) {
         visible={commentSheetVisible}
         onClose={() => setCommentSheetVisible(false)}
         postId={post.id}
-        comments={comments.filter(c => c.postId === post.id)}
+        comments={[]}
         onSendComment={handleSendComment}
         onLikeComment={handleLikeComment}
-        userAvatarUrl={author.avatarUrl}
+        userAvatarUrl={author.avatarUrl || undefined}
       />
     </YStack>
   )

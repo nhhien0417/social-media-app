@@ -13,7 +13,7 @@ import PostAction from './components/PostAction'
 import MediaPicker from './components/MediaPicker'
 import Camera from './components/Camera'
 import DiscardChangesModal from './components/DiscardChanges'
-import { createPostApi } from '@/api/api.post'
+import { usePostStore } from '@/stores/postStore'
 import { usePostStatus } from '@/providers/PostStatusProvider'
 import { PostPrivacy } from '@/types/Post'
 import { useCurrentUser } from '@/hooks/useProfile'
@@ -25,6 +25,7 @@ export default function NewPostScreen() {
   const params = useLocalSearchParams<{ mode?: CreateMode }>()
   const { startPosting, finishPosting, failPosting } = usePostStatus()
   const currentUser = useCurrentUser()
+  const createPost = usePostStore(state => state.createPost)
 
   const [mode, setMode] = useState<CreateMode>('post')
   const [caption, setCaption] = useState('')
@@ -170,7 +171,7 @@ export default function NewPostScreen() {
 
     router.replace('/(tabs)')
 
-    createPostApi(postData)
+    createPost(postData)
       .then(response => {
         console.log('Post created successfully:', response)
         finishPosting()

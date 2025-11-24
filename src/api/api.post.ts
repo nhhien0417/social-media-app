@@ -4,6 +4,20 @@ import { Post, PostPrivacy } from '@/types/Post'
 import { getAccessToken } from '@/utils/SecureStore'
 import { API_BASE_URL } from './axios.config'
 
+export type GetFeedResponse = {
+  statusCode: number
+  error: null | string
+  message: string
+  data: Post[]
+}
+
+export type GetPostDetailResponse = {
+  statusCode: number
+  error: null | string
+  message: string
+  data: Post
+}
+
 export type CreatePostRequest = {
   userId: string
   content?: string
@@ -16,28 +30,22 @@ export type CreatePostRequest = {
   }>
 }
 
+export type CreatePostResponse = {
+  statusCode: number
+  error: null | string
+  message: string
+  data: Post
+}
+
 export type UpdatePostRequest = {
-  userId: string
+  postId: string
   content?: string
-  groupId?: string
   privacy: PostPrivacy
   media?: Array<{
     uri: string
     name: string
     type: string
   }>
-}
-
-export type LikePostRequest = {
-  postId: string
-  userId: string
-}
-
-export type CreatePostResponse = {
-  statusCode: number
-  error: null | string
-  message: string
-  data: Post
 }
 
 export type UpdatePostResponse = {
@@ -47,21 +55,12 @@ export type UpdatePostResponse = {
   data: Post
 }
 
+export type LikePostRequest = {
+  postId: string
+  userId: string
+}
+
 export type LikePostResponse = {
-  statusCode: number
-  error: null | string
-  message: string
-  data: Post
-}
-
-export type GetFeedResponse = {
-  statusCode: number
-  error: null | string
-  message: string
-  data: Post[]
-}
-
-export type GetPostDetailResponse = {
   statusCode: number
   error: null | string
   message: string
@@ -77,6 +76,14 @@ const dataURItoBlob = (dataURI: string): Blob => {
     ia[i] = byteString.charCodeAt(i)
   }
   return new Blob([ab], { type: mimeString })
+}
+
+export const getFeedApi = () => {
+  return ApiClient.get<GetFeedResponse>(ENDPOINTS.POSTS.ALL)
+}
+
+export const getPostDetailApi = (postId: string) => {
+  return ApiClient.get<GetPostDetailResponse>(ENDPOINTS.POSTS.DETAIL(postId))
 }
 
 export const createPostApi = (
@@ -145,8 +152,66 @@ export const createPostApi = (
   })
 }
 
-export const updatePostApi = (data: UpdatePostRequest) => {
-  return ApiClient.put<UpdatePostResponse>(ENDPOINTS.POSTS.UPDATE, data)
+export const updatePostApi = (
+  data: UpdatePostRequest
+): Promise<UpdatePostResponse> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const formData = new FormData()
+
+      formData.append('postId', data.postId)
+      formData.append('privacy', data.privacy)
+
+      if (data.content) {
+        formData.append('content', data.content)
+      }
+
+      if (data.media && data.media.length > 0) {
+        data.media.forEach(file => {
+          if (file.uri.startsWith('data:')) {
+            const blob = dataURItoBlob(file.uri)
+            formData.append('media', blob, file.name)
+          } else {
+            formData.append('media', {
+              uri: file.uri,
+              name: file.name,
+              type: file.type,
+            } as any)
+          }
+        })
+      }
+
+      const token = await getAccessToken()
+      const xhr = new XMLHttpRequest()
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const response = JSON.parse(xhr.responseText)
+            resolve(response)
+          } catch (e) {
+            reject(new Error('Invalid JSON response'))
+          }
+        } else {
+          reject(new Error(`HTTP ${xhr.status}: ${xhr.responseText}`))
+        }
+      }
+
+      xhr.onerror = () => {
+        reject(new Error('Network error'))
+      }
+
+      xhr.open('PUT', `${API_BASE_URL}/${ENDPOINTS.POSTS.UPDATE}`)
+
+      if (token) {
+        xhr.setRequestHeader('Authorization', `Bearer ${token}`)
+      }
+
+      xhr.send(formData)
+    } catch (error) {
+      reject(error)
+    }
+  })
 }
 
 export const deletePostApi = (postId: string) => {
@@ -155,12 +220,4 @@ export const deletePostApi = (postId: string) => {
 
 export const likePostApi = (data: LikePostRequest) => {
   return ApiClient.post<LikePostResponse>(ENDPOINTS.POSTS.LIKE, data)
-}
-
-export const getFeedApi = () => {
-  return ApiClient.get<GetFeedResponse>(ENDPOINTS.POSTS.ALL)
-}
-
-export const getPostDetailApi = (postId: string) => {
-  return ApiClient.get<GetPostDetailResponse>(ENDPOINTS.POSTS.DETAIL(postId))
 }

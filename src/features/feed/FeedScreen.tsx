@@ -1,8 +1,8 @@
-import { FlatList, StyleSheet, BackHandler } from 'react-native'
-import { YStack, XStack, Text, Separator } from 'tamagui'
+import { FlatList, StyleSheet, BackHandler, RefreshControl } from 'react-native'
+import { YStack, XStack, Text, Separator, Spinner } from 'tamagui'
 import { Send, Moon, Sun } from '@tamagui/lucide-icons'
 import { Image } from 'react-native'
-import { useEffect } from 'react'
+import { useEffect, useCallback } from 'react'
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -14,7 +14,7 @@ import Animated, {
 import StoryBar from './components/StoryBar'
 import PostCard from './components/PostCard'
 import PostingStatus from './components/PostingStatus'
-import { posts } from '@/mock/posts'
+import { usePostStore } from '@/stores/postStore'
 import ButtonIcon from '@/components/IconButton'
 import { useAppTheme } from '@/providers/ThemeProvider'
 import { router } from 'expo-router'
@@ -76,6 +76,17 @@ export default function FeedScreen() {
     )
 
     return () => backHandler.remove()
+  }, [])
+
+  const { posts, isLoading, isRefreshing, fetchFeed, refreshFeed } =
+    usePostStore()
+
+  useEffect(() => {
+    fetchFeed()
+  }, [])
+
+  const onRefresh = useCallback(() => {
+    refreshFeed()
   }, [])
 
   const onScroll = useAnimatedScrollHandler({
@@ -151,6 +162,16 @@ export default function FeedScreen() {
           </>
         }
         renderItem={({ item }) => <PostCard post={item} />}
+        refreshControl={
+          <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+        }
+        ListEmptyComponent={
+          isLoading ? (
+            <YStack padding="$4" alignItems="center">
+              <Spinner size="large" color="$color" />
+            </YStack>
+          ) : null
+        }
       />
     </YStack>
   )
