@@ -29,8 +29,6 @@ export default function ProfileFeedScreen() {
 
   const posts = useMemo(() => {
     const userPosts = Array.isArray(displayUser?.posts) ? displayUser.posts : []
-    console.log('ProfileFeedScreen posts:', userPosts.length)
-
     return userPosts.map(post => ({
       ...post,
       authorProfile: post.authorProfile || displayUser,

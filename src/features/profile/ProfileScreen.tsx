@@ -39,7 +39,7 @@ export default function ProfileScreen({ userId }: ProfileScreenProps) {
   const isLoading = !displayUser
 
   const posts = Array.isArray(displayUser?.posts) ? displayUser.posts : []
-  const mediaItems = useMemo(() => {
+  const filteredPosts = useMemo(() => {
     if (tab === 'posts') {
       return posts.filter(p => p.media && p.media.length > 0)
     }
@@ -155,7 +155,7 @@ export default function ProfileScreen({ userId }: ProfileScreenProps) {
           <StoryHighlights highlights={profileMock.highlights} />
           <ProfileTabBar value={tab} onChange={setTab} />
           <MediaGrid
-            items={mediaItems}
+            items={filteredPosts}
             isDark={isDark}
             userId={displayUser.id}
           />

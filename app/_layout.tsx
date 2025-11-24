@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Slot, SplashScreen } from 'expo-router'
+import { Stack, SplashScreen } from 'expo-router'
 import { StatusBar } from 'react-native'
 import { useFonts } from 'expo-font'
 import { TamaguiProvider } from 'tamagui'
@@ -57,7 +57,45 @@ function RootContent() {
     <QueryProvider>
       <PostStatusProvider>
         <NotificationProvider userId={userId || undefined}>
-          <Slot />
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="index" />
+            <Stack.Screen name="auth" />
+            <Stack.Screen name="message" />
+            <Stack.Screen name="profile" />
+            <Stack.Screen
+              name="post/[id]"
+              options={{
+                presentation: 'modal',
+                animation: 'fade',
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="create"
+              options={{
+                presentation: 'modal',
+                animation: 'fade',
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="story"
+              options={{
+                presentation: 'modal',
+                animation: 'fade',
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="call"
+              options={{
+                presentation: 'modal',
+                animation: 'fade',
+                headerShown: false,
+              }}
+            />
+          </Stack>
         </NotificationProvider>
       </PostStatusProvider>
     </QueryProvider>

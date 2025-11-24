@@ -17,24 +17,23 @@ import {
 } from '@tamagui/lucide-icons'
 import ButtonIcon from '@/components/IconButton'
 import { formatDate } from '@/utils/FormatDate'
-import { Media } from '@/types/Media'
 import Comment from '@/features/comment/Comment'
 import { getUserId } from '@/utils/SecureStore'
 import { usePostStore } from '@/stores/postStore'
 import { router } from 'expo-router'
 
-function MediaItem({ item, width }: { item: Media; width: number }) {
-  return <Image source={{ uri: item.url }} width={width} aspectRatio={1} />
+function MediaItem({ url, width }: { url: string; width: number }) {
+  return <Image source={{ uri: url }} width={width} aspectRatio={1} />
 }
 
 function PaginationDots({
-  media,
+  mediaCount,
   activeIndex,
 }: {
-  media: Media[]
+  mediaCount: number
   activeIndex: number
 }) {
-  if (media.length <= 1) return null
+  if (mediaCount <= 1) return null
   return (
     <XStack
       justifyContent="center"
@@ -42,7 +41,7 @@ function PaginationDots({
       marginTop="$3"
       width="100%"
     >
-      {media.map((_, index) => (
+      {Array.from({ length: mediaCount }).map((_, index) => (
         <View
           key={index}
           width={6}
@@ -63,14 +62,7 @@ function PostCard({ post }: { post: Post }) {
 
   const [activeIndex, setActiveIndex] = useState(0)
   const [containerWidth, setContainerWidth] = useState(0)
-  const listRef = useRef<FlatList<Media>>(null)
-
-  const mediaItems: Media[] = media.map((url, index) => ({
-    id: `${post.id}-media-${index}`,
-    type: 'image',
-    url: url,
-    ratio: 1,
-  }))
+  const listRef = useRef<FlatList<string>>(null)
 
   const [isCaptionExpanded, setIsCaptionExpanded] = useState(false)
   const isLongCaption = !!content && content.length > 100
@@ -148,64 +140,90 @@ function PostCard({ post }: { post: Post }) {
       </XStack>
 
       {/* Media carousel */}
-      {mediaItems.length > 0 && (
-        <YStack
-          aspectRatio={1}
-          onLayout={e => setContainerWidth(e.nativeEvent.layout.width)}
+      {media.length > 0 && (
+        <Pressable
+          onPress={() => {
+            router.push({
+              pathname: '/post/[id]',
+              params: { id: post.id },
+            })
+          }}
         >
-          {containerWidth > 0 && (
-            <FlatList
-              ref={listRef}
-              data={mediaItems}
-              keyExtractor={it => it.id}
-              renderItem={({ item }) => (
-                <MediaItem item={item} width={containerWidth} />
-              )}
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              bounces={false}
-              onScroll={handleScroll}
-              scrollEventThrottle={16}
-            />
-          )}
-        </YStack>
+          <YStack
+            aspectRatio={1}
+            onLayout={e => setContainerWidth(e.nativeEvent.layout.width)}
+          >
+            {containerWidth > 0 && (
+              <FlatList
+                ref={listRef}
+                data={media}
+                keyExtractor={(item, index) => `${post.id}-media-${index}`}
+                renderItem={({ item }) => (
+                  <MediaItem url={item} width={containerWidth} />
+                )}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                bounces={false}
+                onScroll={handleScroll}
+                scrollEventThrottle={16}
+              />
+            )}
+          </YStack>
+        </Pressable>
       )}
 
       {/* Dots */}
-      <PaginationDots media={mediaItems} activeIndex={activeIndex} />
+      <PaginationDots mediaCount={media.length} activeIndex={activeIndex} />
 
       {/* Caption */}
       {!!content && (
-        <YStack paddingHorizontal="$3" marginTop="$3" paddingBottom="$2">
-          <Text
-            fontWeight="normal"
-            fontSize={15}
-            numberOfLines={isCaptionExpanded ? undefined : 2}
-          >
-            {content}
-          </Text>
-
-          {isLongCaption && !isCaptionExpanded && (
+        <Pressable
+          onPress={() => {
+            router.push({
+              pathname: '/post/[id]',
+              params: { id: post.id },
+            })
+          }}
+        >
+          <YStack paddingHorizontal="$3" marginTop="$3" paddingBottom="$2">
             <Text
-              color="#888"
-              fontSize={14}
-              onPress={() => setIsCaptionExpanded(true)}
+              fontWeight="normal"
+              fontSize={15}
+              numberOfLines={isCaptionExpanded ? undefined : 2}
             >
-              More
+              {content}
             </Text>
-          )}
 
-          {isLongCaption && isCaptionExpanded && (
-            <Text
-              color="#888"
-              fontSize={14}
-              onPress={() => setIsCaptionExpanded(false)}
-            >
-              Less
-            </Text>
-          )}
-        </YStack>
+            {isLongCaption && !isCaptionExpanded && (
+              <Text
+                color="#888"
+                fontSize={14}
+                onPress={e => {
+                  e.stopPropagation()
+                  setIsCaptionExpanded(true)
+                }}
+                suppressHighlighting
+              >
+                More
+              </Text>
+            )}
+
+            {isLongCaption && isCaptionExpanded && (
+              <Text
+                color="#888"
+                fontSize={14}
+                onPress={e => {
+                  e.stopPropagation()
+                  setIsCaptionExpanded(false)
+                }}
+                suppressHighlighting
+              >
+                Less
+              </Text>
+            )}
+          </YStack>
+        </Pressable>
       )}
 
       {/* Actions */}

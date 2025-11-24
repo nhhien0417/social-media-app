@@ -174,6 +174,8 @@ export default function NewPostScreen() {
     createPost(postData)
       .then(response => {
         console.log('Post created successfully:', response)
+        // Refresh feed to show new post
+        usePostStore.getState().refreshFeed()
         finishPosting()
         setIsSubmitting(false)
       })

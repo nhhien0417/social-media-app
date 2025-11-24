@@ -82,7 +82,9 @@ export default function FeedScreen() {
     usePostStore()
 
   useEffect(() => {
-    fetchFeed()
+    if (posts.length === 0) {
+      fetchFeed()
+    }
   }, [])
 
   const onRefresh = useCallback(() => {
