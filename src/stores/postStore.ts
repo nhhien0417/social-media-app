@@ -14,6 +14,13 @@ import {
   LikePostRequest,
   LikePostResponse,
 } from '@/api/api.post'
+import {
+  addPostToStores,
+  updatePostInStores,
+  deletePostFromStores,
+  toggleLikeInStores,
+  restorePostSnapshot,
+} from '@/utils/syncPosts'
 
 interface PostState {
   // State
@@ -88,7 +95,7 @@ export const usePostStore = create<PostState>((set, get) => ({
     try {
       const response = await createPostApi(data)
       console.log('Successful create post:', response)
-      set(state => ({ posts: [response.data, ...state.posts] }))
+      await addPostToStores(response.data)
       return response
     } catch (error) {
       console.error('Error creating post:', error)
@@ -101,11 +108,8 @@ export const usePostStore = create<PostState>((set, get) => ({
       const response = await updatePostApi(data)
       console.log('Successful update post:', response)
       const updatedPost = response.data
-      set(state => ({
-        posts: state.posts.map(p =>
-          p.id === updatedPost.id ? updatedPost : p
-        ),
-      }))
+      await updatePostInStores(updatedPost.id, () => updatedPost)
+
       return response
     } catch (error) {
       console.error('Error updating post:', error)
@@ -114,17 +118,17 @@ export const usePostStore = create<PostState>((set, get) => ({
   },
 
   deletePost: async (postId: string) => {
-    const { posts } = get()
-    const previousPosts = [...posts]
-
-    set({ posts: posts.filter(p => p.id !== postId) })
-
+    let snapshot
     try {
-      const response = await deletePostApi(postId)
-      console.log('Successful delete post:', response)
+      snapshot = await deletePostFromStores(postId)
+      await deletePostApi(postId)
+      console.log('Successful delete post')
     } catch (error) {
       console.error('Error deleting post:', error)
-      set({ posts: previousPosts })
+      if (snapshot) {
+        await restorePostSnapshot(snapshot)
+      }
+      throw error
     }
   },
 
@@ -135,28 +139,17 @@ export const usePostStore = create<PostState>((set, get) => ({
       throw new Error('Post not found')
     }
 
-    const post = posts[postIndex]
-    const isLiked = post.likes.includes(data.userId)
-
-    const updatedLikes = isLiked
-      ? post.likes.filter(id => id !== data.userId)
-      : [...post.likes, data.userId]
-
-    const updatedPost = { ...post, likes: updatedLikes }
-    const updatedPosts = [...posts]
-    updatedPosts[postIndex] = updatedPost
-
-    set({ posts: updatedPosts })
-
+    let snapshot
     try {
+      snapshot = await toggleLikeInStores(data.postId, data.userId)
       const response = await likePostApi(data)
       console.log('Successful like post:', response)
       return response
     } catch (error) {
       console.error('Error liking post:', error)
-      const revertedPosts = [...get().posts]
-      revertedPosts[postIndex] = post
-      set({ posts: revertedPosts })
+      if (snapshot) {
+        await restorePostSnapshot(snapshot)
+      }
       throw error
     }
   },

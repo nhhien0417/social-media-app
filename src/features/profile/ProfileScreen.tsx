@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState } from 'react'
 import { ActivityIndicator, Pressable, ScrollView } from 'react-native'
 import { Text, XStack, YStack, useThemeName, Button } from 'tamagui'
 import { LogOut, ChevronLeft, MoreVertical, Plus } from '@tamagui/lucide-icons'
@@ -40,6 +40,9 @@ export default function ProfileScreen({ userId }: ProfileScreenProps) {
 
   const posts = Array.isArray(displayUser?.posts) ? displayUser.posts : []
   const mediaItems = useMemo(() => {
+    if (tab === 'posts') {
+      return posts.filter(p => p.media && p.media.length > 0)
+    }
     return posts
   }, [posts, tab])
 
@@ -151,7 +154,11 @@ export default function ProfileScreen({ userId }: ProfileScreenProps) {
           <ProfileActions user={displayUser} isOwnProfile={isOwnProfile} />
           <StoryHighlights highlights={profileMock.highlights} />
           <ProfileTabBar value={tab} onChange={setTab} />
-          <MediaGrid items={mediaItems} isDark={isDark} />
+          <MediaGrid
+            items={mediaItems}
+            isDark={isDark}
+            userId={displayUser.id}
+          />
         </YStack>
       </ScrollView>
     </YStack>

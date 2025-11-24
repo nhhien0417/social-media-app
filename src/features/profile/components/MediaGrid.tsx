@@ -10,15 +10,36 @@ const chunkMedia = (items: Post[]) => {
   return rows
 }
 
+import { useRouter } from 'expo-router'
+import { Pressable } from 'react-native'
+
 export default function MediaGrid({
   items,
   isDark,
+  userId,
 }: {
   items: Post[]
   isDark: boolean
+  userId?: string
 }) {
+  const router = useRouter()
   const rows = useMemo(() => chunkMedia(items), [items])
   const placeholderColor = isDark ? '#1f2937' : '#e5e7eb'
+
+  const handleDisplayFeed = (item: Post) => {
+    const targetUserId = item.authorProfile?.id || userId
+    if (!targetUserId) {
+      console.error('Missing user ID for post navigation')
+      return
+    }
+    router.push({
+      pathname: '/profile/feed',
+      params: {
+        initialPostId: item.id,
+        userId: targetUserId,
+      },
+    })
+  }
 
   if (!items.length) {
     return (
@@ -53,7 +74,7 @@ export default function MediaGrid({
           row.map(item => item.id).join('-') || `empty-row-${rowIndex}`
 
         return (
-          <XStack key={rowKey} gap="$1">
+          <XStack key={rowKey} gap="$1" flex={1}>
             {paddedRow.map((item, columnIndex) => {
               if (!item) {
                 return (
@@ -67,21 +88,29 @@ export default function MediaGrid({
 
               const imageUrl = item.media?.[0]
               return (
-                <YStack
-                  key={item.id}
-                  flex={1}
-                  aspectRatio={1}
-                  overflow="hidden"
-                  borderRadius="$3"
-                  backgroundColor={placeholderColor}
-                >
-                  {imageUrl && (
-                    <Image
-                      source={{ uri: imageUrl }}
+                <YStack key={item.id} flex={1} aspectRatio={1}>
+                  <Pressable
+                    style={{ width: '100%', height: '100%' }}
+                    onPress={() => {
+                      handleDisplayFeed(item)
+                    }}
+                  >
+                    <YStack
                       width="100%"
                       height="100%"
-                    />
-                  )}
+                      overflow="hidden"
+                      borderRadius="$3"
+                      backgroundColor={placeholderColor}
+                    >
+                      {imageUrl && (
+                        <Image
+                          source={{ uri: imageUrl }}
+                          width="100%"
+                          height="100%"
+                        />
+                      )}
+                    </YStack>
+                  </Pressable>
                 </YStack>
               )
             })}

@@ -66,6 +66,12 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
 
       const response = await getUserApi(userId)
       const user = response.data
+      if (user.posts) {
+        user.posts.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        )
+      }
       console.log('Successful initialize:', response)
 
       set({
@@ -89,6 +95,12 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
     try {
       const response = await getUserApi(userId)
       const user = response.data
+      if (user.posts) {
+        user.posts.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        )
+      }
       console.log('Successful fetch user:', response)
 
       set({ users: { ...get().users, [userId]: user } })

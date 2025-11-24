@@ -4,6 +4,7 @@ import { Image, StyleSheet, Pressable } from 'react-native'
 import { INSTAGRAM_GRADIENT } from '@/utils/InstagramGradient'
 import { formatNumber } from '@/utils/FormatNumber'
 import { ProfileComponentProps } from '../ProfileScreen'
+import { useRouter } from 'expo-router'
 
 interface ProfileInfoProps extends ProfileComponentProps {
   onFriendsPress?: () => void
@@ -14,6 +15,7 @@ export function ProfileInfo({
   isOwnProfile,
   onFriendsPress,
 }: ProfileInfoProps) {
+  const router = useRouter()
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
   const captionColor = isDark ? 'rgba(255,255,255,0.7)' : '#4b5563'
@@ -46,14 +48,27 @@ export function ProfileInfo({
       </LinearGradient>
 
       <XStack flex={1} justifyContent="space-around" marginLeft="$5">
-        <YStack alignItems="center" gap="$1">
-          <Text fontSize="$6" fontWeight="700">
-            {formatNumber(Array.isArray(user.posts) ? user.posts.length : 0)}
-          </Text>
-          <Text fontSize="$3" fontWeight="500" color={captionColor}>
-            Posts
-          </Text>
-        </YStack>
+        <Pressable
+          onPress={() => {
+            if (user.posts && user.posts.length > 0) {
+              router.push({
+                pathname: '/profile/feed',
+                params: {
+                  userId: user.id,
+                },
+              })
+            }
+          }}
+        >
+          <YStack alignItems="center" gap="$1">
+            <Text fontSize="$6" fontWeight="700">
+              {formatNumber(Array.isArray(user.posts) ? user.posts.length : 0)}
+            </Text>
+            <Text fontSize="$3" fontWeight="500" color={captionColor}>
+              Posts
+            </Text>
+          </YStack>
+        </Pressable>
 
         <Pressable onPress={onFriendsPress}>
           <YStack alignItems="center" gap="$1">
