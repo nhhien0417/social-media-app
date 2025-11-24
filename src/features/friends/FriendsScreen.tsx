@@ -41,7 +41,7 @@ export default function FriendsScreen({
   const currentUser = useCurrentUser()
   const userId = isOwnProfile ? currentUser?.id : targetUserId
 
-  // Fetch data
+  // Fetch data - only fetch if we have a valid userId
   const { friends, isLoading: friendsLoading } = useFriends(userId)
   const pending = usePending(isOwnProfile)
   const sent = useSent(isOwnProfile)
@@ -86,17 +86,27 @@ export default function FriendsScreen({
 
   // Get current data based on active tab
   const currentData = useMemo(() => {
+    let data: typeof friends = []
     switch (activeTab) {
       case 'friends':
-        return friends || []
+        data = friends || []
+        break
       case 'sent':
-        return sent || []
+        data = sent || []
+        break
       case 'requests':
-        return pending || []
+        data = pending || []
+        break
       default:
-        return []
+        data = []
     }
-  }, [activeTab, friends, sent, pending])
+
+    if (userId && data.length > 0) {
+      return data.filter(user => user.id !== userId)
+    }
+
+    return data
+  }, [activeTab, friends, sent, pending, userId])
 
   // Filter data by search query
   const filteredData = useMemo(() => {

@@ -1,5 +1,10 @@
 import { memo, useState, useRef, useCallback, useEffect } from 'react'
-import { FlatList, NativeScrollEvent, NativeSyntheticEvent } from 'react-native'
+import {
+  FlatList,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  Pressable,
+} from 'react-native'
 import { YStack, XStack, Text, Image, View } from 'tamagui'
 import Avatar from '@/components/Avatar'
 import { Post } from '@/types/Post'
@@ -16,6 +21,7 @@ import { Media } from '@/types/Media'
 import Comment from '@/features/comment/Comment'
 import { getUserId } from '@/utils/SecureStore'
 import { usePostStore } from '@/stores/postStore'
+import { router } from 'expo-router'
 
 function MediaItem({ item, width }: { item: Media; width: number }) {
   return <Image source={{ uri: item.url }} width={width} aspectRatio={1} />
@@ -120,12 +126,24 @@ function PostCard({ post }: { post: Post }) {
         alignItems="center"
         justifyContent="space-between"
       >
-        <XStack alignItems="center" gap="$2.5">
+        <Pressable
+          onPress={() => {
+            if (currentUserId && author.id === currentUserId) {
+              router.push('/(tabs)/profile')
+            } else {
+              router.push({
+                pathname: '/profile/[id]',
+                params: { id: author.id },
+              })
+            }
+          }}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}
+        >
           <Avatar uri={author.avatarUrl || undefined} size={40} />
           <Text fontWeight="600" fontSize={15}>
             {author.username}
           </Text>
-        </XStack>
+        </Pressable>
         <ButtonIcon Icon={MoreVertical} Size={20} />
       </XStack>
 

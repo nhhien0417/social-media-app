@@ -27,15 +27,27 @@ export const useUser = (userId?: string) => {
 }
 
 export const useFriends = (userId?: string) => {
-  const friends = useProfileStore(state => state.friends)
+  const currentUser = useProfileStore(state => state.currentUser)
+  const users = useProfileStore(state => state.users)
   const isLoading = useProfileStore(state => state.isLoading)
   const fetchFriends = useProfileStore(state => state.fetchFriends)
+  const fetchUser = useProfileStore(state => state.fetchUser)
 
   useEffect(() => {
-    if (friends.length === 0) {
-      fetchFriends(userId)
+    if (userId) {
+      if (!users[userId]) {
+        fetchUser(userId)
+      } else {
+        fetchFriends(userId)
+      }
+    } else if (currentUser) {
+      fetchFriends(currentUser.id)
     }
-  }, [userId, friends.length])
+  }, [userId, currentUser?.id])
+
+  const friends = userId
+    ? users[userId]?.friendships || []
+    : currentUser?.friendships || []
 
   return { friends, isLoading }
 }
