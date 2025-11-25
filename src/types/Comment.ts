@@ -4,10 +4,10 @@ export interface Comment {
   id: string
   postId: string
   author: User
-  content: string
-  likeCount: number
-  replyCount: number
+  content?: string
+  media?: string[]
   createdAt: string
-  liked?: boolean
-  parentId?: string
+  updatedAt?: string
+  parentCommentId?: string
+  likes?: string[]
 }

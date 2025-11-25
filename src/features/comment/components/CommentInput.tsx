@@ -1,18 +1,19 @@
-import React, { forwardRef } from 'react'
+import React, { forwardRef, useState } from 'react'
 import {
   TouchableOpacity,
   StyleSheet,
   TextInput as RNTextInput,
+  Image,
 } from 'react-native'
-import { XStack, Input, SizableText, YStack } from 'tamagui'
-import { Send } from '@tamagui/lucide-icons'
+import { XStack, Input, SizableText, YStack, ScrollView } from 'tamagui'
+import { Send, Image as ImageIcon, X } from '@tamagui/lucide-icons'
 import { Comment } from '@/types/Comment'
 import Avatar from '@/components/Avatar'
 
 type Props = {
   value: string
   onChangeText: (text: string) => void
-  onSend: () => void
+  onSend: (content: string, media: string[]) => void
   userAvatarUrl: string
   replyingTo?: Comment | null
   onSelectEmotion: (emoji: string) => void
@@ -25,6 +26,20 @@ const styles = StyleSheet.create({
     height: 35,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  mediaPreview: {
+    width: 100,
+    height: 100,
+    borderRadius: 8,
+    marginRight: 8,
+  },
+  removeMediaButton: {
+    position: 'absolute',
+    top: 4,
+    right: 12,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    borderRadius: 12,
+    padding: 4,
   },
 })
 
@@ -57,6 +72,31 @@ const CommentInput = forwardRef<RNTextInput, Props>(
     },
     ref
   ) => {
+    const [selectedMedia, setSelectedMedia] = useState<string[]>([])
+
+    const handleSend = () => {
+      if (value.trim() || selectedMedia.length > 0) {
+        onSend(value, selectedMedia)
+        setSelectedMedia([])
+      }
+    }
+
+    const handlePickImage = () => {
+      // Mock picking an image
+      const mockImages = [
+        'https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
+        'https://images.unsplash.com/photo-1682687221038-404670e01d46?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
+        'https://images.unsplash.com/photo-1682687220063-4742bd7fd538?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
+      ]
+      const randomImage =
+        mockImages[Math.floor(Math.random() * mockImages.length)]
+      setSelectedMedia(prev => [...prev, randomImage])
+    }
+
+    const removeMedia = (index: number) => {
+      setSelectedMedia(prev => prev.filter((_, i) => i !== index))
+    }
+
     return (
       <YStack borderTopWidth={1} borderColor="$borderColor">
         {/* Reply indicator */}
@@ -77,6 +117,28 @@ const CommentInput = forwardRef<RNTextInput, Props>(
               </SizableText>
             </TouchableOpacity>
           </XStack>
+        )}
+
+        {/* Media Preview */}
+        {selectedMedia.length > 0 && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            paddingHorizontal="$3"
+            paddingTop="$3"
+          >
+            {selectedMedia.map((uri, index) => (
+              <YStack key={index} position="relative">
+                <Image source={{ uri }} style={styles.mediaPreview} />
+                <TouchableOpacity
+                  style={styles.removeMediaButton}
+                  onPress={() => removeMedia(index)}
+                >
+                  <X size={12} color="white" />
+                </TouchableOpacity>
+              </YStack>
+            ))}
+          </ScrollView>
         )}
 
         {/* Input Area */}
@@ -122,10 +184,21 @@ const CommentInput = forwardRef<RNTextInput, Props>(
             backgroundColor="$backgroundModal"
           />
 
-          <TouchableOpacity onPress={onSend} disabled={!value.trim()}>
+          <TouchableOpacity onPress={handlePickImage}>
+            <ImageIcon size={24} color="#888" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={handleSend}
+            disabled={!value.trim() && selectedMedia.length === 0}
+          >
             <Send
               size={24}
-              color={value.trim() ? '#0095F6' : '$placeholderColor'}
+              color={
+                value.trim() || selectedMedia.length > 0
+                  ? '#0095F6'
+                  : '$placeholderColor'
+              }
             />
           </TouchableOpacity>
         </XStack>

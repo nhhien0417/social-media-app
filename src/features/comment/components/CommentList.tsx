@@ -10,6 +10,7 @@ type Props = {
   onLike: (commentId: string) => void
   onReply: (comment: Comment) => void
   onViewReplies: (commentId: string) => void
+  currentUserId?: string
 }
 
 export default function CommentList({
@@ -18,12 +19,13 @@ export default function CommentList({
   onLike,
   onReply,
   onViewReplies,
+  currentUserId,
 }: Props) {
-  const topLevelComments = comments.filter(c => !c.parentId)
+  const topLevelComments = comments.filter(c => !c.parentCommentId)
   const theme = useTheme()
 
   const getReplies = (commentId: string) => {
-    return comments.filter(c => c.parentId === commentId)
+    return comments.filter(c => c.parentCommentId === commentId)
   }
 
   return (
@@ -37,6 +39,10 @@ export default function CommentList({
       renderItem={({ item }) => {
         const replies = getReplies(item.id)
         const isExpanded = expandedComments.has(item.id)
+        const replyCount = replies.length
+        const likeCount = item.likes?.length || 0
+        const isLiked = item.likes?.includes(currentUserId || '') || false
+
         return (
           <YStack>
             <CommentCard
@@ -45,20 +51,30 @@ export default function CommentList({
               onReply={onReply}
               onViewReplies={onViewReplies}
               isExpanded={isExpanded}
+              replyCount={replyCount}
+              likeCount={likeCount}
+              isLiked={isLiked}
             />
             {/* Render replies */}
             {replies.length > 0 && isExpanded && (
               <YStack paddingLeft={50}>
-                {replies.map(reply => (
-                  <CommentCard
-                    key={reply.id}
-                    comment={reply}
-                    onLike={onLike}
-                    onReply={onReply}
-                    onViewReplies={onViewReplies}
-                    isReply
-                  />
-                ))}
+                {replies.map(reply => {
+                  const replyLikeCount = reply.likes?.length || 0
+                  const replyIsLiked =
+                    reply.likes?.includes(currentUserId || '') || false
+                  return (
+                    <CommentCard
+                      key={reply.id}
+                      comment={reply}
+                      onLike={onLike}
+                      onReply={onReply}
+                      onViewReplies={onViewReplies}
+                      isReply
+                      likeCount={replyLikeCount}
+                      isLiked={replyIsLiked}
+                    />
+                  )
+                })}
               </YStack>
             )}
           </YStack>

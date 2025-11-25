@@ -1,5 +1,5 @@
 import React from 'react'
-import { TouchableOpacity, StyleSheet } from 'react-native'
+import { TouchableOpacity, StyleSheet, Image } from 'react-native'
 import { XStack, YStack, SizableText } from 'tamagui'
 import { Heart } from '@tamagui/lucide-icons'
 import { Comment } from '@/types/Comment'
@@ -13,12 +13,21 @@ type Props = {
   onViewReplies: (commentId: string) => void
   isReply?: boolean
   isExpanded?: boolean
+  replyCount?: number
+  likeCount?: number
+  isLiked?: boolean
 }
 
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
     paddingVertical: 12,
+  },
+  mediaImage: {
+    width: 200,
+    height: 200,
+    borderRadius: 12,
+    marginTop: 8,
   },
 })
 
@@ -29,11 +38,14 @@ export default function CommentCard({
   onViewReplies,
   isReply = false,
   isExpanded = false,
+  replyCount = 0,
+  likeCount = 0,
+  isLiked = false,
 }: Props) {
   return (
     <YStack style={styles.container} paddingHorizontal="$3" marginVertical="$2">
       <XStack gap="$3">
-        <Avatar uri={comment.author.avatarUrl} size={35} />
+        <Avatar uri={comment.author.avatarUrl || undefined} size={35} />
 
         <YStack flex={1} marginTop={-5} gap="$1">
           {/* Username and time */}
@@ -47,9 +59,25 @@ export default function CommentCard({
           </XStack>
 
           {/* Content */}
-          <SizableText fontSize={14} lineHeight={18}>
-            {comment.content}
-          </SizableText>
+          {comment.content ? (
+            <SizableText fontSize={14} lineHeight={18}>
+              {comment.content}
+            </SizableText>
+          ) : null}
+
+          {/* Media */}
+          {comment.media && comment.media.length > 0 && (
+            <YStack gap="$2">
+              {comment.media.map((uri, index) => (
+                <Image
+                  key={index}
+                  source={{ uri }}
+                  style={styles.mediaImage}
+                  resizeMode="cover"
+                />
+              ))}
+            </YStack>
+          )}
 
           {/* Actions */}
           <XStack alignItems="center" gap="$4" marginTop="$1">
@@ -59,11 +87,10 @@ export default function CommentCard({
               </SizableText>
             </TouchableOpacity>
 
-            {!isReply && comment.replyCount > 0 && (
+            {!isReply && replyCount > 0 && (
               <TouchableOpacity onPress={() => onViewReplies(comment.id)}>
                 <SizableText fontSize={13} fontWeight="600" color="#888">
-                  — {isExpanded ? 'Hide' : 'View'} replies ({comment.replyCount}
-                  )
+                  — {isExpanded ? 'Hide' : 'View'} replies ({replyCount})
                 </SizableText>
               </TouchableOpacity>
             )}
@@ -75,13 +102,13 @@ export default function CommentCard({
           <TouchableOpacity onPress={() => onLike(comment.id)}>
             <Heart
               size={20}
-              color={comment.liked ? '#ff4444' : '#888'}
-              fill={comment.liked ? '#ff4444' : 'none'}
+              color={isLiked ? '#ff4444' : '#888'}
+              fill={isLiked ? '#ff4444' : 'none'}
             />
           </TouchableOpacity>
-          {comment.likeCount > 0 && (
+          {likeCount > 0 && (
             <SizableText fontSize={13} fontWeight="600" color="#888">
-              {comment.likeCount}
+              {likeCount}
             </SizableText>
           )}
         </YStack>
