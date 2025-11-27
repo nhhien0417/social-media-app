@@ -1,10 +1,12 @@
 import React, { useState } from 'react'
-import { TouchableOpacity, StyleSheet, Image } from 'react-native'
+import { TouchableOpacity, StyleSheet, Image, Pressable } from 'react-native'
 import { XStack, YStack, SizableText } from 'tamagui'
-import { Heart, MoreHorizontal } from '@tamagui/lucide-icons'
+import { Heart } from '@tamagui/lucide-icons'
 import { Comment } from '@/types/Comment'
 import Avatar from '@/components/Avatar'
 import { formatDate } from '@/utils/FormatDate'
+import CommentOptionsSheet from './CommentOptionsSheet'
+import CommentDeleteConfirmModal from './CommentDeleteConfirmModal'
 
 type Props = {
   comment: Comment
@@ -27,13 +29,19 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   mediaImage: {
-    width: 200,
+    width: '100%',
     height: 200,
     borderRadius: 12,
-    marginTop: 8,
   },
-  optionsButton: {
-    padding: 4,
+  mediaGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 8,
+    gap: 4,
+  },
+  mediaGridItem: {
+    borderRadius: 12,
+    overflow: 'hidden',
   },
 })
 
@@ -51,126 +59,152 @@ export default function CommentCard({
   isLiked = false,
   currentUserId,
 }: Props) {
-  const [showOptions, setShowOptions] = useState(false)
+  const [showOptionsSheet, setShowOptionsSheet] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const isOwner = currentUserId === comment.authorProfile?.id
 
-  return (
-    <YStack style={styles.container} paddingHorizontal="$3" marginVertical="$2">
-      <XStack gap="$3">
-        <Avatar uri={comment.authorProfile?.avatarUrl || undefined} size={35} />
+  const hasMedia = comment.media && comment.media.length > 0
+  const mediaCount = comment.media?.length || 0
 
-        <YStack flex={1} marginTop={-5} gap="$1">
-          {/* Username and time */}
-          <XStack alignItems="center" gap="$2" justifyContent="space-between">
-            <XStack alignItems="center" gap="$2">
-              <SizableText fontSize={14} color="$color" fontWeight="600">
-                {comment.authorProfile.username}
-              </SizableText>
-              <SizableText fontSize={12} color="#888">
-                {formatDate(comment.createdAt)}
-              </SizableText>
-            </XStack>
-            {isOwner && (
-              <TouchableOpacity
-                onPress={() => setShowOptions(!showOptions)}
-                style={styles.optionsButton}
-              >
-                <MoreHorizontal size={16} color="#888" />
-              </TouchableOpacity>
-            )}
-          </XStack>
+  const useGridLayout = !isReply && mediaCount >= 2
 
-          {/* Options Menu */}
-          {showOptions && isOwner && (
+  const renderMedia = () => {
+    if (!hasMedia) return null
+
+    if (useGridLayout) {
+      const gridWidth = '48.5%'
+
+      return (
+        <YStack style={styles.mediaGrid}>
+          {comment.media!.map((uri, index) => (
             <YStack
-              backgroundColor="#f0f0f0"
-              borderRadius={8}
-              padding="$2"
-              gap="$1"
-              marginBottom="$2"
+              key={index}
+              style={[styles.mediaGridItem, { width: gridWidth }]}
             >
-              {onEdit && (
-                <TouchableOpacity
-                  onPress={() => {
-                    onEdit(comment)
-                    setShowOptions(false)
-                  }}
-                >
-                  <SizableText fontSize={14} color="$color" padding="$1">
-                    Edit
-                  </SizableText>
-                </TouchableOpacity>
-              )}
-              {onDelete && (
-                <TouchableOpacity
-                  onPress={() => {
-                    onDelete(comment.id)
-                    setShowOptions(false)
-                  }}
-                >
-                  <SizableText fontSize={14} color="#ff4444" padding="$1">
-                    Delete
-                  </SizableText>
-                </TouchableOpacity>
-              )}
+              <Image
+                source={{ uri }}
+                style={[styles.mediaImage, { height: 180 }]}
+                resizeMode="cover"
+              />
             </YStack>
-          )}
+          ))}
+        </YStack>
+      )
+    } else {
+      return (
+        <YStack gap="$2" marginTop="$2">
+          {comment.media!.map((uri, index) => (
+            <Image
+              key={index}
+              source={{ uri }}
+              style={styles.mediaImage}
+              resizeMode="cover"
+            />
+          ))}
+        </YStack>
+      )
+    }
+  }
 
-          {/* Content */}
-          {comment.content ? (
-            <SizableText fontSize={14} lineHeight={18}>
-              {comment.content}
-            </SizableText>
-          ) : null}
+  return (
+    <>
+      <Pressable
+        onLongPress={() => {
+          if (isOwner && (onEdit || onDelete)) {
+            setShowOptionsSheet(true)
+          }
+        }}
+        delayLongPress={400}
+      >
+        <YStack
+          style={styles.container}
+          paddingHorizontal="$3"
+          marginVertical="$2"
+        >
+          <XStack gap="$3">
+            <Avatar
+              uri={comment.authorProfile?.avatarUrl || undefined}
+              size={35}
+            />
 
-          {/* Media */}
-          {comment.media && comment.media.length > 0 && (
-            <YStack gap="$2">
-              {comment.media.map((uri, index) => (
-                <Image
-                  key={index}
-                  source={{ uri }}
-                  style={styles.mediaImage}
-                  resizeMode="cover"
-                />
-              ))}
-            </YStack>
-          )}
-
-          {/* Actions */}
-          <XStack alignItems="center" gap="$4" marginTop="$1">
-            <TouchableOpacity onPress={() => onReply(comment)}>
-              <SizableText fontSize={13} fontWeight="600" color="#888">
-                Reply
-              </SizableText>
-            </TouchableOpacity>
-
-            {!isReply && replyCount > 0 && (
-              <TouchableOpacity onPress={() => onViewReplies(comment.id)}>
-                <SizableText fontSize={13} fontWeight="600" color="#888">
-                  — {isExpanded ? 'Hide' : 'View'} replies ({replyCount})
+            <YStack flex={1} marginTop={-5} gap="$1">
+              {/* Username and time */}
+              <XStack alignItems="center" gap="$2">
+                <SizableText fontSize={14} color="$color" fontWeight="600">
+                  {comment.authorProfile?.username || 'Unknown User'}
                 </SizableText>
+                <SizableText fontSize={12} color="#888">
+                  {formatDate(comment.createdAt)}
+                </SizableText>
+              </XStack>
+
+              {/* Content */}
+              {comment.content ? (
+                <SizableText fontSize={14} lineHeight={18}>
+                  {comment.content}
+                </SizableText>
+              ) : null}
+
+              {/* Media */}
+              {renderMedia()}
+
+              {/* Actions */}
+              <XStack alignItems="center" gap="$4" marginTop="$1">
+                <TouchableOpacity onPress={() => onReply(comment)}>
+                  <SizableText fontSize={13} fontWeight="600" color="#888">
+                    Reply
+                  </SizableText>
+                </TouchableOpacity>
+
+                {!isReply && replyCount > 0 && (
+                  <TouchableOpacity onPress={() => onViewReplies(comment.id)}>
+                    <SizableText fontSize={13} fontWeight="600" color="#888">
+                      — {isExpanded ? 'Hide' : 'View'} replies ({replyCount})
+                    </SizableText>
+                  </TouchableOpacity>
+                )}
+              </XStack>
+            </YStack>
+
+            {/* Like button */}
+            <YStack alignItems="center">
+              <TouchableOpacity onPress={() => onLike(comment.id)}>
+                <Heart
+                  size={20}
+                  color={isLiked ? '#ff4444' : '#888'}
+                  fill={isLiked ? '#ff4444' : 'none'}
+                />
               </TouchableOpacity>
-            )}
+              {likeCount > 0 && (
+                <SizableText fontSize={13} fontWeight="600" color="#888">
+                  {likeCount}
+                </SizableText>
+              )}
+            </YStack>
           </XStack>
         </YStack>
+      </Pressable>
 
-        {/* Like button */}
-        <YStack alignItems="center">
-          <TouchableOpacity onPress={() => onLike(comment.id)}>
-            <Heart
-              size={20}
-              color={isLiked ? '#ff4444' : '#888'}
-              fill={isLiked ? '#ff4444' : 'none'}
-            />
-          </TouchableOpacity>
-          {likeCount > 0 && (
-            <SizableText fontSize={13} fontWeight="600" color="#888">
-              {likeCount}
-            </SizableText>
-          )}
-        </YStack>
-      </XStack>
-    </YStack>
+      {/* Options Sheet */}
+      <CommentOptionsSheet
+        visible={showOptionsSheet}
+        onClose={() => setShowOptionsSheet(false)}
+        onEdit={() => {
+          onEdit?.(comment)
+        }}
+        onDelete={() => {
+          setShowDeleteConfirm(true)
+        }}
+      />
+
+      {/* Delete Confirmation */}
+      <CommentDeleteConfirmModal
+        visible={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={() => {
+          onDelete?.(comment.id)
+        }}
+      />
+    </>
   )
 }

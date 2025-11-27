@@ -1,25 +1,34 @@
-import React, { forwardRef, useState } from 'react'
+import React, { forwardRef, useState, useEffect } from 'react'
 import {
   TouchableOpacity,
   StyleSheet,
   TextInput as RNTextInput,
   Image,
+  ActivityIndicator,
 } from 'react-native'
 import { XStack, Input, SizableText, YStack, ScrollView } from 'tamagui'
-import { Send, Image as ImageIcon, X } from '@tamagui/lucide-icons'
+import {
+  Send,
+  Image as ImageIcon,
+  X,
+  Camera as CameraIcon,
+} from '@tamagui/lucide-icons'
 import { Comment } from '@/types/Comment'
 import Avatar from '@/components/Avatar'
+import MediaPicker from '@/features/create/components/MediaPicker'
+import Camera from '@/features/create/components/Camera'
 
 type Props = {
   value: string
   onChangeText: (text: string) => void
-  onSend: (content: string, media: string[]) => void
+  onSend: (content: string, media: string[]) => Promise<void> | void
   userAvatarUrl: string
   replyingTo?: Comment | null
   editingComment?: Comment | null
   onSelectEmotion: (emoji: string) => void
   onCancelReply?: () => void
   onCancelEdit?: () => void
+  isLoading?: boolean
 }
 
 const styles = StyleSheet.create({
@@ -28,6 +37,10 @@ const styles = StyleSheet.create({
     height: 35,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  mediaPreviewContainer: {
+    backgroundColor: '#f5f5f5',
+    padding: 8,
   },
   mediaPreview: {
     width: 100,
@@ -39,9 +52,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 4,
     right: 12,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: 'rgba(0,0,0,0.7)',
     borderRadius: 12,
-    padding: 4,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 })
 
@@ -73,27 +89,29 @@ const CommentInput = forwardRef<RNTextInput, Props>(
       onSelectEmotion,
       onCancelReply,
       onCancelEdit,
+      isLoading = false,
     },
     ref
   ) => {
     const [selectedMedia, setSelectedMedia] = useState<string[]>([])
+    const [showMediaPicker, setShowMediaPicker] = useState(false)
+    const [showCamera, setShowCamera] = useState(false)
 
-    const handleSend = () => {
-      if (value.trim() || selectedMedia.length > 0) {
-        onSend(value, selectedMedia)
+    useEffect(() => {
+      if (editingComment && editingComment.media) {
+        setSelectedMedia(editingComment.media)
+      } else if (!editingComment) {
         setSelectedMedia([])
       }
-    }
+    }, [editingComment])
 
-    const handlePickImage = () => {
-      const mockImages = [
-        'https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
-        'https://images.unsplash.com/photo-1682687221038-404670e01d46?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
-        'https://images.unsplash.com/photo-1682687220063-4742bd7fd538?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
-      ]
-      const randomImage =
-        mockImages[Math.floor(Math.random() * mockImages.length)]
-      setSelectedMedia(prev => [...prev, randomImage])
+    const handleSend = async () => {
+      if (value.trim() || selectedMedia.length > 0) {
+        await onSend(value, selectedMedia)
+        if (!editingComment) {
+          setSelectedMedia([])
+        }
+      }
     }
 
     const handleRemoveMedia = (index: number) => {
@@ -112,7 +130,7 @@ const CommentInput = forwardRef<RNTextInput, Props>(
             justifyContent="space-between"
           >
             <SizableText fontSize={13} color="#666">
-              Editing comment
+              Editing comment...
             </SizableText>
             {onCancelEdit && (
               <TouchableOpacity onPress={onCancelEdit}>
@@ -132,7 +150,7 @@ const CommentInput = forwardRef<RNTextInput, Props>(
             justifyContent="space-between"
           >
             <SizableText fontSize={13} color="#666">
-              Replying to {replyingTo.authorProfile.username}
+              Replying to {replyingTo.authorProfile?.username || 'Unknown User'}...
             </SizableText>
             {onCancelReply && (
               <TouchableOpacity onPress={onCancelReply}>
@@ -144,24 +162,21 @@ const CommentInput = forwardRef<RNTextInput, Props>(
 
         {/* Media Preview */}
         {selectedMedia.length > 0 && (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            paddingHorizontal="$3"
-            paddingTop="$3"
-          >
-            {selectedMedia.map((uri, index) => (
-              <YStack key={index} position="relative">
-                <Image source={{ uri }} style={styles.mediaPreview} />
-                <TouchableOpacity
-                  style={styles.removeMediaButton}
-                  onPress={() => handleRemoveMedia(index)}
-                >
-                  <X size={12} color="white" />
-                </TouchableOpacity>
-              </YStack>
-            ))}
-          </ScrollView>
+          <YStack style={styles.mediaPreviewContainer}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {selectedMedia.map((uri, index) => (
+                <YStack key={index} position="relative">
+                  <Image source={{ uri }} style={styles.mediaPreview} />
+                  <TouchableOpacity
+                    style={styles.removeMediaButton}
+                    onPress={() => handleRemoveMedia(index)}
+                  >
+                    <X size={14} color="white" />
+                  </TouchableOpacity>
+                </YStack>
+              ))}
+            </ScrollView>
+          </YStack>
         )}
 
         {/* Input Area */}
@@ -205,26 +220,63 @@ const CommentInput = forwardRef<RNTextInput, Props>(
             paddingVertical="$2"
             fontSize={14}
             backgroundColor="$backgroundModal"
+            editable={!isLoading}
           />
 
-          <TouchableOpacity onPress={handlePickImage}>
-            <ImageIcon size={24} color="#888" />
+          <TouchableOpacity
+            onPress={() => setShowCamera(true)}
+            disabled={isLoading}
+          >
+            <CameraIcon size={24} color={isLoading ? '#ccc' : '#888'} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => setShowMediaPicker(true)}
+            disabled={isLoading}
+          >
+            <ImageIcon size={24} color={isLoading ? '#ccc' : '#888'} />
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={handleSend}
-            disabled={!value.trim() && selectedMedia.length === 0}
+            disabled={
+              (!value.trim() && selectedMedia.length === 0) || isLoading
+            }
           >
-            <Send
-              size={24}
-              color={
-                value.trim() || selectedMedia.length > 0
-                  ? '#0095F6'
-                  : '$placeholderColor'
-              }
-            />
+            {isLoading ? (
+              <ActivityIndicator size="small" color="#0095F6" />
+            ) : (
+              <Send
+                size={24}
+                color={
+                  value.trim() || selectedMedia.length > 0
+                    ? '#0095F6'
+                    : '$placeholderColor'
+                }
+              />
+            )}
           </TouchableOpacity>
         </XStack>
+
+        {/* MediaPicker Modal */}
+        <MediaPicker
+          visible={showMediaPicker}
+          onClose={() => setShowMediaPicker(false)}
+          onSelect={assets => {
+            const uris = assets.map(asset => asset.uri)
+            setSelectedMedia(prev => [...prev, ...uris])
+          }}
+          maxSelection={10 - selectedMedia.length}
+        />
+
+        {/* Camera Modal */}
+        <Camera
+          visible={showCamera}
+          onClose={() => setShowCamera(false)}
+          onCapture={media => {
+            setSelectedMedia(prev => [...prev, media.uri])
+          }}
+        />
       </YStack>
     )
   }

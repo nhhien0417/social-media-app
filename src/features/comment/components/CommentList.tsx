@@ -25,11 +25,21 @@ export default function CommentList({
   onDelete,
   currentUserId,
 }: Props) {
-  const topLevelComments = comments.filter(c => !c.parentCommentId)
+  const topLevelComments = comments
+    .filter(c => !c.parentCommentId)
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
   const theme = useTheme()
 
   const getReplies = (commentId: string) => {
-    return comments.filter(c => c.parentCommentId === commentId)
+    return comments
+      .filter(c => c.parentCommentId === commentId)
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      )
   }
 
   return (

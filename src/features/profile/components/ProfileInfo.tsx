@@ -50,20 +50,7 @@ export function ProfileInfo({
       </LinearGradient>
 
       <XStack flex={1} justifyContent="space-around" marginLeft="$5">
-        <Pressable
-          onPress={() => {
-            if (onPostsPress) {
-              onPostsPress()
-            } else if (user.posts && user.posts.length > 0) {
-              router.push({
-                pathname: '/profile/feed',
-                params: {
-                  userId: user.id,
-                },
-              })
-            }
-          }}
-        >
+        <Pressable onPress={onPostsPress}>
           <YStack alignItems="center" gap="$1">
             <Text fontSize="$6" fontWeight="700">
               {formatNumber(Array.isArray(user.posts) ? user.posts.length : 0)}

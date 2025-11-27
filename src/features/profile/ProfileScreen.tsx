@@ -172,7 +172,7 @@ export default function ProfileScreen({ userId }: ProfileScreenProps) {
           <StoryHighlights
             highlights={profileMock.highlights}
             username={displayUser.username}
-            avatarUrl={displayUser.avatarUrl}
+            avatarUrl={displayUser.avatarUrl || undefined}
           />
           <ProfileTabBar value={tab} onChange={setTab} />
           <MediaGrid

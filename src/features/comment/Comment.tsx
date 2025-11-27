@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   TextInput as RNTextInput,
+  ActivityIndicator,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { XStack, YStack, SizableText } from 'tamagui'
@@ -67,6 +68,11 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     backgroundColor: '#888',
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 })
 
 export default function Comment({
@@ -84,6 +90,7 @@ export default function Comment({
   const [currentUserId, setCurrentUserId] = useState<string | undefined>(
     undefined
   )
+  const [isSending, setIsSending] = useState(false)
 
   const {
     comments,
@@ -92,6 +99,7 @@ export default function Comment({
     updateComment,
     deleteComment,
     likeComment,
+    isLoading,
   } = useCommentStore()
   const currentUser = useProfileStore(state => state.currentUser)
 
@@ -101,6 +109,7 @@ export default function Comment({
 
   useEffect(() => {
     if (visible && postId) {
+      useCommentStore.setState({ comments: [], isLoading: true })
       fetchComments(postId)
     }
   }, [visible, postId])
@@ -204,14 +213,56 @@ export default function Comment({
   ).current
 
   const handleSend = async (content: string, media: string[]) => {
-    if (!currentUserId) return
+    if (!currentUserId || isSending) return
 
+    setIsSending(true)
     try {
-      const mediaFiles = media.map((uri, index) => ({
-        uri,
-        name: `media_${index}.jpg`,
-        type: 'image/jpeg',
-      }))
+      const mediaPromises =
+        media.length > 0
+          ? media.map(async uri => {
+              if (uri.startsWith('http://') || uri.startsWith('https://')) {
+                try {
+                  const response = await fetch(uri)
+                  if (!response.ok) throw new Error('Download failed')
+
+                  const blob = await response.blob()
+                  const fileName = uri.split('/').pop() || 'media.jpg'
+
+                  return new Promise<{
+                    uri: string
+                    name: string
+                    type: string
+                  }>(resolve => {
+                    const reader = new FileReader()
+                    reader.onloadend = () => {
+                      resolve({
+                        uri: reader.result as string,
+                        name: fileName,
+                        type: blob.type || 'image/jpeg',
+                      })
+                    }
+                    reader.readAsDataURL(blob)
+                  })
+                } catch (error) {
+                  console.error('Failed to download media:', uri, error)
+                  return {
+                    uri,
+                    name: uri.split('/').pop() || 'media.jpg',
+                    type: 'image/jpeg',
+                  }
+                }
+              } else {
+                // Local file, use as-is
+                return {
+                  uri,
+                  name: uri.split('/').pop() || 'media.jpg',
+                  type: 'image/jpeg',
+                }
+              }
+            })
+          : []
+
+      const mediaFiles = await Promise.all(mediaPromises)
 
       if (editingComment) {
         await updateComment(
@@ -237,11 +288,17 @@ export default function Comment({
       setReplyingTo(null)
     } catch (error) {
       console.error('Failed to send comment:', error)
+    } finally {
+      setIsSending(false)
     }
   }
 
   const handleReply = (comment: Comment) => {
-    setReplyingTo(comment)
+    const topLevelParent = comment.parentCommentId
+      ? comments.find(c => c.id === comment.parentCommentId) || comment
+      : comment
+
+    setReplyingTo(topLevelParent)
     setEditingComment(null)
     setCommentText('')
     inputRef.current?.focus()
@@ -357,16 +414,22 @@ export default function Comment({
 
             {/* Comments List */}
             <YStack flex={1}>
-              <CommentList
-                comments={comments}
-                onLike={handleLike}
-                onReply={handleReply}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                onViewReplies={handleViewReplies}
-                expandedComments={expandedComments}
-                currentUserId={currentUserId}
-              />
+              {isLoading ? (
+                <YStack style={styles.loadingContainer}>
+                  <ActivityIndicator size="large" color="#0095F6" />
+                </YStack>
+              ) : (
+                <CommentList
+                  comments={comments}
+                  onLike={handleLike}
+                  onReply={handleReply}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onViewReplies={handleViewReplies}
+                  expandedComments={expandedComments}
+                  currentUserId={currentUserId}
+                />
+              )}
             </YStack>
 
             {/* Bottom Bar */}
@@ -387,6 +450,7 @@ export default function Comment({
                 onSelectEmotion={handleSelectEmotion}
                 onCancelReply={() => setReplyingTo(null)}
                 onCancelEdit={handleCancelEdit}
+                isLoading={isSending}
               />
             </YStack>
           </KeyboardAvoidingView>
