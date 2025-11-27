@@ -83,23 +83,49 @@ export default function ProfileFeedScreen() {
       </XStack>
 
       {isReady ? (
-        <FlatList
-          data={posts}
-          keyExtractor={item => item.id}
-          renderItem={({ item }) => <PostCard post={item} />}
-          initialScrollIndex={
-            initialScrollIndex !== -1 ? initialScrollIndex : 0
-          }
-          getItemLayout={(_data, index) => ({
-            length: 500,
-            offset: 500 * index,
-            index,
-          })}
-          onScrollToIndexFailed={() => {
-            const wait = new Promise(resolve => setTimeout(resolve, 500))
-            wait.then(() => {})
-          }}
-        />
+        posts.length > 0 ? (
+          <FlatList
+            data={posts}
+            keyExtractor={item => item.id}
+            renderItem={({ item }) => <PostCard post={item} />}
+            initialScrollIndex={
+              initialScrollIndex !== -1 ? initialScrollIndex : 0
+            }
+            getItemLayout={(_data, index) => ({
+              length: 500,
+              offset: 500 * index,
+              index,
+            })}
+            onScrollToIndexFailed={() => {
+              const wait = new Promise(resolve => setTimeout(resolve, 500))
+              wait.then(() => {})
+            }}
+          />
+        ) : (
+          <YStack
+            flex={1}
+            alignItems="center"
+            justifyContent="center"
+            paddingHorizontal="$6"
+            gap="$3"
+          >
+            <Text
+              fontSize="$7"
+              fontWeight="700"
+              color={isDark ? '#f5f5f5' : '#111827'}
+              textAlign="center"
+            >
+              No posts yet
+            </Text>
+            <Text
+              fontSize="$4"
+              color={isDark ? 'rgba(255,255,255,0.6)' : '#6b7280'}
+              textAlign="center"
+            >
+              Once you share photos and reels, they will appear here.
+            </Text>
+          </YStack>
+        )
       ) : (
         <YStack flex={1} alignItems="center" justifyContent="center">
           <Spinner size="large" />

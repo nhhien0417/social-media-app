@@ -45,16 +45,23 @@ export default function MediaGrid({
     return (
       <YStack
         paddingHorizontal="$3"
-        paddingVertical="$6"
+        paddingVertical="$8"
         alignItems="center"
-        gap="$2"
+        gap="$3"
       >
-        <Text fontSize="$6" fontWeight="700">
+        <Text
+          fontSize="$7"
+          fontWeight="700"
+          color={isDark ? '#f5f5f5' : '#111827'}
+          textAlign="center"
+        >
           No posts yet
         </Text>
         <Text
           fontSize="$4"
-          color={isDark ? 'rgba(255,255,255,0.7)' : '#6b7280'}
+          color={isDark ? 'rgba(255,255,255,0.6)' : '#6b7280'}
+          textAlign="center"
+          paddingHorizontal="$4"
         >
           Once you share photos and reels, they will appear here.
         </Text>

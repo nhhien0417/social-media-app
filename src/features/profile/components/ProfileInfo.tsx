@@ -8,12 +8,14 @@ import { useRouter } from 'expo-router'
 
 interface ProfileInfoProps extends ProfileComponentProps {
   onFriendsPress?: () => void
+  onPostsPress?: () => void
 }
 
 export function ProfileInfo({
   user,
   isOwnProfile,
   onFriendsPress,
+  onPostsPress,
 }: ProfileInfoProps) {
   const router = useRouter()
   const themeName = useThemeName()
@@ -50,7 +52,9 @@ export function ProfileInfo({
       <XStack flex={1} justifyContent="space-around" marginLeft="$5">
         <Pressable
           onPress={() => {
-            if (user.posts && user.posts.length > 0) {
+            if (onPostsPress) {
+              onPostsPress()
+            } else if (user.posts && user.posts.length > 0) {
               router.push({
                 pathname: '/profile/feed',
                 params: {

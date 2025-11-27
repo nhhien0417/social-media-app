@@ -67,6 +67,18 @@ export default function ProfileScreen({ userId }: ProfileScreenProps) {
     }
   }
 
+  const handlePostsPress = () => {
+    if (displayUser) {
+      router.push({
+        pathname: '/profile/feed',
+        params: {
+          userId: displayUser.id,
+          isOwnProfile: isOwnProfile.toString(),
+        },
+      })
+    }
+  }
+
   if (isLoading) {
     return (
       <YStack
@@ -149,6 +161,7 @@ export default function ProfileScreen({ userId }: ProfileScreenProps) {
             user={displayUser}
             isOwnProfile={isOwnProfile}
             onFriendsPress={handleFriendsPress}
+            onPostsPress={handlePostsPress}
           />
           <ProfileBio user={displayUser} isOwnProfile={isOwnProfile} />
           <ProfileActions user={displayUser} isOwnProfile={isOwnProfile} />
