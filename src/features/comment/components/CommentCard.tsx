@@ -22,6 +22,7 @@ type Props = {
   likeCount?: number
   isLiked?: boolean
   currentUserId?: string
+  onCloseModal?: () => void
 }
 
 const styles = StyleSheet.create({
@@ -59,6 +60,7 @@ export default function CommentCard({
   likeCount = 0,
   isLiked = false,
   currentUserId,
+  onCloseModal,
 }: Props) {
   const [showOptionsSheet, setShowOptionsSheet] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -108,6 +110,7 @@ export default function CommentCard({
   }
 
   const handleNavigateToProfile = () => {
+    onCloseModal?.()
     if (currentUserId && comment.authorProfile?.id === currentUserId) {
       router.push('/(tabs)/profile')
     } else {

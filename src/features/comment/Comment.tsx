@@ -427,6 +427,7 @@ export default function Comment({
                   onViewReplies={handleViewReplies}
                   expandedComments={expandedComments}
                   currentUserId={currentUserId}
+                  onCloseModal={closeSheet}
                 />
               )}
             </YStack>

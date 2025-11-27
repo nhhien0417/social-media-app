@@ -254,15 +254,11 @@ function PostCard({ post }: { post: Post }) {
               onPress={handleLikePost}
             />
             {post.likes && post.likes.length > 0 && (
-              <Text
-                fontSize={13}
-                fontWeight="600"
-                marginLeft={-4}
-                onPress={() => setLikeListVisible(true)}
-                suppressHighlighting
-              >
-                {formatNumber(post.likes.length)}
-              </Text>
+              <Pressable onPress={() => setLikeListVisible(true)} hitSlop={10}>
+                <Text fontSize={13} fontWeight="600" suppressHighlighting>
+                  {formatNumber(post.likes.length)}
+                </Text>
+              </Pressable>
             )}
           </XStack>
 
@@ -272,7 +268,7 @@ function PostCard({ post }: { post: Post }) {
               onPress={() => setCommentSheetVisible(true)}
             />
             {post.commentsCount > 0 && (
-              <Text fontSize={13} fontWeight="600" marginLeft={-4}>
+              <Text fontSize={13} fontWeight="600">
                 {formatNumber(post.commentsCount)}
               </Text>
             )}

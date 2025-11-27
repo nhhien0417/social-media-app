@@ -13,6 +13,7 @@ type Props = {
   onEdit?: (comment: Comment) => void
   onDelete?: (commentId: string) => void
   currentUserId?: string
+  onCloseModal?: () => void
 }
 
 export default function CommentList({
@@ -24,6 +25,7 @@ export default function CommentList({
   onEdit,
   onDelete,
   currentUserId,
+  onCloseModal,
 }: Props) {
   const topLevelComments = comments
     .filter(c => !c.parentCommentId)
@@ -71,6 +73,7 @@ export default function CommentList({
               likeCount={likeCount}
               isLiked={isLiked}
               currentUserId={currentUserId}
+              onCloseModal={onCloseModal}
             />
             {/* Render replies */}
             {replies.length > 0 && isExpanded && (
@@ -92,6 +95,7 @@ export default function CommentList({
                       likeCount={replyLikeCount}
                       isLiked={replyIsLiked}
                       currentUserId={currentUserId}
+                      onCloseModal={onCloseModal}
                     />
                   )
                 })}
