@@ -79,6 +79,10 @@ export default function ProfileScreen({ userId }: ProfileScreenProps) {
     }
   }
 
+  const handleCreatePost = () => {
+    router.push('/create')
+  }
+
   if (isLoading) {
     return (
       <YStack
@@ -139,7 +143,7 @@ export default function ProfileScreen({ userId }: ProfileScreenProps) {
             <XStack gap="$3" alignItems="center">
               {isOwnProfile ? (
                 <>
-                  <Pressable hitSlop={8}>
+                  <Pressable hitSlop={8} onPress={handleCreatePost}>
                     <Plus size={25} color={navIconColor} />
                   </Pressable>
                   <Pressable hitSlop={8}>
