@@ -23,6 +23,7 @@ import { usePostStore } from '@/stores/postStore'
 import { router } from 'expo-router'
 import PostOptionsSheet from './PostOptionsSheet'
 import DeleteConfirmModal from './DeleteConfirmModal'
+import { formatNumber } from '@/utils/FormatNumber'
 
 function MediaItem({ url, width }: { url: string; width: number }) {
   return <Image source={{ uri: url }} width={width} aspectRatio={1} />
@@ -151,7 +152,6 @@ function PostCard({ post }: { post: Post }) {
           onPress={() => setOptionsSheetVisible(true)}
         />
       </XStack>
-
       {/* Media carousel */}
       {media.length > 0 && (
         <Pressable
@@ -185,10 +185,8 @@ function PostCard({ post }: { post: Post }) {
           </YStack>
         </Pressable>
       )}
-
       {/* Dots */}
       <PaginationDots mediaCount={media.length} activeIndex={activeIndex} />
-
       {/* Caption */}
       {!!content && (
         <Pressable
@@ -245,22 +243,37 @@ function PostCard({ post }: { post: Post }) {
         justifyContent="space-between"
         alignItems="center"
       >
-        <XStack alignItems="center">
-          <ButtonIcon
-            Icon={Heart}
-            Fill={isLiked}
-            Color={isLiked ? '#ee4444' : '$color'}
-            onPress={handleLikePost}
-          />
-          <ButtonIcon
-            Icon={MessageCircle}
-            onPress={() => setCommentSheetVisible(true)}
-          />
+        <XStack alignItems="center" gap="$2">
+          <XStack alignItems="center">
+            <ButtonIcon
+              Icon={Heart}
+              Fill={isLiked}
+              Color={isLiked ? '#ee4444' : '$color'}
+              onPress={handleLikePost}
+            />
+            {post.likes && post.likes.length > 0 && (
+              <Text fontSize={13} fontWeight="600" marginLeft={-4}>
+                {formatNumber(post.likes.length)}
+              </Text>
+            )}
+          </XStack>
+
+          <XStack alignItems="center">
+            <ButtonIcon
+              Icon={MessageCircle}
+              onPress={() => setCommentSheetVisible(true)}
+            />
+            {post.commentsCount > 0 && (
+              <Text fontSize={13} fontWeight="600" marginLeft={-4}>
+                {formatNumber(post.commentsCount)}
+              </Text>
+            )}
+          </XStack>
+
           <ButtonIcon Icon={Send} />
         </XStack>
         <ButtonIcon Icon={Bookmark} />
       </XStack>
-
       {/* Time */}
       <Text
         paddingHorizontal="$3"
@@ -271,7 +284,6 @@ function PostCard({ post }: { post: Post }) {
       >
         {formatDate(createdAt)}
       </Text>
-
       {/* Comment Sheet */}
       <Comment
         visible={commentSheetVisible}
@@ -279,7 +291,6 @@ function PostCard({ post }: { post: Post }) {
         postId={post.id}
         userAvatarUrl={author.avatarUrl || undefined}
       />
-
       <PostOptionsSheet
         visible={optionsSheetVisible}
         onClose={() => setOptionsSheetVisible(false)}
@@ -287,7 +298,6 @@ function PostCard({ post }: { post: Post }) {
         onDelete={handleDelete}
         isOwner={isOwner}
       />
-
       <DeleteConfirmModal
         visible={deleteModalVisible}
         onClose={() => setDeleteModalVisible(false)}

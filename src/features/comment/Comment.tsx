@@ -252,7 +252,6 @@ export default function Comment({
                   }
                 }
               } else {
-                // Local file, use as-is
                 return {
                   uri,
                   name: uri.split('/').pop() || 'media.jpg',
