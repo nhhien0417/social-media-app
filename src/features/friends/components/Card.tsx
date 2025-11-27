@@ -164,7 +164,7 @@ export function UserCard({
           onPress={() => onAddFriend?.(user.id)}
           disabled={isLoading}
         >
-          Follow
+          Add Friend
         </Button>
       )}
     </XStack>
