@@ -107,14 +107,6 @@ function PostCard({ post }: { post: Post }) {
     await likePost({ postId: post.id, userId: currentUserId })
   }
 
-  const handleSendComment = (content: string, parentId?: string) => {
-    console.log('Send comment:', content, 'parentId:', parentId)
-  }
-
-  const handleLikeComment = (commentId: string) => {
-    console.log('Like comment:', commentId)
-  }
-
   const handleEdit = () => {
     router.push({
       pathname: '/create',
@@ -285,9 +277,6 @@ function PostCard({ post }: { post: Post }) {
         visible={commentSheetVisible}
         onClose={() => setCommentSheetVisible(false)}
         postId={post.id}
-        comments={[]}
-        onSendComment={handleSendComment}
-        onLikeComment={handleLikeComment}
         userAvatarUrl={author.avatarUrl || undefined}
       />
 

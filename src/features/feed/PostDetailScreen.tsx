@@ -175,14 +175,6 @@ function PostDetailScreen() {
     await likePost({ postId: post.id, userId: currentUserId })
   }
 
-  const handleSendComment = (content: string, parentId?: string) => {
-    console.log('Send comment:', content, 'parentId:', parentId)
-  }
-
-  const handleLikeComment = (commentId: string) => {
-    console.log('Like comment:', commentId)
-  }
-
   const handleEdit = () => {
     router.push({
       pathname: '/create',
@@ -387,9 +379,6 @@ function PostDetailScreen() {
         visible={commentSheetVisible}
         onClose={() => setCommentSheetVisible(false)}
         postId={post.id}
-        comments={[]}
-        onSendComment={handleSendComment}
-        onLikeComment={handleLikeComment}
       />
 
       <PostOptionsSheet

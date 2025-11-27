@@ -16,8 +16,10 @@ type Props = {
   onSend: (content: string, media: string[]) => void
   userAvatarUrl: string
   replyingTo?: Comment | null
+  editingComment?: Comment | null
   onSelectEmotion: (emoji: string) => void
   onCancelReply?: () => void
+  onCancelEdit?: () => void
 }
 
 const styles = StyleSheet.create({
@@ -67,8 +69,10 @@ const CommentInput = forwardRef<RNTextInput, Props>(
       onSend,
       userAvatarUrl,
       replyingTo,
+      editingComment,
       onSelectEmotion,
       onCancelReply,
+      onCancelEdit,
     },
     ref
   ) => {
@@ -82,7 +86,6 @@ const CommentInput = forwardRef<RNTextInput, Props>(
     }
 
     const handlePickImage = () => {
-      // Mock picking an image
       const mockImages = [
         'https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
         'https://images.unsplash.com/photo-1682687221038-404670e01d46?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
@@ -93,29 +96,49 @@ const CommentInput = forwardRef<RNTextInput, Props>(
       setSelectedMedia(prev => [...prev, randomImage])
     }
 
-    const removeMedia = (index: number) => {
+    const handleRemoveMedia = (index: number) => {
       setSelectedMedia(prev => prev.filter((_, i) => i !== index))
     }
 
     return (
       <YStack borderTopWidth={1} borderColor="$borderColor">
-        {/* Reply indicator */}
+        {/* Edit Indicator */}
+        {editingComment && (
+          <XStack
+            paddingHorizontal="$3"
+            paddingVertical="$2"
+            backgroundColor="#f0f0f0"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <SizableText fontSize={13} color="#666">
+              Editing comment
+            </SizableText>
+            {onCancelEdit && (
+              <TouchableOpacity onPress={onCancelEdit}>
+                <X size={16} color="#666" />
+              </TouchableOpacity>
+            )}
+          </XStack>
+        )}
+
+        {/* Reply Indicator */}
         {replyingTo && (
           <XStack
             paddingHorizontal="$3"
-            paddingVertical="$3"
+            paddingVertical="$2"
+            backgroundColor="#f0f0f0"
             alignItems="center"
             justifyContent="space-between"
-            backgroundColor="$backgroundFocus"
           >
-            <SizableText fontSize={15} fontWeight="600" color="#888">
-              Replying to {replyingTo.author.username} ...
+            <SizableText fontSize={13} color="#666">
+              Replying to {replyingTo.authorProfile.username}
             </SizableText>
-            <TouchableOpacity onPress={onCancelReply}>
-              <SizableText fontSize={15} fontWeight="700" color="#0095F6">
-                Cancel
-              </SizableText>
-            </TouchableOpacity>
+            {onCancelReply && (
+              <TouchableOpacity onPress={onCancelReply}>
+                <X size={16} color="#666" />
+              </TouchableOpacity>
+            )}
           </XStack>
         )}
 
@@ -132,7 +155,7 @@ const CommentInput = forwardRef<RNTextInput, Props>(
                 <Image source={{ uri }} style={styles.mediaPreview} />
                 <TouchableOpacity
                   style={styles.removeMediaButton}
-                  onPress={() => removeMedia(index)}
+                  onPress={() => handleRemoveMedia(index)}
                 >
                   <X size={12} color="white" />
                 </TouchableOpacity>

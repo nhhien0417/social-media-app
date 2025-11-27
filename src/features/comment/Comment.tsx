@@ -16,7 +16,9 @@ import { XStack, YStack, SizableText } from 'tamagui'
 import type { Comment } from '@/types/Comment'
 import CommentList from './components/CommentList'
 import CommentInput from './components/CommentInput'
-import { User } from '@/types/User'
+import { useCommentStore } from '@/stores/commentStore'
+import { getUserId } from '@/utils/SecureStore'
+import { useProfileStore } from '@/stores/profileStore'
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window')
 
@@ -29,9 +31,6 @@ type Props = {
   visible: boolean
   onClose: () => void
   postId: string
-  comments: Comment[]
-  onSendComment: (content?: string, media?: string[], parentId?: string) => void
-  onLikeComment: (commentId: string) => void
   userAvatarUrl?: string
 }
 
@@ -70,106 +69,48 @@ const styles = StyleSheet.create({
   },
 })
 
-const MOCK_USER: User = {
-  id: 'user-1',
-  username: 'current_user',
-  email: 'test@test.com',
-  firstName: 'Test',
-  lastName: 'User',
-  avatarUrl: 'https://i.pravatar.cc/150?img=1',
-  gender: 'male',
-  dob: '2000-01-01',
-  bio: 'Hello',
-  posts: [],
-  friendships: [],
-  friendStatus: 'NONE',
-}
-
-const MOCK_COMMENTS: Comment[] = [
-  {
-    id: '1',
-    postId: 'post-1',
-    author: {
-      ...MOCK_USER,
-      id: 'user-2',
-      username: 'alice',
-      avatarUrl: 'https://i.pravatar.cc/150?img=5',
-    },
-    content: 'This is a text only comment',
-    media: [],
-    createdAt: new Date().toISOString(),
-    likes: ['user-1'],
-  },
-  {
-    id: '2',
-    postId: 'post-1',
-    author: {
-      ...MOCK_USER,
-      id: 'user-3',
-      username: 'bob',
-      avatarUrl: 'https://i.pravatar.cc/150?img=8',
-    },
-    content: 'Check out this photo!',
-    media: [
-      'https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
-    ],
-    createdAt: new Date(Date.now() - 3600000).toISOString(),
-    likes: [],
-  },
-  {
-    id: '3',
-    postId: 'post-1',
-    author: {
-      ...MOCK_USER,
-      id: 'user-4',
-      username: 'charlie',
-      avatarUrl: 'https://i.pravatar.cc/150?img=12',
-    },
-    media: [
-      'https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
-      'https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
-    ],
-    createdAt: new Date(Date.now() - 7200000).toISOString(),
-    likes: ['user-2', 'user-3'],
-  },
-  {
-    id: '4',
-    postId: 'post-1',
-    author: {
-      ...MOCK_USER,
-      id: 'user-2',
-      username: 'alice',
-      avatarUrl: 'https://i.pravatar.cc/150?img=5',
-    },
-    content: 'Reply to text comment',
-    media: [],
-    createdAt: new Date().toISOString(),
-    parentCommentId: '1',
-    likes: [],
-  },
-]
-
 export default function Comment({
   visible,
   onClose,
   postId,
-  comments,
-  onSendComment,
-  onLikeComment,
-  userAvatarUrl = 'https://i.pravatar.cc/150?img=1',
+  userAvatarUrl,
 }: Props) {
   const [commentText, setCommentText] = useState('')
   const [replyingTo, setReplyingTo] = useState<Comment | null>(null)
+  const [editingComment, setEditingComment] = useState<Comment | null>(null)
   const [expandedComments, setExpandedComments] = useState<Set<string>>(
     new Set()
   )
+  const [currentUserId, setCurrentUserId] = useState<string | undefined>(
+    undefined
+  )
 
-  const [localComments, setLocalComments] = useState<Comment[]>(MOCK_COMMENTS)
+  const {
+    comments,
+    fetchComments,
+    addComment,
+    updateComment,
+    deleteComment,
+    likeComment,
+  } = useCommentStore()
+  const currentUser = useProfileStore(state => state.currentUser)
 
-  // Sync with props if needed, but for this task we use MOCK_COMMENTS primarily
-  // useEffect(() => {
-  //   if (comments.length > 0) setLocalComments(comments)
-  // }, [comments])
+  useEffect(() => {
+    getUserId().then(id => setCurrentUserId(id || undefined))
+  }, [])
+
+  useEffect(() => {
+    if (visible && postId) {
+      fetchComments(postId)
+    }
+  }, [visible, postId])
+
+  useEffect(() => {
+    if (editingComment) {
+      setCommentText(editingComment.content || '')
+      inputRef.current?.focus()
+    }
+  }, [editingComment])
 
   const inputRef = useRef<RNTextInput>(null)
 
@@ -219,6 +160,7 @@ export default function Comment({
       if (finished) {
         onClose()
         setReplyingTo(null)
+        setEditingComment(null)
         setCommentText('')
       }
     })
@@ -230,21 +172,16 @@ export default function Comment({
       onMoveShouldSetPanResponder: (_, g) => {
         return Math.abs(g.dy) > 10 && Math.abs(g.dy) > Math.abs(g.dx)
       },
-      onPanResponderGrant: () => {
-        // Store the current translateY value
-      },
+      onPanResponderGrant: () => {},
       onPanResponderMove: (_, g) => {
-        // Only allow downward drag
         if (g.dy > 0) {
           translateY.setValue(g.dy)
         }
       },
       onPanResponderRelease: (_, g) => {
-        // If dragged down more than 150px or fast velocity, close
         if (g.dy > 150 || g.vy > 0.5) {
           closeSheet()
         } else {
-          // Otherwise snap back to full
           Animated.spring(translateY, {
             toValue: SNAP_POINTS.FULL,
             useNativeDriver: true,
@@ -255,7 +192,6 @@ export default function Comment({
         }
       },
       onPanResponderTerminate: () => {
-        // Snap back to full on termination
         Animated.spring(translateY, {
           toValue: SNAP_POINTS.FULL,
           useNativeDriver: true,
@@ -267,27 +203,64 @@ export default function Comment({
     })
   ).current
 
-  const handleSend = (content: string, media: string[]) => {
-    // Mock adding comment
-    const newComment: Comment = {
-      id: Date.now().toString(),
-      postId,
-      author: MOCK_USER,
-      content,
-      media,
-      createdAt: new Date().toISOString(),
-      parentCommentId: replyingTo?.id,
-      likes: [],
-    }
+  const handleSend = async (content: string, media: string[]) => {
+    if (!currentUserId) return
 
-    setLocalComments(prev => [newComment, ...prev])
-    setCommentText('')
-    setReplyingTo(null)
+    try {
+      const mediaFiles = media.map((uri, index) => ({
+        uri,
+        name: `media_${index}.jpg`,
+        type: 'image/jpeg',
+      }))
+
+      if (editingComment) {
+        await updateComment(
+          {
+            commentId: editingComment.id,
+            content,
+          },
+          mediaFiles
+        )
+        setEditingComment(null)
+      } else {
+        await addComment(
+          {
+            postId,
+            authorId: currentUserId,
+            content,
+            parentCommentId: replyingTo?.id,
+          },
+          mediaFiles
+        )
+      }
+      setCommentText('')
+      setReplyingTo(null)
+    } catch (error) {
+      console.error('Failed to send comment:', error)
+    }
   }
 
   const handleReply = (comment: Comment) => {
     setReplyingTo(comment)
+    setEditingComment(null)
+    setCommentText('')
     inputRef.current?.focus()
+  }
+
+  const handleEdit = (comment: Comment) => {
+    setEditingComment(comment)
+    setReplyingTo(null)
+    setCommentText(comment.content || '')
+    inputRef.current?.focus()
+  }
+
+  const handleDelete = async (commentId: string) => {
+    if (!currentUserId) return
+    try {
+      await deleteComment(commentId)
+    } catch (error) {
+      console.error('Failed to delete comment:', error)
+    }
   }
 
   const handleViewReplies = (commentId: string) => {
@@ -307,19 +280,14 @@ export default function Comment({
     inputRef.current?.focus()
   }
 
-  const handleLike = (commentId: string) => {
-    setLocalComments(prev =>
-      prev.map(c => {
-        if (c.id === commentId) {
-          const isLiked = c.likes?.includes(MOCK_USER.id)
-          const newLikes = isLiked
-            ? c.likes?.filter(id => id !== MOCK_USER.id)
-            : [...(c.likes || []), MOCK_USER.id]
-          return { ...c, likes: newLikes }
-        }
-        return c
-      })
-    )
+  const handleLike = async (commentId: string) => {
+    if (!currentUserId) return
+    await likeComment(commentId, currentUserId)
+  }
+
+  const handleCancelEdit = () => {
+    setEditingComment(null)
+    setCommentText('')
   }
 
   if (!visible) return null
@@ -390,12 +358,14 @@ export default function Comment({
             {/* Comments List */}
             <YStack flex={1}>
               <CommentList
-                comments={localComments}
+                comments={comments}
                 onLike={handleLike}
                 onReply={handleReply}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
                 onViewReplies={handleViewReplies}
                 expandedComments={expandedComments}
-                currentUserId={MOCK_USER.id}
+                currentUserId={currentUserId}
               />
             </YStack>
 
@@ -407,10 +377,16 @@ export default function Comment({
                 value={commentText}
                 onChangeText={setCommentText}
                 onSend={handleSend}
-                userAvatarUrl={userAvatarUrl}
+                userAvatarUrl={
+                  currentUser?.avatarUrl ||
+                  userAvatarUrl ||
+                  'https://i.pravatar.cc/150?img=1'
+                }
                 replyingTo={replyingTo}
+                editingComment={editingComment}
                 onSelectEmotion={handleSelectEmotion}
                 onCancelReply={() => setReplyingTo(null)}
+                onCancelEdit={handleCancelEdit}
               />
             </YStack>
           </KeyboardAvoidingView>

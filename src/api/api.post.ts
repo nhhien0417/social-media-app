@@ -74,6 +74,33 @@ export type GetCommentResponse = {
   message: string
   data: Comment[]
 }
+
+export type CreateCommentRequest = {
+  postId: string
+  authorId: string
+  parentCommentId?: string
+  content?: string
+}
+
+export type CreateCommnetResponse = {
+  statusCode: number
+  error: null | string
+  message: string
+  data: Comment
+}
+
+export type UpdateCommentRequest = {
+  commentId: string
+  content?: string
+}
+
+export type UpdateCommentResponse = {
+  statusCode: number
+  error: null | string
+  message: string
+  data: Comment
+}
+
 export type LikeCommentRequest = {
   commentId: string
   userId: string
@@ -247,6 +274,121 @@ export const getCommentApi = (postId: string) => {
   return ApiClient.get<GetCommentResponse>(ENDPOINTS.POSTS.COMMENT_GET(postId))
 }
 
+export const createCommentApi = (
+  data: CreateCommentRequest,
+  mediaFiles?: Array<{ uri: string; name: string; type: string }>
+): Promise<CreateCommnetResponse> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const formData = new FormData()
+
+      formData.append('comment', JSON.stringify(data))
+
+      if (mediaFiles && mediaFiles.length > 0) {
+        mediaFiles.forEach(file => {
+          if (file.uri.startsWith('data:')) {
+            const blob = dataURItoBlob(file.uri)
+            formData.append('media', blob, file.name)
+          } else {
+            formData.append('media', {
+              uri: file.uri,
+              name: file.name,
+              type: file.type,
+            } as any)
+          }
+        })
+      }
+
+      const token = await getAccessToken()
+      const xhr = new XMLHttpRequest()
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const response = JSON.parse(xhr.responseText)
+            resolve(response)
+          } catch (e) {
+            reject(new Error('Invalid JSON response'))
+          }
+        } else {
+          reject(new Error(`HTTP ${xhr.status}: ${xhr.responseText}`))
+        }
+      }
+
+      xhr.onerror = () => {
+        reject(new Error('Network error'))
+      }
+
+      xhr.open('POST', `${API_BASE_URL}/${ENDPOINTS.POSTS.COMMENT_CREATE}`)
+
+      if (token) {
+        xhr.setRequestHeader('Authorization', `Bearer ${token}`)
+      }
+
+      xhr.send(formData)
+    } catch (error) {
+      reject(error)
+    }
+  })
+}
+
+export const updateCommentApi = (
+  data: UpdateCommentRequest,
+  mediaFiles?: Array<{ uri: string; name: string; type: string }>
+): Promise<UpdateCommentResponse> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const formData = new FormData()
+
+      formData.append('comment', JSON.stringify(data))
+
+      if (mediaFiles && mediaFiles.length > 0) {
+        mediaFiles.forEach(file => {
+          if (file.uri.startsWith('data:')) {
+            const blob = dataURItoBlob(file.uri)
+            formData.append('media', blob, file.name)
+          } else {
+            formData.append('media', {
+              uri: file.uri,
+              name: file.name,
+              type: file.type,
+            } as any)
+          }
+        })
+      }
+
+      const token = await getAccessToken()
+      const xhr = new XMLHttpRequest()
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const response = JSON.parse(xhr.responseText)
+            resolve(response)
+          } catch (e) {
+            reject(new Error('Invalid JSON response'))
+          }
+        } else {
+          reject(new Error(`HTTP ${xhr.status}: ${xhr.responseText}`))
+        }
+      }
+
+      xhr.onerror = () => {
+        reject(new Error('Network error'))
+      }
+
+      xhr.open('PUT', `${API_BASE_URL}/${ENDPOINTS.POSTS.COMMENT_UPDATE}`)
+
+      if (token) {
+        xhr.setRequestHeader('Authorization', `Bearer ${token}`)
+      }
+
+      xhr.send(formData)
+    } catch (error) {
+      reject(error)
+    }
+  })
+}
 
 export const deleteCommentApi = (commentId: string) => {
   return ApiClient.delete<string>(ENDPOINTS.POSTS.COMMENT_DELETE(commentId))

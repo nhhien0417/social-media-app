@@ -10,6 +10,8 @@ type Props = {
   onLike: (commentId: string) => void
   onReply: (comment: Comment) => void
   onViewReplies: (commentId: string) => void
+  onEdit?: (comment: Comment) => void
+  onDelete?: (commentId: string) => void
   currentUserId?: string
 }
 
@@ -19,6 +21,8 @@ export default function CommentList({
   onLike,
   onReply,
   onViewReplies,
+  onEdit,
+  onDelete,
   currentUserId,
 }: Props) {
   const topLevelComments = comments.filter(c => !c.parentCommentId)
@@ -50,10 +54,13 @@ export default function CommentList({
               onLike={onLike}
               onReply={onReply}
               onViewReplies={onViewReplies}
+              onEdit={onEdit}
+              onDelete={onDelete}
               isExpanded={isExpanded}
               replyCount={replyCount}
               likeCount={likeCount}
               isLiked={isLiked}
+              currentUserId={currentUserId}
             />
             {/* Render replies */}
             {replies.length > 0 && isExpanded && (
@@ -69,9 +76,12 @@ export default function CommentList({
                       onLike={onLike}
                       onReply={onReply}
                       onViewReplies={onViewReplies}
+                      onEdit={onEdit}
+                      onDelete={onDelete}
                       isReply
                       likeCount={replyLikeCount}
                       isLiked={replyIsLiked}
+                      currentUserId={currentUserId}
                     />
                   )
                 })}
