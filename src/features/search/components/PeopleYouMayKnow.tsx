@@ -78,11 +78,16 @@ export const PeopleYouMayKnow = memo(function PeopleYouMayKnow({
     } catch {}
   }
 
-  const handleNavigateToProfile = (userId: string) => {
-    router.push({
-      pathname: '/profile/[id]',
-      params: { id: userId },
-    })
+  const handleNavigateToProfile = async (userId: string) => {
+    const currentUserId = await getUserId()
+    if (currentUserId && userId === currentUserId) {
+      router.push('/(tabs)/profile')
+    } else {
+      router.push({
+        pathname: '/profile/[id]',
+        params: { id: userId },
+      })
+    }
   }
 
   if (loading) {

@@ -24,6 +24,7 @@ import { router } from 'expo-router'
 import PostOptionsSheet from './PostOptionsSheet'
 import DeleteConfirmModal from './DeleteConfirmModal'
 import { formatNumber } from '@/utils/FormatNumber'
+import LikeListModal from '@/features/like/LikeListModal'
 
 function MediaItem({ url, width }: { url: string; width: number }) {
   return <Image source={{ uri: url }} width={width} aspectRatio={1} />
@@ -75,6 +76,7 @@ function PostCard({ post }: { post: Post }) {
   const [deleteModalVisible, setDeleteModalVisible] = useState(false)
   const [isLiked, setIsLiked] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [likeListVisible, setLikeListVisible] = useState(false)
 
   const isOwner = currentUserId === author.id
 
@@ -252,7 +254,13 @@ function PostCard({ post }: { post: Post }) {
               onPress={handleLikePost}
             />
             {post.likes && post.likes.length > 0 && (
-              <Text fontSize={13} fontWeight="600" marginLeft={-4}>
+              <Text
+                fontSize={13}
+                fontWeight="600"
+                marginLeft={-4}
+                onPress={() => setLikeListVisible(true)}
+                suppressHighlighting
+              >
                 {formatNumber(post.likes.length)}
               </Text>
             )}
@@ -274,6 +282,7 @@ function PostCard({ post }: { post: Post }) {
         </XStack>
         <ButtonIcon Icon={Bookmark} />
       </XStack>
+
       {/* Time */}
       <Text
         paddingHorizontal="$3"
@@ -284,6 +293,7 @@ function PostCard({ post }: { post: Post }) {
       >
         {formatDate(createdAt)}
       </Text>
+
       {/* Comment Sheet */}
       <Comment
         visible={commentSheetVisible}
@@ -291,6 +301,7 @@ function PostCard({ post }: { post: Post }) {
         postId={post.id}
         userAvatarUrl={author.avatarUrl || undefined}
       />
+
       <PostOptionsSheet
         visible={optionsSheetVisible}
         onClose={() => setOptionsSheetVisible(false)}
@@ -298,11 +309,18 @@ function PostCard({ post }: { post: Post }) {
         onDelete={handleDelete}
         isOwner={isOwner}
       />
+
       <DeleteConfirmModal
         visible={deleteModalVisible}
         onClose={() => setDeleteModalVisible(false)}
         postId={post.id}
         thumbnailUrl={media[0]}
+      />
+
+      <LikeListModal
+        visible={likeListVisible}
+        onClose={() => setLikeListVisible(false)}
+        postId={post.id}
       />
     </YStack>
   )

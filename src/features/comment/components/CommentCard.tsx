@@ -7,6 +7,7 @@ import Avatar from '@/components/Avatar'
 import { formatDate } from '@/utils/FormatDate'
 import CommentOptionsSheet from './CommentOptionsSheet'
 import CommentDeleteConfirmModal from './CommentDeleteConfirmModal'
+import { router } from 'expo-router'
 
 type Props = {
   comment: Comment
@@ -106,6 +107,17 @@ export default function CommentCard({
     }
   }
 
+  const handleNavigateToProfile = () => {
+    if (currentUserId && comment.authorProfile?.id === currentUserId) {
+      router.push('/(tabs)/profile')
+    } else {
+      router.push({
+        pathname: '/profile/[id]',
+        params: { id: comment.authorProfile?.id || '' },
+      })
+    }
+  }
+
   return (
     <>
       <Pressable
@@ -122,17 +134,21 @@ export default function CommentCard({
           marginVertical="$2"
         >
           <XStack gap="$3">
-            <Avatar
-              uri={comment.authorProfile?.avatarUrl || undefined}
-              size={35}
-            />
+            <TouchableOpacity onPress={handleNavigateToProfile}>
+              <Avatar
+                uri={comment.authorProfile?.avatarUrl || undefined}
+                size={35}
+              />
+            </TouchableOpacity>
 
             <YStack flex={1} marginTop={-5} gap="$1">
               {/* Username and time */}
               <XStack alignItems="center" gap="$2">
-                <SizableText fontSize={14} color="$color" fontWeight="600">
-                  {comment.authorProfile?.username || 'Unknown User'}
-                </SizableText>
+                <TouchableOpacity onPress={handleNavigateToProfile}>
+                  <SizableText fontSize={14} color="$color" fontWeight="600">
+                    {comment.authorProfile?.username || 'Unknown User'}
+                  </SizableText>
+                </TouchableOpacity>
                 <SizableText fontSize={12} color="#888">
                   {formatDate(comment.createdAt)}
                 </SizableText>
@@ -165,7 +181,6 @@ export default function CommentCard({
                 )}
               </XStack>
             </YStack>
-
             {/* Like button */}
             <YStack alignItems="center">
               <TouchableOpacity onPress={() => onLike(comment.id)}>
