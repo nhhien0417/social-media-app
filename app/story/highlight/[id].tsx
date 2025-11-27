@@ -13,7 +13,10 @@ export default function HighlightScreen() {
 
   useEffect(() => {
     console.log('HighlightScreen params:', { id, username, avatarUrl })
-    console.log('Available highlights:', profileMock.highlights.map(h => h.id))
+    console.log(
+      'Available highlights:',
+      profileMock.highlights.map(h => h.id)
+    )
   }, [id, username, avatarUrl])
 
   // Find the highlight from mock data
@@ -21,7 +24,12 @@ export default function HighlightScreen() {
 
   useEffect(() => {
     if (highlight) {
-      console.log('Found highlight:', highlight.label, 'Stories:', highlight.stories?.length)
+      console.log(
+        'Found highlight:',
+        highlight.label,
+        'Stories:',
+        highlight.stories?.length
+      )
     } else {
       console.log('Highlight not found for id:', id)
     }
@@ -29,7 +37,12 @@ export default function HighlightScreen() {
 
   if (!id) {
     return (
-      <YStack flex={1} alignItems="center" justifyContent="center" backgroundColor="#000">
+      <YStack
+        flex={1}
+        alignItems="center"
+        justifyContent="center"
+        backgroundColor="#000"
+      >
         <Text color="white">No highlight ID provided</Text>
       </YStack>
     )
@@ -37,7 +50,12 @@ export default function HighlightScreen() {
 
   if (!highlight) {
     return (
-      <YStack flex={1} alignItems="center" justifyContent="center" backgroundColor="#000">
+      <YStack
+        flex={1}
+        alignItems="center"
+        justifyContent="center"
+        backgroundColor="#000"
+      >
         <Text color="white">Highlight not found: {id}</Text>
       </YStack>
     )
@@ -45,7 +63,12 @@ export default function HighlightScreen() {
 
   if (!highlight.stories || highlight.stories.length === 0) {
     return (
-      <YStack flex={1} alignItems="center" justifyContent="center" backgroundColor="#000">
+      <YStack
+        flex={1}
+        alignItems="center"
+        justifyContent="center"
+        backgroundColor="#000"
+      >
         <Text color="white">No stories in this highlight</Text>
       </YStack>
     )

@@ -22,10 +22,14 @@ const STORY_DURATION = 5000 // 5 seconds per story
 function formatTimestamp(timestamp: string): string {
   const now = new Date()
   const storyTime = new Date(timestamp)
-  const diffInHours = Math.floor((now.getTime() - storyTime.getTime()) / (1000 * 60 * 60))
-  
+  const diffInHours = Math.floor(
+    (now.getTime() - storyTime.getTime()) / (1000 * 60 * 60)
+  )
+
   if (diffInHours < 1) {
-    const diffInMinutes = Math.floor((now.getTime() - storyTime.getTime()) / (1000 * 60))
+    const diffInMinutes = Math.floor(
+      (now.getTime() - storyTime.getTime()) / (1000 * 60)
+    )
     if (diffInMinutes < 1) return 'Just now'
     return `${diffInMinutes}m ago`
   } else if (diffInHours < 24) {
