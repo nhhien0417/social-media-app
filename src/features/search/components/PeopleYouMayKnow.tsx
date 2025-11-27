@@ -14,6 +14,8 @@ import { Check, UserPlus } from '@tamagui/lucide-icons'
 import { addFriendApi, getAllProfilesApi } from '@/api/api.profile'
 import { getUserId } from '@/utils/SecureStore'
 import { User } from '@/types/User'
+import { router } from 'expo-router'
+import { Pressable } from 'react-native'
 
 interface PeopleYouMayKnowProps {
   onAddFriend?: (user: User) => void
@@ -76,6 +78,13 @@ export const PeopleYouMayKnow = memo(function PeopleYouMayKnow({
     } catch {}
   }
 
+  const handleNavigateToProfile = (userId: string) => {
+    router.push({
+      pathname: '/profile/[id]',
+      params: { id: userId },
+    })
+  }
+
   if (loading) {
     return (
       <YStack gap="$3" alignItems="center" padding="$4">
@@ -110,26 +119,38 @@ export const PeopleYouMayKnow = memo(function PeopleYouMayKnow({
       <YStack gap="$3">
         {users.map(user => (
           <XStack key={user.id} gap="$3" alignItems="center">
-            <Avatar size="$5">
-              <AvatarImage />
-              <AvatarFallback backgroundColor={isDark ? '#1f2937' : '#e5e7eb'}>
-                <Text fontWeight="700" color={titleColor}>
-                  {user.id?.toUpperCase() ?? 'U'}
-                </Text>
-              </AvatarFallback>
-            </Avatar>
+            <Pressable
+              onPress={() => handleNavigateToProfile(user.id)}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 12,
+                flex: 1,
+              }}
+            >
+              <Avatar size="$5">
+                <AvatarImage />
+                <AvatarFallback
+                  backgroundColor={isDark ? '#1f2937' : '#e5e7eb'}
+                >
+                  <Text fontWeight="700" color={titleColor}>
+                    {user.id?.toUpperCase() ?? 'U'}
+                  </Text>
+                </AvatarFallback>
+              </Avatar>
 
-            <YStack flex={1} gap="$1">
-              <Text fontSize="$4" fontWeight="600" color={titleColor}>
-                {user.email}
-              </Text>
-              <Text fontSize="$3" color={subtitleColor}>
-                {user.lastName}
-              </Text>
-              <Text fontSize="$2" color={subtitleColor}>
-                {user.dob} mutual friends
-              </Text>
-            </YStack>
+              <YStack flex={1} gap="$1">
+                <Text fontSize="$4" fontWeight="600" color={titleColor}>
+                  {user.email}
+                </Text>
+                <Text fontSize="$3" color={subtitleColor}>
+                  {user.lastName}
+                </Text>
+                <Text fontSize="$2" color={subtitleColor}>
+                  {user.dob} mutual friends
+                </Text>
+              </YStack>
+            </Pressable>
 
             <Button
               size="$3"
