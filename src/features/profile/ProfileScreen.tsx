@@ -169,7 +169,11 @@ export default function ProfileScreen({ userId }: ProfileScreenProps) {
           />
           <ProfileBio user={displayUser} isOwnProfile={isOwnProfile} />
           <ProfileActions user={displayUser} isOwnProfile={isOwnProfile} />
-          <StoryHighlights highlights={profileMock.highlights} />
+          <StoryHighlights
+            highlights={profileMock.highlights}
+            username={displayUser.username}
+            avatarUrl={displayUser.avatarUrl}
+          />
           <ProfileTabBar value={tab} onChange={setTab} />
           <MediaGrid
             items={filteredPosts}

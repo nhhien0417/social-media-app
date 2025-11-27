@@ -1,16 +1,21 @@
 import { memo } from 'react'
-import { ScrollView, StyleSheet, Image } from 'react-native'
+import { ScrollView, StyleSheet, Image, Pressable } from 'react-native'
 import { Text, YStack, useThemeName } from 'tamagui'
 import { LinearGradient } from 'expo-linear-gradient'
+import { router } from 'expo-router'
 import type { ProfileHighlight } from '../../../mock/profile'
 import { INSTAGRAM_GRADIENT } from '@/utils/InstagramGradient'
 
 interface StoryHighlightsProps {
   highlights: ProfileHighlight[]
+  username?: string
+  avatarUrl?: string
 }
 
 export const StoryHighlights = memo(function StoryHighlights({
   highlights,
+  username,
+  avatarUrl,
 }: StoryHighlightsProps) {
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
@@ -22,6 +27,17 @@ export const StoryHighlights = memo(function StoryHighlights({
     return null
   }
 
+  const handleHighlightPress = (highlight: ProfileHighlight) => {
+    router.push({
+      pathname: '/story/highlight/[id]',
+      params: {
+        id: highlight.id,
+        username: username || 'User',
+        avatarUrl: avatarUrl || '',
+      },
+    })
+  }
+
   return (
     <ScrollView
       horizontal
@@ -29,44 +45,46 @@ export const StoryHighlights = memo(function StoryHighlights({
       contentContainerStyle={{ paddingHorizontal: 12, gap: 16 }}
     >
       {highlights.map(item => (
-        <YStack key={item.id} alignItems="center" gap="$2">
-          <LinearGradient
-            colors={INSTAGRAM_GRADIENT}
-            start={{ x: 0, y: 0.35 }}
-            end={{ x: 1, y: 0.65 }}
-            style={styles.highlightRing}
-          >
-            <YStack
-              style={[
-                styles.highlightInner,
-                { backgroundColor: ringBackground },
-              ]}
+        <Pressable key={item.id} onPress={() => handleHighlightPress(item)}>
+          <YStack alignItems="center" gap="$2">
+            <LinearGradient
+              colors={INSTAGRAM_GRADIENT}
+              start={{ x: 0, y: 0.35 }}
+              end={{ x: 1, y: 0.65 }}
+              style={styles.highlightRing}
             >
-              <YStack style={styles.highlightImageWrapper}>
-                {item.coverImage ? (
-                  <Image
-                    source={{ uri: item.coverImage }}
-                    style={styles.highlightImage}
-                  />
-                ) : (
-                  <YStack
-                    flex={1}
-                    alignItems="center"
-                    justifyContent="center"
-                    backgroundColor={fallbackBackground}
-                  >
-                    <Text fontSize="$3" fontWeight="600" color="#f8fafc">
-                      {item.label[0]?.toUpperCase() ?? 'S'}
-                    </Text>
-                  </YStack>
-                )}
+              <YStack
+                style={[
+                  styles.highlightInner,
+                  { backgroundColor: ringBackground },
+                ]}
+              >
+                <YStack style={styles.highlightImageWrapper}>
+                  {item.coverImage ? (
+                    <Image
+                      source={{ uri: item.coverImage }}
+                      style={styles.highlightImage}
+                    />
+                  ) : (
+                    <YStack
+                      flex={1}
+                      alignItems="center"
+                      justifyContent="center"
+                      backgroundColor={fallbackBackground}
+                    >
+                      <Text fontSize="$3" fontWeight="600" color="#f8fafc">
+                        {item.label[0]?.toUpperCase() ?? 'S'}
+                      </Text>
+                    </YStack>
+                  )}
+                </YStack>
               </YStack>
-            </YStack>
-          </LinearGradient>
-          <Text fontSize="$2" color={labelColor}>
-            {item.label}
-          </Text>
-        </YStack>
+            </LinearGradient>
+            <Text fontSize="$2" color={labelColor}>
+              {item.label}
+            </Text>
+          </YStack>
+        </Pressable>
       ))}
     </ScrollView>
   )
