@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { Post } from '@/types/Post'
+import { User } from '@/types/User'
 import {
   getFeedApi,
   getPostDetailApi,
@@ -13,6 +14,7 @@ import {
   UpdatePostResponse,
   LikePostRequest,
   LikePostResponse,
+  getUserLikesApi,
 } from '@/api/api.post'
 import {
   addPostToStores,
@@ -40,6 +42,7 @@ interface PostState {
   updatePost: (data: UpdatePostRequest) => Promise<UpdatePostResponse>
   deletePost: (postId: string) => Promise<void>
   likePost: (data: LikePostRequest) => Promise<LikePostResponse>
+  getUserLikes: (postId: string) => Promise<User[]>
 }
 
 export const usePostStore = create<PostState>((set, get) => ({
@@ -148,6 +151,17 @@ export const usePostStore = create<PostState>((set, get) => ({
       if (snapshot) {
         await restorePostSnapshot(snapshot)
       }
+      throw error
+    }
+  },
+
+  getUserLikes: async (postId: string) => {
+    try {
+      const response = await getUserLikesApi(postId)
+      console.log('Successful get user likes:', response)
+      return response.data
+    } catch (error) {
+      console.error('Error getting user likes:', error)
       throw error
     }
   },

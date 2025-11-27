@@ -4,6 +4,7 @@ import { Post, PostPrivacy } from '@/types/Post'
 import { getAccessToken } from '@/utils/SecureStore'
 import { API_BASE_URL } from './axios.config'
 import { Comment } from '@/types/Comment'
+import { User } from '@/types/User'
 
 export type GetFeedResponse = {
   statusCode: number
@@ -66,6 +67,13 @@ export type LikePostResponse = {
   error: null | string
   message: string
   data: Post
+}
+
+export type GetUserLikesResponse = {
+  statusCode: number
+  error: null | string
+  message: string
+  data: User[]
 }
 
 export type GetCommentResponse = {
@@ -268,6 +276,12 @@ export const deletePostApi = (postId: string) => {
 
 export const likePostApi = (data: LikePostRequest) => {
   return ApiClient.post<LikePostResponse>(ENDPOINTS.POSTS.POST_LIKE, data)
+}
+
+export const getUserLikesApi = (postId: string) => {
+  return ApiClient.get<GetUserLikesResponse>(
+    ENDPOINTS.POSTS.POST_USERLIKES(postId)
+  )
 }
 
 export const getCommentApi = (postId: string) => {

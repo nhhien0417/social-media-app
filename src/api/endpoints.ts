@@ -24,6 +24,7 @@ export const ENDPOINTS = {
     POST_UPDATE: 'post/update-post',
     POST_DELETE: (id: string | number) => `post/delete-post/${id}`,
     POST_LIKE: 'post/like-post',
+    POST_USERLIKES: (id: string | number) => `post/userlikes/${id}`,
 
     COMMENT_GET: (postId: string | number) => `post/comments/${postId}`,
     COMMENT_CREATE: 'post/comments',
