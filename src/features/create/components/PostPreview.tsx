@@ -352,7 +352,10 @@ export default function PostPreview({
         onRequestClose={() => setShowPrivacyModal(false)}
       >
         <TouchableOpacity
-          style={[styles.privacyOverlay, { backgroundColor: modalOverlayColor }]}
+          style={[
+            styles.privacyOverlay,
+            { backgroundColor: modalOverlayColor },
+          ]}
           activeOpacity={1}
           onPress={() => setShowPrivacyModal(false)}
         >
