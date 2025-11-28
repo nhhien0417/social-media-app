@@ -15,12 +15,15 @@ import {
   Settings,
   Share2,
   Bell,
+  Search,
 } from '@tamagui/lucide-icons'
 import { router } from 'expo-router'
 import { formatNumber } from '@/utils/FormatNumber'
 import { Group } from '@/types/Group'
 import PostCard from '../feed/components/PostCard'
 import { groupPosts } from '@/mock/groupPosts'
+import { GroupNotificationSheet } from './components/GroupNotificationSheet'
+import { GroupSearchModal } from './components/GroupSearchModal'
 
 type GroupTab = 'discussion' | 'members' | 'about'
 
@@ -31,6 +34,9 @@ interface GroupDetailScreenProps {
 export default function GroupDetailScreen({ groupId }: GroupDetailScreenProps) {
   const [activeTab, setActiveTab] = useState<GroupTab>('discussion')
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [notificationSheetVisible, setNotificationSheetVisible] =
+    useState(false)
+  const [searchModalVisible, setSearchModalVisible] = useState(false)
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
 
@@ -130,33 +136,33 @@ export default function GroupDetailScreen({ groupId }: GroupDetailScreenProps) {
 
               {/* Sample members */}
               {[1, 2, 3, 4, 5].map(i => (
-                <XStack
+                <Pressable
                   key={i}
-                  paddingVertical="$2"
-                  alignItems="center"
-                  gap="$3"
+                  onPress={() => router.push(`/profile/user-${i}`)}
                 >
-                  <YStack
-                    width={48}
-                    height={48}
-                    borderRadius={24}
-                    backgroundColor={subtitleColor}
-                    alignItems="center"
-                    justifyContent="center"
-                  >
-                    <Text fontSize={18} fontWeight="600" color="#fff">
-                      M{i}
-                    </Text>
-                  </YStack>
-                  <YStack flex={1}>
-                    <Text fontSize={15} fontWeight="600" color={textColor}>
-                      Member {i}
-                    </Text>
-                    <Text fontSize={13} color={subtitleColor}>
-                      Joined 2 weeks ago
-                    </Text>
-                  </YStack>
-                </XStack>
+                  <XStack paddingVertical="$2" alignItems="center" gap="$3">
+                    <YStack
+                      width={48}
+                      height={48}
+                      borderRadius={24}
+                      backgroundColor={subtitleColor}
+                      alignItems="center"
+                      justifyContent="center"
+                    >
+                      <Text fontSize={18} fontWeight="600" color="#fff">
+                        M{i}
+                      </Text>
+                    </YStack>
+                    <YStack flex={1}>
+                      <Text fontSize={15} fontWeight="600" color={textColor}>
+                        Member {i}
+                      </Text>
+                      <Text fontSize={13} color={subtitleColor}>
+                        Joined 2 weeks ago
+                      </Text>
+                    </YStack>
+                  </XStack>
+                </Pressable>
               ))}
             </YStack>
           </YStack>
@@ -236,7 +242,13 @@ export default function GroupDetailScreen({ groupId }: GroupDetailScreenProps) {
           </Text>
         </XStack>
         <XStack gap="$2">
-          <Pressable hitSlop={8}>
+          <Pressable hitSlop={8} onPress={() => setSearchModalVisible(true)}>
+            <Search size={22} color={textColor} />
+          </Pressable>
+          <Pressable
+            hitSlop={8}
+            onPress={() => setNotificationSheetVisible(true)}
+          >
             <Bell size={22} color={textColor} />
           </Pressable>
           <Pressable hitSlop={8}>
@@ -357,6 +369,21 @@ export default function GroupDetailScreen({ groupId }: GroupDetailScreenProps) {
         {/* Tab Content */}
         {renderTabContent()}
       </ScrollView>
+
+      {/* Modals */}
+      <GroupNotificationSheet
+        visible={notificationSheetVisible}
+        onClose={() => setNotificationSheetVisible(false)}
+        isDark={isDark}
+        groupName={group.name}
+      />
+
+      <GroupSearchModal
+        visible={searchModalVisible}
+        onClose={() => setSearchModalVisible(false)}
+        isDark={isDark}
+        groupName={group.name}
+      />
     </YStack>
   )
 }
