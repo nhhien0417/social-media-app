@@ -37,94 +37,109 @@ export function GroupCard({
     router.push(`/group/${group.id}`)
   }
 
+  const cardBackground = isDark ? '#1a1a1a' : '#ffffff'
+  const borderColor = isDark ? '#2a2a2a' : '#e5e7eb'
+
   return (
-    <YStack paddingHorizontal="$4" paddingVertical="$3" gap="$3">
-      <XStack alignItems="center" gap="$3">
-        <Pressable onPress={handleNavigateToGroup}>
+    <Pressable onPress={handleNavigateToGroup}>
+      <YStack
+        paddingHorizontal="$4"
+        paddingVertical="$3.5"
+        gap="$2.5"
+        marginHorizontal="$3"
+        marginVertical="$1.5"
+        backgroundColor={cardBackground}
+        borderRadius={12}
+        borderColor={borderColor}
+        borderWidth={1}
+      >
+        <XStack alignItems="center" gap="$3">
           <YStack style={styles.avatar}>
             <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
           </YStack>
-        </Pressable>
 
-        <Pressable style={{ flex: 1 }} onPress={handleNavigateToGroup}>
-          <YStack gap="$1">
+          <YStack flex={1} gap="$1.5">
             <XStack alignItems="center" gap="$2">
-              <Text fontSize={14} fontWeight="600" color={textColor}>
+              <Text fontSize={15} fontWeight="700" color={textColor}>
                 {group.name}
               </Text>
               {group.privacy === 'PRIVATE' && (
-                <Lock size={14} color={subtitleColor} />
+                <Lock size={15} color={subtitleColor} />
               )}
             </XStack>
-            <XStack alignItems="center" gap="$1">
-              <Users size={13} color={subtitleColor} />
-              <Text fontSize={13} color={subtitleColor}>
+            <XStack alignItems="center" gap="$1.5">
+              <Users size={14} color={subtitleColor} />
+              <Text fontSize={13} color={subtitleColor} fontWeight="500">
                 {formatNumber(group.memberCount)} members
               </Text>
             </XStack>
           </YStack>
-        </Pressable>
 
-        {/* JOINED GROUP - No buttons needed */}
-        {type === 'joined' && null}
+          {/* PENDING REQUEST */}
+          {type === 'pending' && (
+            <Button
+              size="$3"
+              backgroundColor={isDark ? 'rgba(255,255,255,0.1)' : '#efefef'}
+              color={textColor}
+              borderRadius={10}
+              paddingHorizontal="$4"
+              fontWeight="600"
+              fontSize={13}
+              pressStyle={{ opacity: 0.8, scale: 0.97 }}
+              onPress={e => {
+                e.stopPropagation()
+                onCancelRequest?.(group.id)
+              }}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+          )}
 
-        {/* PENDING REQUEST */}
-        {type === 'pending' && (
-          <Button
-            size="$3"
-            backgroundColor={isDark ? 'rgba(255,255,255,0.1)' : '#efefef'}
-            color={textColor}
-            borderRadius={8}
-            paddingHorizontal="$4"
-            fontWeight="600"
-            fontSize={14}
-            pressStyle={{ opacity: 0.8 }}
-            onPress={() => onCancelRequest?.(group.id)}
-            disabled={isLoading}
+          {/* SUGGESTION */}
+          {type === 'suggestion' && (
+            <Button
+              size="$3"
+              backgroundColor="#0095F6"
+              color="#ffffff"
+              borderRadius={10}
+              paddingHorizontal="$4"
+              fontWeight="600"
+              fontSize={13}
+              pressStyle={{ opacity: 0.9, scale: 0.97 }}
+              onPress={e => {
+                e.stopPropagation()
+                onJoinGroup?.(group.id)
+              }}
+              disabled={isLoading}
+            >
+              Join
+            </Button>
+          )}
+        </XStack>
+
+        {/* Group Description */}
+        {group.description && (
+          <Text
+            fontSize={13}
+            color={subtitleColor}
+            numberOfLines={2}
+            lineHeight={18}
+            marginTop="$1"
           >
-            Cancel
-          </Button>
+            {group.description}
+          </Text>
         )}
-
-        {/* SUGGESTION */}
-        {type === 'suggestion' && (
-          <Button
-            size="$3"
-            backgroundColor="#0095F6"
-            color="#ffffff"
-            borderRadius={8}
-            paddingHorizontal="$4"
-            fontWeight="600"
-            fontSize={14}
-            pressStyle={{ opacity: 0.8 }}
-            onPress={() => onJoinGroup?.(group.id)}
-            disabled={isLoading}
-          >
-            Join
-          </Button>
-        )}
-      </XStack>
-
-      {/* Group Description */}
-      {group.description && (
-        <Text
-          fontSize={13}
-          color={subtitleColor}
-          numberOfLines={2}
-          paddingLeft="$14"
-        >
-          {group.description}
-        </Text>
-      )}
-    </YStack>
+      </YStack>
+    </Pressable>
   )
 }
 
 const styles = StyleSheet.create({
   avatar: {
-    width: 54,
-    height: 54,
-    borderRadius: 8,
+    width: 60,
+    height: 60,
+    borderRadius: 12,
     overflow: 'hidden',
   },
   avatarImage: {

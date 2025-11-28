@@ -64,6 +64,7 @@ type Props = {
   privacy: PrivacyOption
   onChangePrivacy: (value: PrivacyOption) => void
   showCaption?: boolean
+  groupName?: string
 }
 
 const privacyOptions: DropdownOption[] = [
@@ -96,6 +97,7 @@ export default function PostPreview({
   privacy,
   onChangePrivacy,
   showCaption = true,
+  groupName,
 }: Props) {
   const [showPrivacyModal, setShowPrivacyModal] = useState(false)
   const [fullscreenMedia, setFullscreenMedia] = useState<MediaItem | null>(null)
@@ -111,10 +113,12 @@ export default function PostPreview({
   const chipBorder = isDark ? 'rgba(255,255,255,0.14)' : '#dbeafe'
   const mutedTextColor = isDark ? 'rgba(255,255,255,0.68)' : '#6b7280'
   const overlayColor = 'rgba(0,0,0,0.65)'
+  const modalBackground = isDark ? '#242526' : '#ffffff'
   const modalBorderColor = isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0'
   const modalTitleColor = isDark ? '#f7f7f8' : '#0f172a'
   const modalSubtitleColor = isDark ? 'rgba(209,213,219,0.78)' : '#475569'
   const modalShadowColor = isDark ? 'rgba(0,0,0,0.85)' : 'rgba(15,23,42,0.12)'
+  const modalOverlayColor = isDark ? 'rgba(0,0,0,0.85)' : 'rgba(0,0,0,0.7)'
   const privacyOptionActiveBackground = isDark
     ? 'rgba(0,149,246,0.18)'
     : '#eff6ff'
@@ -167,9 +171,20 @@ export default function PostPreview({
               <SizableText size="$4" fontWeight="700">
                 {user.name}
               </SizableText>
-              <Text fontSize={12} color={mutedTextColor}>
-                {selectedOption.explanation}
-              </Text>
+              {groupName ? (
+                <XStack alignItems="center" gap="$1.5">
+                  <Text fontSize={12} fontWeight="500" color={mutedTextColor}>
+                    Posting in
+                  </Text>
+                  <Text fontSize={12} fontWeight="700" color={accentColor}>
+                    {groupName}
+                  </Text>
+                </XStack>
+              ) : (
+                <Text fontSize={12} color={mutedTextColor}>
+                  {selectedOption.explanation}
+                </Text>
+              )}
             </YStack>
 
             <Button
@@ -337,13 +352,13 @@ export default function PostPreview({
         onRequestClose={() => setShowPrivacyModal(false)}
       >
         <TouchableOpacity
-          style={styles.privacyOverlay}
+          style={[styles.privacyOverlay, { backgroundColor: modalOverlayColor }]}
           activeOpacity={1}
           onPress={() => setShowPrivacyModal(false)}
         >
           <YStack
             width="100%"
-            backgroundColor="$backgroundModal"
+            backgroundColor={modalBackground}
             borderRadius={24}
             padding="$4"
             gap="$3"
@@ -513,7 +528,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-end',
     padding: 20,
-    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   fullscreenBackdrop: {
     flex: 1,

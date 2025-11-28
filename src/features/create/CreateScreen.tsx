@@ -25,6 +25,8 @@ export default function NewPostScreen() {
   const params = useLocalSearchParams<{
     mode?: CreateMode
     editPostId?: string
+    groupId?: string
+    groupName?: string
   }>()
   const {
     startPosting,
@@ -297,7 +299,7 @@ export default function NewPostScreen() {
       const postData = {
         userId: currentUser.id,
         content: caption.trim() || undefined,
-        groupId: undefined,
+        groupId: params.groupId || undefined,
         privacy: privacyMap[privacy],
         media:
           media.length > 0
@@ -402,6 +404,7 @@ export default function NewPostScreen() {
             privacy={privacy}
             onChangePrivacy={setPrivacy}
             showCaption={mode === 'post'}
+            groupName={params.groupName}
           />
         </ScrollView>
 

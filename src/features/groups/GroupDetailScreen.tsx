@@ -1,10 +1,11 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import {
   ScrollView,
   Image,
   StyleSheet,
   Pressable,
   RefreshControl,
+  Alert,
 } from 'react-native'
 import { YStack, XStack, Text, useThemeName, Button, Separator } from 'tamagui'
 import {
@@ -16,6 +17,8 @@ import {
   Share2,
   Bell,
   Search,
+  Edit3,
+  Trash2,
 } from '@tamagui/lucide-icons'
 import { router } from 'expo-router'
 import { formatNumber } from '@/utils/FormatNumber'
@@ -24,8 +27,9 @@ import PostCard from '../feed/components/PostCard'
 import { groupPosts } from '@/mock/groupPosts'
 import { GroupNotificationSheet } from './components/GroupNotificationSheet'
 import { GroupSearchModal } from './components/GroupSearchModal'
+import { getUserId } from '@/utils/SecureStore'
 
-type GroupTab = 'discussion' | 'members' | 'about'
+type GroupTab = 'discussion' | 'members' | 'about' | 'yourPosts'
 
 interface GroupDetailScreenProps {
   groupId: string
@@ -37,8 +41,17 @@ export default function GroupDetailScreen({ groupId }: GroupDetailScreenProps) {
   const [notificationSheetVisible, setNotificationSheetVisible] =
     useState(false)
   const [searchModalVisible, setSearchModalVisible] = useState(false)
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
+
+  useEffect(() => {
+    const loadUserId = async () => {
+      const userId = await getUserId()
+      setCurrentUserId(userId)
+    }
+    loadUserId()
+  }, [])
 
   // Mock group data - in real app, fetch from API
   const group: Group = {
@@ -68,6 +81,29 @@ export default function GroupDetailScreen({ groupId }: GroupDetailScreenProps) {
     setTimeout(() => setIsRefreshing(false), 1000)
   }
 
+  const handleEditPost = (postId: string) => {
+    Alert.alert('Edit Post', `Edit post ${postId}`)
+  }
+
+  const handleDeletePost = (postId: string) => {
+    Alert.alert('Delete Post', 'Are you sure you want to delete this post?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => {
+          // Handle delete
+          Alert.alert('Success', 'Post deleted successfully')
+        },
+      },
+    ])
+  }
+
+  const userPosts = useMemo(() => {
+    if (!currentUserId) return []
+    return groupPosts.filter(post => post.authorProfile.id === currentUserId)
+  }, [currentUserId])
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'discussion':
@@ -76,36 +112,45 @@ export default function GroupDetailScreen({ groupId }: GroupDetailScreenProps) {
             {/* Create Post Section */}
             <YStack
               backgroundColor={cardBackground}
-              borderColor={borderColor}
-              borderWidth={1}
               borderRadius={12}
-              padding="$3"
+              padding="$4"
               marginHorizontal="$3"
+              marginTop="$2"
+              marginBottom="$1"
             >
-              <XStack gap="$3" alignItems="center">
-                <YStack
-                  width={40}
-                  height={40}
-                  borderRadius={20}
-                  backgroundColor={subtitleColor}
-                  alignItems="center"
-                  justifyContent="center"
-                >
-                  <Text fontSize={16} fontWeight="600" color="#fff">
-                    U
-                  </Text>
-                </YStack>
-                <Pressable style={{ flex: 1 }}>
+              <Pressable
+                onPress={() =>
+                  router.push(
+                    `/create?groupId=${groupId}&groupName=${encodeURIComponent(group.name)}`
+                  )
+                }
+              >
+                <XStack gap="$3" alignItems="center">
                   <YStack
-                    backgroundColor={isDark ? '#2a2a2a' : '#f0f2f5'}
+                    width={40}
+                    height={40}
                     borderRadius={20}
-                    paddingHorizontal="$4"
-                    paddingVertical="$2.5"
+                    backgroundColor={isDark ? '#2a2a2a' : '#e4e6eb'}
+                    alignItems="center"
+                    justifyContent="center"
                   >
-                    <Text color={subtitleColor}>What's on your mind?</Text>
+                    <Text fontSize={16} fontWeight="700" color={textColor}>
+                      U
+                    </Text>
                   </YStack>
-                </Pressable>
-              </XStack>
+                  <YStack
+                    flex={1}
+                    backgroundColor={isDark ? '#2a2a2a' : '#f0f2f5'}
+                    borderRadius={24}
+                    paddingHorizontal="$4"
+                    paddingVertical="$3"
+                  >
+                    <Text color={subtitleColor} fontSize={15}>
+                      What's on your mind?
+                    </Text>
+                  </YStack>
+                </XStack>
+              </Pressable>
             </YStack>
 
             {/* Posts */}
@@ -140,16 +185,22 @@ export default function GroupDetailScreen({ groupId }: GroupDetailScreenProps) {
                   key={i}
                   onPress={() => router.push(`/profile/user-${i}`)}
                 >
-                  <XStack paddingVertical="$2" alignItems="center" gap="$3">
+                  <XStack
+                    paddingVertical="$3"
+                    alignItems="center"
+                    gap="$3"
+                    borderBottomWidth={i < 5 ? 1 : 0}
+                    borderBottomColor={borderColor}
+                  >
                     <YStack
-                      width={48}
-                      height={48}
-                      borderRadius={24}
-                      backgroundColor={subtitleColor}
+                      width={52}
+                      height={52}
+                      borderRadius={26}
+                      backgroundColor={isDark ? '#2a2a2a' : '#e4e6eb'}
                       alignItems="center"
                       justifyContent="center"
                     >
-                      <Text fontSize={18} fontWeight="600" color="#fff">
+                      <Text fontSize={18} fontWeight="700" color={textColor}>
                         M{i}
                       </Text>
                     </YStack>
@@ -157,7 +208,11 @@ export default function GroupDetailScreen({ groupId }: GroupDetailScreenProps) {
                       <Text fontSize={15} fontWeight="600" color={textColor}>
                         Member {i}
                       </Text>
-                      <Text fontSize={13} color={subtitleColor}>
+                      <Text
+                        fontSize={13}
+                        color={subtitleColor}
+                        marginTop="$0.5"
+                      >
                         Joined 2 weeks ago
                       </Text>
                     </YStack>
@@ -218,6 +273,97 @@ export default function GroupDetailScreen({ groupId }: GroupDetailScreenProps) {
             </YStack>
           </YStack>
         )
+
+      case 'yourPosts':
+        return (
+          <YStack gap="$2" paddingTop="$2">
+            {userPosts.length > 0 ? (
+              userPosts.map(post => (
+                <YStack key={post.id}>
+                  <PostCard post={post} />
+                  {/* Edit/Delete Actions */}
+                  <YStack
+                    backgroundColor={cardBackground}
+                    paddingHorizontal="$4"
+                    paddingVertical="$3"
+                    borderTopWidth={1}
+                    borderTopColor={borderColor}
+                    marginTop={-8}
+                  >
+                    <XStack gap="$2">
+                      <Button
+                        flex={1}
+                        backgroundColor={
+                          isDark ? 'rgba(255,255,255,0.1)' : '#f0f2f5'
+                        }
+                        color={textColor}
+                        borderRadius={8}
+                        fontWeight="500"
+                        fontSize={14}
+                        height={40}
+                        icon={<Edit3 size={16} color={textColor} />}
+                        pressStyle={{ opacity: 0.8, scale: 0.98 }}
+                        onPress={() => handleEditPost(post.id)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        flex={1}
+                        backgroundColor={
+                          isDark ? 'rgba(255,59,48,0.15)' : '#ffebee'
+                        }
+                        color="#ef4444"
+                        borderRadius={8}
+                        fontWeight="500"
+                        fontSize={14}
+                        height={40}
+                        icon={<Trash2 size={16} color="#ef4444" />}
+                        pressStyle={{ opacity: 0.8, scale: 0.98 }}
+                        onPress={() => handleDeletePost(post.id)}
+                      >
+                        Delete
+                      </Button>
+                    </XStack>
+                  </YStack>
+                </YStack>
+              ))
+            ) : (
+              <YStack
+                backgroundColor={cardBackground}
+                borderRadius={12}
+                padding="$6"
+                marginHorizontal="$3"
+                marginTop="$4"
+                alignItems="center"
+                gap="$3"
+              >
+                <YStack
+                  width={80}
+                  height={80}
+                  borderRadius={40}
+                  backgroundColor={isDark ? '#2a2a2a' : '#f0f2f5'}
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <Edit3 size={32} color={subtitleColor} />
+                </YStack>
+                <YStack alignItems="center" gap="$1">
+                  <Text fontSize={17} fontWeight="600" color={textColor}>
+                    No posts yet
+                  </Text>
+                  <Text
+                    fontSize={14}
+                    color={subtitleColor}
+                    textAlign="center"
+                    lineHeight={20}
+                  >
+                    You haven't posted anything in this group yet
+                  </Text>
+                </YStack>
+              </YStack>
+            )}
+          </YStack>
+        )
     }
   }
 
@@ -265,65 +411,82 @@ export default function GroupDetailScreen({ groupId }: GroupDetailScreenProps) {
       >
         {/* Cover Photo */}
         {group.coverUrl && (
-          <YStack height={200}>
+          <YStack height={220} position="relative">
             <Image source={{ uri: group.coverUrl }} style={styles.coverImage} />
+            <YStack
+              position="absolute"
+              bottom={0}
+              left={0}
+              right={0}
+              height={80}
+              style={{
+                background: isDark
+                  ? 'linear-gradient(to top, rgba(0,0,0,0.6), transparent)'
+                  : 'linear-gradient(to top, rgba(0,0,0,0.3), transparent)',
+              }}
+            />
           </YStack>
         )}
 
         {/* Group Info */}
         <YStack
           backgroundColor={cardBackground}
-          padding="$4"
-          gap="$3"
+          paddingHorizontal="$4"
+          paddingTop="$4"
+          paddingBottom="$4"
+          gap="$3.5"
           borderBottomColor={borderColor}
           borderBottomWidth={1}
         >
-          <XStack alignItems="center" gap="$3">
+          <XStack alignItems="center" gap="$3.5">
             {group.avatarUrl && (
               <Image
                 source={{ uri: group.avatarUrl }}
                 style={styles.groupAvatar}
               />
             )}
-            <YStack flex={1}>
+            <YStack flex={1} gap="$1">
+              <Text fontSize={18} fontWeight="700" color={textColor}>
+                {group.name}
+              </Text>
               <XStack alignItems="center" gap="$2">
                 {group.privacy === 'PRIVATE' ? (
-                  <Lock size={16} color={subtitleColor} />
+                  <Lock size={14} color={subtitleColor} />
                 ) : (
-                  <Globe size={16} color={subtitleColor} />
+                  <Globe size={14} color={subtitleColor} />
                 )}
-                <Text fontSize={13} color={subtitleColor}>
-                  {group.privacy === 'PUBLIC'
-                    ? 'Public group'
-                    : 'Private group'}{' '}
-                  · {formatNumber(group.memberCount)} members
+                <Text fontSize={13} color={subtitleColor} fontWeight="500">
+                  {group.privacy === 'PUBLIC' ? 'Public' : 'Private'} ·{' '}
+                  {formatNumber(group.memberCount)} members
                 </Text>
               </XStack>
             </YStack>
           </XStack>
 
           {/* Action Buttons */}
-          <XStack gap="$2">
+          <XStack gap="$2.5">
             <Button
               flex={1}
               backgroundColor="#1877F2"
               color="#ffffff"
-              borderRadius={8}
+              borderRadius={10}
               fontWeight="600"
               fontSize={15}
-              pressStyle={{ opacity: 0.9 }}
+              height={44}
+              pressStyle={{ opacity: 0.9, scale: 0.98 }}
             >
               Joined
             </Button>
             <Button
+              flex={1}
               backgroundColor={isDark ? 'rgba(255,255,255,0.1)' : '#e4e6eb'}
               color={textColor}
-              borderRadius={8}
+              borderRadius={10}
               fontWeight="600"
               fontSize={15}
-              paddingHorizontal="$4"
+              height={44}
               icon={<Share2 size={18} color={textColor} />}
-              pressStyle={{ opacity: 0.9 }}
+              pressStyle={{ opacity: 0.9, scale: 0.98 }}
             >
               Share
             </Button>
@@ -338,6 +501,7 @@ export default function GroupDetailScreen({ groupId }: GroupDetailScreenProps) {
         >
           {[
             { key: 'discussion', label: 'Discussion' },
+            { key: 'yourPosts', label: 'Your Posts' },
             { key: 'members', label: 'Members' },
             { key: 'about', label: 'About' },
           ].map(tab => (
@@ -395,9 +559,9 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
   },
   groupAvatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
+    width: 70,
+    height: 70,
+    borderRadius: 14,
     resizeMode: 'cover',
   },
 })

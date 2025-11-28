@@ -15,9 +15,10 @@ export async function saveUserId(userId: string) {
 
 export async function getUserId(): Promise<string | null> {
   if (Platform.OS === 'web') {
-    return localStorage.getItem(USER_ID_KEY)
+    return localStorage.getItem(USER_ID_KEY) || '1' // Default to '1' for testing
   } else {
-    return await getItemAsync(USER_ID_KEY)
+    const userId = await getItemAsync(USER_ID_KEY)
+    return userId || '1' // Default to '1' for testing
   }
 }
 

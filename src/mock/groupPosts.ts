@@ -2,6 +2,57 @@ import { Post } from '@/types/Post'
 
 export const groupPosts: Post[] = [
   {
+    id: 'group-post-current-1',
+    groupId: '1',
+    content:
+      'Just finished implementing push notifications in my React Native app! 🔔 It was challenging but totally worth it. Happy to help if anyone needs guidance!',
+    media: ['https://picsum.photos/seed/mypost1/800/600'],
+    createdAt: '2024-11-28T14:20:00Z',
+    privacy: 'PUBLIC',
+    likes: ['user1', 'user2', 'user3', 'user4', 'user5'],
+    commentsCount: 18,
+    authorProfile: {
+      id: '1',
+      email: 'current.user@example.com',
+      username: 'currentuser',
+      firstName: 'Current',
+      lastName: 'User',
+      avatarUrl:
+        'https://ui-avatars.com/api/?name=Current+User&background=1877F2&color=fff',
+      gender: null,
+      dob: null,
+      bio: 'React Native Developer',
+      posts: null,
+      friendships: null,
+      friendStatus: null,
+    },
+  },
+  {
+    id: 'group-post-current-2',
+    groupId: '1',
+    content:
+      "Here's a code snippet for handling dark mode in React Native. Hope this helps someone! 💡\n\nconst { colorScheme } = useColorScheme();\nconst isDark = colorScheme === 'dark';",
+    createdAt: '2024-11-27T11:30:00Z',
+    privacy: 'PUBLIC',
+    likes: ['user6', 'user7', 'user8'],
+    commentsCount: 7,
+    authorProfile: {
+      id: '1',
+      email: 'current.user@example.com',
+      username: 'currentuser',
+      firstName: 'Current',
+      lastName: 'User',
+      avatarUrl:
+        'https://ui-avatars.com/api/?name=Current+User&background=1877F2&color=fff',
+      gender: null,
+      dob: null,
+      bio: 'React Native Developer',
+      posts: null,
+      friendships: null,
+      friendStatus: null,
+    },
+  },
+  {
     id: 'group-post-1',
     groupId: '1',
     content:
