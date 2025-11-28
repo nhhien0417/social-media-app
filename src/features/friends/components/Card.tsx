@@ -3,6 +3,7 @@ import { XStack, YStack, Text, Button } from 'tamagui'
 import { UserPlus } from '@tamagui/lucide-icons'
 import { router } from 'expo-router'
 import { User } from '@/types/User'
+import { getUserId } from '@/utils/SecureStore'
 
 type CardType = 'friend' | 'request' | 'sent' | 'suggestion'
 
@@ -36,6 +37,18 @@ export function UserCard({
   const displayName = fullName || user.email
   const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=random`
 
+  const handleNavigateToProfile = async () => {
+    const currentUserId = await getUserId()
+    if (currentUserId && user.id === currentUserId) {
+      router.push('/(tabs)/profile')
+    } else {
+      router.push({
+        pathname: '/profile/[id]',
+        params: { id: user.id },
+      })
+    }
+  }
+
   return (
     <XStack
       paddingHorizontal="$4"
@@ -43,16 +56,13 @@ export function UserCard({
       alignItems="center"
       gap="$3"
     >
-      <Pressable onPress={() => router.push(`/profile/${user.id}`)}>
+      <Pressable onPress={handleNavigateToProfile}>
         <YStack style={styles.avatar}>
           <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
         </YStack>
       </Pressable>
 
-      <Pressable
-        style={{ flex: 1 }}
-        onPress={() => router.push(`/profile/${user.id}`)}
-      >
+      <Pressable style={{ flex: 1 }} onPress={handleNavigateToProfile}>
         <YStack gap="$1">
           <Text fontSize={14} fontWeight="600" color={textColor}>
             {displayName}
