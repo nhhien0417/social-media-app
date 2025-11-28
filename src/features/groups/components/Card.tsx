@@ -1,6 +1,7 @@
 import { Image, StyleSheet, Pressable } from 'react-native'
 import { XStack, YStack, Text, Button } from 'tamagui'
 import { Users, Lock } from '@tamagui/lucide-icons'
+import { router } from 'expo-router'
 import { Group } from '@/types/Group'
 import { formatNumber } from '@/utils/FormatNumber'
 
@@ -32,16 +33,20 @@ export function GroupCard({
     group.avatarUrl ||
     `https://ui-avatars.com/api/?name=${encodeURIComponent(group.name)}&background=random`
 
+  const handleNavigateToGroup = () => {
+    router.push(`/group/${group.id}`)
+  }
+
   return (
     <YStack paddingHorizontal="$4" paddingVertical="$3" gap="$3">
       <XStack alignItems="center" gap="$3">
-        <Pressable>
+        <Pressable onPress={handleNavigateToGroup}>
           <YStack style={styles.avatar}>
             <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
           </YStack>
         </Pressable>
 
-        <Pressable style={{ flex: 1 }}>
+        <Pressable style={{ flex: 1 }} onPress={handleNavigateToGroup}>
           <YStack gap="$1">
             <XStack alignItems="center" gap="$2">
               <Text fontSize={14} fontWeight="600" color={textColor}>
