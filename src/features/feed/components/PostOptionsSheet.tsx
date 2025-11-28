@@ -14,6 +14,8 @@ interface PostOptionsSheetProps {
   onEdit: () => void
   onDelete: () => void
   isOwner: boolean
+  isAdmin?: boolean
+  onDeleteAsAdmin?: () => void
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
@@ -24,11 +26,14 @@ export default function PostOptionsSheet({
   onEdit,
   onDelete,
   isOwner,
+  isAdmin,
+  onDeleteAsAdmin,
 }: PostOptionsSheetProps) {
   const themeName = useThemeName()
   const isDark = themeName.includes('dark')
 
-  if (!isOwner) return null
+  // Show menu if user is owner OR admin
+  if (!isOwner && !isAdmin) return null
 
   return (
     <Modal
@@ -63,104 +68,156 @@ export default function PostOptionsSheet({
               elevation: 8,
             }}
           >
-            {/* Edit Option */}
-            <Pressable
-              onPress={() => {
-                onEdit()
-                onClose()
-              }}
-              style={({ pressed }) => [
-                styles.option,
-                {
-                  backgroundColor: pressed
-                    ? isDark
-                      ? '#2c2c2e'
-                      : '#f5f5f5'
-                    : 'transparent',
-                },
-              ]}
-            >
-              <XStack
-                alignItems="center"
-                gap="$3"
-                paddingVertical="$3.5"
-                paddingHorizontal="$4"
+            {/* Edit Option - Only for owner */}
+            {isOwner && (
+              <Pressable
+                onPress={() => {
+                  onEdit()
+                  onClose()
+                }}
+                style={({ pressed }) => [
+                  styles.option,
+                  {
+                    backgroundColor: pressed
+                      ? isDark
+                        ? '#2c2c2e'
+                        : '#f5f5f5'
+                      : 'transparent',
+                  },
+                ]}
               >
-                <YStack
-                  width={36}
-                  height={36}
-                  borderRadius={18}
-                  backgroundColor={isDark ? '#0a84ff26' : '#007aff1a'}
+                <XStack
                   alignItems="center"
-                  justifyContent="center"
+                  gap="$3"
+                  paddingVertical="$3.5"
+                  paddingHorizontal="$4"
                 >
-                  <Edit3 size={18} color={isDark ? '#0a84ff' : '#007aff'} />
-                </YStack>
-                <YStack flex={1}>
-                  <Text
-                    fontSize={16}
-                    fontWeight="600"
-                    color={isDark ? 'white' : 'black'}
+                  <YStack
+                    width={36}
+                    height={36}
+                    borderRadius={18}
+                    backgroundColor={isDark ? '#0a84ff26' : '#007aff1a'}
+                    alignItems="center"
+                    justifyContent="center"
                   >
-                    Edit Post
-                  </Text>
-                  <Text fontSize={13} color={isDark ? '#8e8e93' : '#8e8e93'}>
-                    Make changes to your post
-                  </Text>
-                </YStack>
-              </XStack>
-            </Pressable>
+                    <Edit3 size={18} color={isDark ? '#0a84ff' : '#007aff'} />
+                  </YStack>
+                  <YStack flex={1}>
+                    <Text
+                      fontSize={16}
+                      fontWeight="600"
+                      color={isDark ? 'white' : 'black'}
+                    >
+                      Edit Post
+                    </Text>
+                    <Text fontSize={13} color={isDark ? '#8e8e93' : '#8e8e93'}>
+                      Make changes to your post
+                    </Text>
+                  </YStack>
+                </XStack>
+              </Pressable>
+            )}
 
-            {/* Divider */}
-            <YStack
-              height={StyleSheet.hairlineWidth}
-              backgroundColor={isDark ? '#38383a' : '#e5e5ea'}
-              marginHorizontal="$4"
-            />
+            {/* Divider - Only show if owner has both edit and delete */}
+            {isOwner && (
+              <YStack
+                height={StyleSheet.hairlineWidth}
+                backgroundColor={isDark ? '#38383a' : '#e5e5ea'}
+                marginHorizontal="$4"
+              />
+            )}
 
-            {/* Delete Option */}
-            <Pressable
-              onPress={() => {
-                onDelete()
-                onClose()
-              }}
-              style={({ pressed }) => [
-                styles.option,
-                {
-                  backgroundColor: pressed
-                    ? isDark
-                      ? '#2c2c2e'
-                      : '#f5f5f5'
-                    : 'transparent',
-                },
-              ]}
-            >
-              <XStack
-                alignItems="center"
-                gap="$3"
-                paddingVertical="$3.5"
-                paddingHorizontal="$4"
+            {/* Delete Option - For owner */}
+            {isOwner && (
+              <Pressable
+                onPress={() => {
+                  onDelete()
+                  onClose()
+                }}
+                style={({ pressed }) => [
+                  styles.option,
+                  {
+                    backgroundColor: pressed
+                      ? isDark
+                        ? '#2c2c2e'
+                        : '#f5f5f5'
+                      : 'transparent',
+                  },
+                ]}
               >
-                <YStack
-                  width={36}
-                  height={36}
-                  borderRadius={18}
-                  backgroundColor="#ff3b301a"
+                <XStack
                   alignItems="center"
-                  justifyContent="center"
+                  gap="$3"
+                  paddingVertical="$3.5"
+                  paddingHorizontal="$4"
                 >
-                  <Trash2 size={18} color="#ff3b30" />
-                </YStack>
-                <YStack flex={1}>
-                  <Text fontSize={16} fontWeight="600" color="#ff3b30">
-                    Delete Post
-                  </Text>
-                  <Text fontSize={13} color={isDark ? '#8e8e93' : '#8e8e93'}>
-                    Permanently remove this post
-                  </Text>
-                </YStack>
-              </XStack>
-            </Pressable>
+                  <YStack
+                    width={36}
+                    height={36}
+                    borderRadius={18}
+                    backgroundColor="#ff3b301a"
+                    alignItems="center"
+                    justifyContent="center"
+                  >
+                    <Trash2 size={18} color="#ff3b30" />
+                  </YStack>
+                  <YStack flex={1}>
+                    <Text fontSize={16} fontWeight="600" color="#ff3b30">
+                      Delete Post
+                    </Text>
+                    <Text fontSize={13} color={isDark ? '#8e8e93' : '#8e8e93'}>
+                      Permanently remove this post
+                    </Text>
+                  </YStack>
+                </XStack>
+              </Pressable>
+            )}
+
+            {/* Admin Delete Option - Only for admin who is not the owner */}
+            {isAdmin && !isOwner && onDeleteAsAdmin && (
+              <Pressable
+                onPress={() => {
+                  onDeleteAsAdmin()
+                  onClose()
+                }}
+                style={({ pressed }) => [
+                  styles.option,
+                  {
+                    backgroundColor: pressed
+                      ? isDark
+                        ? '#2c2c2e'
+                        : '#f5f5f5'
+                      : 'transparent',
+                  },
+                ]}
+              >
+                <XStack
+                  alignItems="center"
+                  gap="$3"
+                  paddingVertical="$3.5"
+                  paddingHorizontal="$4"
+                >
+                  <YStack
+                    width={36}
+                    height={36}
+                    borderRadius={18}
+                    backgroundColor="#ff3b301a"
+                    alignItems="center"
+                    justifyContent="center"
+                  >
+                    <Trash2 size={18} color="#ff3b30" />
+                  </YStack>
+                  <YStack flex={1}>
+                    <Text fontSize={16} fontWeight="600" color="#ff3b30">
+                      Delete Post (Admin)
+                    </Text>
+                    <Text fontSize={13} color={isDark ? '#8e8e93' : '#8e8e93'}>
+                      Remove this post as group admin
+                    </Text>
+                  </YStack>
+                </XStack>
+              </Pressable>
+            )}
           </YStack>
         </Animated.View>
       </AnimatedPressable>

@@ -59,7 +59,15 @@ function PaginationDots({
   )
 }
 
-function PostCard({ post }: { post: Post }) {
+function PostCard({
+  post,
+  isAdmin,
+  onDeleteAsAdmin,
+}: {
+  post: Post
+  isAdmin?: boolean
+  onDeleteAsAdmin?: (postId: string) => void
+}) {
   const { authorProfile: author, media = [], content, createdAt } = post
 
   if (!author) return null
@@ -304,6 +312,10 @@ function PostCard({ post }: { post: Post }) {
         onEdit={handleEdit}
         onDelete={handleDelete}
         isOwner={isOwner}
+        isAdmin={isAdmin}
+        onDeleteAsAdmin={
+          onDeleteAsAdmin ? () => onDeleteAsAdmin(post.id) : undefined
+        }
       />
 
       <DeleteConfirmModal

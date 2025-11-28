@@ -27,7 +27,12 @@ import PostCard from '../feed/components/PostCard'
 import { groupPosts } from '@/mock/groupPosts'
 import { GroupNotificationSheet } from './components/GroupNotificationSheet'
 import { GroupSearchModal } from './components/GroupSearchModal'
+import { GroupMemberManagementModal } from './components/GroupMemberManagementModal'
+import { EditGroupInfoModal } from './components/EditGroupInfoModal'
 import { getUserId } from '@/utils/SecureStore'
+import { groupMembers } from '@/mock/groupMembers'
+import type { GroupMember } from '@/types/Group'
+import { Shield, Crown, MoreVertical } from '@tamagui/lucide-icons'
 
 type GroupTab = 'discussion' | 'members' | 'about' | 'yourPosts'
 
@@ -41,6 +46,9 @@ export default function GroupDetailScreen({ groupId }: GroupDetailScreenProps) {
   const [notificationSheetVisible, setNotificationSheetVisible] =
     useState(false)
   const [searchModalVisible, setSearchModalVisible] = useState(false)
+  const [memberManagementVisible, setMemberManagementVisible] = useState(false)
+  const [editGroupInfoVisible, setEditGroupInfoVisible] = useState(false)
+  const [selectedMember, setSelectedMember] = useState<GroupMember | null>(null)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
@@ -67,7 +75,10 @@ export default function GroupDetailScreen({ groupId }: GroupDetailScreenProps) {
     status: 'JOINED',
     createdAt: '2024-01-15T10:00:00Z',
     category: 'Technology',
+    currentUserRole: 'ADMIN', // Change to 'MEMBER' to test member view
   }
+
+  const isAdmin = group.currentUserRole === 'ADMIN'
 
   const backgroundColor = isDark ? '#000000' : '#FAFAFA'
   const textColor = isDark ? '#f5f5f5' : '#111827'
@@ -103,6 +114,52 @@ export default function GroupDetailScreen({ groupId }: GroupDetailScreenProps) {
     if (!currentUserId) return []
     return groupPosts.filter(post => post.authorProfile.id === currentUserId)
   }, [currentUserId])
+
+  const handleMemberPress = (member: GroupMember) => {
+    if (isAdmin && member.role !== 'ADMIN') {
+      setSelectedMember(member)
+      setMemberManagementVisible(true)
+    } else {
+      router.push(`/profile/${member.id}`)
+    }
+  }
+
+  const handlePromoteToAdmin = (memberId: string) => {
+    Alert.alert('Success', 'Member promoted to admin successfully')
+  }
+
+  const handleRemoveMember = (memberId: string) => {
+    Alert.alert('Success', 'Member removed from group')
+  }
+
+  const handleBlockMember = (memberId: string) => {
+    Alert.alert('Success', 'Member blocked successfully')
+  }
+
+  const handleSaveGroupInfo = (
+    name: string,
+    description: string,
+    category: string
+  ) => {
+    Alert.alert('Success', 'Group information updated successfully')
+  }
+
+  const handleDeleteGroupPost = (postId: string) => {
+    Alert.alert(
+      'Delete Post',
+      'Are you sure you want to delete this post? This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert('Success', 'Post deleted successfully')
+          },
+        },
+      ]
+    )
+  }
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -155,7 +212,12 @@ export default function GroupDetailScreen({ groupId }: GroupDetailScreenProps) {
 
             {/* Posts */}
             {groupPosts.map(post => (
-              <PostCard key={post.id} post={post} />
+              <PostCard
+                key={post.id}
+                post={post}
+                isAdmin={isAdmin}
+                onDeleteAsAdmin={handleDeleteGroupPost}
+              />
             ))}
           </YStack>
         )
@@ -163,6 +225,90 @@ export default function GroupDetailScreen({ groupId }: GroupDetailScreenProps) {
       case 'members':
         return (
           <YStack padding="$3" gap="$3">
+            {/* Admins Section */}
+            {groupMembers.filter(m => m.role === 'ADMIN').length > 0 && (
+              <YStack
+                backgroundColor={cardBackground}
+                borderRadius={12}
+                padding="$4"
+                borderColor={borderColor}
+                borderWidth={1}
+                marginBottom="$2"
+              >
+                <XStack alignItems="center" gap="$2" marginBottom="$3">
+                  <Shield size={20} color="#1877F2" />
+                  <Text fontSize={16} fontWeight="600" color={textColor}>
+                    Admins
+                  </Text>
+                </XStack>
+
+                {groupMembers
+                  .filter(m => m.role === 'ADMIN')
+                  .map((member, index, arr) => (
+                    <Pressable
+                      key={member.id}
+                      onPress={() => router.push(`/profile/${member.id}`)}
+                    >
+                      <XStack
+                        paddingVertical="$3"
+                        alignItems="center"
+                        gap="$3"
+                        borderBottomWidth={index < arr.length - 1 ? 1 : 0}
+                        borderBottomColor={borderColor}
+                      >
+                        {member.avatarUrl ? (
+                          <Image
+                            source={{ uri: member.avatarUrl }}
+                            style={{
+                              width: 52,
+                              height: 52,
+                              borderRadius: 26,
+                            }}
+                          />
+                        ) : (
+                          <YStack
+                            width={52}
+                            height={52}
+                            borderRadius={26}
+                            backgroundColor={isDark ? '#2a2a2a' : '#e4e6eb'}
+                            alignItems="center"
+                            justifyContent="center"
+                          >
+                            <Text
+                              fontSize={18}
+                              fontWeight="700"
+                              color={textColor}
+                            >
+                              {member.name.charAt(0)}
+                            </Text>
+                          </YStack>
+                        )}
+                        <YStack flex={1}>
+                          <XStack alignItems="center" gap="$2">
+                            <Text
+                              fontSize={15}
+                              fontWeight="600"
+                              color={textColor}
+                            >
+                              {member.name}
+                            </Text>
+                            <Crown size={16} color="#f59e0b" />
+                          </XStack>
+                          <Text
+                            fontSize={13}
+                            color={subtitleColor}
+                            marginTop="$0.5"
+                          >
+                            Admin
+                          </Text>
+                        </YStack>
+                      </XStack>
+                    </Pressable>
+                  ))}
+              </YStack>
+            )}
+
+            {/* All Members */}
             <YStack
               backgroundColor={cardBackground}
               borderRadius={12}
@@ -179,43 +325,61 @@ export default function GroupDetailScreen({ groupId }: GroupDetailScreenProps) {
                 Members · {formatNumber(group.memberCount)}
               </Text>
 
-              {/* Sample members */}
-              {[1, 2, 3, 4, 5].map(i => (
+              {groupMembers.map((member, index) => (
                 <Pressable
-                  key={i}
-                  onPress={() => router.push(`/profile/user-${i}`)}
+                  key={member.id}
+                  onPress={() => handleMemberPress(member)}
                 >
                   <XStack
                     paddingVertical="$3"
                     alignItems="center"
                     gap="$3"
-                    borderBottomWidth={i < 5 ? 1 : 0}
+                    borderBottomWidth={index < groupMembers.length - 1 ? 1 : 0}
                     borderBottomColor={borderColor}
                   >
-                    <YStack
-                      width={52}
-                      height={52}
-                      borderRadius={26}
-                      backgroundColor={isDark ? '#2a2a2a' : '#e4e6eb'}
-                      alignItems="center"
-                      justifyContent="center"
-                    >
-                      <Text fontSize={18} fontWeight="700" color={textColor}>
-                        M{i}
-                      </Text>
-                    </YStack>
+                    {member.avatarUrl ? (
+                      <Image
+                        source={{ uri: member.avatarUrl }}
+                        style={{
+                          width: 52,
+                          height: 52,
+                          borderRadius: 26,
+                        }}
+                      />
+                    ) : (
+                      <YStack
+                        width={52}
+                        height={52}
+                        borderRadius={26}
+                        backgroundColor={isDark ? '#2a2a2a' : '#e4e6eb'}
+                        alignItems="center"
+                        justifyContent="center"
+                      >
+                        <Text fontSize={18} fontWeight="700" color={textColor}>
+                          {member.name.charAt(0)}
+                        </Text>
+                      </YStack>
+                    )}
                     <YStack flex={1}>
-                      <Text fontSize={15} fontWeight="600" color={textColor}>
-                        Member {i}
-                      </Text>
+                      <XStack alignItems="center" gap="$2">
+                        <Text fontSize={15} fontWeight="600" color={textColor}>
+                          {member.name}
+                        </Text>
+                        {member.role === 'ADMIN' && (
+                          <Crown size={14} color="#f59e0b" />
+                        )}
+                      </XStack>
                       <Text
                         fontSize={13}
                         color={subtitleColor}
                         marginTop="$0.5"
                       >
-                        Joined 2 weeks ago
+                        {member.role === 'ADMIN' ? 'Admin' : 'Member'}
                       </Text>
                     </YStack>
+                    {isAdmin && member.role !== 'ADMIN' && (
+                      <MoreVertical size={20} color={subtitleColor} />
+                    )}
                   </XStack>
                 </Pressable>
               ))}
@@ -270,6 +434,27 @@ export default function GroupDetailScreen({ groupId }: GroupDetailScreenProps) {
                   </Text>
                 </YStack>
               </XStack>
+
+              {isAdmin && (
+                <>
+                  <Separator borderColor={borderColor} />
+                  <Button
+                    backgroundColor={
+                      isDark ? 'rgba(24,119,242,0.15)' : '#e7f3ff'
+                    }
+                    color="#1877F2"
+                    borderRadius={8}
+                    fontWeight="600"
+                    fontSize={14}
+                    height={40}
+                    icon={<Settings size={18} color="#1877F2" />}
+                    pressStyle={{ opacity: 0.8, scale: 0.98 }}
+                    onPress={() => setEditGroupInfoVisible(true)}
+                  >
+                    Edit Group Info
+                  </Button>
+                </>
+              )}
             </YStack>
           </YStack>
         )
@@ -547,6 +732,30 @@ export default function GroupDetailScreen({ groupId }: GroupDetailScreenProps) {
         onClose={() => setSearchModalVisible(false)}
         isDark={isDark}
         groupName={group.name}
+      />
+
+      {/* Admin Modals */}
+      {selectedMember && (
+        <GroupMemberManagementModal
+          visible={memberManagementVisible}
+          onClose={() => {
+            setMemberManagementVisible(false)
+            setSelectedMember(null)
+          }}
+          member={selectedMember}
+          onPromoteToAdmin={handlePromoteToAdmin}
+          onRemoveMember={handleRemoveMember}
+          onBlockMember={handleBlockMember}
+          isDark={isDark}
+        />
+      )}
+
+      <EditGroupInfoModal
+        visible={editGroupInfoVisible}
+        onClose={() => setEditGroupInfoVisible(false)}
+        group={group}
+        onSave={handleSaveGroupInfo}
+        isDark={isDark}
       />
     </YStack>
   )
