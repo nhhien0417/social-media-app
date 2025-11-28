@@ -3,6 +3,7 @@ import { Stack, SplashScreen } from 'expo-router'
 import { StatusBar } from 'react-native'
 import { useFonts } from 'expo-font'
 import { TamaguiProvider } from 'tamagui'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import config from '../tamagui.config'
 
 import { ThemeProvider, useAppTheme } from '@/providers/ThemeProvider'
@@ -117,10 +118,12 @@ export default function RootLayout() {
   if (!loaded) return null
 
   return (
-    <TamaguiProvider config={config}>
-      <ThemeProvider>
-        <RootContent />
-      </ThemeProvider>
-    </TamaguiProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <TamaguiProvider config={config}>
+        <ThemeProvider>
+          <RootContent />
+        </ThemeProvider>
+      </TamaguiProvider>
+    </GestureHandlerRootView>
   )
 }

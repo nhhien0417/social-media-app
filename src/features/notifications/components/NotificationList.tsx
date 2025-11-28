@@ -1,6 +1,14 @@
-import { YStack, XStack, Text, Button, ScrollView } from 'tamagui'
+import { YStack, XStack, Text, Button, ScrollView, useTheme } from 'tamagui'
 import Avatar from '@/components/Avatar'
-import { MoreVertical } from '@tamagui/lucide-icons'
+import {
+  MoreVertical,
+  Heart,
+  MessageCircle,
+  UserPlus,
+  Share2,
+  Users,
+  Bell,
+} from '@tamagui/lucide-icons'
 import type { NotificationItem } from '@/types/Notification'
 import { formatDate } from '@/utils/FormatDate'
 
@@ -21,6 +29,41 @@ export default function NotificationList({
   onLayout,
   onContentSizeChange,
 }: NotificationListProps) {
+  const theme = useTheme()
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'LIKE_POST':
+      case 'LIKE_COMMENT':
+      case 'STORY_LIKE':
+        return (
+          <Heart size={14} color="$red10" fill={theme.red10?.get() ?? 'red'} />
+        )
+
+      case 'COMMENT_ON_POST':
+      case 'REPLY_COMMENT':
+      case 'MENTION_COMMENT':
+      case 'MENTION_POST':
+        return <MessageCircle size={14} color="$blue10" />
+
+      case 'FRIEND_REQUEST':
+      case 'FRIEND_REQUEST_ACCEPTED':
+        return <UserPlus size={14} color="$green10" />
+
+      case 'SHARE_POST':
+        return <Share2 size={14} color="$orange10" />
+
+      case 'GROUP_INVITE':
+      case 'GROUP_JOIN_REQUEST':
+      case 'GROUP_JOIN_ACCEPTED':
+      case 'GROUP_NEW_POST':
+        return <Users size={14} color="$purple10" />
+
+      default:
+        return <Bell size={14} color="$gray10" />
+    }
+  }
+
   return (
     <ScrollView
       backgroundColor="$background"
@@ -44,10 +87,23 @@ export default function NotificationList({
             onPress={() => onNotificationPress(item)}
           >
             <XStack alignItems="center" gap="$3">
-              <Avatar
-                uri={`https://i.pravatar.cc/150?u=${item.senderId}`}
-                size={60}
-              />
+              <YStack>
+                <Avatar
+                  uri={`https://i.pravatar.cc/150?u=${item.senderId}`}
+                  size={60}
+                />
+                <YStack
+                  position="absolute"
+                  bottom={-2}
+                  right={-2}
+                  backgroundColor="$background"
+                  borderRadius={100}
+                  padding={4}
+                  elevation="$1"
+                >
+                  {getNotificationIcon(item.type)}
+                </YStack>
+              </YStack>
               <YStack flex={1}>
                 <Text color="$color" fontSize="$4">
                   {item.message}

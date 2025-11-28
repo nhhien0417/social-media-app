@@ -2,12 +2,13 @@ import type { ComponentProps } from 'react'
 import { Tabs, useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { View } from 'react-native'
-import { YStack, useTheme } from 'tamagui'
+import { YStack, useTheme, Text } from 'tamagui'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useEffect, useState } from 'react'
 import Avatar from '@/components/Avatar'
 import { getAccessToken } from '@/utils/SecureStore'
 import { useInitProfile, useCurrentUser } from '@/hooks/useProfile'
+import { useNotifications } from '@/providers/NotificationProvider'
 
 export default function TabsLayout() {
   const theme = useTheme()
@@ -16,6 +17,7 @@ export default function TabsLayout() {
 
   useInitProfile()
   const currentUser = useCurrentUser()
+  const { unreadCount } = useNotifications()
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -110,7 +112,45 @@ export default function TabsLayout() {
         <Tabs.Screen
           name="activity"
           options={{
-            tabBarIcon: ({ focused }) => icon('notifications', focused),
+            tabBarIcon: ({ focused }) => (
+              <View>
+                {icon('notifications', focused)}
+                {unreadCount > 0 && (
+                  <View
+                    style={{
+                      position: 'absolute',
+                      right: 0,
+                      top: 0,
+                      backgroundColor: 'red',
+                      borderRadius: 10,
+                      minWidth: 16,
+                      height: 16,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      paddingHorizontal: 2,
+                    }}
+                  >
+                    <YStack
+                      backgroundColor="$red10"
+                      width={16}
+                      height={16}
+                      borderRadius={10}
+                      alignItems="center"
+                      justifyContent="center"
+                    >
+                      <Text
+                        color="white"
+                        fontSize={10}
+                        fontWeight="bold"
+                        textAlign="center"
+                      >
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                      </Text>
+                    </YStack>
+                  </View>
+                )}
+              </View>
+            ),
           }}
         />
 

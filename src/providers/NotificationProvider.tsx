@@ -18,6 +18,9 @@ import {
   setBadgeCount,
 } from '@/services/pushNotifications'
 import { registerPushToken } from '@/api/api.notification'
+import { useRouter } from 'expo-router'
+import { NotificationToast } from '@/features/notifications/components/NotificationToast'
+import { getNotificationMessage } from '@/utils/NotificationMessage'
 
 /**
  * Notification Context value interface
@@ -59,6 +62,9 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   const notificationListener = useRef<Notifications.Subscription | null>(null)
   const responseListener = useRef<Notifications.Subscription | null>(null)
   const userId = propUserId
+  const router = useRouter()
+  const [currentNotification, setCurrentNotification] =
+    useState<NotificationItem | null>(null)
 
   // =====================================
   // SETUP PUSH NOTIFICATIONS
@@ -134,9 +140,10 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
             createdAt: new Date().toISOString(),
             read: false,
             type: (data.type as NotificationType) || 'NEW_POST',
+            data: data,
           }
 
-          console.log('Adding notification from Push:', newNotification.id)
+          newNotification.message = getNotificationMessage(newNotification)
           return [newNotification, ...prev]
         })
       }
@@ -152,17 +159,13 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
           any
         >
 
-        // TODO: Navigate to appropriate screen based on notification type
-        // Example:
-        // if (data.postId) {
-        //   router.push(`/post/${data.postId}`)
-        // } else if (data.senderId) {
-        //   router.push(`/profile/${data.senderId}`)
-        // } else if (data.type === 'message') {
-        //   router.push(`/message/${data.messageId}`)
-        // }
-
         console.log('Navigation data:', data)
+
+        if (data.postId) {
+          router.push(`/post/${data.postId}`)
+        } else if (data.senderId) {
+          router.push(`/profile/${data.senderId}`)
+        }
       }
     )
 
@@ -188,7 +191,13 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   // Load mock notifications on mount (for development)
   useEffect(() => {
     // Load mock data initially
-    setNotifications(mockNotifications as NotificationItem[])
+    const formattedMockNotifications = (
+      mockNotifications as NotificationItem[]
+    ).map(n => ({
+      ...n,
+      message: getNotificationMessage(n),
+    }))
+    setNotifications(formattedMockNotifications)
   }, [])
 
   // Connect to STOMP WebSocket
@@ -214,11 +223,18 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
         }
 
         // Add new notification at the beginning
-        return [notification, ...prev]
+        const formattedNotification = {
+          ...notification,
+          message: getNotificationMessage(notification),
+        }
+        return [formattedNotification, ...prev]
       })
 
-      // Optional: Show in-app toast/banner
-      // showToast(notification.message)
+      // Show in-app toast
+      setCurrentNotification({
+        ...notification,
+        message: getNotificationMessage(notification),
+      })
     },
     []
   )
@@ -272,7 +288,6 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
    */
   const clearAll = useCallback(() => {
     // For now, just update UI optimistically
-    // TODO: Send STOMP message to backend when endpoint is ready
     // stompService.send('/notifications/clear-all', {})
 
     setNotifications([])
@@ -280,6 +295,67 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
 
   // Calculate unread count
   const unreadCount = notifications.filter(n => !n.read).length
+
+  /**
+   * Handle notification press
+   */
+  const handleNotificationPress = useCallback(
+    (notification: NotificationItem) => {
+      console.log('Notification pressed:', notification)
+
+      // Mark as read
+      if (!notification.read) {
+        markAsRead(notification.id)
+      }
+
+      // Close toast
+      setCurrentNotification(null)
+
+      // Navigate based on type
+      const { type, data, senderId } = notification
+
+      switch (type) {
+        case 'NEW_POST':
+        case 'LIKE_POST':
+        case 'COMMENT_ON_POST':
+        case 'MENTION_POST':
+        case 'SHARE_POST':
+        case 'REPLY_COMMENT':
+        case 'LIKE_COMMENT':
+        case 'MENTION_COMMENT':
+          if (data?.postId) {
+            router.push(`/post/${data.postId}`)
+          } else {
+            console.warn('No postId found in notification data')
+          }
+          break
+
+        case 'FRIEND_REQUEST':
+        case 'FRIEND_REQUEST_ACCEPTED':
+        case 'FRIEND_REQUEST_REMOVED':
+          if (senderId) {
+            router.push(`/profile/${senderId}`)
+          }
+          break
+
+        case 'GROUP_INVITE':
+        case 'GROUP_JOIN_REQUEST':
+        case 'GROUP_JOIN_ACCEPTED':
+        case 'GROUP_NEW_POST':
+          if (data?.groupId) {
+            router.push(`/group/${data.groupId}`)
+          }
+          break
+
+        default:
+          if (senderId) {
+            router.push(`/profile/${senderId}`)
+          }
+          break
+      }
+    },
+    [markAsRead, router]
+  )
 
   const value: NotificationContextValue = {
     notifications,
@@ -295,6 +371,12 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   return (
     <NotificationContext.Provider value={value}>
       {children}
+      <NotificationToast
+        key={currentNotification?.id}
+        notification={currentNotification}
+        onPress={handleNotificationPress}
+        onDismiss={() => setCurrentNotification(null)}
+      />
     </NotificationContext.Provider>
   )
 }

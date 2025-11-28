@@ -32,4 +32,11 @@ export interface NotificationItem {
   senderId: string
   receiverId: string
   type: NotificationType
+  data?: {
+    postId?: string
+    commentId?: string
+    groupId?: string
+    storyId?: string
+    [key: string]: any
+  }
 }

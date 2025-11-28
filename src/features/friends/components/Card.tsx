@@ -33,9 +33,6 @@ export function UserCard({
   const textColor = isDark ? '#f5f5f5' : '#111827'
   const subtitleColor = isDark ? 'rgba(255,255,255,0.6)' : '#6b7280'
 
-  const fullName = `${user.firstName} ${user.lastName}`.trim()
-  const displayName = fullName || user.email
-
   const handleNavigateToProfile = async () => {
     const currentUserId = await getUserId()
     if (currentUserId && user.id === currentUserId) {
@@ -67,7 +64,7 @@ export function UserCard({
       <Pressable style={{ flex: 1 }} onPress={handleNavigateToProfile}>
         <YStack gap="$1">
           <Text fontSize={14} fontWeight="600" color={textColor}>
-            {displayName}
+            {user.username}
           </Text>
           <Text fontSize={13} color={subtitleColor}>
             {user.email}
