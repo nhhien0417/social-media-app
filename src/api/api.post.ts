@@ -6,6 +6,7 @@ import { API_BASE_URL } from './axios.config'
 import { Comment } from '@/types/Comment'
 import { User } from '@/types/User'
 import { dataURItoBlob } from '@/utils/ConvertData'
+import { Platform } from 'react-native'
 
 export type GetFeedResponse = {
   statusCode: number
@@ -151,9 +152,13 @@ export const createPostApi = (
       }
 
       if (data.media && data.media.length > 0) {
-        data.media.forEach(file => {
+        for (const file of data.media) {
           if (file.uri.startsWith('data:')) {
             const blob = dataURItoBlob(file.uri)
+            formData.append('media', blob, file.name)
+          } else if (Platform.OS === 'web') {
+            const response = await fetch(file.uri)
+            const blob = await response.blob()
             formData.append('media', blob, file.name)
           } else {
             formData.append('media', {
@@ -162,7 +167,7 @@ export const createPostApi = (
               type: file.type,
             } as any)
           }
-        })
+        }
       }
 
       const token = await getAccessToken()
@@ -213,9 +218,13 @@ export const updatePostApi = (
       }
 
       if (data.media && data.media.length > 0) {
-        data.media.forEach(file => {
+        for (const file of data.media) {
           if (file.uri.startsWith('data:')) {
             const blob = dataURItoBlob(file.uri)
+            formData.append('media', blob, file.name)
+          } else if (Platform.OS === 'web') {
+            const response = await fetch(file.uri)
+            const blob = await response.blob()
             formData.append('media', blob, file.name)
           } else {
             formData.append('media', {
@@ -224,7 +233,7 @@ export const updatePostApi = (
               type: file.type,
             } as any)
           }
-        })
+        }
       }
 
       const token = await getAccessToken()
@@ -289,9 +298,13 @@ export const createCommentApi = (
       formData.append('comment', JSON.stringify(data))
 
       if (mediaFiles && mediaFiles.length > 0) {
-        mediaFiles.forEach(file => {
+        for (const file of mediaFiles) {
           if (file.uri.startsWith('data:')) {
             const blob = dataURItoBlob(file.uri)
+            formData.append('media', blob, file.name)
+          } else if (Platform.OS === 'web') {
+            const response = await fetch(file.uri)
+            const blob = await response.blob()
             formData.append('media', blob, file.name)
           } else {
             formData.append('media', {
@@ -300,7 +313,7 @@ export const createCommentApi = (
               type: file.type,
             } as any)
           }
-        })
+        }
       }
 
       const token = await getAccessToken()
@@ -346,9 +359,13 @@ export const updateCommentApi = (
       formData.append('comment', JSON.stringify(data))
 
       if (mediaFiles && mediaFiles.length > 0) {
-        mediaFiles.forEach(file => {
+        for (const file of mediaFiles) {
           if (file.uri.startsWith('data:')) {
             const blob = dataURItoBlob(file.uri)
+            formData.append('media', blob, file.name)
+          } else if (Platform.OS === 'web') {
+            const response = await fetch(file.uri)
+            const blob = await response.blob()
             formData.append('media', blob, file.name)
           } else {
             formData.append('media', {
@@ -357,7 +374,7 @@ export const updateCommentApi = (
               type: file.type,
             } as any)
           }
-        })
+        }
       }
 
       const token = await getAccessToken()

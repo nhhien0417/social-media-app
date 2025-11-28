@@ -10,7 +10,9 @@ import {
   Dimensions,
   Image as RNImage,
   ActivityIndicator,
+  Platform,
 } from 'react-native'
+import * as ImagePicker from 'expo-image-picker'
 import { XStack, YStack, Button, SizableText } from 'tamagui'
 import { X, Check } from '@tamagui/lucide-icons'
 import * as MediaLibrary from 'expo-media-library'
@@ -156,9 +158,36 @@ export default function MediaPicker({
 
   useEffect(() => {
     if (visible) {
-      translateY.setValue(SNAP_POINTS.HIDDEN)
-      currentSnapPoint.current = SNAP_POINTS.HALF
-      openSheet()
+      if (Platform.OS === 'web') {
+        ;(async () => {
+          try {
+            const result = await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: ['images', 'videos'],
+              allowsMultipleSelection: true,
+              quality: 1,
+              selectionLimit: maxSelection,
+            })
+
+            if (!result.canceled) {
+              const webAssets: MediaAsset[] = result.assets.map(asset => ({
+                id: asset.assetId || asset.uri,
+                uri: asset.uri,
+                mediaType: asset.type === 'video' ? 'video' : 'photo',
+                duration: asset.duration || undefined,
+              }))
+              onSelect(webAssets)
+            }
+            onClose()
+          } catch (error) {
+            console.error('Web picker error:', error)
+            onClose()
+          }
+        })()
+      } else {
+        translateY.setValue(SNAP_POINTS.HIDDEN)
+        currentSnapPoint.current = SNAP_POINTS.HALF
+        openSheet()
+      }
     } else {
       setSelectedIds(new Set())
     }
@@ -389,7 +418,7 @@ export default function MediaPicker({
     )
   }
 
-  if (!visible) return null
+  if (!visible || Platform.OS === 'web') return null
 
   return (
     <Modal

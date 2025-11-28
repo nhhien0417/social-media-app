@@ -1,4 +1,5 @@
 import {
+  createElement,
   forwardRef,
   useEffect,
   useImperativeHandle,
@@ -315,46 +316,76 @@ export const EditProfileForm = forwardRef<
         <Label fontWeight={700} fontSize={15} color={labelColor}>
           Date of birth
         </Label>
-        <XStack
-          alignItems="center"
-          borderWidth={1}
-          borderColor={outlineColor}
-          borderRadius="$4"
-          paddingHorizontal="$3"
-          paddingVertical="$2"
-          backgroundColor={inputBackground}
-          justifyContent="space-between"
-          onPress={() => setShowDatePicker(true)}
-          pressStyle={{ opacity: 0.8 }}
-        >
-          <Text
-            fontSize={15}
-            color={
-              formValues.dob
-                ? inputTextColor
-                : isDark
-                  ? 'rgba(255,255,255,0.5)'
-                  : '#9ca3af'
-            }
+        {Platform.OS === 'web' ? (
+          <XStack
+            alignItems="center"
+            borderWidth={1}
+            borderColor={outlineColor}
+            borderRadius="$4"
+            paddingHorizontal="$3"
+            paddingVertical="$2"
+            backgroundColor={inputBackground}
           >
-            {displayDob}
-          </Text>
+            {createElement('input', {
+              type: 'date',
+              value: formValues.dob,
+              onChange: (e: any) =>
+                setFormValues(current => ({ ...current, dob: e.target.value })),
+              style: {
+                border: 'none',
+                background: 'transparent',
+                color: inputTextColor,
+                fontSize: 15,
+                fontFamily: 'System',
+                width: '100%',
+                outline: 'none',
+              },
+            })}
+          </XStack>
+        ) : (
+          <YStack>
+            <XStack
+              alignItems="center"
+              borderWidth={1}
+              borderColor={outlineColor}
+              borderRadius="$4"
+              paddingHorizontal="$3"
+              paddingVertical="$2"
+              backgroundColor={inputBackground}
+              justifyContent="space-between"
+              onPress={() => setShowDatePicker(true)}
+              pressStyle={{ opacity: 0.8 }}
+            >
+              <Text
+                fontSize={15}
+                color={
+                  formValues.dob
+                    ? inputTextColor
+                    : isDark
+                      ? 'rgba(255,255,255,0.5)'
+                      : '#9ca3af'
+                }
+              >
+                {displayDob}
+              </Text>
 
-          <Calendar size={20} color={inputTextColor} />
-        </XStack>
-        {showDatePicker && (
-          <DateTimePicker
-            value={formValues.dob ? new Date(formValues.dob) : new Date()}
-            mode="date"
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-            onChange={(event, selectedDate) => {
-              setShowDatePicker(false)
-              if (selectedDate) {
-                const dateString = selectedDate.toISOString().split('T')[0]
-                setFormValues(current => ({ ...current, dob: dateString }))
-              }
-            }}
-          />
+              <Calendar size={20} color={inputTextColor} />
+            </XStack>
+            {showDatePicker && (
+              <DateTimePicker
+                value={formValues.dob ? new Date(formValues.dob) : new Date()}
+                mode="date"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                onChange={(event, selectedDate) => {
+                  setShowDatePicker(false)
+                  if (selectedDate) {
+                    const dateString = selectedDate.toISOString().split('T')[0]
+                    setFormValues(current => ({ ...current, dob: dateString }))
+                  }
+                }}
+              />
+            )}
+          </YStack>
         )}
       </YStack>
     </ScrollView>

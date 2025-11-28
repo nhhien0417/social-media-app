@@ -279,8 +279,7 @@ export default function NewPostScreen() {
       router.replace('/(tabs)')
 
       updatePost(updateData)
-        .then(response => {
-          console.log('Post updated successfully:', response)
+        .then(() => {
           usePostStore.getState().refreshFeed()
           finishUpdating()
           setIsSubmitting(false)
