@@ -31,13 +31,13 @@ class StompService {
    */
   connect(userId: string): void {
     if (this.client?.active) {
-      console.log('🔌 STOMP already connected')
+      console.log('STOMP already connected')
       return
     }
 
     this.currentUserId = userId
     const url = getWebSocketURL()
-    console.log('🔌 Connecting to STOMP WebSocket:', url)
+    console.log('Connecting to STOMP WebSocket:', url)
 
     const config: StompConfig = {
       // Use SockJS for transport compatibility
@@ -57,7 +57,7 @@ class StompService {
       // Event handlers
       onConnect: (frame: IFrame) => {
         console.log('STOMP Connected successfully')
-        console.log('📋 Connection frame:', frame)
+        console.log('Connection frame:', frame)
         this.connected = true
 
         // Subscribe to user-specific notification topic
@@ -69,7 +69,7 @@ class StompService {
 
       onStompError: (frame: IFrame) => {
         console.error('STOMP Error:', frame.headers['message'])
-        console.error('📋 Error details:', frame.body)
+        console.error('Error details:', frame.body)
         this.connected = false
 
         // Emit error event
@@ -80,8 +80,8 @@ class StompService {
       },
 
       onWebSocketClose: (event: CloseEvent) => {
-        console.log('🔌 WebSocket connection closed')
-        console.log('📋 Close event:', event)
+        console.log('WebSocket connection closed')
+        console.log('Close event:', event)
         this.connected = false
 
         // Emit disconnect event
@@ -89,7 +89,7 @@ class StompService {
       },
 
       onDisconnect: (frame: IFrame) => {
-        console.log('🔌 STOMP Disconnected')
+        console.log('STOMP Disconnected')
         this.connected = false
 
         // Emit disconnect event
@@ -105,7 +105,7 @@ class StompService {
               str.includes('CONNECTED') ||
               str.includes('DISCONNECT')
             ) {
-              console.log('🐛 STOMP:', str)
+              console.log('STOMP:', str)
             }
           }
         : undefined,
@@ -121,17 +121,16 @@ class StompService {
    */
   private subscribeToNotifications(userId: string): void {
     if (!this.client?.active) {
-      console.warn('⚠️ Cannot subscribe: STOMP not connected')
+      console.warn('Cannot subscribe: STOMP not connected')
       return
     }
 
     // Subscribe to user's notification topic
     const topic = `/topic/notifications/${userId}`
-    console.log('📬 Subscribing to:', topic)
+    console.log('Subscribing to:', topic)
 
     this.client.subscribe(topic, (message: IMessage) => {
       try {
-        console.log('📨 Received notification:', message.body)
         const notification = JSON.parse(message.body)
 
         // Emit notification event to all listeners
@@ -147,7 +146,7 @@ class StompService {
    */
   disconnect(): void {
     if (this.client?.active) {
-      console.log('🔌 Disconnecting STOMP client...')
+      console.log('Disconnecting STOMP client...')
       this.client.deactivate()
       this.connected = false
       this.currentUserId = null
@@ -223,7 +222,7 @@ class StompService {
    */
   send(destination: string, body: any, headers?: Record<string, string>): void {
     if (!this.client?.active) {
-      console.warn('⚠️ Cannot send message: STOMP not connected')
+      console.warn('Cannot send message: STOMP not connected')
       return
     }
 
@@ -233,7 +232,7 @@ class StompService {
         body: JSON.stringify(body),
         headers: headers || {},
       })
-      console.log('📤 Message sent to:', destination)
+      console.log('Message sent to:', destination)
     } catch (error) {
       console.error('Failed to send message:', error)
     }

@@ -56,7 +56,7 @@ function RootContent() {
   return (
     <QueryProvider>
       <PostStatusProvider>
-        <NotificationProvider userId={userId || undefined}>
+        <NotificationProvider userId={userId}>
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="index" />

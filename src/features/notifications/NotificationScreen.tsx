@@ -43,7 +43,7 @@ export default function NotificationScreen() {
   /**
    * Delete a specific notification
    */
-  const handleDeleteNotification = (id: number) => {
+  const handleDeleteNotification = (id: string) => {
     deleteNotification(id)
     setActiveNotification(null)
   }
@@ -60,7 +60,7 @@ export default function NotificationScreen() {
    * Handle notification press - mark as read and navigate
    */
   const handleNotificationPress = (notification: NotificationItem) => {
-    if (notification.unread) {
+    if (!notification.read) {
       markAsRead(notification.id)
     }
     // TODO: Navigate to related content

@@ -1,11 +1,12 @@
 import { Sheet, Text, Button, Separator } from 'tamagui'
 import Avatar from '@/components/Avatar'
 import type { NotificationItem } from '@/types/Notification'
+import { formatDate } from '@/utils/FormatDate'
 
 interface NotificationSheetProps {
   notification: NotificationItem | null
   onOpenChange: (open: boolean) => void
-  onDelete: (id: number) => void
+  onDelete: (id: string) => void
 }
 
 export default function NotificationSheet({
@@ -34,7 +35,10 @@ export default function NotificationSheet({
       >
         {notification && (
           <>
-            <Avatar uri={notification.avatar || ''} size={80} />
+            <Avatar
+              uri={`https://i.pravatar.cc/150?u=${notification.senderId}`}
+              size={80}
+            />
             <Text
               color="$color"
               textAlign="center"
@@ -47,7 +51,7 @@ export default function NotificationSheet({
               {notification.message}
             </Text>
             <Text color="$gray8" fontSize="$3">
-              {notification.time}
+              {formatDate(notification.createdAt)}
             </Text>
 
             <Separator marginVertical="$3" />

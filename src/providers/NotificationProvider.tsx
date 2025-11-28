@@ -27,9 +27,9 @@ interface NotificationContextValue {
   unreadCount: number
   isConnected: boolean
   pushToken: string | null
-  markAsRead: (id: number) => void
+  markAsRead: (id: string) => void
   markAllAsRead: () => void
-  deleteNotification: (id: number) => void
+  deleteNotification: (id: string) => void
   clearAll: () => void
 }
 
@@ -42,12 +42,7 @@ const NotificationContext = createContext<NotificationContextValue | undefined>(
 
 interface NotificationProviderProps {
   children: ReactNode
-  /**
-   * User ID for WebSocket connection (optional)
-   * If not provided, will try to get from token or use 'guest'
-   * Pass the logged-in user's ID here for proper notification routing
-   */
-  userId?: string
+  userId: string | null
 }
 
 /**
@@ -63,10 +58,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   const [pushToken, setPushToken] = useState<string | null>(null)
   const notificationListener = useRef<Notifications.Subscription | null>(null)
   const responseListener = useRef<Notifications.Subscription | null>(null)
-
-  // TODO: Get userId from auth token/context when available
-  // For now, use prop or fallback to 'guest'
-  const userId = propUserId || 'guest'
+  const userId = propUserId
 
   // =====================================
   // SETUP PUSH NOTIFICATIONS
@@ -74,31 +66,30 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   useEffect(() => {
     let isMounted = true
 
-    // Đăng ký Push Notifications
+    // Register for Push Notifications
     const setupPushNotifications = async () => {
       try {
-        // Lấy Push Token
+        // Get Push Token
         const token = await registerForPushNotificationsAsync()
 
         if (token && isMounted) {
           setPushToken(token)
-          console.log('🔔 Push Token:', token)
+          console.log('Push Token:', token)
 
-          // Gửi token lên backend (chỉ khi có userId thật)
-          if (userId && userId !== 'guest') {
+          // Send token to backend
+          if (userId) {
             try {
               await registerPushToken(token)
-              console.log('Đã đăng ký Push Token với backend')
+              console.log('Registered Push Token with backend')
             } catch (error) {
-              console.error('Lỗi khi đăng ký Push Token:', error)
+              console.error('Error registering Push Token:', error)
             }
           }
         }
       } catch (error) {
-        console.error('Lỗi setup Push Notifications:', error)
+        console.error('Error setting up Push Notifications:', error)
       }
     }
-
     setupPushNotifications()
 
     // Cleanup
@@ -109,57 +100,52 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
 
   // =====================================
   // LISTEN TO PUSH NOTIFICATIONS
-  // (Chỉ hoạt động khi app ở background/killed)
   // =====================================
   useEffect(() => {
-    // Lắng nghe notification khi app đang mở
-    // Note: Push notifications vẫn được nhận nhưng WebSocket sẽ xử lý
     notificationListener.current = addNotificationReceivedListener(
       notification => {
         console.log(
-          '🔔 Push Notification received (app foreground):',
+          'Push Notification received (app foreground):',
           notification
         )
 
         // Parse notification data
         const data = notification.request.content.data as Record<string, any>
 
-        // Kiểm tra xem notification đã tồn tại chưa (có thể đã nhận qua WebSocket)
+        // Check if notification already exists (might have been received via WebSocket)
         const notificationId = data.notificationId || Date.now()
 
         setNotifications(prev => {
-          // Tránh duplicate nếu đã nhận qua WebSocket
+          // Avoid duplicates if already received via WebSocket
           const exists = prev.some(n => n.id === notificationId)
           if (exists) {
             console.log(
-              '📝 Notification already exists (from WebSocket), skipping...'
+              'Notification already exists (from WebSocket), skipping...'
             )
             return prev
           }
 
-          // Tạo NotificationItem từ push notification
+          // Create NotificationItem from push notification
           const newNotification: NotificationItem = {
-            id: notificationId,
+            id: notificationId.toString(),
             senderId: (data.senderId as string) || '0',
-            section: (data.section as string) || 'other',
-            avatar:
-              (data.avatar as string) || 'https://via.placeholder.com/150',
+            receiverId: userId || '',
             message: notification.request.content.body || '',
-            time: new Date().toISOString(),
-            unread: true,
-            type: (data.type as NotificationType) || 'other',
+            createdAt: new Date().toISOString(),
+            read: false,
+            type: (data.type as NotificationType) || 'NEW_POST',
           }
 
-          console.log('➕ Adding notification from Push:', newNotification.id)
+          console.log('Adding notification from Push:', newNotification.id)
           return [newNotification, ...prev]
         })
       }
     )
 
-    // Lắng nghe khi user nhấn vào notification
+    // Listen when user taps on notification
     responseListener.current = addNotificationResponseReceivedListener(
       response => {
-        console.log('🔔 Notification tapped:', response)
+        console.log('Notification tapped:', response)
 
         const data = response.notification.request.content.data as Record<
           string,
@@ -176,7 +162,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
         //   router.push(`/message/${data.messageId}`)
         // }
 
-        console.log('📱 Navigation data:', data)
+        console.log('Navigation data:', data)
       }
     )
 
@@ -195,7 +181,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   // UPDATE BADGE COUNT
   // =====================================
   useEffect(() => {
-    const unreadCount = notifications.filter(n => n.unread).length
+    const unreadCount = notifications.filter(n => !n.read).length
     setBadgeCount(unreadCount)
   }, [notifications])
 
@@ -207,27 +193,26 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
 
   // Connect to STOMP WebSocket
   const { isConnected } = useStomp({
-    userId,
+    userId: userId || undefined,
     autoConnect: !!userId && userId !== 'guest',
     autoDisconnect: true,
   })
 
   /**
    * Handle new notification received from Kafka/Backend via STOMP WebSocket
-   * Đây là nguồn chính khi app đang MỞ (real-time, ưu tiên hơn Push)
+   * This is the main source when app is OPEN (real-time, prioritized over Push)
    */
   const handleNewNotification = useCallback(
     (notification: NotificationItem) => {
-      console.log('🌐 WebSocket notification received:', notification)
+      console.log('Notification received:', notification)
 
       setNotifications(prev => {
         // Check for duplicates
         if (prev.some(n => n.id === notification.id)) {
-          console.log('📝 Notification already exists, skipping...')
+          console.log('Notification already exists, skipping...')
           return prev
         }
 
-        console.log('➕ Adding notification from WebSocket:', notification.id)
         // Add new notification at the beginning
         return [notification, ...prev]
       })
@@ -246,13 +231,13 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
    * Note: Backend needs to implement corresponding STOMP endpoint
    * @param id - Notification ID
    */
-  const markAsRead = useCallback((id: number) => {
+  const markAsRead = useCallback((id: string) => {
     // For now, just update UI optimistically
     // TODO: Send STOMP message to backend when endpoint is ready
     // stompService.send('/notifications/mark-read', { id })
 
     setNotifications(prev =>
-      prev.map(n => (n.id === id ? { ...n, unread: false } : n))
+      prev.map(n => (n.id === id ? { ...n, read: true } : n))
     )
   }, [])
 
@@ -265,7 +250,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     // TODO: Send STOMP message to backend when endpoint is ready
     // stompService.send('/notifications/mark-all-read', {})
 
-    setNotifications(prev => prev.map(n => ({ ...n, unread: false })))
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })))
   }, [])
 
   /**
@@ -273,7 +258,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
    * Note: Backend needs to implement corresponding STOMP endpoint
    * @param id - Notification ID
    */
-  const deleteNotification = useCallback((id: number) => {
+  const deleteNotification = useCallback((id: string) => {
     // For now, just update UI optimistically
     // TODO: Send STOMP message to backend when endpoint is ready
     // stompService.send('/notifications/delete', { id })
@@ -294,7 +279,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   }, [])
 
   // Calculate unread count
-  const unreadCount = notifications.filter(n => n.unread).length
+  const unreadCount = notifications.filter(n => !n.read).length
 
   const value: NotificationContextValue = {
     notifications,
