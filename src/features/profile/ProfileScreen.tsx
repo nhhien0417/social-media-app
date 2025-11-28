@@ -67,6 +67,12 @@ export default function ProfileScreen({ userId }: ProfileScreenProps) {
     }
   }
 
+  const handleGroupsPress = () => {
+    if (isOwnProfile) {
+      router.push('/profile/groups')
+    }
+  }
+
   const handlePostsPress = () => {
     if (displayUser) {
       router.push({
@@ -165,6 +171,7 @@ export default function ProfileScreen({ userId }: ProfileScreenProps) {
             user={displayUser}
             isOwnProfile={isOwnProfile}
             onFriendsPress={handleFriendsPress}
+            onGroupsPress={handleGroupsPress}
             onPostsPress={handlePostsPress}
           />
           <ProfileBio user={displayUser} isOwnProfile={isOwnProfile} />

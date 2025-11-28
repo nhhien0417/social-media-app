@@ -8,6 +8,7 @@ import { useRouter } from 'expo-router'
 
 interface ProfileInfoProps extends ProfileComponentProps {
   onFriendsPress?: () => void
+  onGroupsPress?: () => void
   onPostsPress?: () => void
 }
 
@@ -15,6 +16,7 @@ export function ProfileInfo({
   user,
   isOwnProfile,
   onFriendsPress,
+  onGroupsPress,
   onPostsPress,
 }: ProfileInfoProps) {
   const router = useRouter()
@@ -70,6 +72,17 @@ export function ProfileInfo({
             </Text>
             <Text fontSize="$3" fontWeight="500" color={captionColor}>
               Friends
+            </Text>
+          </YStack>
+        </Pressable>
+
+        <Pressable onPress={onGroupsPress}>
+          <YStack alignItems="center" gap="$1">
+            <Text fontSize="$6" fontWeight="700">
+              {formatNumber(12)}
+            </Text>
+            <Text fontSize="$3" fontWeight="500" color={captionColor}>
+              Groups
             </Text>
           </YStack>
         </Pressable>
