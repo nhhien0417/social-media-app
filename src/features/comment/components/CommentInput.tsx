@@ -15,8 +15,8 @@ import {
 } from '@tamagui/lucide-icons'
 import { Comment } from '@/types/Comment'
 import Avatar from '@/components/Avatar'
-import MediaPicker from '@/features/create/components/MediaPicker'
-import Camera from '@/features/create/components/Camera'
+import MediaPicker from '@/components/MediaPicker'
+import Camera from '@/components/Camera'
 
 type Props = {
   value: string
@@ -150,7 +150,8 @@ const CommentInput = forwardRef<RNTextInput, Props>(
             justifyContent="space-between"
           >
             <SizableText fontSize={13} color="#666">
-              Replying to {replyingTo.authorProfile?.username || 'Unknown User'}...
+              Replying to {replyingTo.authorProfile?.username || 'Unknown User'}
+              ...
             </SizableText>
             {onCancelReply && (
               <TouchableOpacity onPress={onCancelReply}>

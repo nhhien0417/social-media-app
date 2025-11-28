@@ -10,8 +10,8 @@ import PostPreview, {
   type PrivacyOption,
 } from '../create/components/PostPreview'
 import PostAction from '../create/components/PostAction'
-import MediaPicker from '../create/components/MediaPicker'
-import Camera from '../create/components/Camera'
+import MediaPicker from '../../components/MediaPicker'
+import Camera from '../../components/Camera'
 import DiscardChangesModal from '../create/components/DiscardChanges'
 import { usePostStore } from '@/stores/postStore'
 import { useCurrentUser } from '@/hooks/useProfile'
