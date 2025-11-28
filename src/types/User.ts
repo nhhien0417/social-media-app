@@ -1,5 +1,6 @@
 import { Post } from './Post'
 
+export type Gender = 'MALE' | 'FEMALE' | 'OTHER'
 export type FriendStatus =
   | 'NONE'
   | 'SELF'

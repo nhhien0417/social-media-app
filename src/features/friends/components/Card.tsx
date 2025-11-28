@@ -35,7 +35,6 @@ export function UserCard({
 
   const fullName = `${user.firstName} ${user.lastName}`.trim()
   const displayName = fullName || user.email
-  const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=random`
 
   const handleNavigateToProfile = async () => {
     const currentUserId = await getUserId()
@@ -58,7 +57,10 @@ export function UserCard({
     >
       <Pressable onPress={handleNavigateToProfile}>
         <YStack style={styles.avatar}>
-          <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
+          <Image
+            source={{ uri: user.avatarUrl || undefined }}
+            style={styles.avatarImage}
+          />
         </YStack>
       </Pressable>
 

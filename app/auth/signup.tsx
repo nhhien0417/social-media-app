@@ -14,7 +14,11 @@ import {
 } from 'tamagui'
 import { Eye, EyeOff } from '@tamagui/lucide-icons'
 import { Image } from 'react-native'
-import { signUpApi } from '@/api/api.auth'
+import { signUpApi, signInApi } from '@/api/api.auth'
+import { updateProfileApi } from '@/api/api.profile'
+import { getAvatarUrl } from '@/utils/Avatar'
+import { saveTokens, saveUserId } from '@/utils/SecureStore'
+import { urlToDataURI } from '@/utils/ConvertData'
 import ButtonIcon from '@/components/IconButton'
 import { GoogleSignInButton } from '@/components/GoogleSignInButton'
 
@@ -79,9 +83,35 @@ export default function SignUpScreen() {
     setErrors({})
 
     try {
-      const response = await signUpApi({ email, username, password })
-      console.log('API Response:', response)
-      router.replace('/auth/signin')
+      // 1. Sign Up
+      const signupResponse = await signUpApi({ email, username, password })
+      console.log('API Response:', signupResponse)
+
+      // 2. Sign In
+      const signinResponse = await signInApi({ email, password })
+      console.log('API Response:', signinResponse)
+
+      const { accessToken, refreshToken, id } = signinResponse.data
+      await saveTokens(accessToken, refreshToken)
+      await saveUserId(id)
+
+      // 3. Generate and Upload Avatar
+      try {
+        const avatarUrl = getAvatarUrl(username)
+        const dataURI = await urlToDataURI(avatarUrl)
+        await updateProfileApi(
+          { userId: id },
+          {
+            uri: dataURI,
+            name: 'avatar.png',
+            type: 'image/png',
+          }
+        )
+      } catch (avatarError) {
+        console.error('Failed to auto-generate avatar:', avatarError)
+      }
+
+      router.replace('/(tabs)')
     } catch (error: any) {
       const apiError =
         error?.response?.data?.message || 'An unknown error occurred.'

@@ -2,6 +2,10 @@ import { Button, XStack, Text, Spinner, YStack } from 'tamagui'
 import { useGoogleSignIn } from '../hooks/useGoogleSignIn'
 import { useRouter } from 'expo-router'
 import Svg, { G, Path } from 'react-native-svg'
+import { getUserApi, updateProfileApi } from '@/api/api.profile'
+import { getAvatarUrl } from '@/utils/Avatar'
+import { urlToDataURI } from '@/utils/ConvertData'
+import { getUserId } from '@/utils/SecureStore'
 
 export const GoogleSignInButton = () => {
   const { isLoading, handleGoogleSignIn } = useGoogleSignIn()
@@ -11,7 +15,30 @@ export const GoogleSignInButton = () => {
     const result = await handleGoogleSignIn()
 
     if (result.success) {
-      console.log('Google sign-in success, navigating to home...')
+      console.log('Google sign-in success')
+      try {
+        const userId = await getUserId()
+        if (userId) {
+          const userResponse = await getUserApi(userId)
+          const user = userResponse.data
+          if (!user.avatarUrl) {
+            console.log('Avatar missing, generating...')
+            const avatarUrl = getAvatarUrl(user.username)
+            const dataURI = await urlToDataURI(avatarUrl)
+            await updateProfileApi(
+              { userId },
+              {
+                uri: dataURI,
+                name: 'avatar.png',
+                type: 'image/png',
+              }
+            )
+            console.log('Avatar generated and uploaded.')
+          }
+        }
+      } catch (error) {
+        console.error('Error checking/uploading avatar:', error)
+      }
       router.replace('/(tabs)')
     } else {
       console.log('Google sign-in failed:', result.error)

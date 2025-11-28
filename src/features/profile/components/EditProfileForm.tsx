@@ -1,4 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useState,
+} from 'react'
 import { ScrollView, Image, StyleSheet } from 'react-native'
 import {
   Button,
@@ -13,22 +19,35 @@ import {
   Adapt,
   Sheet,
 } from 'tamagui'
-import { Camera, ChevronDown } from '@tamagui/lucide-icons'
+import { Camera, ChevronDown, Check, Calendar } from '@tamagui/lucide-icons'
 import { LinearGradient } from 'expo-linear-gradient'
+import * as ImagePicker from 'expo-image-picker'
+import DateTimePicker from '@react-native-community/datetimepicker'
+import { Platform } from 'react-native'
+import type { Gender } from '@/types/User'
 
 import { INSTAGRAM_GRADIENT } from '@/utils/InstagramGradient'
 import { ProfileComponentProps } from '../ProfileScreen'
+import { useProfileStore } from '@/stores/profileStore'
+import { Alert } from 'react-native'
 
 type FormValues = {
   name: string
   username: string
   avatarUrl: string
-  gender: string
+  gender: Gender | ''
   bio: string
   dob: string
 }
 
-export function EditProfileForm({ user }: ProfileComponentProps) {
+export type EditProfileFormRef = {
+  handleSave: () => Promise<void>
+}
+
+export const EditProfileForm = forwardRef<
+  EditProfileFormRef,
+  ProfileComponentProps
+>(({ user }, ref) => {
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
 
@@ -37,7 +56,7 @@ export function EditProfileForm({ user }: ProfileComponentProps) {
       name: [user.firstName, user.lastName].filter(Boolean).join(' '),
       username: user.username || '',
       avatarUrl: user.avatarUrl || '',
-      gender: user.gender || '',
+      gender: (user.gender as Gender) || '',
       bio: user.bio || '',
       dob: user.dob || '',
     }),
@@ -45,6 +64,14 @@ export function EditProfileForm({ user }: ProfileComponentProps) {
   )
 
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
+  const [showDatePicker, setShowDatePicker] = useState(false)
+  const [avatarFile, setAvatarFile] = useState<{
+    uri: string
+    name: string
+    type: string
+  } | null>(null)
+
+  const { updateProfile, isLoading } = useProfileStore()
 
   useEffect(() => {
     setFormValues(initialValues)
@@ -56,6 +83,51 @@ export function EditProfileForm({ user }: ProfileComponentProps) {
   const outlineColor = isDark ? 'rgba(255,255,255,0.25)' : '#d1d5db'
   const ringBackground = isDark ? '#050506' : '#ffffff'
   const displayDob = formValues.dob || 'Select your date of birth'
+
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    })
+
+    if (!result.canceled) {
+      const asset = result.assets[0]
+      setFormValues(prev => ({ ...prev, avatarUrl: asset.uri }))
+      setAvatarFile({
+        uri: asset.uri,
+        name: asset.fileName || 'avatar.jpg',
+        type: asset.mimeType || 'image/jpeg',
+      })
+    }
+  }
+
+  useImperativeHandle(ref, () => ({
+    handleSave: async () => {
+      try {
+        const nameParts = formValues.name.trim().split(' ')
+        const firstName = nameParts[0]
+        const lastName = nameParts.slice(1).join(' ')
+
+        await updateProfile(
+          {
+            userId: user.id,
+            username: formValues.username,
+            firstName,
+            lastName,
+            bio: formValues.bio,
+            gender: formValues.gender,
+            dob: formValues.dob,
+          },
+          avatarFile || undefined
+        )
+        Alert.alert('Success', 'Profile updated successfully')
+      } catch (error) {
+        Alert.alert('Error', 'Failed to update profile')
+      }
+    },
+  }))
 
   return (
     <ScrollView
@@ -95,9 +167,7 @@ export function EditProfileForm({ user }: ProfileComponentProps) {
           borderColor={outlineColor}
           borderWidth={1}
           fontSize={15}
-          onPress={() => {
-            // TODO: open image picker
-          }}
+          onPress={pickImage}
         >
           Change profile photo
         </Button>
@@ -165,7 +235,7 @@ export function EditProfileForm({ user }: ProfileComponentProps) {
         <Select
           value={formValues.gender || ''}
           onValueChange={value =>
-            setFormValues(current => ({ ...current, gender: value }))
+            setFormValues(current => ({ ...current, gender: value as Gender }))
           }
         >
           <Select.Trigger
@@ -209,28 +279,28 @@ export function EditProfileForm({ user }: ProfileComponentProps) {
                 <Select.Item value="" index={0}>
                   <Select.ItemText>Prefer not to say</Select.ItemText>
                   <Select.ItemIndicator marginLeft="auto">
-                    •
+                    <Check size={16} />
                   </Select.ItemIndicator>
                 </Select.Item>
 
                 <Select.Item value="FEMALE" index={1}>
                   <Select.ItemText>Female</Select.ItemText>
                   <Select.ItemIndicator marginLeft="auto">
-                    •
+                    <Check size={16} />
                   </Select.ItemIndicator>
                 </Select.Item>
 
                 <Select.Item value="MALE" index={2}>
                   <Select.ItemText>Male</Select.ItemText>
                   <Select.ItemIndicator marginLeft="auto">
-                    •
+                    <Check size={16} />
                   </Select.ItemIndicator>
                 </Select.Item>
 
                 <Select.Item value="OTHER" index={3}>
                   <Select.ItemText>Other</Select.ItemText>
                   <Select.ItemIndicator marginLeft="auto">
-                    •
+                    <Check size={16} />
                   </Select.ItemIndicator>
                 </Select.Item>
               </Select.Group>
@@ -254,6 +324,8 @@ export function EditProfileForm({ user }: ProfileComponentProps) {
           paddingVertical="$2"
           backgroundColor={inputBackground}
           justifyContent="space-between"
+          onPress={() => setShowDatePicker(true)}
+          pressStyle={{ opacity: 0.8 }}
         >
           <Text
             fontSize={15}
@@ -268,23 +340,26 @@ export function EditProfileForm({ user }: ProfileComponentProps) {
             {displayDob}
           </Text>
 
-          <Button
-            size="$2"
-            fontSize={15}
-            fontWeight={500}
-            backgroundColor="transparent"
-            color={inputTextColor}
-            onPress={() => {
-              // TODO: open date picker, rồi setFormValues({ ... , dob: 'YYYY-MM-DD' })
-            }}
-          >
-            Change
-          </Button>
+          <Calendar size={20} color={inputTextColor} />
         </XStack>
+        {showDatePicker && (
+          <DateTimePicker
+            value={formValues.dob ? new Date(formValues.dob) : new Date()}
+            mode="date"
+            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            onChange={(event, selectedDate) => {
+              setShowDatePicker(false)
+              if (selectedDate) {
+                const dateString = selectedDate.toISOString().split('T')[0]
+                setFormValues(current => ({ ...current, dob: dateString }))
+              }
+            }}
+          />
+        )}
       </YStack>
     </ScrollView>
   )
-}
+})
 
 const AVATAR_SIZE = 100
 const RING_PADDING = 5

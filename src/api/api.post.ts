@@ -5,6 +5,7 @@ import { getAccessToken } from '@/utils/SecureStore'
 import { API_BASE_URL } from './axios.config'
 import { Comment } from '@/types/Comment'
 import { User } from '@/types/User'
+import { dataURItoBlob } from '@/utils/ConvertData'
 
 export type GetFeedResponse = {
   statusCode: number
@@ -119,17 +120,6 @@ export type LikeCommentResponse = {
   error: null | string
   message: string
   data: Comment
-}
-
-const dataURItoBlob = (dataURI: string): Blob => {
-  const byteString = atob(dataURI.split(',')[1])
-  const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0]
-  const ab = new ArrayBuffer(byteString.length)
-  const ia = new Uint8Array(ab)
-  for (let i = 0; i < byteString.length; i++) {
-    ia[i] = byteString.charCodeAt(i)
-  }
-  return new Blob([ab], { type: mimeString })
 }
 
 export const getFeedApi = () => {
@@ -353,7 +343,6 @@ export const updateCommentApi = (
   return new Promise(async (resolve, reject) => {
     try {
       const formData = new FormData()
-
       formData.append('comment', JSON.stringify(data))
 
       if (mediaFiles && mediaFiles.length > 0) {

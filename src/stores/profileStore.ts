@@ -9,6 +9,9 @@ import {
   acceptFriendApi,
   rejectFriendAPi,
   getUserApi,
+  updateProfileApi,
+  UpdateProfileRequest,
+  UserProfileResponse,
 } from '@/api/api.profile'
 import { getUserId } from '@/utils/SecureStore'
 
@@ -42,6 +45,11 @@ interface ProfileState {
   cancelFriend: (friendUserId: string) => Promise<void>
   rejectFriend: (friendUserId: string) => Promise<void>
   unfriend: (friendUserId: string) => Promise<void>
+
+  updateProfile: (
+    data: UpdateProfileRequest,
+    avatar?: { uri: string; name: string; type: string }
+  ) => Promise<UserProfileResponse>
 }
 
 export const useProfileStore = create<ProfileState>((set, get) => ({
@@ -80,6 +88,29 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       })
     } catch (error) {
       console.error('Error initialize:', error)
+    }
+  },
+
+  updateProfile: async (
+    data: UpdateProfileRequest,
+    avatar?: { uri: string; name: string; type: string }
+  ) => {
+    set({ isLoading: true, error: null })
+    try {
+      const response = await updateProfileApi(data, avatar)
+      console.log('Successful update profile:', response)
+      const updatedUser = response.data
+
+      set(state => ({
+        currentUser: updatedUser,
+        users: { ...state.users, [updatedUser.id]: updatedUser },
+        isLoading: false,
+      }))
+      return response
+    } catch (error) {
+      console.error('Error update profile:', error)
+      set({ error: 'Failed to update profile', isLoading: false })
+      throw error
     }
   },
 

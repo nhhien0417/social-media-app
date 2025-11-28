@@ -1,9 +1,14 @@
+import { useRef } from 'react'
 import { useRouter } from 'expo-router'
 import { Button, Text, XStack, YStack, useThemeName } from 'tamagui'
-import { EditProfileForm } from '@/features/profile/components/EditProfileForm'
+import {
+  EditProfileForm,
+  EditProfileFormRef,
+} from '@/features/profile/components/EditProfileForm'
 import { useCurrentUser } from '@/hooks/useProfile'
 
 export default function EditProfileScreen() {
+  const formRef = useRef<EditProfileFormRef>(null)
   const router = useRouter()
   const themeName = useThemeName()
   const currentUser = useCurrentUser()
@@ -13,8 +18,11 @@ export default function EditProfileScreen() {
   const textColor = isDark ? '#FAFAFA' : '#000000'
   const accentColor = '#0095F6'
 
-  const handleSave = () => {
-    router.replace('/profile')
+  const handleSave = async () => {
+    if (formRef.current) {
+      await formRef.current.handleSave()
+      router.replace('/profile')
+    }
   }
 
   const handleCancel = () => {
@@ -80,7 +88,7 @@ export default function EditProfileScreen() {
         </Button>
       </XStack>
 
-      <EditProfileForm user={currentUser} isOwnProfile={true} />
+      <EditProfileForm ref={formRef} user={currentUser} isOwnProfile={true} />
     </YStack>
   )
 }

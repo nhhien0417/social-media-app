@@ -8,6 +8,7 @@ export const ENDPOINTS = {
   },
   PROFILE: {
     ALL: 'profile/users',
+    UPDATE: 'profile/users',
     DETAIL: (id: string | number) => `profile/users/${id}`,
     FRIENDS: (id: string | number) => `profile/friendships/${id}`,
     SENT: (id: string | number) => `profile/friendships/sent/${id}`,
