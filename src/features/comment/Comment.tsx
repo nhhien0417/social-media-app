@@ -20,6 +20,7 @@ import CommentInput from './components/CommentInput'
 import { useCommentStore } from '@/stores/commentStore'
 import { getUserId } from '@/utils/SecureStore'
 import { useProfileStore } from '@/stores/profileStore'
+import { processMediaForUpload } from '@/utils/MediaUtils'
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window')
 
@@ -217,51 +218,9 @@ export default function Comment({
 
     setIsSending(true)
     try {
-      const mediaPromises =
-        media.length > 0
-          ? media.map(async uri => {
-              if (uri.startsWith('http://') || uri.startsWith('https://')) {
-                try {
-                  const response = await fetch(uri)
-                  if (!response.ok) throw new Error('Download failed')
-
-                  const blob = await response.blob()
-                  const fileName = uri.split('/').pop() || 'media.jpg'
-
-                  return new Promise<{
-                    uri: string
-                    name: string
-                    type: string
-                  }>(resolve => {
-                    const reader = new FileReader()
-                    reader.onloadend = () => {
-                      resolve({
-                        uri: reader.result as string,
-                        name: fileName,
-                        type: blob.type || 'image/jpeg',
-                      })
-                    }
-                    reader.readAsDataURL(blob)
-                  })
-                } catch (error) {
-                  console.error('Failed to download media:', uri, error)
-                  return {
-                    uri,
-                    name: uri.split('/').pop() || 'media.jpg',
-                    type: 'image/jpeg',
-                  }
-                }
-              } else {
-                return {
-                  uri,
-                  name: uri.split('/').pop() || 'media.jpg',
-                  type: 'image/jpeg',
-                }
-              }
-            })
-          : []
-
-      const mediaFiles = await Promise.all(mediaPromises)
+      const mediaFiles = await processMediaForUpload(
+        media.map(uri => ({ uri }))
+      )
 
       if (editingComment) {
         await updateComment(

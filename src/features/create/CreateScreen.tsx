@@ -17,6 +17,7 @@ import { usePostStore } from '@/stores/postStore'
 import { usePostStatus } from '@/providers/PostStatusProvider'
 import { PostPrivacy } from '@/types/Post'
 import { useCurrentUser } from '@/hooks/useProfile'
+import { processMediaForUpload } from '@/utils/MediaUtils'
 
 export type CreateMode = 'post' | 'story'
 
@@ -238,36 +239,9 @@ export default function NewPostScreen() {
     if (isEditMode && editPostId) {
       startUpdating(firstMediaUrl)
 
-      const mediaPromises =
-        media.length > 0
-          ? media.map(m => {
-              if (m.blob) {
-                return new Promise<{ uri: string; name: string; type: string }>(
-                  resolve => {
-                    const reader = new FileReader()
-                    reader.onloadend = () => {
-                      resolve({
-                        uri: reader.result as string,
-                        name: m.fileName || 'image.jpg',
-                        type: m.mimeType || 'image/jpeg',
-                      })
-                    }
-                    reader.readAsDataURL(m.blob!)
-                  }
-                )
-              } else {
-                return Promise.resolve({
-                  uri: m.url,
-                  name: m.fileName || m.url.split('/').pop() || 'file',
-                  type:
-                    m.mimeType ||
-                    (m.type === 'video' ? 'video/mp4' : 'image/jpeg'),
-                })
-              }
-            })
-          : []
-
-      const mediaData = await Promise.all(mediaPromises)
+      const mediaData = await processMediaForUpload(
+        media.map(m => ({ ...m, uri: m.url }))
+      )
 
       const updateData = {
         postId: editPostId,
@@ -302,21 +276,16 @@ export default function NewPostScreen() {
         privacy: privacyMap[privacy],
         media:
           media.length > 0
-            ? media.map(m => ({
-                uri: m.url,
-                name: m.fileName || m.url.split('/').pop() || 'file',
-                type:
-                  m.mimeType ||
-                  (m.type === 'video' ? 'video/mp4' : 'image/jpeg'),
-              }))
+            ? await processMediaForUpload(
+                media.map(m => ({ ...m, uri: m.url }))
+              )
             : undefined,
       }
 
       router.replace('/(tabs)')
 
       createPost(postData)
-        .then(response => {
-          console.log('Post created successfully:', response)
+        .then(() => {
           usePostStore.getState().refreshFeed()
           finishPosting()
           setIsSubmitting(false)

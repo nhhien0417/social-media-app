@@ -31,6 +31,7 @@ import { INSTAGRAM_GRADIENT } from '@/utils/InstagramGradient'
 import { ProfileComponentProps } from '../ProfileScreen'
 import { useProfileStore } from '@/stores/profileStore'
 import { Alert } from 'react-native'
+import { processMediaForUpload } from '@/utils/MediaUtils'
 
 type FormValues = {
   name: string
@@ -70,7 +71,15 @@ export const EditProfileForm = forwardRef<
     uri: string
     name: string
     type: string
-  } | null>(null)
+  } | null>(
+    user.avatarUrl
+      ? {
+          uri: user.avatarUrl,
+          name: 'avatar.jpg',
+          type: 'image/jpeg',
+        }
+      : null
+  )
 
   const { updateProfile, isLoading } = useProfileStore()
 
@@ -111,6 +120,14 @@ export const EditProfileForm = forwardRef<
         const firstName = nameParts[0]
         const lastName = nameParts.slice(1).join(' ')
 
+        let processedAvatar
+        if (avatarFile) {
+          const processed = await processMediaForUpload([avatarFile])
+          if (processed.length > 0) {
+            processedAvatar = processed[0]
+          }
+        }
+
         await updateProfile(
           {
             userId: user.id,
@@ -121,7 +138,7 @@ export const EditProfileForm = forwardRef<
             gender: formValues.gender,
             dob: formValues.dob,
           },
-          avatarFile || undefined
+          processedAvatar
         )
         Alert.alert('Success', 'Profile updated successfully')
       } catch (error) {
