@@ -63,7 +63,7 @@ export const usePostStore = create<PostState>((set, get) => ({
     try {
       const response = await getFeedApi()
       console.log('Successful fetch feed:', response)
-      set({ posts: response.data, isLoading: false })
+      set({ posts: response.data.posts, isLoading: false })
     } catch (error) {
       console.error('Error fetching feed:', error)
       set({ error: 'Failed to fetch feed', isLoading: false })
@@ -75,7 +75,7 @@ export const usePostStore = create<PostState>((set, get) => ({
     try {
       const response = await getFeedApi()
       console.log('Successful refresh feed:', response)
-      set({ posts: response.data, isRefreshing: false })
+      set({ posts: response.data.posts, isRefreshing: false })
     } catch (error) {
       console.error('Error refreshing feed:', error)
       set({ error: 'Failed to refresh feed', isRefreshing: false })

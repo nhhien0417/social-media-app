@@ -12,7 +12,9 @@ export type GetFeedResponse = {
   statusCode: number
   error: null | string
   message: string
-  data: Post[]
+  data: {
+    posts: Post[]
+  }
 }
 
 export type GetPostDetailResponse = {
