@@ -17,7 +17,11 @@ import { usePostStore } from '@/stores/postStore'
 import { usePostStatus } from '@/providers/PostStatusProvider'
 import { PostPrivacy } from '@/types/Post'
 import { useCurrentUser } from '@/hooks/useProfile'
-import { processMediaForUpload } from '@/utils/MediaUtils'
+import {
+  processMediaForUpload,
+  getMediaItemFromCamera,
+  getMediaItemsFromPicker,
+} from '@/utils/MediaUtils'
 
 export type CreateMode = 'post' | 'story'
 
@@ -179,42 +183,30 @@ export default function NewPostScreen() {
       type: 'photo' | 'video'
       duration?: number
     }) => {
-      const filename = media.uri.startsWith('data:')
-        ? `photo-${Date.now()}.jpg`
-        : media.uri.split('/').pop() || `photo-${Date.now()}.jpg`
-
-      const mimeType = media.uri.startsWith('data:')
-        ? media.uri.split(',')[0].split(':')[1].split(';')[0]
-        : media.type === 'video'
-          ? 'video/mp4'
-          : 'image/jpeg'
-
-      const newMedia: MediaItem = {
-        id: `captured-${Date.now()}`,
-        url: media.uri,
-        type: media.type,
-        duration: media.duration,
-        fileName: filename,
-        mimeType,
-      }
-      setMedia(prev => [...prev, newMedia])
+      const newMedia = getMediaItemFromCamera(media)
+      setMedia(prev => [
+        ...prev,
+        {
+          ...newMedia,
+          id: `captured-${Date.now()}`,
+          url: newMedia.uri,
+          type: newMedia.type as 'photo' | 'video',
+        },
+      ])
       setShowCamera(false)
     },
     []
   )
 
   const handleMediaSelect = useCallback((assets: any[]) => {
-    const newMedia: MediaItem[] = assets.map(asset => ({
-      id: asset.id,
-      url: asset.uri,
-      type: asset.mediaType === 'video' ? 'video' : 'photo',
-      duration: asset.duration,
-      fileName: asset.fileName || asset.uri.split('/').pop() || 'file',
-      mimeType:
-        asset.mimeType ||
-        (asset.mediaType === 'video' ? 'video/mp4' : 'image/jpeg'),
+    const newMediaItems = getMediaItemsFromPicker(assets)
+    const newMediaWithIds = newMediaItems.map(item => ({
+      ...item,
+      id: item.uri,
+      url: item.uri,
+      type: (item.type === 'video' ? 'video' : 'photo') as 'photo' | 'video',
     }))
-    setMedia(prev => [...prev, ...newMedia])
+    setMedia(prev => [...prev, ...newMediaWithIds])
     setShowMediaPicker(false)
   }, [])
 

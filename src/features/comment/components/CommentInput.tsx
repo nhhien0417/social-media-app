@@ -17,6 +17,10 @@ import { Comment } from '@/types/Comment'
 import Avatar from '@/components/Avatar'
 import MediaPicker from '@/components/MediaPicker'
 import Camera from '@/components/Camera'
+import {
+  getMediaItemFromCamera,
+  getMediaItemsFromPicker,
+} from '@/utils/MediaUtils'
 
 type Props = {
   value: string
@@ -264,7 +268,8 @@ const CommentInput = forwardRef<RNTextInput, Props>(
           visible={showMediaPicker}
           onClose={() => setShowMediaPicker(false)}
           onSelect={assets => {
-            const uris = assets.map(asset => asset.uri)
+            const mediaItems = getMediaItemsFromPicker(assets)
+            const uris = mediaItems.map(item => item.uri)
             setSelectedMedia(prev => [...prev, ...uris])
           }}
           maxSelection={10 - selectedMedia.length}
@@ -275,7 +280,8 @@ const CommentInput = forwardRef<RNTextInput, Props>(
           visible={showCamera}
           onClose={() => setShowCamera(false)}
           onCapture={media => {
-            setSelectedMedia(prev => [...prev, media.uri])
+            const mediaItem = getMediaItemFromCamera(media)
+            setSelectedMedia(prev => [...prev, mediaItem.uri])
           }}
         />
       </YStack>

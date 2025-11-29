@@ -5,6 +5,45 @@ export type MediaItem = {
   blob?: Blob
   fileName?: string
   mimeType?: string
+  duration?: number
+}
+
+export const getMediaItemFromCamera = (media: {
+  uri: string
+  type: 'photo' | 'video'
+  duration?: number
+}): MediaItem => {
+  const filename = media.uri.startsWith('data:')
+    ? `photo-${Date.now()}.jpg`
+    : media.uri.split('/').pop() || `photo-${Date.now()}.jpg`
+
+  const mimeType = media.uri.startsWith('data:')
+    ? media.uri.split(',')[0].split(':')[1].split(';')[0]
+    : media.type === 'video'
+      ? 'video/mp4'
+      : 'image/jpeg'
+
+  return {
+    uri: media.uri,
+    type: media.type,
+    name: filename,
+    fileName: filename,
+    mimeType: mimeType,
+    duration: media.duration,
+  }
+}
+
+export const getMediaItemsFromPicker = (assets: any[]): MediaItem[] => {
+  return assets.map(asset => ({
+    uri: asset.uri,
+    type: asset.mediaType === 'video' ? 'video' : 'photo',
+    name: asset.fileName || asset.uri.split('/').pop() || 'file',
+    fileName: asset.fileName || asset.uri.split('/').pop() || 'file',
+    mimeType:
+      asset.mimeType ||
+      (asset.mediaType === 'video' ? 'video/mp4' : 'image/jpeg'),
+    duration: asset.duration,
+  }))
 }
 
 export const processMediaForUpload = async (

@@ -15,6 +15,10 @@ import Camera from '../../components/Camera'
 import DiscardChangesModal from '../create/components/DiscardChanges'
 import { usePostStore } from '@/stores/postStore'
 import { useCurrentUser } from '@/hooks/useProfile'
+import {
+  getMediaItemFromCamera,
+  getMediaItemsFromPicker,
+} from '@/utils/MediaUtils'
 
 export default function CreateGroupPostScreen() {
   const router = useRouter()
@@ -68,8 +72,15 @@ export default function CreateGroupPostScreen() {
     router.back()
   }
 
-  const handleAddMedia = (newMedia: MediaItem[]) => {
-    setMedia(prev => [...prev, ...newMedia])
+  const handleAddMedia = (assets: any[]) => {
+    const newMediaItems = getMediaItemsFromPicker(assets)
+    const newMediaWithIds = newMediaItems.map(item => ({
+      ...item,
+      id: item.uri,
+      url: item.uri,
+      type: (item.type === 'video' ? 'video' : 'photo') as 'photo' | 'video',
+    }))
+    setMedia(prev => [...prev, ...newMediaWithIds])
     setShowMediaPicker(false)
   }
 
@@ -77,8 +88,17 @@ export default function CreateGroupPostScreen() {
     setMedia(prev => prev.filter(item => item.id !== id))
   }
 
-  const handleCameraCapture = (capturedMedia: MediaItem) => {
-    setMedia(prev => [...prev, capturedMedia])
+  const handleCameraCapture = (media: any) => {
+    const newMedia = getMediaItemFromCamera(media)
+    setMedia(prev => [
+      ...prev,
+      {
+        ...newMedia,
+        id: `captured-${Date.now()}`,
+        url: newMedia.uri,
+        type: newMedia.type as 'photo' | 'video',
+      },
+    ])
     setShowCamera(false)
   }
 
@@ -159,7 +179,7 @@ export default function CreateGroupPostScreen() {
       <MediaPicker
         visible={showMediaPicker}
         onClose={() => setShowMediaPicker(false)}
-        onSelectMedia={handleAddMedia}
+        onSelect={handleAddMedia}
         maxSelection={10}
       />
 

@@ -50,7 +50,7 @@ export default function CommentOptionsSheet({
             borderRadius={16}
             overflow="hidden"
             marginHorizontal={16}
-            marginBottom={32}
+            marginBottom={16}
             style={{
               shadowColor: '#000',
               shadowOffset: { width: 0, height: 4 },

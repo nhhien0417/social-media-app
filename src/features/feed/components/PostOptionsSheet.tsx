@@ -58,8 +58,7 @@ export default function PostOptionsSheet({
             backgroundColor={isDark ? '#1c1c1e' : 'white'}
             borderRadius={16}
             overflow="hidden"
-            marginHorizontal={16}
-            marginBottom={32}
+            margin={16}
             style={{
               shadowColor: '#000',
               shadowOffset: { width: 0, height: 4 },

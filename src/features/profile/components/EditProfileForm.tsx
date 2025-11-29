@@ -9,7 +9,6 @@ import {
 import {
   ScrollView,
   Image,
-  StyleSheet,
   ActivityIndicator,
   Modal,
   TouchableOpacity,
@@ -20,7 +19,6 @@ import {
   Input,
   Label,
   Text,
-  TextArea,
   YStack,
   XStack,
   useThemeName,
@@ -35,7 +33,6 @@ import {
   Calendar,
 } from '@tamagui/lucide-icons'
 import { LinearGradient } from 'expo-linear-gradient'
-import * as ImagePicker from 'expo-image-picker'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import type { Gender } from '@/types/User'
 
@@ -43,7 +40,11 @@ import { INSTAGRAM_GRADIENT } from '@/utils/InstagramGradient'
 import { ProfileComponentProps } from '../ProfileScreen'
 import { useProfileStore } from '@/stores/profileStore'
 import { Alert } from 'react-native'
-import { processMediaForUpload } from '@/utils/MediaUtils'
+import {
+  processMediaForUpload,
+  getMediaItemFromCamera,
+  getMediaItemsFromPicker,
+} from '@/utils/MediaUtils'
 import AvatarSelectionSheet from './AvatarSelectionSheet'
 import MediaPicker from '@/components/MediaPicker'
 import Camera from '@/components/Camera'
@@ -124,32 +125,23 @@ export const EditProfileForm = forwardRef<
 
   const handleMediaSelect = (assets: any[]) => {
     if (assets.length > 0) {
-      const asset = assets[0]
-      setFormValues(prev => ({ ...prev, avatarUrl: asset.uri }))
+      const mediaItem = getMediaItemsFromPicker([assets[0]])[0]
+      setFormValues(prev => ({ ...prev, avatarUrl: mediaItem.uri }))
       setAvatarFile({
-        uri: asset.uri,
-        name: asset.fileName || 'avatar.jpg',
-        type: asset.mediaType === 'video' ? 'video/mp4' : 'image/jpeg',
+        uri: mediaItem.uri,
+        name: mediaItem.fileName || 'avatar.jpg',
+        type: mediaItem.mimeType || 'image/jpeg',
       })
     }
   }
 
   const handleCameraCapture = (media: any) => {
-    const filename = media.uri.startsWith('data:')
-      ? `photo-${Date.now()}.jpg`
-      : media.uri.split('/').pop() || `photo-${Date.now()}.jpg`
-
-    const mimeType = media.uri.startsWith('data:')
-      ? media.uri.split(',')[0].split(':')[1].split(';')[0]
-      : media.type === 'video'
-        ? 'video/mp4'
-        : 'image/jpeg'
-
-    setFormValues(prev => ({ ...prev, avatarUrl: media.uri }))
+    const mediaItem = getMediaItemFromCamera(media)
+    setFormValues(prev => ({ ...prev, avatarUrl: mediaItem.uri }))
     setAvatarFile({
-      uri: media.uri,
-      name: filename,
-      type: mimeType,
+      uri: mediaItem.uri,
+      name: mediaItem.fileName || 'camera_capture.jpg',
+      type: mediaItem.mimeType || 'image/jpeg',
     })
     setShowCamera(false)
   }
