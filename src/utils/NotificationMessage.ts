@@ -3,7 +3,7 @@ import { NotificationItem } from '@/types/Notification'
 export const getNotificationMessage = (
   notification: NotificationItem
 ): string => {
-  const { type, data } = notification
+  const { type, extraData: data } = notification
   const senderName = data?.senderName || 'Someone'
 
   switch (type) {

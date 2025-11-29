@@ -140,7 +140,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
             createdAt: new Date().toISOString(),
             read: false,
             type: (data.type as NotificationType) || 'NEW_POST',
-            data: data,
+            extraData: data,
           }
 
           newNotification.message = getNotificationMessage(newNotification)
@@ -312,7 +312,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
       setCurrentNotification(null)
 
       // Navigate based on type
-      const { type, data, senderId } = notification
+      const { type, extraData: data, senderId } = notification
 
       switch (type) {
         case 'NEW_POST':
