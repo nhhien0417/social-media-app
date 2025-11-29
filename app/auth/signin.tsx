@@ -176,15 +176,17 @@ export default function SignInScreen() {
           </XStack>
 
           {/* Remember + Forgot */}
-          <Text
-            marginTop="$1"
-            textAlign="right"
-            color="$primary"
-            fontWeight="500"
-            fontSize={15}
-          >
-            Forgot password?
-          </Text>
+          <Link href="/auth/forgot" asChild>
+            <Text
+              marginTop="$1"
+              textAlign="right"
+              color="$primary"
+              fontWeight="500"
+              fontSize={15}
+            >
+              Forgot password?
+            </Text>
+          </Link>
 
           {/* CTA */}
           <Button
