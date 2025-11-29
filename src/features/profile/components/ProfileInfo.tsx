@@ -1,10 +1,11 @@
 import { Text, XStack, YStack, useThemeName } from 'tamagui'
 import { LinearGradient } from 'expo-linear-gradient'
-import { Image, StyleSheet, Pressable } from 'react-native'
+import { StyleSheet, Pressable } from 'react-native'
 import { INSTAGRAM_GRADIENT } from '@/utils/InstagramGradient'
 import { formatNumber } from '@/utils/FormatNumber'
 import { ProfileComponentProps } from '../ProfileScreen'
 import { useRouter } from 'expo-router'
+import Avatar from '@/components/Avatar'
 
 interface ProfileInfoProps extends ProfileComponentProps {
   onFriendsPress?: () => void
@@ -43,7 +44,7 @@ export function ProfileInfo({
           justifyContent="center"
         >
           <YStack style={styles.avatarImageWrapper}>
-            <Image
+            <Avatar
               source={{ uri: user.avatarUrl || undefined }}
               style={styles.avatarImage}
             />

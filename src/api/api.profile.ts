@@ -4,6 +4,7 @@ import { ENDPOINTS } from './endpoints'
 import { getAccessToken } from '@/utils/SecureStore'
 import { API_BASE_URL } from './axios.config'
 import { dataURItoBlob } from '@/utils/ConvertData'
+import { Platform } from 'react-native'
 
 export type AllProfileResponse = {
   statusCode: number
@@ -61,6 +62,10 @@ export const updateProfileApi = (
       if (avatar) {
         if (avatar.uri.startsWith('data:')) {
           const blob = dataURItoBlob(avatar.uri)
+          formData.append('media', blob, avatar.name)
+        } else if (Platform.OS === 'web') {
+          const response = await fetch(avatar.uri)
+          const blob = await response.blob()
           formData.append('media', blob, avatar.name)
         } else {
           formData.append('media', {

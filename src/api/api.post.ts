@@ -296,7 +296,6 @@ export const createCommentApi = (
   return new Promise(async (resolve, reject) => {
     try {
       const formData = new FormData()
-
       formData.append('comment', JSON.stringify(data))
 
       if (mediaFiles && mediaFiles.length > 0) {
