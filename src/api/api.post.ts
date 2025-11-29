@@ -5,7 +5,7 @@ import { getAccessToken } from '@/utils/SecureStore'
 import { API_BASE_URL } from './axios.config'
 import { Comment } from '@/types/Comment'
 import { User } from '@/types/User'
-import { dataURItoBlob } from '@/utils/ConvertData'
+import { dataURItoBlob } from '@/utils/MediaUtils'
 import { Platform } from 'react-native'
 
 export type GetFeedResponse = {

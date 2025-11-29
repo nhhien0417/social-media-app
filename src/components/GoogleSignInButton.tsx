@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router'
 import Svg, { G, Path } from 'react-native-svg'
 import { getUserApi, updateProfileApi } from '@/api/api.profile'
 import { getAvatarUrl } from '@/utils/Avatar'
-import { urlToDataURI } from '@/utils/ConvertData'
+import { urlToDataURI } from '@/utils/MediaUtils'
 import { getUserId } from '@/utils/SecureStore'
 
 export const GoogleSignInButton = () => {

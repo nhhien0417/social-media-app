@@ -18,7 +18,7 @@ import { signUpApi, signInApi } from '@/api/api.auth'
 import { updateProfileApi } from '@/api/api.profile'
 import { getAvatarUrl } from '@/utils/Avatar'
 import { saveTokens, saveUserId } from '@/utils/SecureStore'
-import { urlToDataURI } from '@/utils/ConvertData'
+import { urlToDataURI } from '@/utils/MediaUtils'
 import ButtonIcon from '@/components/IconButton'
 import { GoogleSignInButton } from '@/components/GoogleSignInButton'
 

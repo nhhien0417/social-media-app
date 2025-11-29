@@ -3,7 +3,7 @@ import ApiClient from './apiClient'
 import { ENDPOINTS } from './endpoints'
 import { getAccessToken } from '@/utils/SecureStore'
 import { API_BASE_URL } from './axios.config'
-import { dataURItoBlob } from '@/utils/ConvertData'
+import { dataURItoBlob } from '@/utils/MediaUtils'
 import { Platform } from 'react-native'
 
 export type AllProfileResponse = {
