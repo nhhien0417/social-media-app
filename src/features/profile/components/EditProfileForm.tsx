@@ -6,7 +6,15 @@ import {
   useMemo,
   useState,
 } from 'react'
-import { ScrollView, Image, StyleSheet } from 'react-native'
+import {
+  ScrollView,
+  Image,
+  StyleSheet,
+  ActivityIndicator,
+  Modal,
+  TouchableOpacity,
+  Platform,
+} from 'react-native'
 import {
   Button,
   Input,
@@ -20,11 +28,15 @@ import {
   Adapt,
   Sheet,
 } from 'tamagui'
-import { Camera, ChevronDown, Check, Calendar } from '@tamagui/lucide-icons'
+import {
+  Camera as CameraIcon,
+  ChevronDown,
+  Check,
+  Calendar,
+} from '@tamagui/lucide-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import * as ImagePicker from 'expo-image-picker'
 import DateTimePicker from '@react-native-community/datetimepicker'
-import { Platform } from 'react-native'
 import type { Gender } from '@/types/User'
 
 import { INSTAGRAM_GRADIENT } from '@/utils/InstagramGradient'
@@ -32,6 +44,9 @@ import { ProfileComponentProps } from '../ProfileScreen'
 import { useProfileStore } from '@/stores/profileStore'
 import { Alert } from 'react-native'
 import { processMediaForUpload } from '@/utils/MediaUtils'
+import AvatarSelectionSheet from './AvatarSelectionSheet'
+import MediaPicker from '@/components/MediaPicker'
+import Camera from '@/components/Camera'
 
 type FormValues = {
   name: string
@@ -67,6 +82,13 @@ export const EditProfileForm = forwardRef<
 
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
   const [showDatePicker, setShowDatePicker] = useState(false)
+  const [isUpdating, setIsUpdating] = useState(false)
+
+  // Media Selection State
+  const [showAvatarSelection, setShowAvatarSelection] = useState(false)
+  const [showMediaPicker, setShowMediaPicker] = useState(false)
+  const [showCamera, setShowCamera] = useState(false)
+
   const [avatarFile, setAvatarFile] = useState<{
     uri: string
     name: string
@@ -81,40 +103,60 @@ export const EditProfileForm = forwardRef<
       : null
   )
 
-  const { updateProfile, isLoading } = useProfileStore()
+  const { updateProfile } = useProfileStore()
 
   useEffect(() => {
     setFormValues(initialValues)
   }, [initialValues])
 
-  const inputBackground = isDark ? 'rgba(255,255,255,0.08)' : '#f3f4f6'
-  const inputTextColor = isDark ? '#f5f5f5' : '#05070cff'
-  const labelColor = isDark ? 'rgba(255,255,255,0.8)' : '#151719ff'
-  const outlineColor = isDark ? 'rgba(255,255,255,0.25)' : '#d1d5db'
-  const ringBackground = isDark ? '#050506' : '#ffffff'
-  const displayDob = formValues.dob || 'Select your date of birth'
+  // Modern UI Colors
+  const inputBackground = isDark ? '#1A1A1A' : '#F5F5F5'
+  const inputTextColor = isDark ? '#FFFFFF' : '#000000'
+  const labelColor = isDark ? '#A0A0A0' : '#666666'
+  const borderColor = isDark ? '#333333' : '#E0E0E0'
+  const primaryColor = '#0095F6'
 
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    })
+  const displayDob = formValues.dob || 'Select date of birth'
 
-    if (!result.canceled) {
-      const asset = result.assets[0]
+  const handleAvatarPress = () => {
+    setShowAvatarSelection(true)
+  }
+
+  const handleMediaSelect = (assets: any[]) => {
+    if (assets.length > 0) {
+      const asset = assets[0]
       setFormValues(prev => ({ ...prev, avatarUrl: asset.uri }))
       setAvatarFile({
         uri: asset.uri,
         name: asset.fileName || 'avatar.jpg',
-        type: asset.mimeType || 'image/jpeg',
+        type: asset.mediaType === 'video' ? 'video/mp4' : 'image/jpeg',
       })
     }
   }
 
+  const handleCameraCapture = (media: any) => {
+    const filename = media.uri.startsWith('data:')
+      ? `photo-${Date.now()}.jpg`
+      : media.uri.split('/').pop() || `photo-${Date.now()}.jpg`
+
+    const mimeType = media.uri.startsWith('data:')
+      ? media.uri.split(',')[0].split(':')[1].split(';')[0]
+      : media.type === 'video'
+        ? 'video/mp4'
+        : 'image/jpeg'
+
+    setFormValues(prev => ({ ...prev, avatarUrl: media.uri }))
+    setAvatarFile({
+      uri: media.uri,
+      name: filename,
+      type: mimeType,
+    })
+    setShowCamera(false)
+  }
+
   useImperativeHandle(ref, () => ({
     handleSave: async () => {
+      setIsUpdating(true)
       try {
         const nameParts = formValues.name.trim().split(' ')
         const firstName = nameParts[0]
@@ -143,252 +185,287 @@ export const EditProfileForm = forwardRef<
         Alert.alert('Success', 'Profile updated successfully')
       } catch (error) {
         Alert.alert('Error', 'Failed to update profile')
+      } finally {
+        setIsUpdating(false)
       }
     },
   }))
 
+  const renderInput = (
+    label: string,
+    value: string,
+    onChangeText: (text: string) => void,
+    placeholder: string,
+    multiline = false
+  ) => (
+    <YStack gap="$2">
+      <Label fontSize={14} fontWeight="600" color={labelColor} marginLeft="$1">
+        {label}
+      </Label>
+      <Input
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={placeholder}
+        placeholderTextColor={isDark ? '#666' : '#999'}
+        backgroundColor={inputBackground}
+        borderColor={borderColor}
+        borderWidth={1}
+        borderRadius="$4"
+        paddingHorizontal="$3"
+        paddingVertical={multiline ? '$3' : '$3'}
+        fontSize={16}
+        color={inputTextColor}
+        multiline={multiline}
+        minHeight={multiline ? 100 : undefined}
+        textAlignVertical={multiline ? 'top' : 'center'}
+        focusStyle={{
+          borderColor: primaryColor,
+          borderWidth: 1.5,
+        }}
+      />
+    </YStack>
+  )
+
   return (
-    <ScrollView
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{
-        padding: 15,
-        gap: 10,
-      }}
-    >
-      {/* Avatar + change button */}
-      <YStack gap="$3" alignItems="center">
-        <LinearGradient
-          colors={INSTAGRAM_GRADIENT}
-          start={{ x: 0, y: 0.35 }}
-          end={{ x: 1, y: 0.65 }}
-          style={styles.avatarRing}
-        >
-          <YStack
-            style={[styles.avatarInner, { backgroundColor: ringBackground }]}
-            alignItems="center"
-            justifyContent="center"
-          >
-            <YStack style={styles.avatarImageWrapper}>
-              <Image
-                source={{ uri: formValues.avatarUrl }}
-                style={styles.avatarImage}
-              />
-            </YStack>
-          </YStack>
-        </LinearGradient>
-
-        <Button
-          size="$3"
-          backgroundColor={isDark ? 'rgba(255,255,255,0.08)' : '#f3f4f6'}
-          color={inputTextColor}
-          icon={<Camera size={20} color={inputTextColor} />}
-          borderColor={outlineColor}
-          borderWidth={1}
-          fontSize={15}
-          onPress={pickImage}
-        >
-          Change profile photo
-        </Button>
-      </YStack>
-
-      {/* Name */}
-      <YStack>
-        <Label fontWeight={700} fontSize={15} color={labelColor}>
-          Name
-        </Label>
-        <Input
-          value={formValues.name}
-          fontSize={15}
-          placeholder="Full name"
-          backgroundColor={inputBackground}
-          color={inputTextColor}
-          onChangeText={value =>
-            setFormValues(current => ({ ...current, name: value }))
-          }
-        />
-      </YStack>
-
-      {/* Username */}
-      <YStack>
-        <Label fontWeight={700} fontSize={15} color={labelColor}>
-          Username
-        </Label>
-        <Input
-          value={formValues.username}
-          placeholder="username"
-          fontSize={15}
-          backgroundColor={inputBackground}
-          color={inputTextColor}
-          onChangeText={value =>
-            setFormValues(current => ({ ...current, username: value }))
-          }
-          autoCapitalize="none"
-        />
-      </YStack>
-
-      {/* Bio */}
-      <YStack>
-        <Label fontWeight={700} fontSize={15} color={labelColor}>
-          Bio
-        </Label>
-        <TextArea
-          minHeight={112}
-          multiline
-          value={formValues.bio}
-          fontSize={15}
-          placeholder="Tell people a bit about yourself"
-          backgroundColor={inputBackground}
-          color={inputTextColor}
-          onChangeText={value =>
-            setFormValues(current => ({ ...current, bio: value }))
-          }
-        />
-      </YStack>
-
-      {/* Gender (Select) */}
-      <YStack>
-        <Label fontWeight={700} fontSize={15} color={labelColor}>
-          Gender
-        </Label>
-        <Select
-          value={formValues.gender || ''}
-          onValueChange={value =>
-            setFormValues(current => ({ ...current, gender: value as Gender }))
-          }
-        >
-          <Select.Trigger
-            iconAfter={ChevronDown}
-            borderColor={outlineColor}
-            backgroundColor={inputBackground}
-            fontSize={15}
-          >
-            <Select.Value
-              placeholder="Select gender"
-              style={{ color: inputTextColor as string }}
-            />
-          </Select.Trigger>
-
-          <Adapt>
-            <Sheet
-              modal
-              dismissOnSnapToBottom
-              animationConfig={{
-                type: 'spring',
-                damping: 20,
-                mass: 0.8,
-                stiffness: 250,
-              }}
-            >
-              <Sheet.Frame>
-                <Sheet.ScrollView>
-                  <Adapt.Contents />
-                </Sheet.ScrollView>
-              </Sheet.Frame>
-              <Sheet.Overlay />
-            </Sheet>
-          </Adapt>
-
-          <Select.Content zIndex={1000}>
-            <Select.ScrollUpButton />
-            <Select.Viewport>
-              <Select.Group>
-                <Select.Label>Gender</Select.Label>
-
-                <Select.Item value="" index={0}>
-                  <Select.ItemText>Prefer not to say</Select.ItemText>
-                  <Select.ItemIndicator marginLeft="auto">
-                    <Check size={16} />
-                  </Select.ItemIndicator>
-                </Select.Item>
-
-                <Select.Item value="FEMALE" index={1}>
-                  <Select.ItemText>Female</Select.ItemText>
-                  <Select.ItemIndicator marginLeft="auto">
-                    <Check size={16} />
-                  </Select.ItemIndicator>
-                </Select.Item>
-
-                <Select.Item value="MALE" index={2}>
-                  <Select.ItemText>Male</Select.ItemText>
-                  <Select.ItemIndicator marginLeft="auto">
-                    <Check size={16} />
-                  </Select.ItemIndicator>
-                </Select.Item>
-
-                <Select.Item value="OTHER" index={3}>
-                  <Select.ItemText>Other</Select.ItemText>
-                  <Select.ItemIndicator marginLeft="auto">
-                    <Check size={16} />
-                  </Select.ItemIndicator>
-                </Select.Item>
-              </Select.Group>
-            </Select.Viewport>
-            <Select.ScrollDownButton />
-          </Select.Content>
-        </Select>
-      </YStack>
-
-      {/* Date of birth (display + placeholder, chuẩn text để sau gắn DatePicker) */}
-      <YStack>
-        <Label fontWeight={700} fontSize={15} color={labelColor}>
-          Date of birth
-        </Label>
-        {Platform.OS === 'web' ? (
-          <XStack
-            alignItems="center"
-            borderWidth={1}
-            borderColor={outlineColor}
-            borderRadius="$4"
-            paddingHorizontal="$3"
-            paddingVertical="$2"
-            backgroundColor={inputBackground}
-          >
-            {createElement('input', {
-              type: 'date',
-              value: formValues.dob,
-              onChange: (e: any) =>
-                setFormValues(current => ({ ...current, dob: e.target.value })),
-              style: {
-                border: 'none',
-                background: 'transparent',
-                color: inputTextColor,
-                fontSize: 15,
-                fontFamily: 'System',
-                width: '100%',
-                outline: 'none',
-              },
-            })}
-          </XStack>
-        ) : (
-          <YStack>
-            <XStack
-              alignItems="center"
-              borderWidth={1}
-              borderColor={outlineColor}
-              borderRadius="$4"
-              paddingHorizontal="$3"
-              paddingVertical="$2"
-              backgroundColor={inputBackground}
-              justifyContent="space-between"
-              onPress={() => setShowDatePicker(true)}
-              pressStyle={{ opacity: 0.8 }}
-            >
-              <Text
-                fontSize={15}
-                color={
-                  formValues.dob
-                    ? inputTextColor
-                    : isDark
-                      ? 'rgba(255,255,255,0.5)'
-                      : '#9ca3af'
-                }
+    <>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          padding: 20,
+          paddingBottom: 40,
+        }}
+      >
+        {/* Avatar Section */}
+        <YStack alignItems="center" marginBottom="$6">
+          <TouchableOpacity onPress={handleAvatarPress} activeOpacity={0.8}>
+            <YStack position="relative">
+              <LinearGradient
+                colors={INSTAGRAM_GRADIENT}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={{
+                  padding: 3,
+                  borderRadius: 60,
+                }}
               >
-                {displayDob}
-              </Text>
+                <Image
+                  source={{
+                    uri:
+                      formValues.avatarUrl || 'https://via.placeholder.com/150',
+                  }}
+                  style={{
+                    width: 110,
+                    height: 110,
+                    borderRadius: 55,
+                    borderWidth: 4,
+                    borderColor: isDark ? '#000' : '#fff',
+                    backgroundColor: inputBackground,
+                  }}
+                />
+              </LinearGradient>
+              <YStack
+                position="absolute"
+                bottom={5}
+                right={5}
+                backgroundColor={primaryColor}
+                width={32}
+                height={32}
+                borderRadius={16}
+                alignItems="center"
+                justifyContent="center"
+                borderWidth={3}
+                borderColor={isDark ? '#000' : '#fff'}
+              >
+                <CameraIcon size={16} color="#fff" />
+              </YStack>
+            </YStack>
+          </TouchableOpacity>
+          <Button
+            unstyled
+            marginTop="$3"
+            onPress={handleAvatarPress}
+            pressStyle={{ opacity: 0.7 }}
+          >
+            <Text color={primaryColor} fontWeight="600" fontSize={16}>
+              Change Profile Photo
+            </Text>
+          </Button>
+        </YStack>
 
-              <Calendar size={20} color={inputTextColor} />
-            </XStack>
-            {showDatePicker && (
+        <YStack gap="$4">
+          {renderInput(
+            'Name',
+            formValues.name,
+            text => setFormValues(prev => ({ ...prev, name: text })),
+            'Enter your name'
+          )}
+
+          {renderInput(
+            'Username',
+            formValues.username,
+            text => setFormValues(prev => ({ ...prev, username: text })),
+            'Enter username'
+          )}
+
+          {renderInput(
+            'Bio',
+            formValues.bio,
+            text => setFormValues(prev => ({ ...prev, bio: text })),
+            'Write a bio...',
+            true
+          )}
+
+          {/* Gender Select */}
+          <YStack gap="$2">
+            <Label
+              fontSize={14}
+              fontWeight="600"
+              color={labelColor}
+              marginLeft="$1"
+            >
+              Gender
+            </Label>
+            <Select
+              value={formValues.gender || ''}
+              onValueChange={value =>
+                setFormValues(prev => ({ ...prev, gender: value as Gender }))
+              }
+            >
+              <Select.Trigger
+                iconAfter={ChevronDown}
+                backgroundColor={inputBackground}
+                borderColor={borderColor}
+                borderWidth={1}
+                borderRadius="$4"
+                paddingHorizontal="$3"
+                height={50}
+              >
+                <Select.Value
+                  placeholder="Select gender"
+                  style={{ color: inputTextColor, fontSize: 16 }}
+                />
+              </Select.Trigger>
+
+              <Adapt>
+                <Sheet
+                  modal
+                  dismissOnSnapToBottom
+                  animationConfig={{
+                    type: 'spring',
+                    damping: 20,
+                    mass: 0.8,
+                    stiffness: 250,
+                  }}
+                >
+                  <Sheet.Frame>
+                    <Sheet.ScrollView>
+                      <Adapt.Contents />
+                    </Sheet.ScrollView>
+                  </Sheet.Frame>
+                  <Sheet.Overlay />
+                </Sheet>
+              </Adapt>
+
+              <Select.Content zIndex={1000}>
+                <Select.ScrollUpButton />
+                <Select.Viewport>
+                  <Select.Group>
+                    <Select.Label>Gender</Select.Label>
+                    <Select.Item value="" index={0}>
+                      <Select.ItemText>Prefer not to say</Select.ItemText>
+                      <Select.ItemIndicator marginLeft="auto">
+                        <Check size={16} />
+                      </Select.ItemIndicator>
+                    </Select.Item>
+                    <Select.Item value="FEMALE" index={1}>
+                      <Select.ItemText>Female</Select.ItemText>
+                      <Select.ItemIndicator marginLeft="auto">
+                        <Check size={16} />
+                      </Select.ItemIndicator>
+                    </Select.Item>
+                    <Select.Item value="MALE" index={2}>
+                      <Select.ItemText>Male</Select.ItemText>
+                      <Select.ItemIndicator marginLeft="auto">
+                        <Check size={16} />
+                      </Select.ItemIndicator>
+                    </Select.Item>
+                    <Select.Item value="OTHER" index={3}>
+                      <Select.ItemText>Other</Select.ItemText>
+                      <Select.ItemIndicator marginLeft="auto">
+                        <Check size={16} />
+                      </Select.ItemIndicator>
+                    </Select.Item>
+                  </Select.Group>
+                </Select.Viewport>
+                <Select.ScrollDownButton />
+              </Select.Content>
+            </Select>
+          </YStack>
+
+          {/* Date of Birth */}
+          <YStack gap="$2">
+            <Label
+              fontSize={14}
+              fontWeight="600"
+              color={labelColor}
+              marginLeft="$1"
+            >
+              Date of Birth
+            </Label>
+            {Platform.OS === 'web' ? (
+              <XStack
+                alignItems="center"
+                backgroundColor={inputBackground}
+                borderColor={borderColor}
+                borderWidth={1}
+                borderRadius="$4"
+                paddingHorizontal="$3"
+                height={50}
+              >
+                {createElement('input', {
+                  type: 'date',
+                  value: formValues.dob,
+                  onChange: (e: any) =>
+                    setFormValues(prev => ({ ...prev, dob: e.target.value })),
+                  style: {
+                    border: 'none',
+                    background: 'transparent',
+                    color: inputTextColor,
+                    fontSize: 16,
+                    fontFamily: 'System',
+                    width: '100%',
+                    outline: 'none',
+                  },
+                })}
+              </XStack>
+            ) : (
+              <TouchableOpacity
+                onPress={() => setShowDatePicker(true)}
+                activeOpacity={0.7}
+              >
+                <XStack
+                  alignItems="center"
+                  justifyContent="space-between"
+                  backgroundColor={inputBackground}
+                  borderColor={borderColor}
+                  borderWidth={1}
+                  borderRadius="$4"
+                  paddingHorizontal="$3"
+                  height={50}
+                >
+                  <Text
+                    fontSize={16}
+                    color={
+                      formValues.dob ? inputTextColor : isDark ? '#666' : '#999'
+                    }
+                  >
+                    {displayDob}
+                  </Text>
+                  <Calendar size={20} color={labelColor} />
+                </XStack>
+              </TouchableOpacity>
+            )}
+            {showDatePicker && Platform.OS !== 'web' && (
               <DateTimePicker
                 value={formValues.dob ? new Date(formValues.dob) : new Date()}
                 mode="date"
@@ -397,48 +474,65 @@ export const EditProfileForm = forwardRef<
                   setShowDatePicker(false)
                   if (selectedDate) {
                     const dateString = selectedDate.toISOString().split('T')[0]
-                    setFormValues(current => ({ ...current, dob: dateString }))
+                    setFormValues(prev => ({ ...prev, dob: dateString }))
                   }
                 }}
               />
             )}
           </YStack>
-        )}
-      </YStack>
-    </ScrollView>
+        </YStack>
+      </ScrollView>
+
+      {/* Loading Overlay */}
+      <Modal transparent visible={isUpdating} animationType="fade">
+        <YStack
+          flex={1}
+          backgroundColor="rgba(0,0,0,0.5)"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <YStack
+            backgroundColor={isDark ? '#262626' : 'white'}
+            padding="$5"
+            borderRadius="$4"
+            alignItems="center"
+            gap="$3"
+            elevation={5}
+            shadowColor="#000"
+            shadowOffset={{ width: 0, height: 2 }}
+            shadowOpacity={0.25}
+            shadowRadius={3.84}
+          >
+            <ActivityIndicator size="large" color={primaryColor} />
+            <Text fontWeight="600" fontSize={16} color={inputTextColor}>
+              Updating profile...
+            </Text>
+          </YStack>
+        </YStack>
+      </Modal>
+
+      {/* Avatar Selection Sheet */}
+      <AvatarSelectionSheet
+        visible={showAvatarSelection}
+        onClose={() => setShowAvatarSelection(false)}
+        onTakePhoto={() => setShowCamera(true)}
+        onChooseFromLibrary={() => setShowMediaPicker(true)}
+      />
+
+      {/* Media Picker */}
+      <MediaPicker
+        visible={showMediaPicker}
+        onClose={() => setShowMediaPicker(false)}
+        onSelect={handleMediaSelect}
+        maxSelection={1}
+      />
+
+      {/* Camera */}
+      <Camera
+        visible={showCamera}
+        onClose={() => setShowCamera(false)}
+        onCapture={handleCameraCapture}
+      />
+    </>
   )
-})
-
-const AVATAR_SIZE = 100
-const RING_PADDING = 5
-const RING_SIZE = AVATAR_SIZE + RING_PADDING * 2
-
-const styles = StyleSheet.create({
-  avatarRing: {
-    width: RING_SIZE,
-    height: RING_SIZE,
-    padding: RING_PADDING,
-    borderRadius: RING_SIZE / 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarInner: {
-    width: AVATAR_SIZE + RING_PADDING,
-    height: AVATAR_SIZE + RING_PADDING,
-    padding: RING_PADDING / 2,
-    borderRadius: (AVATAR_SIZE + RING_PADDING) / 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  avatarImageWrapper: {
-    width: AVATAR_SIZE,
-    height: AVATAR_SIZE,
-    borderRadius: AVATAR_SIZE / 2,
-    overflow: 'hidden',
-  },
 })

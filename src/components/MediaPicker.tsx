@@ -14,7 +14,7 @@ import {
 } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
 import { XStack, YStack, Button, SizableText } from 'tamagui'
-import { X, Check } from '@tamagui/lucide-icons'
+import { Check } from '@tamagui/lucide-icons'
 import * as MediaLibrary from 'expo-media-library'
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window')
