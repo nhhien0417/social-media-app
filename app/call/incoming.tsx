@@ -1,13 +1,11 @@
 import React, { useEffect, useRef } from 'react'
-import { StyleSheet, Animated, Dimensions, StatusBar } from 'react-native'
+import { StyleSheet, Animated, StatusBar } from 'react-native'
 import { useLocalSearchParams, router } from 'expo-router'
-import { YStack, XStack, SizableText, Avatar, Text } from 'tamagui'
+import { YStack, XStack, Avatar, Text } from 'tamagui'
 import { Feather } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
 import { TouchableOpacity } from 'react-native'
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window')
 
 export default function IncomingCallScreen() {
   const {
