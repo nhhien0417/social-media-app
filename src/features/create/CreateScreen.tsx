@@ -15,7 +15,7 @@ import Camera from '../../components/Camera'
 import DiscardChangesModal from './components/DiscardChanges'
 import { usePostStore } from '@/stores/postStore'
 import { usePostStatus } from '@/providers/PostStatusProvider'
-import { PostPrivacy } from '@/types/Post'
+import { PostPrivacy, PostType } from '@/types/Post'
 import { useCurrentUser } from '@/hooks/useProfile'
 import {
   processMediaForUpload,
@@ -23,12 +23,10 @@ import {
   getMediaItemsFromPicker,
 } from '@/utils/MediaUtils'
 
-export type CreateMode = 'post' | 'story'
-
 export default function NewPostScreen() {
   const router = useRouter()
   const params = useLocalSearchParams<{
-    mode?: CreateMode
+    mode?: PostType
     editPostId?: string
     groupId?: string
     groupName?: string
@@ -49,7 +47,7 @@ export default function NewPostScreen() {
   const editPostId = params.editPostId
   const isEditMode = !!editPostId
 
-  const [mode, setMode] = useState<CreateMode>('post')
+  const [mode, setMode] = useState<PostType>('POST')
   const [caption, setCaption] = useState('')
   const [media, setMedia] = useState<MediaItem[]>([])
   const [privacy, setPrivacy] = useState<PrivacyOption>('friends')
@@ -145,7 +143,7 @@ export default function NewPostScreen() {
         setShowCamera(false)
         setShowMediaPicker(false)
         setShowDiscardModal(false)
-        setMode((params.mode as CreateMode) || 'post')
+        setMode((params.mode as PostType) || 'POST')
       }
 
       loadPostData()
@@ -159,7 +157,7 @@ export default function NewPostScreen() {
 
   const canShare = useMemo(() => {
     const hasContent = caption.trim().length > 0 || media.length > 0
-    if (mode === 'story') return media.length > 0
+    if (mode === 'STORY') return media.length > 0
     return hasContent
   }, [caption, media, mode])
 
@@ -246,7 +244,7 @@ export default function NewPostScreen() {
 
       updatePost(updateData)
         .then(() => {
-          usePostStore.getState().refreshFeed()
+          usePostStore.getState().refreshFeed(mode)
           finishUpdating()
           setIsSubmitting(false)
         })
@@ -266,6 +264,7 @@ export default function NewPostScreen() {
         content: caption.trim() || undefined,
         groupId: params.groupId || undefined,
         privacy: privacyMap[privacy],
+        type: mode,
         media:
           media.length > 0
             ? await processMediaForUpload(
@@ -278,7 +277,7 @@ export default function NewPostScreen() {
 
       createPost(postData)
         .then(() => {
-          usePostStore.getState().refreshFeed()
+          usePostStore.getState().refreshFeed(postData.type)
           finishPosting()
           setIsSubmitting(false)
         })
@@ -363,7 +362,7 @@ export default function NewPostScreen() {
             onRemoveMedia={handleRemove}
             privacy={privacy}
             onChangePrivacy={setPrivacy}
-            showCaption={mode === 'post'}
+            showCaption={mode === 'POST'}
             groupName={params.groupName}
           />
         </ScrollView>

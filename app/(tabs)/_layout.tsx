@@ -100,7 +100,7 @@ export default function TabsLayout() {
               e.preventDefault()
               router.push({
                 pathname: '/create',
-                params: { mode: 'post' },
+                params: { mode: 'POST' },
               })
             },
           }}

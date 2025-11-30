@@ -12,9 +12,7 @@ import {
   YStack,
   Button,
   SizableText,
-  Paragraph,
   useThemeName,
-  useTheme,
 } from 'tamagui'
 import {
   ChevronLeft,
@@ -24,17 +22,17 @@ import {
   Check,
 } from '@tamagui/lucide-icons'
 import IconButton from '@/components/IconButton'
-import { CreateMode } from '../CreateScreen'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { PostType } from '@/types/Post'
 
 type Props = {
-  mode: CreateMode
+  mode: PostType
   canShare?: boolean
   isSubmitting?: boolean
   isEditMode?: boolean
   onBack?: () => void
   onShare?: () => void
-  onChangeMode?: (mode: CreateMode) => void
+  onChangeMode?: (mode: PostType) => void
 }
 
 const styles = StyleSheet.create({
@@ -79,7 +77,7 @@ export default function Header({
   onChangeMode,
 }: Props) {
   const [showModal, setShowModal] = useState(false)
-  const isPost = mode === 'post'
+  const isPost = mode === 'POST'
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
   const accentColor = isDark ? '#0095F6' : '#1877F2'
@@ -181,7 +179,7 @@ export default function Header({
     })
   ).current
 
-  const handleSelectMode = (selectedMode: CreateMode) => {
+  const handleSelectMode = (selectedMode: PostType) => {
     onChangeMode?.(selectedMode)
     closeSheet()
   }
@@ -344,13 +342,13 @@ export default function Header({
                 <YStack padding="$3" gap="$3">
                   {[
                     {
-                      value: 'post' as const,
+                      value: 'POST' as PostType,
                       title: 'Post',
                       description: 'Share moments with your friends.',
                       Icon: FileText,
                     },
                     {
-                      value: 'story' as const,
+                      value: 'STORY' as PostType,
                       title: 'Story',
                       description:
                         'Share content that disappears after 24 hours.',

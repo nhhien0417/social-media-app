@@ -1,6 +1,6 @@
 import ApiClient from './apiClient'
 import { ENDPOINTS } from './endpoints'
-import { Post, PostPrivacy } from '@/types/Post'
+import { Post, PostPrivacy, PostType } from '@/types/Post'
 import { getAccessToken } from '@/utils/SecureStore'
 import { API_BASE_URL } from './axios.config'
 import { Comment } from '@/types/Comment'
@@ -28,6 +28,7 @@ export type CreatePostRequest = {
   userId: string
   content?: string
   groupId?: string
+  type: PostType
   privacy: PostPrivacy
   media?: Array<{
     uri: string
@@ -125,8 +126,9 @@ export type LikeCommentResponse = {
   data: Comment
 }
 
-export const getFeedApi = () => {
-  return ApiClient.get<GetFeedResponse>(ENDPOINTS.POSTS.POST_FEED)
+export const getFeedApi = (type: PostType) => {
+  const params = `?type=${type}`
+  return ApiClient.get<GetFeedResponse>(`${ENDPOINTS.POSTS.POST_FEED}${params}`)
 }
 
 export const getPostDetailApi = (postId: string) => {
@@ -143,6 +145,7 @@ export const createPostApi = (
       const formData = new FormData()
 
       formData.append('userId', data.userId)
+      formData.append('type', data.type)
       formData.append('privacy', data.privacy)
 
       if (data.content) {

@@ -17,7 +17,7 @@ function CreateStoryItem() {
   const handlePress = () => {
     router.push({
       pathname: '/create',
-      params: { mode: 'story' },
+      params: { mode: 'STORY' },
     })
   }
 

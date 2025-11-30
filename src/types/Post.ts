@@ -1,5 +1,6 @@
 import { User } from './User'
 
+export type PostType = 'POST' | 'STORY'
 export type PostPrivacy = 'PUBLIC' | 'PRIVATE' | 'FRIENDS'
 
 export interface Post {
@@ -9,6 +10,7 @@ export interface Post {
   media?: string[]
   createdAt: string
   updatedAt?: string
+  type: PostType
   privacy: PostPrivacy
   likes: string[]
   commentsCount: number

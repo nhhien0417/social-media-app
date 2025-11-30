@@ -16,6 +16,7 @@ import DiscardChangesModal from '../create/components/DiscardChanges'
 import { usePostStore } from '@/stores/postStore'
 import { useCurrentUser } from '@/hooks/useProfile'
 import {
+  processMediaForUpload,
   getMediaItemFromCamera,
   getMediaItemsFromPicker,
 } from '@/utils/MediaUtils'
@@ -108,22 +109,28 @@ export default function CreateGroupPostScreen() {
       return
     }
 
+    if (!currentUser?.id) {
+      Alert.alert('Error', 'User not found')
+      return
+    }
+
     setIsSubmitting(true)
     try {
-      const formData = new FormData()
-      formData.append('content', caption)
-      formData.append('privacy', 'PUBLIC')
-      if (params.groupId) {
-        formData.append('groupId', params.groupId)
+      const mediaData =
+        media.length > 0
+          ? await processMediaForUpload(media.map(m => ({ ...m, uri: m.url })))
+          : undefined
+
+      const postData = {
+        userId: currentUser.id,
+        content: caption.trim() || undefined,
+        groupId: params.groupId,
+        privacy: 'PUBLIC' as const,
+        type: 'POST' as const,
+        media: mediaData,
       }
 
-      media.forEach((item, index) => {
-        if (item.blob) {
-          formData.append('media', item.blob, item.fileName || `media-${index}`)
-        }
-      })
-
-      await createPost(formData)
+      await createPost(postData)
 
       Alert.alert('Success', 'Post created successfully!', [
         {

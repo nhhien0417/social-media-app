@@ -16,6 +16,7 @@ import {
   LikePostResponse,
   getUserLikesApi,
 } from '@/api/api.post'
+import { PostType } from '@/types/Post'
 import {
   addPostToStores,
   updatePostWithSnapshot,
@@ -34,8 +35,8 @@ interface PostState {
 
   // Actions
   addPost: (post: Post) => void
-  fetchFeed: () => Promise<void>
-  refreshFeed: () => Promise<void>
+  fetchFeed: (type: PostType) => Promise<void>
+  refreshFeed: (type: PostType) => Promise<void>
   getPostDetail: (postId: string) => Promise<void>
 
   createPost: (data: CreatePostRequest) => Promise<CreatePostResponse>
@@ -58,10 +59,10 @@ export const usePostStore = create<PostState>((set, get) => ({
     set(state => ({ posts: [post, ...state.posts] }))
   },
 
-  fetchFeed: async () => {
+  fetchFeed: async (type: PostType) => {
     set({ isLoading: true, error: null })
     try {
-      const response = await getFeedApi()
+      const response = await getFeedApi(type)
       console.log('Successful fetch feed:', response)
       set({ posts: response.data.posts, isLoading: false })
     } catch (error) {
@@ -70,10 +71,10 @@ export const usePostStore = create<PostState>((set, get) => ({
     }
   },
 
-  refreshFeed: async () => {
+  refreshFeed: async (type: PostType) => {
     set({ isRefreshing: true, error: null })
     try {
-      const response = await getFeedApi()
+      const response = await getFeedApi(type)
       console.log('Successful refresh feed:', response)
       set({ posts: response.data.posts, isRefreshing: false })
     } catch (error) {

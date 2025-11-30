@@ -83,12 +83,12 @@ export default function FeedScreen() {
 
   useEffect(() => {
     if (posts.length === 0) {
-      fetchFeed()
+      fetchFeed('POST')
     }
   }, [])
 
   const onRefresh = useCallback(() => {
-    refreshFeed()
+    refreshFeed('POST')
   }, [])
 
   const onScroll = useAnimatedScrollHandler({
