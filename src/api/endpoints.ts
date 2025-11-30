@@ -29,7 +29,7 @@ export const ENDPOINTS = {
 
     COMMENT_GET: (postId: string | number) => `post/comments/${postId}`,
     COMMENT_CREATE: 'post/comments',
-    COMMENT_UPDATE: `post/comments`,
+    COMMENT_UPDATE: 'post/comments',
     COMMENT_DELETE: (id: string | number) => `post/comments/${id}`,
     COMMENT_LIKE: 'post/comments/like',
   },
