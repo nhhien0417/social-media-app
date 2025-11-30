@@ -125,8 +125,9 @@ export type LikeCommentResponse = {
 }
 
 export const getFeedApi = (type: PostType) => {
-  const params = `?type=${type}`
-  return ApiClient.get<GetFeedResponse>(`${ENDPOINTS.POSTS.POST_FEED}${params}`)
+  return ApiClient.get<GetFeedResponse>(
+    `${ENDPOINTS.POSTS.POST_FEED}?type=${type}`
+  )
 }
 
 export const getPostDetailApi = (postId: string) => {

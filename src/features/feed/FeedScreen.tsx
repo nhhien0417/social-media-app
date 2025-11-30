@@ -16,7 +16,6 @@ import PostCard from './components/PostCard'
 import PostingStatus from './components/PostingStatus'
 import { usePostStore } from '@/stores/postStore'
 import ButtonIcon from '@/components/IconButton'
-import { useAppTheme } from '@/providers/ThemeProvider'
 import { router } from 'expo-router'
 
 const HEADER_VIEW_HEIGHT = 50
@@ -29,8 +28,6 @@ const AnimatedList = Animated.createAnimatedComponent(
 ) as unknown as typeof FlatList
 
 function HeaderContent() {
-  const { theme, toggleTheme } = useAppTheme()
-
   return (
     <XStack
       paddingHorizontal="$3"
@@ -49,13 +46,7 @@ function HeaderContent() {
           Valorant
         </Text>
       </XStack>
-      <XStack alignItems="center" justifyContent="space-between">
-        <ButtonIcon Icon={Send} onPress={() => router.push('/message')} />
-        <ButtonIcon
-          Icon={theme === 'light' ? Moon : Sun}
-          onPress={toggleTheme}
-        />
-      </XStack>
+      <ButtonIcon Icon={Send} onPress={() => router.push('/message')} />
     </XStack>
   )
 }

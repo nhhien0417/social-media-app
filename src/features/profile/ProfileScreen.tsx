@@ -1,18 +1,21 @@
 import { useMemo, useState } from 'react'
 import { ActivityIndicator, Pressable, ScrollView } from 'react-native'
 import { Text, XStack, YStack, useThemeName, Button } from 'tamagui'
-import { LogOut, ChevronLeft, MoreVertical, Plus } from '@tamagui/lucide-icons'
+import { ChevronLeft, Menu, Plus } from '@tamagui/lucide-icons'
 import { useRouter } from 'expo-router'
 import { ProfileInfo } from './components/ProfileInfo'
 import { ProfileBio } from './components/ProfileBio'
 import { ProfileActions } from './components/ProfileActions'
 import { StoryHighlights } from './components/StoryHighlights'
 import { ProfileTabBar } from './components/ProfileTabBar'
-import { removeTokensAndUserId } from '@/utils/SecureStore'
 import { useCurrentUser, useUser } from '@/hooks/useProfile'
 import MediaGrid from './components/MediaGrid'
 import { profileMock } from '@/mock/profile'
 import { User } from '@/types/User'
+import SettingsSheet from './components/SettingsSheet'
+import LogoutConfirmModal from './components/LogoutConfirmModal'
+import { removeTokensAndUserId } from '@/utils/SecureStore'
+import { useAppTheme } from '@/providers/ThemeProvider'
 
 export type ProfileTabKey = 'posts' | 'reels' | 'tagged'
 
@@ -28,6 +31,8 @@ export interface ProfileComponentProps {
 export default function ProfileScreen({ userId }: ProfileScreenProps) {
   const router = useRouter()
   const [tab, setTab] = useState<ProfileTabKey>('posts')
+  const [showSettings, setShowSettings] = useState(false)
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
 
@@ -47,10 +52,15 @@ export default function ProfileScreen({ userId }: ProfileScreenProps) {
   }, [posts, tab])
 
   const navIconColor = isDark ? '#f5f5f5' : '#111827'
+  const { toggleTheme } = useAppTheme()
 
   const handleLogout = async () => {
     await removeTokensAndUserId()
     router.replace('/auth/signin')
+  }
+
+  const handleToggleTheme = () => {
+    toggleTheme()
   }
 
   const handleFriendsPress = () => {
@@ -152,16 +162,13 @@ export default function ProfileScreen({ userId }: ProfileScreenProps) {
                   <Pressable hitSlop={8} onPress={handleCreatePost}>
                     <Plus size={25} color={navIconColor} />
                   </Pressable>
-                  <Pressable hitSlop={8}>
-                    <MoreVertical size={25} color={navIconColor} />
-                  </Pressable>
-                  <Pressable onPress={handleLogout} hitSlop={8}>
-                    <LogOut size={25} color={navIconColor} />
+                  <Pressable hitSlop={8} onPress={() => setShowSettings(true)}>
+                    <Menu size={25} color={navIconColor} />
                   </Pressable>
                 </>
               ) : (
                 <Pressable hitSlop={8}>
-                  <MoreVertical size={25} color={navIconColor} />
+                  <Menu size={25} color={navIconColor} />
                 </Pressable>
               )}
             </XStack>
@@ -189,6 +196,20 @@ export default function ProfileScreen({ userId }: ProfileScreenProps) {
           />
         </YStack>
       </ScrollView>
+
+      {/* Settings Modal */}
+      <SettingsSheet
+        visible={showSettings}
+        onClose={() => setShowSettings(false)}
+        onToggleTheme={handleToggleTheme}
+        onLogout={() => setShowLogoutConfirm(true)}
+      />
+
+      {/* Logout Confirmation Modal */}
+      <LogoutConfirmModal
+        visible={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+      />
     </YStack>
   )
 }

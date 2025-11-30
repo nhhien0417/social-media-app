@@ -49,8 +49,8 @@ export const signUpApi = (data: SignUpData) => {
   return ApiClient.post<{ message: string }>(ENDPOINTS.IDENTITY.REGISTER, data)
 }
 
-export const signOutApi = () => {
-  return ApiClient.post(ENDPOINTS.IDENTITY.LOGOUT)
+export const signOutApi = (email: string) => {
+  return ApiClient.post<string>(`${ENDPOINTS.IDENTITY.LOGOUT}?email=${email}`)
 }
 
 export const refreshTokenApi = (data: RefreshTokenData) => {
