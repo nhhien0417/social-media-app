@@ -11,7 +11,7 @@ import {
   Spinner,
   XStack,
 } from 'tamagui'
-import { Image, TextInput } from 'react-native'
+import { Image, Pressable, TextInput } from 'react-native'
 import { ChevronLeft } from '@tamagui/lucide-icons'
 
 export default function VerifyOtpScreen() {
@@ -96,18 +96,6 @@ export default function VerifyOtpScreen() {
       }}
     >
       <YStack paddingHorizontal="$6" paddingVertical="$6" alignItems="center">
-        {/* Back Button */}
-        <Button
-          position="absolute"
-          top={20}
-          left={20}
-          circular
-          size="$3"
-          icon={ChevronLeft}
-          onPress={() => router.back()}
-          chromeless
-        />
-
         {/* Logo */}
         <Image
           source={require('@/assets/logo_0.png')}
@@ -187,18 +175,23 @@ export default function VerifyOtpScreen() {
         </YStack>
 
         {/* Resend */}
-        <XStack gap="$1" marginTop="$6" alignItems="center">
+        <XStack gap="$2.5" marginTop="$6" alignItems="center">
           <Paragraph color="#888">Didn't receive code?</Paragraph>
-          <Button
-            chromeless
-            onPress={() => {
-              /* TODO: Resend logic */
-            }}
-          >
+          <Pressable onPress={() => router.push('/auth/signin')}>
             <Text color="$primary" fontWeight="700">
               Resend
             </Text>
-          </Button>
+          </Pressable>
+        </XStack>
+
+        {/* Back to Email */}
+        <XStack gap="$2.5" marginTop="$3" alignItems="center">
+          <Paragraph color="#888">Incorrect email?</Paragraph>
+          <Pressable onPress={() => router.back()}>
+            <Text color="$primary" fontWeight="700">
+              Change
+            </Text>
+          </Pressable>
         </XStack>
       </YStack>
     </ScrollView>

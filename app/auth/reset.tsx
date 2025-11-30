@@ -1,4 +1,4 @@
-import { useRouter, useLocalSearchParams } from 'expo-router'
+import { useRouter, useLocalSearchParams, Link } from 'expo-router'
 import { useState } from 'react'
 import {
   YStack,
@@ -11,7 +11,7 @@ import {
   Spinner,
   XStack,
 } from 'tamagui'
-import { Image } from 'react-native'
+import { Image, Pressable } from 'react-native'
 import { ChevronLeft, Eye, EyeOff } from '@tamagui/lucide-icons'
 import ButtonIcon from '@/components/IconButton'
 
@@ -70,18 +70,6 @@ export default function ResetPasswordScreen() {
       }}
     >
       <YStack paddingHorizontal="$6" paddingVertical="$6" alignItems="center">
-        {/* Back Button */}
-        <Button
-          position="absolute"
-          top={20}
-          left={20}
-          circular
-          size="$3"
-          icon={ChevronLeft}
-          onPress={() => router.back()}
-          chromeless
-        />
-
         {/* Logo */}
         <Image
           source={require('@/assets/logo_0.png')}
@@ -190,6 +178,21 @@ export default function ResetPasswordScreen() {
           >
             {isLoading ? 'Reset Password' : 'Reset Password'}
           </Button>
+
+          {/* Footer */}
+          <XStack
+            gap="$2.5"
+            marginTop="$6"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Paragraph color="#888">Remember your password?</Paragraph>
+            <Pressable onPress={() => router.push('/auth/signin')}>
+              <Text color="$primary" fontWeight="700">
+                Login
+              </Text>
+            </Pressable>
+          </XStack>
         </YStack>
       </YStack>
     </ScrollView>
