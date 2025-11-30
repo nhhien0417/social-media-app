@@ -30,7 +30,7 @@ export default function SettingsSheet({
 
   const handleChangePassword = () => {
     onClose()
-    router.push('/auth/reset')
+    router.push('/profile/password')
   }
 
   return (

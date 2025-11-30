@@ -61,18 +61,6 @@ export default function ForgotPasswordScreen() {
       }}
     >
       <YStack paddingHorizontal="$6" paddingVertical="$6" alignItems="center">
-        {/* Back Button */}
-        <Button
-          position="absolute"
-          top={20}
-          left={20}
-          circular
-          size="$3"
-          icon={ChevronLeft}
-          onPress={() => router.back()}
-          chromeless
-        />
-
         {/* Logo */}
         <Image
           source={require('@/assets/logo_0.png')}
