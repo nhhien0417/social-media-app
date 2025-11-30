@@ -25,15 +25,14 @@ import {
   Users,
   X,
 } from '@tamagui/lucide-icons'
+import { PostPrivacy } from '@/types/Post'
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
 const GRID_SPACING = 8
 const MIN_TEXTAREA_HEIGHT = 44
 
-export type PrivacyOption = 'public' | 'friends' | 'only-me'
-
 type DropdownOption = {
-  value: PrivacyOption
+  value: PostPrivacy
   label: string
   explanation: string
   icon: React.ElementType
@@ -61,28 +60,28 @@ type Props = {
   onChangeCaption: (text: string) => void
   media: MediaItem[]
   onRemoveMedia: (id: string) => void
-  privacy: PrivacyOption
-  onChangePrivacy: (value: PrivacyOption) => void
+  privacy: PostPrivacy
+  onChangePrivacy: (value: PostPrivacy) => void
   showCaption?: boolean
   groupName?: string
 }
 
 const privacyOptions: DropdownOption[] = [
   {
-    value: 'public',
+    value: 'PUBLIC',
     label: 'Public',
     explanation: 'Anyone on or off the app can see this post',
     icon: Globe,
   },
   {
-    value: 'friends',
+    value: 'FRIENDS',
     label: 'Friends',
     explanation: 'Only your friends will see this post',
     icon: Users,
   },
   {
-    value: 'only-me',
-    label: 'Only me',
+    value: 'PRIVATE',
+    label: 'Private',
     explanation: 'Keep this post private to you',
     icon: Lock,
   },
@@ -142,7 +141,7 @@ export default function PostPreview({
     return Math.floor((containerWidth - GRID_SPACING) / 2)
   }, [containerWidth, isSingle])
 
-  const handleSelectPrivacy = (value: PrivacyOption) => {
+  const handleSelectPrivacy = (value: PostPrivacy) => {
     onChangePrivacy(value)
     setShowPrivacyModal(false)
   }

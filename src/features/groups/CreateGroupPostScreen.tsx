@@ -7,7 +7,6 @@ import Header from '../create/components/Header'
 import PostPreview, {
   type MediaItem,
   type UserInfoData,
-  type PrivacyOption,
 } from '../create/components/PostPreview'
 import PostAction from '../create/components/PostAction'
 import MediaPicker from '../../components/MediaPicker'
@@ -20,6 +19,7 @@ import {
   getMediaItemFromCamera,
   getMediaItemsFromPicker,
 } from '@/utils/MediaUtils'
+import { PostPrivacy } from '@/types/Post'
 
 export default function CreateGroupPostScreen() {
   const router = useRouter()
@@ -33,7 +33,7 @@ export default function CreateGroupPostScreen() {
 
   const [caption, setCaption] = useState('')
   const [media, setMedia] = useState<MediaItem[]>([])
-  const [privacy] = useState<PrivacyOption>('public') // Group posts are typically public within the group
+  const [privacy] = useState<PostPrivacy>('PUBLIC')
   const [showMediaPicker, setShowMediaPicker] = useState(false)
   const [showCamera, setShowCamera] = useState(false)
   const [showDiscardModal, setShowDiscardModal] = useState(false)

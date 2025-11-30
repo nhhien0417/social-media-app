@@ -7,7 +7,6 @@ import Header from './components/Header'
 import PostPreview, {
   type MediaItem,
   type UserInfoData,
-  type PrivacyOption,
 } from './components/PostPreview'
 import PostAction from './components/PostAction'
 import MediaPicker from '../../components/MediaPicker'
@@ -50,7 +49,7 @@ export default function NewPostScreen() {
   const [mode, setMode] = useState<PostType>('POST')
   const [caption, setCaption] = useState('')
   const [media, setMedia] = useState<MediaItem[]>([])
-  const [privacy, setPrivacy] = useState<PrivacyOption>('friends')
+  const [privacy, setPrivacy] = useState<PostPrivacy>('FRIENDS')
   const [showMediaPicker, setShowMediaPicker] = useState(false)
   const [showCamera, setShowCamera] = useState(false)
   const [showDiscardModal, setShowDiscardModal] = useState(false)
@@ -125,12 +124,7 @@ export default function NewPostScreen() {
                 setMedia([])
               }
 
-              const privacyMap: Record<string, PrivacyOption> = {
-                PUBLIC: 'public',
-                FRIENDS: 'friends',
-                PRIVATE: 'only-me',
-              }
-              setPrivacy(privacyMap[post.privacy] || 'friends')
+              setPrivacy(post.privacy)
             }
           } catch (error) {
             console.error('Failed to load post:', error)
@@ -138,7 +132,7 @@ export default function NewPostScreen() {
         } else {
           setMedia([])
           setCaption('')
-          setPrivacy('friends')
+          setPrivacy('FRIENDS')
         }
         setShowCamera(false)
         setShowMediaPicker(false)
@@ -220,12 +214,6 @@ export default function NewPostScreen() {
 
     const firstMediaUrl = media.length > 0 ? media[0].url : undefined
 
-    const privacyMap: Record<PrivacyOption, PostPrivacy> = {
-      public: 'PUBLIC',
-      friends: 'FRIENDS',
-      'only-me': 'PRIVATE',
-    }
-
     if (isEditMode && editPostId) {
       startUpdating(firstMediaUrl)
 
@@ -236,7 +224,7 @@ export default function NewPostScreen() {
       const updateData = {
         postId: editPostId,
         content: caption.trim() || undefined,
-        privacy: privacyMap[privacy],
+        privacy: privacy,
         media: mediaData.length > 0 ? mediaData : undefined,
       }
 
@@ -263,7 +251,7 @@ export default function NewPostScreen() {
         userId: currentUser.id,
         content: caption.trim() || undefined,
         groupId: params.groupId || undefined,
-        privacy: privacyMap[privacy],
+        privacy: privacy,
         type: mode,
         media:
           media.length > 0
