@@ -35,7 +35,13 @@ export default function AuthLayout() {
       }}
       edges={['top', 'bottom']}
     >
-      <Stack screenOptions={{ headerShown: false }} />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: 'fade',
+          presentation: 'modal',
+        }}
+      />
     </SafeAreaView>
   )
 }

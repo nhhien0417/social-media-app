@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-export default function CallLayout() {
+export default function GroupLayout() {
   return (
     <SafeAreaView
       style={{

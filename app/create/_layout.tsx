@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-export default function AuthLayout() {
+export default function CreateLayout() {
   return (
     <SafeAreaView
       style={{
@@ -10,7 +10,13 @@ export default function AuthLayout() {
       }}
       edges={['top', 'bottom']}
     >
-      <Stack screenOptions={{ headerShown: false }} />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: 'fade',
+          presentation: 'modal',
+        }}
+      />
     </SafeAreaView>
   )
 }
