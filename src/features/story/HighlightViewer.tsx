@@ -11,7 +11,6 @@ import { YStack, XStack, Text } from 'tamagui'
 import { X, MoreHorizontal } from '@tamagui/lucide-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import type { ProfileHighlight } from '@/mock/profile'
 import { formatDate } from '@/utils/FormatDate'
 
@@ -85,7 +84,6 @@ export default function HighlightViewer({
   username = 'User',
   avatarUrl,
 }: HighlightViewerProps) {
-  const insets = useSafeAreaInsets()
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
@@ -183,7 +181,7 @@ export default function HighlightViewer({
           style={styles.topSection}
         >
           {/* Progress Bars */}
-          <XStack gap={4} paddingHorizontal={16} paddingTop={insets.top + 8}>
+          <XStack gap={4} paddingHorizontal={16} paddingTop={16}>
             {Array.from({ length: totalStories }).map((_, index) => (
               <ProgressBar
                 key={index}

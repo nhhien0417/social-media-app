@@ -19,7 +19,6 @@ import {
   useCameraPermissions,
   useMicrophonePermissions,
 } from 'expo-camera'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Video, ResizeMode } from 'expo-av'
 
 interface CapturedMedia {
@@ -344,7 +343,6 @@ const styles = StyleSheet.create({
 })
 
 export default function Camera({ visible, onClose, onCapture }: Props) {
-  const insets = useSafeAreaInsets()
   const [facing, setFacing] = useState<CameraType>('back')
   const [flash, setFlash] = useState<FlashMode>('off')
   const [mode, setMode] = useState<CameraMode>('photo')
@@ -765,7 +763,7 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
 
               {/* Recording Indicator */}
               {isRecording && (
-                <View style={[styles.recordingTime, { top: insets.top + 70 }]}>
+                <View style={[styles.recordingTime, { top: 70 }]}>
                   <View style={styles.recordingDot} />
                   <Text style={styles.recordingTimeText}>
                     {formatTime(recordingTime)}
@@ -775,12 +773,7 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
 
               {/* Minimum Duration Warning */}
               {showMinDurationWarning && (
-                <View
-                  style={[
-                    styles.warningMessage,
-                    { bottom: insets.bottom + 220 },
-                  ]}
-                >
+                <View style={[styles.warningMessage, { bottom: 220 }]}>
                   <Text style={styles.warningText}>
                     Hold for at least 1 second
                   </Text>
@@ -788,7 +781,7 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
               )}
 
               {/* Top Bar */}
-              <View style={[styles.topBar, { top: insets.top + 10 }]}>
+              <View style={[styles.topBar, { top: 10 }]}>
                 <TouchableOpacity style={styles.iconButton} onPress={onClose}>
                   <Ionicons name="close" size={28} color="white" />
                 </TouchableOpacity>
@@ -884,12 +877,7 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
 
               {/* Zoom Controls */}
               {showZoomControls && (
-                <View
-                  style={[
-                    styles.zoomContainer,
-                    { bottom: insets.bottom + 220 },
-                  ]}
-                >
+                <View style={[styles.zoomContainer, { bottom: 220 }]}>
                   <TouchableOpacity
                     onPress={decreaseZoom}
                     disabled={isZoomChanging || zoom === 0}
@@ -965,12 +953,7 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
 
               {/* Filters Selection */}
               {showFilters && (
-                <View
-                  style={[
-                    styles.filtersContainer,
-                    { bottom: insets.bottom + 240 },
-                  ]}
-                >
+                <View style={[styles.filtersContainer, { bottom: 240 }]}>
                   <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
@@ -1007,7 +990,7 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
               )}
 
               {/* Bottom Bar */}
-              <View style={[styles.bottomBar, { bottom: insets.bottom + 20 }]}>
+              <View style={[styles.bottomBar, { bottom: 20 }]}>
                 {/* Mode Selector */}
                 <View style={styles.modeSelector}>
                   <TouchableOpacity
@@ -1142,7 +1125,7 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
                   styles.previewActionsContainer,
                   {
                     bottom: 0,
-                    paddingBottom: insets.bottom + 40,
+                    paddingBottom: 40,
                   },
                 ]}
               >

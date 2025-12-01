@@ -10,7 +10,6 @@ import {
 import { useLocalSearchParams, router } from 'expo-router'
 import { YStack, XStack, Avatar, Text } from 'tamagui'
 import { Feather } from '@expo/vector-icons'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
 import { users } from '../../src/mock/users'
 
@@ -31,7 +30,6 @@ export default function CallScreen() {
     chatId?: string
   }>()
 
-  const insets = useSafeAreaInsets()
   const [callState, setCallState] = useState<CallState>('calling')
   const [isMuted, setIsMuted] = useState(false)
   const [isSpeakerOn, setIsSpeakerOn] = useState(type === 'video')
@@ -218,7 +216,7 @@ export default function CallScreen() {
               style={[
                 styles.pipContainer,
                 {
-                  top: insets.top + 20,
+                  top: 20,
                   opacity: fadeAnim,
                 },
               ]}
@@ -255,11 +253,7 @@ export default function CallScreen() {
           style={StyleSheet.absoluteFill}
         >
           <StatusBar barStyle="light-content" />
-          <YStack
-            flex={1}
-            justifyContent="space-between"
-            paddingTop={insets.top + 40}
-          >
+          <YStack flex={1} justifyContent="space-between" paddingTop={40}>
             {/* Top Section */}
             <YStack alignItems="center" paddingTop="$8">
               {/* Avatar with ring animations */}
@@ -361,7 +355,7 @@ export default function CallScreen() {
         bottom={0}
         left={0}
         right={0}
-        paddingBottom={insets.bottom + 30}
+        paddingBottom={30}
         paddingHorizontal="$5"
       >
         {/* Main Controls Row */}

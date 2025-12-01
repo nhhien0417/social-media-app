@@ -3,7 +3,6 @@ import { StyleSheet, Animated, StatusBar } from 'react-native'
 import { useLocalSearchParams, router } from 'expo-router'
 import { YStack, XStack, Avatar, Text } from 'tamagui'
 import { Feather } from '@expo/vector-icons'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
 import { TouchableOpacity } from 'react-native'
 
@@ -22,7 +21,6 @@ export default function IncomingCallScreen() {
     chatId?: string
   }>()
 
-  const insets = useSafeAreaInsets()
   const isVideoCall = type === 'video'
 
   // Animations
@@ -83,11 +81,7 @@ export default function IncomingCallScreen() {
       style={StyleSheet.absoluteFill}
     >
       <StatusBar barStyle="light-content" />
-      <YStack
-        flex={1}
-        paddingTop={insets.top + 60}
-        paddingBottom={insets.bottom + 40}
-      >
+      <YStack flex={1} paddingTop={60} paddingBottom={40}>
         {/* Avatar and Info */}
         <YStack flex={1} alignItems="center" justifyContent="center">
           <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
