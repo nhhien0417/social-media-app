@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import {
   View,
   Image,
@@ -9,48 +9,69 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
-  Keyboard,
 } from 'react-native'
 import { YStack, XStack, Text } from 'tamagui'
 import { X, Heart, Send, MoreHorizontal } from '@tamagui/lucide-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router, useLocalSearchParams } from 'expo-router'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { stories as allStories } from '@/mock/stories'
 import StoryProgressBar from './components/StoryProgressBar'
 import Avatar from '@/components/Avatar'
+import { usePostStore } from '@/stores/postStore'
+import { Post } from '@/types/Post'
+import { formatDate } from '@/utils/FormatDate'
 
 const STORY_DURATION = 5000
 
 export default function StoryViewer() {
-  const { id } = useLocalSearchParams<{ id: string }>()
-  const insets = useSafeAreaInsets()
+  const { id: storyId } = useLocalSearchParams<{ id: string }>()
+  const stories = usePostStore(state => state.stories)
 
-  // Sort stories: new stories first
-  const sortedStories = [...allStories].sort((a, b) => {
-    if (a.hasNew === b.hasNew) return 0
-    return a.hasNew ? -1 : 1
-  })
+  // Group stories by author
+  const groupedStories = useMemo(() => {
+    const groups: { [key: string]: Post[] } = {}
+    stories.forEach(story => {
+      const aId = story.authorProfile.id
+      if (!groups[aId]) {
+        groups[aId] = []
+      }
+      groups[aId].push(story)
+    })
+    return Object.values(groups)
+  }, [stories])
 
-  const initialIndex = sortedStories.findIndex(s => s.id === id)
-  const [currentUserIndex, setCurrentUserIndex] = useState(
-    initialIndex >= 0 ? initialIndex : 0
-  )
-  const [currentStoryIndex, setCurrentStoryIndex] = useState(0)
+  const { initialUserIndex, initialStoryIndex } = useMemo(() => {
+    let userIndex = 0
+    let storyIndex = 0
+
+    for (let i = 0; i < groupedStories.length; i++) {
+      const userStories = groupedStories[i]
+      const sIndex = userStories.findIndex(s => s.id === storyId)
+      if (sIndex !== -1) {
+        userIndex = i
+        storyIndex = sIndex
+        break
+      }
+    }
+    return { initialUserIndex: userIndex, initialStoryIndex: storyIndex }
+  }, [groupedStories, storyId])
+
+  const [currentUserIndex, setCurrentUserIndex] = useState(initialUserIndex)
+  const [currentStoryIndex, setCurrentStoryIndex] = useState(initialStoryIndex)
   const [isPaused, setIsPaused] = useState(false)
   const [isLiked, setIsLiked] = useState(false)
   const [showReplyInput, setShowReplyInput] = useState(false)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
 
-  const currentUser = sortedStories[currentUserIndex]
-  const currentStory = currentUser?.stories?.[currentStoryIndex]
-  const totalStories = currentUser?.stories?.length || 0
+  const currentUserStories = groupedStories[currentUserIndex]
+  const currentStory = currentUserStories?.[currentStoryIndex]
+  const totalStories = currentUserStories?.length || 0
+  const author = currentStory?.authorProfile
 
   useEffect(() => {
-    if (!currentUser || totalStories === 0) {
+    if (!currentUserStories || totalStories === 0) {
       router.back()
     }
-  }, [currentUser, totalStories])
+  }, [currentUserStories, totalStories])
 
   useEffect(() => {
     if (isPaused) return
@@ -66,11 +87,15 @@ export default function StoryViewer() {
 
   const handleNext = () => {
     if (currentStoryIndex < totalStories - 1) {
-      setCurrentStoryIndex(prev => prev + 1)
+      const nextStoryIndex = currentStoryIndex + 1
+      setCurrentStoryIndex(nextStoryIndex)
+      router.setParams({ id: currentUserStories[nextStoryIndex].id })
     } else {
-      if (currentUserIndex < sortedStories.length - 1) {
-        setCurrentUserIndex(prev => prev + 1)
+      if (currentUserIndex < groupedStories.length - 1) {
+        const nextUserIndex = currentUserIndex + 1
+        setCurrentUserIndex(nextUserIndex)
         setCurrentStoryIndex(0)
+        router.setParams({ id: groupedStories[nextUserIndex][0].id })
       } else {
         router.back()
       }
@@ -79,14 +104,17 @@ export default function StoryViewer() {
 
   const handlePrevious = () => {
     if (currentStoryIndex > 0) {
-      setCurrentStoryIndex(prev => prev - 1)
+      const prevStoryIndex = currentStoryIndex - 1
+      setCurrentStoryIndex(prevStoryIndex)
+      router.setParams({ id: currentUserStories[prevStoryIndex].id })
     } else {
       if (currentUserIndex > 0) {
         const prevUserIndex = currentUserIndex - 1
-        const prevUserStories =
-          sortedStories[prevUserIndex]?.stories?.length || 1
+        const prevUserStories = groupedStories[prevUserIndex]
+        const prevStoryIndex = prevUserStories.length - 1
         setCurrentUserIndex(prevUserIndex)
-        setCurrentStoryIndex(prevUserStories - 1)
+        setCurrentStoryIndex(prevStoryIndex)
+        router.setParams({ id: prevUserStories[prevStoryIndex].id })
       }
     }
   }
@@ -147,16 +175,18 @@ export default function StoryViewer() {
           if (gestureState.dx > 50) {
             if (currentUserIndex > 0) {
               const prevUserIndex = currentUserIndex - 1
-              const prevUserStories =
-                sortedStories[prevUserIndex]?.stories?.length || 1
+              const prevUserStories = groupedStories[prevUserIndex]
               setCurrentUserIndex(prevUserIndex)
               setCurrentStoryIndex(0)
+              router.setParams({ id: prevUserStories[0].id })
             }
           } else if (gestureState.dx < -50) {
             // Swipe left - next user
-            if (currentUserIndex < sortedStories.length - 1) {
-              setCurrentUserIndex(prev => prev + 1)
+            if (currentUserIndex < groupedStories.length - 1) {
+              const nextUserIndex = currentUserIndex + 1
+              setCurrentUserIndex(nextUserIndex)
               setCurrentStoryIndex(0)
+              router.setParams({ id: groupedStories[nextUserIndex][0].id })
             } else {
               router.back()
             }
@@ -170,17 +200,40 @@ export default function StoryViewer() {
     })
   ).current
 
+  if (!currentStory || !author) return null
+
+  // Get the first media item URL if available, otherwise use a placeholder or handle text stories
+  const mediaUrl =
+    currentStory.media && currentStory.media.length > 0
+      ? currentStory.media[0]
+      : null
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#000000" />
 
       {/* Story Image/Video Background */}
-      {currentStory && (
+      {mediaUrl ? (
         <Image
-          source={{ uri: currentStory.mediaUrl }}
+          source={{ uri: mediaUrl }}
           style={StyleSheet.absoluteFill}
           resizeMode="contain"
         />
+      ) : (
+        <View
+          style={[
+            StyleSheet.absoluteFill,
+            {
+              backgroundColor: '#333',
+              justifyContent: 'center',
+              alignItems: 'center',
+            },
+          ]}
+        >
+          <Text color="white" fontSize={20} textAlign="center" padding={20}>
+            {currentStory.content}
+          </Text>
+        </View>
       )}
 
       {/* Content Overlay with Flexbox */}
@@ -191,7 +244,7 @@ export default function StoryViewer() {
           style={styles.topSection}
         >
           {/* Progress Bars */}
-          <XStack gap={4} paddingHorizontal={16} paddingTop={insets.top + 8}>
+          <XStack gap={4} paddingHorizontal={16} paddingTop={16}>
             {Array.from({ length: totalStories }).map((_, index) => (
               <StoryProgressBar
                 key={index}
@@ -218,7 +271,7 @@ export default function StoryViewer() {
             >
               <View style={styles.avatarInner}>
                 <Avatar
-                  uri={currentUser.author.avatarUrl || undefined}
+                  uri={author.avatarUrl || undefined}
                   style={styles.avatar}
                 />
               </View>
@@ -230,24 +283,21 @@ export default function StoryViewer() {
                 fontWeight="600"
                 lineHeight={18}
               >
-                {currentUser.author.username}
+                {author.username}
               </Text>
               <Text color="rgba(255,255,255,0.7)" fontSize={12} lineHeight={16}>
-                {new Date().toLocaleTimeString('en-US', {
-                  hour: 'numeric',
-                  minute: '2-digit',
-                })}
+                {formatDate(currentStory.createdAt)}
               </Text>
             </YStack>
+            <Pressable style={styles.moreButton} hitSlop={8}>
+              <MoreHorizontal size={24} color="#ffffff" strokeWidth={2.5} />
+            </Pressable>
             <Pressable
               onPress={handleClose}
               style={styles.closeButton}
               hitSlop={8}
             >
               <X size={26} color="#ffffff" strokeWidth={2.5} />
-            </Pressable>
-            <Pressable style={styles.moreButton} hitSlop={8}>
-              <MoreHorizontal size={24} color="#ffffff" strokeWidth={2.5} />
             </Pressable>
           </XStack>
         </LinearGradient>
@@ -287,10 +337,7 @@ export default function StoryViewer() {
         >
           <LinearGradient
             colors={['transparent', 'rgba(0,0,0,0.7)']}
-            style={[
-              styles.bottomSection,
-              { paddingBottom: insets.bottom + 16 },
-            ]}
+            style={[styles.bottomSection, { paddingBottom: 16 }]}
           >
             {/* Bottom Actions */}
             {!showReplyInput && (

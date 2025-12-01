@@ -100,7 +100,7 @@ function StoryBar({ stories }: StoryBarProps) {
               key={author.id}
               author={author}
               hasNew={true}
-              onPress={() => router.push(`/story/${author.id}`)}
+              onPress={() => router.push(`/story/${userStories[0].id}`)}
             />
           )
         })}
