@@ -74,6 +74,8 @@ interface StoryBarProps {
 
 function StoryBar({ stories }: StoryBarProps) {
   const groupedStories = useMemo(() => {
+    if (!stories) return []
+
     const groups: { [key: string]: Post[] } = {}
     stories.forEach(story => {
       const authorId = story.authorProfile.id
