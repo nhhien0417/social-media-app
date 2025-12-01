@@ -1,11 +1,12 @@
 import { memo } from 'react'
-import { ScrollView, Image, StyleSheet, Pressable } from 'react-native'
+import { ScrollView, StyleSheet, Pressable } from 'react-native'
 import { XStack, YStack, Text, Button, useThemeName } from 'tamagui'
 import { Plus } from '@tamagui/lucide-icons'
 import { router } from 'expo-router'
 import { stories } from '@/mock/stories'
 import StoryItem from './StoryItem'
 import { useCurrentUser } from '@/hooks/useProfile'
+import Avatar from '@/components/Avatar'
 
 function CreateStoryItem() {
   const themeName = useThemeName()
@@ -31,8 +32,8 @@ function CreateStoryItem() {
             justifyContent="center"
           >
             <YStack style={styles.storyImageWrapper}>
-              <Image
-                source={{ uri: currentUser?.avatarUrl || undefined }}
+              <Avatar
+                uri={currentUser?.avatarUrl || undefined}
                 style={styles.storyImage}
               />
             </YStack>
@@ -86,7 +87,7 @@ function StoryBar() {
           <StoryItem
             key={s.id}
             story={s}
-            onPress={() => router.push(`/story/${s.id}` as any)}
+            onPress={() => router.push(`/story/${s.id}`)}
           />
         ))}
       </XStack>

@@ -1,9 +1,10 @@
 import { Story } from '@/types/Story'
 import React from 'react'
-import { Image, StyleSheet, Pressable } from 'react-native'
+import { StyleSheet, Pressable } from 'react-native'
 import { YStack, Text, useThemeName } from 'tamagui'
 import { LinearGradient } from 'expo-linear-gradient'
 import { INSTAGRAM_GRADIENT } from '@/utils/InstagramGradient'
+import Avatar from '@/components/Avatar'
 
 interface StoryItemProps {
   story: Story
@@ -32,8 +33,8 @@ function StoryItem({ story, onPress }: StoryItemProps) {
               style={[styles.innerRing, { backgroundColor: ringBackground }]}
             >
               <YStack style={styles.imageWrapper}>
-                <Image
-                  source={{ uri: author.avatarUrl }}
+                <Avatar
+                  uri={author.avatarUrl || undefined}
                   style={styles.image}
                 />
               </YStack>
@@ -50,7 +51,10 @@ function StoryItem({ story, onPress }: StoryItemProps) {
             ]}
           >
             <YStack style={styles.imageWrapper}>
-              <Image source={{ uri: author.avatarUrl }} style={styles.image} />
+              <Avatar
+                uri={author.avatarUrl || undefined}
+                style={styles.image}
+              />
             </YStack>
           </YStack>
         )}

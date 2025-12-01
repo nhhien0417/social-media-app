@@ -3,7 +3,6 @@ import {
   View,
   Image,
   Pressable,
-  Dimensions,
   StatusBar,
   StyleSheet,
   PanResponder,
@@ -19,9 +18,9 @@ import { router } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { stories as allStories } from '@/mock/stories'
 import StoryProgressBar from './components/StoryProgressBar'
+import Avatar from '@/components/Avatar'
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window')
-const STORY_DURATION = 5000 // 5 seconds per story
+const STORY_DURATION = 5000
 
 interface StoryViewerProps {
   initialStoryId: string
@@ -44,40 +43,17 @@ export default function StoryViewer({ initialStoryId }: StoryViewerProps) {
   const [isPaused, setIsPaused] = useState(false)
   const [isLiked, setIsLiked] = useState(false)
   const [showReplyInput, setShowReplyInput] = useState(false)
-  const [keyboardHeight, setKeyboardHeight] = useState(0)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
 
   const currentUser = sortedStories[currentUserIndex]
   const currentStory = currentUser?.stories?.[currentStoryIndex]
   const totalStories = currentUser?.stories?.length || 0
 
-  // If no stories, go back
   useEffect(() => {
     if (!currentUser || totalStories === 0) {
       router.back()
     }
   }, [currentUser, totalStories])
-
-  // Keyboard listeners
-  useEffect(() => {
-    const keyboardWillShow = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
-      e => {
-        setKeyboardHeight(e.endCoordinates.height)
-      }
-    )
-    const keyboardWillHide = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
-      () => {
-        setKeyboardHeight(0)
-      }
-    )
-
-    return () => {
-      keyboardWillShow.remove()
-      keyboardWillHide.remove()
-    }
-  }, [])
 
   useEffect(() => {
     if (isPaused) return
@@ -92,27 +68,22 @@ export default function StoryViewer({ initialStoryId }: StoryViewerProps) {
   }, [currentUserIndex, currentStoryIndex, isPaused])
 
   const handleNext = () => {
-    // Check if there are more stories for current user
     if (currentStoryIndex < totalStories - 1) {
       setCurrentStoryIndex(prev => prev + 1)
     } else {
-      // Move to next user
       if (currentUserIndex < sortedStories.length - 1) {
         setCurrentUserIndex(prev => prev + 1)
         setCurrentStoryIndex(0)
       } else {
-        // No more stories, close viewer
         router.back()
       }
     }
   }
 
   const handlePrevious = () => {
-    // Check if we can go back in current user's stories
     if (currentStoryIndex > 0) {
       setCurrentStoryIndex(prev => prev - 1)
     } else {
-      // Move to previous user
       if (currentUserIndex > 0) {
         const prevUserIndex = currentUserIndex - 1
         const prevUserStories =
@@ -164,7 +135,6 @@ export default function StoryViewer({ initialStoryId }: StoryViewerProps) {
     }
   }
 
-  // Swipe gesture handler
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
@@ -176,10 +146,8 @@ export default function StoryViewer({ initialStoryId }: StoryViewerProps) {
       },
       onPanResponderRelease: (_, gestureState) => {
         setIsPaused(false)
-        // Horizontal swipe (left/right) - change user
         if (Math.abs(gestureState.dx) > Math.abs(gestureState.dy)) {
           if (gestureState.dx > 50) {
-            // Swipe right - previous user
             if (currentUserIndex > 0) {
               const prevUserIndex = currentUserIndex - 1
               const prevUserStories =
@@ -252,8 +220,8 @@ export default function StoryViewer({ initialStoryId }: StoryViewerProps) {
               style={styles.avatarGradient}
             >
               <View style={styles.avatarInner}>
-                <Image
-                  source={{ uri: currentUser.author.avatarUrl }}
+                <Avatar
+                  uri={currentUser.author.avatarUrl || undefined}
                   style={styles.avatar}
                 />
               </View>

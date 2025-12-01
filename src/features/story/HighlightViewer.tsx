@@ -3,7 +3,6 @@ import {
   View,
   Image,
   Pressable,
-  Dimensions,
   StatusBar,
   StyleSheet,
   Animated,
@@ -14,31 +13,9 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import type { ProfileHighlight } from '@/mock/profile'
+import { formatDate } from '@/utils/FormatDate'
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window')
-const STORY_DURATION = 5000 // 5 seconds per story
-
-// Format timestamp to relative time
-function formatTimestamp(timestamp: string): string {
-  const now = new Date()
-  const storyTime = new Date(timestamp)
-  const diffInHours = Math.floor(
-    (now.getTime() - storyTime.getTime()) / (1000 * 60 * 60)
-  )
-
-  if (diffInHours < 1) {
-    const diffInMinutes = Math.floor(
-      (now.getTime() - storyTime.getTime()) / (1000 * 60)
-    )
-    if (diffInMinutes < 1) return 'Just now'
-    return `${diffInMinutes}m ago`
-  } else if (diffInHours < 24) {
-    return `${diffInHours}h ago`
-  } else {
-    const diffInDays = Math.floor(diffInHours / 24)
-    return `${diffInDays}d ago`
-  }
-}
+const STORY_DURATION = 5000
 
 // Simple Progress Bar Component matching StoryViewer
 function ProgressBar({
@@ -253,7 +230,7 @@ export default function HighlightViewer({
                 {username}
               </Text>
               <Text color="rgba(255,255,255,0.7)" fontSize={12} lineHeight={16}>
-                {formatTimestamp(currentStory.timestamp)}
+                {formatDate(currentStory.timestamp)}
               </Text>
             </YStack>
             <Pressable

@@ -8,16 +8,12 @@ import {
   StatusBar,
 } from 'react-native'
 import { useLocalSearchParams, router } from 'expo-router'
-import { YStack, XStack, SizableText, Avatar, Text } from 'tamagui'
+import { YStack, XStack, Avatar, Text } from 'tamagui'
 import { Feather } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
-import { BlurView } from 'expo-blur'
 import { users } from '../../src/mock/users'
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window')
-
-type CallType = 'voice' | 'video'
 type CallState = 'calling' | 'connected' | 'ended'
 
 export default function CallScreen() {
@@ -42,7 +38,6 @@ export default function CallScreen() {
   const [isVideoEnabled, setIsVideoEnabled] = useState(type === 'video')
   const [duration, setDuration] = useState(0)
   const [isVideoCall] = useState<boolean>(type === 'video')
-  const [isMinimized, setIsMinimized] = useState(false)
 
   // Animation values
   const pulseAnim = useRef(new Animated.Value(1)).current
