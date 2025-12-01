@@ -214,18 +214,6 @@ export default function SignInScreen() {
           <GoogleSignInButton />
         </YStack>
 
-        {/* DEV: Skip to Home for testing */}
-        {__DEV__ && (
-          <Button
-            marginTop="$4"
-            size="$3"
-            chromeless
-            onPress={() => router.replace('/(tabs)')}
-          >
-            Skip to Home
-          </Button>
-        )}
-
         {/* Footer */}
         <XStack gap="$1" marginTop="$2" alignItems="center">
           <Paragraph color="#888">Don't have an account?</Paragraph>
