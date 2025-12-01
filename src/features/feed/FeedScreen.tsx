@@ -69,17 +69,30 @@ export default function FeedScreen() {
     return () => backHandler.remove()
   }, [])
 
-  const { posts, isLoading, isRefreshing, fetchFeed, refreshFeed } =
-    usePostStore()
+  const {
+    posts,
+    stories,
+    isLoading,
+    isRefreshing,
+    fetchPosts,
+    refreshPosts,
+    fetchStories,
+    refreshStories,
+  } = usePostStore()
 
   useEffect(() => {
     if (posts.length === 0) {
-      fetchFeed('POST')
+      fetchPosts()
+    }
+
+    if (stories.length === 0) {
+      fetchStories()
     }
   }, [])
 
   const onRefresh = useCallback(() => {
-    refreshFeed('POST')
+    refreshPosts()
+    refreshStories()
   }, [])
 
   const onScroll = useAnimatedScrollHandler({
@@ -149,7 +162,7 @@ export default function FeedScreen() {
         ListHeaderComponent={
           <>
             <AnimatedSpacer style={spacerStyle} />
-            <StoryBar />
+            <StoryBar stories={stories} />
             <PostingStatus />
             <Separator />
           </>

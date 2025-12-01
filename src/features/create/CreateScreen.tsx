@@ -232,7 +232,11 @@ export default function NewPostScreen() {
 
       updatePost(updateData)
         .then(() => {
-          usePostStore.getState().refreshFeed(mode)
+          if (mode === 'STORY') {
+            usePostStore.getState().refreshStories()
+          } else {
+            usePostStore.getState().refreshPosts()
+          }
           finishUpdating()
           setIsSubmitting(false)
         })
@@ -265,7 +269,11 @@ export default function NewPostScreen() {
 
       createPost(postData)
         .then(() => {
-          usePostStore.getState().refreshFeed(postData.type)
+          if (mode === 'STORY') {
+            usePostStore.getState().refreshStories()
+          } else {
+            usePostStore.getState().refreshPosts()
+          }
           finishPosting()
           setIsSubmitting(false)
         })

@@ -28,6 +28,7 @@ import {
 interface PostState {
   // State
   posts: Post[]
+  stories: Post[]
   currentPost: Post | null
   isLoading: boolean
   isRefreshing: boolean
@@ -35,8 +36,10 @@ interface PostState {
 
   // Actions
   addPost: (post: Post) => void
-  fetchFeed: (type: PostType) => Promise<void>
-  refreshFeed: (type: PostType) => Promise<void>
+  fetchPosts: () => Promise<void>
+  refreshPosts: () => Promise<void>
+  fetchStories: () => Promise<void>
+  refreshStories: () => Promise<void>
   getPostDetail: (postId: string) => Promise<void>
 
   createPost: (data: CreatePostRequest) => Promise<CreatePostResponse>
@@ -49,6 +52,7 @@ interface PostState {
 export const usePostStore = create<PostState>((set, get) => ({
   // Initial State
   posts: [],
+  stories: [],
   currentPost: null,
   isLoading: false,
   isRefreshing: false,
@@ -59,27 +63,51 @@ export const usePostStore = create<PostState>((set, get) => ({
     set(state => ({ posts: [post, ...state.posts] }))
   },
 
-  fetchFeed: async (type: PostType) => {
+  fetchPosts: async () => {
     set({ isLoading: true, error: null })
     try {
-      const response = await getFeedApi(type)
-      console.log('Successful fetch feed:', response)
+      const response = await getFeedApi('POST')
+      console.log('Successful fetch posts:', response)
       set({ posts: response.data.posts, isLoading: false })
     } catch (error) {
-      console.error('Error fetching feed:', error)
-      set({ error: 'Failed to fetch feed', isLoading: false })
+      console.error('Error fetching posts:', error)
+      set({ error: 'Failed to fetch posts', isLoading: false })
     }
   },
 
-  refreshFeed: async (type: PostType) => {
+  refreshPosts: async () => {
     set({ isRefreshing: true, error: null })
     try {
-      const response = await getFeedApi(type)
-      console.log('Successful refresh feed:', response)
+      const response = await getFeedApi('POST')
+      console.log('Successful refresh posts:', response)
       set({ posts: response.data.posts, isRefreshing: false })
     } catch (error) {
-      console.error('Error refreshing feed:', error)
-      set({ error: 'Failed to refresh feed', isRefreshing: false })
+      console.error('Error refreshing posts:', error)
+      set({ error: 'Failed to refresh posts', isRefreshing: false })
+    }
+  },
+
+  fetchStories: async () => {
+    set({ isLoading: true, error: null })
+    try {
+      const response = await getFeedApi('STORY')
+      console.log('Successful fetch stories:', response)
+      set({ stories: response.data.posts, isLoading: false })
+    } catch (error) {
+      console.error('Error fetching stories:', error)
+      set({ error: 'Failed to fetch stories', isLoading: false })
+    }
+  },
+
+  refreshStories: async () => {
+    set({ isRefreshing: true, error: null })
+    try {
+      const response = await getFeedApi('STORY')
+      console.log('Successful refresh stories:', response)
+      set({ stories: response.data.posts, isRefreshing: false })
+    } catch (error) {
+      console.error('Error refreshing stories:', error)
+      set({ error: 'Failed to refresh stories', isRefreshing: false })
     }
   },
 

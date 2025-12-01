@@ -1,4 +1,4 @@
-import { Story } from '@/types/Story'
+import { User } from '@/types/User'
 import React from 'react'
 import { StyleSheet, Pressable } from 'react-native'
 import { YStack, Text, useThemeName } from 'tamagui'
@@ -7,12 +7,12 @@ import { INSTAGRAM_GRADIENT } from '@/utils/InstagramGradient'
 import Avatar from '@/components/Avatar'
 
 interface StoryItemProps {
-  story: Story
+  author: User
+  hasNew: boolean
   onPress?: () => void
 }
 
-function StoryItem({ story, onPress }: StoryItemProps) {
-  const { author, hasNew } = story
+function StoryItem({ author, hasNew, onPress }: StoryItemProps) {
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
   const ringBackground = isDark ? '#121212' : '#ffffff'

@@ -1,12 +1,12 @@
-import { memo } from 'react'
+import { memo, useMemo } from 'react'
 import { ScrollView, StyleSheet, Pressable } from 'react-native'
 import { XStack, YStack, Text, Button, useThemeName } from 'tamagui'
 import { Plus } from '@tamagui/lucide-icons'
 import { router } from 'expo-router'
-import { stories } from '@/mock/stories'
 import StoryItem from './StoryItem'
 import { useCurrentUser } from '@/hooks/useProfile'
 import Avatar from '@/components/Avatar'
+import { Post } from '@/types/Post'
 
 function CreateStoryItem() {
   const themeName = useThemeName()
@@ -68,12 +68,22 @@ function CreateStoryItem() {
   )
 }
 
-function StoryBar() {
-  // Sort stories: new stories first, then viewed stories
-  const sortedStories = [...stories].sort((a, b) => {
-    if (a.hasNew === b.hasNew) return 0
-    return a.hasNew ? -1 : 1
-  })
+interface StoryBarProps {
+  stories: Post[]
+}
+
+function StoryBar({ stories }: StoryBarProps) {
+  const groupedStories = useMemo(() => {
+    const groups: { [key: string]: Post[] } = {}
+    stories.forEach(story => {
+      const authorId = story.authorProfile.id
+      if (!groups[authorId]) {
+        groups[authorId] = []
+      }
+      groups[authorId].push(story)
+    })
+    return Object.values(groups)
+  }, [stories])
 
   return (
     <ScrollView
@@ -83,13 +93,17 @@ function StoryBar() {
     >
       <XStack gap="$1">
         <CreateStoryItem />
-        {sortedStories.map(s => (
-          <StoryItem
-            key={s.id}
-            story={s}
-            onPress={() => router.push(`/story/${s.id}`)}
-          />
-        ))}
+        {groupedStories.map(userStories => {
+          const author = userStories[0].authorProfile
+          return (
+            <StoryItem
+              key={author.id}
+              author={author}
+              hasNew={true}
+              onPress={() => router.push(`/story/${author.id}`)}
+            />
+          )
+        })}
       </XStack>
     </ScrollView>
   )
