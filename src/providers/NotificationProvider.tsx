@@ -10,7 +10,6 @@ import React, {
 import * as Notifications from 'expo-notifications'
 import { useStomp, useStompEvent } from '@/hooks/useRealTimeNotification'
 import { NotificationItem, NotificationType } from '@/types/Notification'
-import { notifications as mockNotifications } from '@/mock/notifications'
 import {
   registerForPushNotificationsAsync,
   addNotificationReceivedListener,
@@ -187,18 +186,6 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     const unreadCount = notifications.filter(n => !n.read).length
     setBadgeCount(unreadCount)
   }, [notifications])
-
-  // Load mock notifications on mount (for development)
-  useEffect(() => {
-    // Load mock data initially
-    const formattedMockNotifications = (
-      mockNotifications as NotificationItem[]
-    ).map(n => ({
-      ...n,
-      message: getNotificationMessage(n),
-    }))
-    setNotifications(formattedMockNotifications)
-  }, [])
 
   // Connect to STOMP WebSocket
   const { isConnected } = useStomp({
