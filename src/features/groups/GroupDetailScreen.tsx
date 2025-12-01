@@ -20,7 +20,7 @@ import {
   Edit3,
   Trash2,
 } from '@tamagui/lucide-icons'
-import { router } from 'expo-router'
+import { router, useLocalSearchParams } from 'expo-router'
 import { formatNumber } from '@/utils/FormatNumber'
 import { Group } from '@/types/Group'
 import PostCard from '../feed/components/PostCard'
@@ -36,11 +36,13 @@ import { Shield, Crown, MoreVertical } from '@tamagui/lucide-icons'
 
 type GroupTab = 'discussion' | 'members' | 'about' | 'yourPosts'
 
-interface GroupDetailScreenProps {
-  groupId: string
-}
+export default function GroupDetailScreen() {
+  const { id: groupId } = useLocalSearchParams<{ id: string }>()
 
-export default function GroupDetailScreen({ groupId }: GroupDetailScreenProps) {
+  if (!groupId) {
+    return null
+  }
+
   const [activeTab, setActiveTab] = useState<GroupTab>('discussion')
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [notificationSheetVisible, setNotificationSheetVisible] =

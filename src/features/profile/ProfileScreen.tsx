@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { ActivityIndicator, Pressable, ScrollView } from 'react-native'
 import { Text, XStack, YStack, useThemeName, Button } from 'tamagui'
 import { ChevronLeft, Menu, Plus } from '@tamagui/lucide-icons'
-import { useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { ProfileInfo } from './components/ProfileInfo'
 import { ProfileBio } from './components/ProfileBio'
 import { ProfileActions } from './components/ProfileActions'
@@ -19,16 +19,14 @@ import { useAppTheme } from '@/providers/ThemeProvider'
 
 export type ProfileTabKey = 'posts' | 'reels' | 'tagged'
 
-export interface ProfileScreenProps {
-  userId?: string
-}
-
 export interface ProfileComponentProps {
   user: User
   isOwnProfile: boolean
 }
 
-export default function ProfileScreen({ userId }: ProfileScreenProps) {
+export default function ProfileScreen() {
+  const { id: userId } = useLocalSearchParams<{ id: string }>()
+
   const router = useRouter()
   const [tab, setTab] = useState<ProfileTabKey>('posts')
   const [showSettings, setShowSettings] = useState(false)

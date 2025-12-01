@@ -14,7 +14,7 @@ import {
 import { YStack, XStack, Text } from 'tamagui'
 import { X, Heart, Send, MoreHorizontal } from '@tamagui/lucide-icons'
 import { LinearGradient } from 'expo-linear-gradient'
-import { router } from 'expo-router'
+import { router, useLocalSearchParams } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { stories as allStories } from '@/mock/stories'
 import StoryProgressBar from './components/StoryProgressBar'
@@ -22,11 +22,8 @@ import Avatar from '@/components/Avatar'
 
 const STORY_DURATION = 5000
 
-interface StoryViewerProps {
-  initialStoryId: string
-}
-
-export default function StoryViewer({ initialStoryId }: StoryViewerProps) {
+export default function StoryViewer() {
+  const { id } = useLocalSearchParams<{ id: string }>()
   const insets = useSafeAreaInsets()
 
   // Sort stories: new stories first
@@ -35,7 +32,7 @@ export default function StoryViewer({ initialStoryId }: StoryViewerProps) {
     return a.hasNew ? -1 : 1
   })
 
-  const initialIndex = sortedStories.findIndex(s => s.id === initialStoryId)
+  const initialIndex = sortedStories.findIndex(s => s.id === id)
   const [currentUserIndex, setCurrentUserIndex] = useState(
     initialIndex >= 0 ? initialIndex : 0
   )

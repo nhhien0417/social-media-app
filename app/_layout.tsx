@@ -60,42 +60,15 @@ function RootContent() {
         <NotificationProvider userId={userId}>
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="index" />
             <Stack.Screen name="auth" />
+            <Stack.Screen name="call" />
+            <Stack.Screen name="create" />
+            <Stack.Screen name="group" />
             <Stack.Screen name="message" />
+            <Stack.Screen name="post" />
             <Stack.Screen name="profile" />
-            <Stack.Screen
-              name="post/[id]"
-              options={{
-                presentation: 'modal',
-                animation: 'fade',
-                headerShown: false,
-              }}
-            />
-            <Stack.Screen
-              name="create"
-              options={{
-                presentation: 'modal',
-                animation: 'fade',
-                headerShown: false,
-              }}
-            />
-            <Stack.Screen
-              name="story"
-              options={{
-                presentation: 'modal',
-                animation: 'fade',
-                headerShown: false,
-              }}
-            />
-            <Stack.Screen
-              name="call"
-              options={{
-                presentation: 'modal',
-                animation: 'fade',
-                headerShown: false,
-              }}
-            />
+            <Stack.Screen name="story" />
+            <Stack.Screen name="index" />
           </Stack>
         </NotificationProvider>
       </PostStatusProvider>
