@@ -19,7 +19,7 @@ import {
   useCameraPermissions,
   useMicrophonePermissions,
 } from 'expo-camera'
-import { Video, ResizeMode } from 'expo-av'
+import { useVideoPlayer, VideoView } from 'expo-video'
 
 interface CapturedMedia {
   uri: string
@@ -341,6 +341,22 @@ const styles = StyleSheet.create({
     borderColor: '#0095F6',
   },
 })
+
+const VideoPreview = ({ uri }: { uri: string }) => {
+  const player = useVideoPlayer(uri, player => {
+    player.loop = true
+    player.play()
+  })
+
+  return (
+    <VideoView
+      style={styles.previewMedia}
+      player={player}
+      contentFit="contain"
+      nativeControls={false}
+    />
+  )
+}
 
 export default function Camera({ visible, onClose, onCapture }: Props) {
   const [facing, setFacing] = useState<CameraType>('back')
@@ -1108,14 +1124,7 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
                     resizeMode="contain"
                   />
                 ) : (
-                  <Video
-                    source={{ uri: capturedMedia.uri }}
-                    style={styles.previewMedia}
-                    resizeMode={ResizeMode.CONTAIN}
-                    shouldPlay
-                    isLooping
-                    useNativeControls={false}
-                  />
+                  <VideoPreview uri={capturedMedia.uri} />
                 )}
               </View>
 
