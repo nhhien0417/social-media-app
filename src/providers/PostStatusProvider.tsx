@@ -16,17 +16,18 @@ type PostStatus =
 
 type PostStatusContextType = {
   status: PostStatus
-  errorMessage?: string
+  mode: 'POST' | 'STORY'
   mediaUrl?: string
+  errorMessage?: string
   lastOperation?: 'posting' | 'updating' | 'deleting'
-  startPosting: (mediaUrl?: string) => void
+  startPosting: (mediaUrl?: string, mode?: 'POST' | 'STORY') => void
   finishPosting: () => void
   failPosting: (error: string) => void
   resetPosting: () => void
-  startDeleting: (mediaUrl?: string) => void
+  startDeleting: (mediaUrl?: string, mode?: 'POST' | 'STORY') => void
   finishDeleting: () => void
   failDeleting: (error: string) => void
-  startUpdating: (mediaUrl?: string) => void
+  startUpdating: (mediaUrl?: string, mode?: 'POST' | 'STORY') => void
   finishUpdating: () => void
   failUpdating: (error: string) => void
 }
@@ -42,13 +43,18 @@ export function PostStatusProvider({ children }: PropsWithChildren) {
   const [lastOperation, setLastOperation] = useState<
     'posting' | 'updating' | 'deleting'
   >()
+  const [mode, setMode] = useState<'POST' | 'STORY'>('POST')
 
-  const startPosting = useCallback((media?: string) => {
-    setStatus('posting')
-    setMediaUrl(media)
-    setErrorMessage(undefined)
-    setLastOperation('posting')
-  }, [])
+  const startPosting = useCallback(
+    (media?: string, newMode: 'POST' | 'STORY' = 'POST') => {
+      setStatus('posting')
+      setMode(newMode)
+      setMediaUrl(media)
+      setErrorMessage(undefined)
+      setLastOperation('posting')
+    },
+    []
+  )
 
   const finishPosting = useCallback(() => {
     setStatus('success')
@@ -77,12 +83,16 @@ export function PostStatusProvider({ children }: PropsWithChildren) {
     setMediaUrl(undefined)
   }, [])
 
-  const startDeleting = useCallback((media?: string) => {
-    setStatus('deleting')
-    setMediaUrl(media)
-    setErrorMessage(undefined)
-    setLastOperation('deleting')
-  }, [])
+  const startDeleting = useCallback(
+    (media?: string, newMode: 'POST' | 'STORY' = 'POST') => {
+      setStatus('deleting')
+      setMode(newMode)
+      setMediaUrl(media)
+      setErrorMessage(undefined)
+      setLastOperation('deleting')
+    },
+    []
+  )
 
   const finishDeleting = useCallback(() => {
     setStatus('success')
@@ -105,12 +115,16 @@ export function PostStatusProvider({ children }: PropsWithChildren) {
     }, 3000)
   }, [])
 
-  const startUpdating = useCallback((media?: string) => {
-    setStatus('updating')
-    setMediaUrl(media)
-    setErrorMessage(undefined)
-    setLastOperation('updating')
-  }, [])
+  const startUpdating = useCallback(
+    (media?: string, newMode: 'POST' | 'STORY' = 'POST') => {
+      setStatus('updating')
+      setMode(newMode)
+      setMediaUrl(media)
+      setErrorMessage(undefined)
+      setLastOperation('updating')
+    },
+    []
+  )
 
   const finishUpdating = useCallback(() => {
     setStatus('success')
@@ -137,8 +151,9 @@ export function PostStatusProvider({ children }: PropsWithChildren) {
     <PostStatusContext.Provider
       value={{
         status,
-        errorMessage,
+        mode,
         mediaUrl,
+        errorMessage,
         lastOperation,
         startPosting,
         finishPosting,

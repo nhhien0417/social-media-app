@@ -11,10 +11,10 @@ import { YStack, XStack, Text, View, Image } from 'tamagui'
 import Avatar from '@/components/Avatar'
 import {
   X,
-  MoreVertical,
   Heart,
   MessageCircle,
   Send,
+  MoreHorizontal,
 } from '@tamagui/lucide-icons'
 import ButtonIcon from '@/components/IconButton'
 import { formatDate } from '@/utils/FormatDate'
@@ -217,7 +217,7 @@ function PostDetailScreen() {
             <X size={28} color="white" />
           </Pressable>
           <ButtonIcon
-            Icon={MoreVertical}
+            Icon={MoreHorizontal}
             Size={24}
             Color="white"
             onPress={() => setOptionsSheetVisible(true)}
@@ -386,6 +386,7 @@ function PostDetailScreen() {
         onClose={() => setOptionsSheetVisible(false)}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        mode={post.type}
         isOwner={isOwner}
       />
 
@@ -393,6 +394,7 @@ function PostDetailScreen() {
         visible={deleteModalVisible}
         onClose={() => setDeleteModalVisible(false)}
         postId={post.id}
+        mode={post.type}
         thumbnailUrl={media[0]}
       />
     </YStack>

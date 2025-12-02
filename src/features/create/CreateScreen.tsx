@@ -215,7 +215,7 @@ export default function NewPostScreen() {
     const firstMediaUrl = media.length > 0 ? media[0].url : undefined
 
     if (isEditMode && editPostId) {
-      startUpdating(firstMediaUrl)
+      startUpdating(firstMediaUrl, mode)
 
       const mediaData = await processMediaForUpload(
         media.map(m => ({ ...m, uri: m.url }))
@@ -249,7 +249,7 @@ export default function NewPostScreen() {
         })
     } else {
       // Create new post
-      startPosting(firstMediaUrl)
+      startPosting(firstMediaUrl, mode)
 
       const postData = {
         userId: currentUser.id,

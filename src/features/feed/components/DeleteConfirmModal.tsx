@@ -1,5 +1,5 @@
 import { Modal, Pressable, StyleSheet } from 'react-native'
-import { YStack, XStack, Text, useThemeName } from 'tamagui'
+import { YStack, Text, useThemeName } from 'tamagui'
 import { usePostStore } from '@/stores/postStore'
 import { usePostStatus } from '@/providers/PostStatusProvider'
 import { router } from 'expo-router'
@@ -16,6 +16,7 @@ interface DeleteConfirmModalProps {
   onClose: () => void
   postId: string
   thumbnailUrl?: string
+  mode: 'POST' | 'STORY'
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
@@ -24,6 +25,7 @@ export default function DeleteConfirmModal({
   visible,
   onClose,
   postId,
+  mode,
   thumbnailUrl,
 }: DeleteConfirmModalProps) {
   const deletePost = usePostStore(state => state.deletePost)
@@ -33,7 +35,7 @@ export default function DeleteConfirmModal({
 
   const handleDelete = async () => {
     onClose()
-    startDeleting(thumbnailUrl)
+    startDeleting(thumbnailUrl, mode)
 
     try {
       await deletePost(postId)
@@ -44,7 +46,8 @@ export default function DeleteConfirmModal({
       }
     } catch (error) {
       const errorMessage =
-        (error as any)?.message || 'Failed to delete post. Please try again.'
+        (error as any)?.message ||
+        `Failed to delete ${mode === 'STORY' ? 'story' : 'post'}. Please try again.`
       failDeleting(errorMessage)
     }
   }
@@ -105,7 +108,7 @@ export default function DeleteConfirmModal({
                   color={isDark ? 'white' : 'black'}
                   textAlign="center"
                 >
-                  Delete Post?
+                  Delete {mode === 'STORY' ? 'Story' : 'Post'}?
                 </Text>
                 <Text
                   fontSize={15}
@@ -113,8 +116,8 @@ export default function DeleteConfirmModal({
                   textAlign="center"
                   lineHeight={20}
                 >
-                  This post will be permanently deleted. This action cannot be
-                  undone.
+                  This {mode === 'STORY' ? 'story' : 'post'} will be permanently
+                  deleted. This action cannot be undone.
                 </Text>
               </YStack>
 

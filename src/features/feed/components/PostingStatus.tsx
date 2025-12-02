@@ -23,7 +23,7 @@ const TRACK_H = 4
 const BAR_RATIO = 0.35
 
 export default function PostingStatus() {
-  const { status, mediaUrl, lastOperation } = usePostStatus()
+  const { status, mediaUrl, lastOperation, mode } = usePostStatus()
   const isVisible = status !== 'idle'
 
   const containerOpacity = useSharedValue(0)
@@ -36,22 +36,25 @@ export default function PostingStatus() {
   const imageScale = useSharedValue(1)
   const iconScale = useSharedValue(0)
 
+  const typeText = mode === 'STORY' ? 'story' : 'post'
+  const TypeText = mode === 'STORY' ? 'Story' : 'Post'
+
   const getSuccessMessage = () => {
     switch (lastOperation) {
       case 'updating':
         return {
-          title: 'Post updated successfully!',
+          title: `${TypeText} updated successfully!`,
           subtitle: 'Your changes have been saved',
         }
       case 'deleting':
         return {
-          title: 'Post deleted successfully!',
-          subtitle: 'Your post has been removed',
+          title: `${TypeText} deleted successfully!`,
+          subtitle: `Your ${typeText} has been removed`,
         }
       default:
         return {
-          title: 'Post shared successfully!',
-          subtitle: 'Your friends can now see your post',
+          title: `${TypeText} shared successfully!`,
+          subtitle: `Your friends can now see your ${typeText}`,
         }
     }
   }
@@ -60,17 +63,17 @@ export default function PostingStatus() {
     switch (lastOperation) {
       case 'updating':
         return {
-          title: "Couldn't update your post",
+          title: `Couldn't update your ${typeText}`,
           subtitle: 'Something went wrong. Please try again.',
         }
       case 'deleting':
         return {
-          title: "Couldn't delete your post",
+          title: `Couldn't delete your ${typeText}`,
           subtitle: 'Something went wrong. Please try again.',
         }
       default:
         return {
-          title: "Couldn't share your post",
+          title: `Couldn't share your ${typeText}`,
           subtitle: 'Something went wrong. Please try again.',
         }
     }
@@ -247,7 +250,7 @@ export default function PostingStatus() {
           )}
           <YStack flex={1} gap="$2.5" justifyContent="center">
             <Text fontSize="$5" fontWeight="600" color="$color">
-              Creating your post...
+              Creating your {typeText}...
             </Text>
 
             {/* Track */}
@@ -305,7 +308,7 @@ export default function PostingStatus() {
           )}
           <YStack flex={1} gap="$2.5" justifyContent="center">
             <Text fontSize="$5" fontWeight="600" color="$color">
-              Updating your post...
+              Updating your {typeText}...
             </Text>
 
             <YStack
@@ -361,7 +364,7 @@ export default function PostingStatus() {
           )}
           <YStack flex={1} gap="$2.5" justifyContent="center">
             <Text fontSize="$5" fontWeight="600" color="$color">
-              Deleting your post...
+              Deleting your {typeText}...
             </Text>
 
             <YStack

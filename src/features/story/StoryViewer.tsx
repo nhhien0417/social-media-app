@@ -19,12 +19,16 @@ import Avatar from '@/components/Avatar'
 import { usePostStore } from '@/stores/postStore'
 import { Post } from '@/types/Post'
 import { formatDate } from '@/utils/FormatDate'
+import PostOptionsSheet from '../feed/components/PostOptionsSheet'
+import DeleteConfirmModal from '../feed/components/DeleteConfirmModal'
+import { useCurrentUser } from '@/hooks/useProfile'
 
 const STORY_DURATION = 5000
 
 export default function StoryViewer() {
   const { id: storyId } = useLocalSearchParams<{ id: string }>()
   const stories = usePostStore(state => state.stories)
+  const currentUser = useCurrentUser()
 
   // Group stories by author
   const groupedStories = useMemo(() => {
@@ -60,12 +64,15 @@ export default function StoryViewer() {
   const [isPaused, setIsPaused] = useState(false)
   const [isLiked, setIsLiked] = useState(false)
   const [showReplyInput, setShowReplyInput] = useState(false)
+  const [optionsSheetVisible, setOptionsSheetVisible] = useState(false)
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
 
   const currentUserStories = groupedStories[currentUserIndex]
   const currentStory = currentUserStories?.[currentStoryIndex]
   const totalStories = currentUserStories?.length || 0
   const author = currentStory?.authorProfile
+  const isOwner = currentUser?.id === author?.id
 
   useEffect(() => {
     if (!currentUserStories || totalStories === 0) {
@@ -74,7 +81,7 @@ export default function StoryViewer() {
   }, [currentUserStories, totalStories])
 
   useEffect(() => {
-    if (isPaused) return
+    if (isPaused || optionsSheetVisible || deleteModalVisible) return
 
     timerRef.current = setTimeout(() => {
       handleNext()
@@ -83,7 +90,13 @@ export default function StoryViewer() {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
     }
-  }, [currentUserIndex, currentStoryIndex, isPaused])
+  }, [
+    currentUserIndex,
+    currentStoryIndex,
+    isPaused,
+    optionsSheetVisible,
+    deleteModalVisible,
+  ])
 
   const handleNext = () => {
     if (currentStoryIndex < totalStories - 1) {
@@ -158,6 +171,14 @@ export default function StoryViewer() {
       setShowReplyInput(false)
       setIsPaused(false)
     }
+  }
+
+  const handleDelete = () => {
+    setDeleteModalVisible(true)
+  }
+
+  const handleEdit = () => {
+    setOptionsSheetVisible(false)
   }
 
   const panResponder = useRef(
@@ -249,7 +270,7 @@ export default function StoryViewer() {
               <StoryProgressBar
                 key={index}
                 duration={STORY_DURATION}
-                isPaused={isPaused}
+                isPaused={isPaused || optionsSheetVisible || deleteModalVisible}
                 isActive={index === currentStoryIndex}
                 isCompleted={index < currentStoryIndex}
               />
@@ -289,7 +310,14 @@ export default function StoryViewer() {
                 {formatDate(currentStory.createdAt)}
               </Text>
             </YStack>
-            <Pressable style={styles.moreButton} hitSlop={8}>
+            <Pressable
+              style={styles.moreButton}
+              hitSlop={8}
+              onPress={() => {
+                setOptionsSheetVisible(true)
+                setIsPaused(true)
+              }}
+            >
               <MoreHorizontal size={24} color="#ffffff" strokeWidth={2.5} />
             </Pressable>
             <Pressable
@@ -388,6 +416,29 @@ export default function StoryViewer() {
           </LinearGradient>
         </KeyboardAvoidingView>
       </View>
+
+      <PostOptionsSheet
+        visible={optionsSheetVisible}
+        onClose={() => {
+          setOptionsSheetVisible(false)
+          setIsPaused(false)
+        }}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        isOwner={isOwner}
+        mode="STORY"
+      />
+
+      <DeleteConfirmModal
+        visible={deleteModalVisible}
+        onClose={() => {
+          setDeleteModalVisible(false)
+          setIsPaused(false)
+        }}
+        postId={currentStory.id}
+        thumbnailUrl={mediaUrl || undefined}
+        mode="STORY"
+      />
     </View>
   )
 }

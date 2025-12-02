@@ -13,6 +13,7 @@ interface PostOptionsSheetProps {
   onClose: () => void
   onEdit: () => void
   onDelete: () => void
+  mode: 'POST' | 'STORY'
   isOwner: boolean
   isAdmin?: boolean
   onDeleteAsAdmin?: () => void
@@ -25,6 +26,7 @@ export default function PostOptionsSheet({
   onClose,
   onEdit,
   onDelete,
+  mode,
   isOwner,
   isAdmin,
   onDeleteAsAdmin,
@@ -107,10 +109,10 @@ export default function PostOptionsSheet({
                       fontWeight="600"
                       color={isDark ? 'white' : 'black'}
                     >
-                      Edit Post
+                      Edit {mode === 'STORY' ? 'Story' : 'Post'}
                     </Text>
                     <Text fontSize={13} color={isDark ? '#8e8e93' : '#8e8e93'}>
-                      Make changes to your post
+                      Make changes to your {mode === 'STORY' ? 'story' : 'post'}
                     </Text>
                   </YStack>
                 </XStack>
@@ -162,10 +164,11 @@ export default function PostOptionsSheet({
                   </YStack>
                   <YStack flex={1}>
                     <Text fontSize={16} fontWeight="600" color="#ff3b30">
-                      Delete Post
+                      Delete {mode === 'STORY' ? 'Story' : 'Post'}
                     </Text>
                     <Text fontSize={13} color={isDark ? '#8e8e93' : '#8e8e93'}>
-                      Permanently remove this post
+                      Permanently remove this{' '}
+                      {mode === 'STORY' ? 'story' : 'post'}
                     </Text>
                   </YStack>
                 </XStack>
@@ -208,10 +211,11 @@ export default function PostOptionsSheet({
                   </YStack>
                   <YStack flex={1}>
                     <Text fontSize={16} fontWeight="600" color="#ff3b30">
-                      Delete Post (Admin)
+                      Delete {mode === 'STORY' ? 'Story' : 'Post'} (Admin)
                     </Text>
                     <Text fontSize={13} color={isDark ? '#8e8e93' : '#8e8e93'}>
-                      Remove this post as group admin
+                      Remove this {mode === 'STORY' ? 'story' : 'post'} as group
+                      admin
                     </Text>
                   </YStack>
                 </XStack>
