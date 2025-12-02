@@ -11,7 +11,13 @@ import {
   Platform,
 } from 'react-native'
 import { YStack, XStack, Text } from 'tamagui'
-import { X, Heart, Send, MoreHorizontal } from '@tamagui/lucide-icons'
+import {
+  X,
+  Heart,
+  Send,
+  MoreHorizontal,
+  MessageCircle,
+} from '@tamagui/lucide-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router, useLocalSearchParams, useFocusEffect } from 'expo-router'
 import { useCallback } from 'react'
@@ -19,10 +25,12 @@ import StoryProgressBar from './components/StoryProgressBar'
 import Avatar from '@/components/Avatar'
 import ButtonIcon from '@/components/IconButton'
 import { usePostStore } from '@/stores/postStore'
+import { useCommentStore } from '@/stores/commentStore'
 import { Post } from '@/types/Post'
 import { formatDate } from '@/utils/FormatDate'
 import PostOptionsSheet from '../feed/components/PostOptionsSheet'
 import DeleteConfirmModal from '../feed/components/DeleteConfirmModal'
+import Comment from '@/features/comment/Comment'
 import { useCurrentUser } from '@/hooks/useProfile'
 
 const STORY_DURATION = 5000
@@ -30,6 +38,7 @@ const STORY_DURATION = 5000
 export default function StoryViewer() {
   const { id: storyId } = useLocalSearchParams<{ id: string }>()
   const stories = usePostStore(state => state.stories)
+  const addComment = useCommentStore(state => state.addComment)
   const currentUser = useCurrentUser()
 
   // Group stories by author
@@ -67,8 +76,10 @@ export default function StoryViewer() {
   const [isPaused, setIsPaused] = useState(false)
   const [isLiked, setIsLiked] = useState(false)
   const [showReplyInput, setShowReplyInput] = useState(false)
+  const [replyText, setReplyText] = useState('')
   const [optionsSheetVisible, setOptionsSheetVisible] = useState(false)
   const [deleteModalVisible, setDeleteModalVisible] = useState(false)
+  const [commentSheetVisible, setCommentSheetVisible] = useState(false)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
 
   const currentUserStories = groupedStories[currentUserIndex]
@@ -97,7 +108,14 @@ export default function StoryViewer() {
   }, [currentUserStories, totalStories])
 
   useEffect(() => {
-    if (isPaused || optionsSheetVisible || deleteModalVisible || !isFocused)
+    if (
+      isPaused ||
+      showReplyInput ||
+      optionsSheetVisible ||
+      deleteModalVisible ||
+      commentSheetVisible ||
+      !isFocused
+    )
       return
 
     timerRef.current = setTimeout(() => {
@@ -111,9 +129,11 @@ export default function StoryViewer() {
     currentUserIndex,
     currentStoryIndex,
     isPaused,
+    isFocused,
+    showReplyInput,
     optionsSheetVisible,
     deleteModalVisible,
-    isFocused,
+    commentSheetVisible,
   ])
 
   const handleNext = () => {
@@ -151,19 +171,29 @@ export default function StoryViewer() {
   }
 
   const handleTapLeft = () => {
-    handlePrevious()
+    if (showReplyInput) {
+      handleDismissInput()
+    } else {
+      handlePrevious()
+    }
   }
 
   const handleTapRight = () => {
-    handleNext()
+    if (showReplyInput) {
+      handleDismissInput()
+    } else {
+      handleNext()
+    }
   }
 
   const handleLongPressIn = () => {
-    setIsPaused(true)
+    if (!showReplyInput) {
+      setIsPaused(true)
+    }
   }
 
   const handleLongPressOut = () => {
-    if (!showReplyInput) {
+    if (!showReplyInput && !commentSheetVisible) {
       setIsPaused(false)
     }
   }
@@ -191,9 +221,21 @@ export default function StoryViewer() {
     setIsPaused(true)
   }
 
-  const handleSendReply = () => {
-    setShowReplyInput(false)
-    setIsPaused(false)
+  const handleSendReply = async () => {
+    if (!replyText.trim() || !currentUser || !currentStory) return
+
+    try {
+      await addComment({
+        postId: currentStory.id,
+        authorId: currentUser.id,
+        content: replyText,
+      })
+      setReplyText('')
+      setShowReplyInput(false)
+      setIsPaused(false)
+    } catch (error) {
+      console.error('Failed to send comment:', error)
+    }
   }
 
   const handleDismissInput = () => {
@@ -225,9 +267,15 @@ export default function StoryViewer() {
         setIsPaused(true)
       },
       onPanResponderRelease: (_, gestureState) => {
-        if (!showReplyInput) {
+        if (!showReplyInput && !commentSheetVisible) {
           setIsPaused(false)
         }
+
+        if (showReplyInput) {
+          handleDismissInput()
+          return
+        }
+
         if (Math.abs(gestureState.dx) > Math.abs(gestureState.dy)) {
           if (gestureState.dx > 50) {
             if (currentUserIndex > 0) {
@@ -306,7 +354,13 @@ export default function StoryViewer() {
               <StoryProgressBar
                 key={index}
                 duration={STORY_DURATION}
-                isPaused={isPaused || optionsSheetVisible || deleteModalVisible}
+                isPaused={
+                  isPaused ||
+                  showReplyInput ||
+                  optionsSheetVisible ||
+                  deleteModalVisible ||
+                  commentSheetVisible
+                }
                 isActive={index === currentStoryIndex}
                 isCompleted={index < currentStoryIndex}
               />
@@ -370,25 +424,13 @@ export default function StoryViewer() {
         <View style={styles.middleSection}>
           <Pressable
             style={styles.tapLeft}
-            onPress={() => {
-              if (showReplyInput) {
-                handleDismissInput()
-              } else {
-                handleTapLeft()
-              }
-            }}
+            onPress={handleTapLeft}
             onLongPress={handleLongPressIn}
             onPressOut={handleLongPressOut}
           />
           <Pressable
             style={styles.tapRight}
-            onPress={() => {
-              if (showReplyInput) {
-                handleDismissInput()
-              } else {
-                handleTapRight()
-              }
-            }}
+            onPress={handleTapRight}
             onLongPress={handleLongPressIn}
             onPressOut={handleLongPressOut}
           />
@@ -405,10 +447,10 @@ export default function StoryViewer() {
           >
             {/* Bottom Actions */}
             {!showReplyInput && (
-              <XStack alignItems="center" gap={16} paddingHorizontal={16}>
+              <XStack alignItems="center" gap={8} paddingHorizontal={16}>
                 <Pressable style={styles.replyInput} onPress={handleReply}>
                   <Text color="rgba(255,255,255,0.7)" fontSize={14}>
-                    Send message
+                    Leave a comment...
                   </Text>
                 </Pressable>
                 <ButtonIcon
@@ -419,25 +461,30 @@ export default function StoryViewer() {
                   onPress={handleLike}
                   hitSlop={8}
                 />
-                <Pressable style={styles.actionButton} hitSlop={8}>
-                  <Send size={26} color="#ffffff" strokeWidth={2} />
-                </Pressable>
+                <ButtonIcon
+                  Icon={MessageCircle}
+                  Size={28}
+                  Color="#ffffff"
+                  onPress={() => {
+                    setCommentSheetVisible(true)
+                    setIsPaused(true)
+                  }}
+                  hitSlop={8}
+                />
               </XStack>
             )}
 
             {/* Reply Input */}
             {showReplyInput && (
-              <XStack alignItems="center" gap={12} paddingHorizontal={16}>
+              <XStack alignItems="center" gap={8} paddingHorizontal={16}>
                 <View style={styles.replyInputWrapper}>
                   <TextInput
                     style={styles.textInput}
-                    placeholder="Send message..."
+                    placeholder="Leave a comment..."
                     placeholderTextColor="rgba(255,255,255,0.5)"
                     autoFocus
-                    onBlur={() => {
-                      setShowReplyInput(false)
-                      setIsPaused(false)
-                    }}
+                    value={replyText}
+                    onChangeText={setReplyText}
                   />
                 </View>
                 <Pressable onPress={handleSendReply} style={styles.sendButton}>
@@ -470,6 +517,16 @@ export default function StoryViewer() {
         postId={currentStory.id}
         thumbnailUrl={mediaUrl || undefined}
         mode="STORY"
+      />
+
+      <Comment
+        visible={commentSheetVisible}
+        onClose={() => {
+          setCommentSheetVisible(false)
+          setIsPaused(false)
+        }}
+        postId={currentStory.id}
+        userAvatarUrl={currentUser?.avatarUrl || undefined}
       />
     </View>
   )
