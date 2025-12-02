@@ -17,6 +17,7 @@ import { router, useLocalSearchParams, useFocusEffect } from 'expo-router'
 import { useCallback } from 'react'
 import StoryProgressBar from './components/StoryProgressBar'
 import Avatar from '@/components/Avatar'
+import ButtonIcon from '@/components/IconButton'
 import { usePostStore } from '@/stores/postStore'
 import { Post } from '@/types/Post'
 import { formatDate } from '@/utils/FormatDate'
@@ -171,8 +172,18 @@ export default function StoryViewer() {
     router.back()
   }
 
-  const handleLike = () => {
-    setIsLiked(!isLiked)
+  const likePost = usePostStore(state => state.likePost)
+
+  useEffect(() => {
+    if (currentStory && currentUser) {
+      const isLikedByMe = currentStory.likes?.includes(currentUser.id) ?? false
+      setIsLiked(isLikedByMe)
+    }
+  }, [currentStory, currentUser])
+
+  const handleLike = async () => {
+    if (!currentStory || !currentUser) return
+    await likePost({ postId: currentStory.id, userId: currentUser.id })
   }
 
   const handleReply = () => {
@@ -400,18 +411,14 @@ export default function StoryViewer() {
                     Send message
                   </Text>
                 </Pressable>
-                <Pressable
+                <ButtonIcon
+                  Icon={Heart}
+                  Size={28}
+                  Fill={isLiked}
+                  Color={isLiked ? '#ee4444' : '#ffffff'}
                   onPress={handleLike}
-                  style={styles.actionButton}
                   hitSlop={8}
-                >
-                  <Heart
-                    size={28}
-                    color="#ffffff"
-                    fill={isLiked ? '#ff3040' : 'transparent'}
-                    strokeWidth={2}
-                  />
-                </Pressable>
+                />
                 <Pressable style={styles.actionButton} hitSlop={8}>
                   <Send size={26} color="#ffffff" strokeWidth={2} />
                 </Pressable>
