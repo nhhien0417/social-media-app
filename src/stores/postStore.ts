@@ -16,7 +16,6 @@ import {
   LikePostResponse,
   getUserLikesApi,
 } from '@/api/api.post'
-import { PostType } from '@/types/Post'
 import {
   addPostToStores,
   updatePostWithSnapshot,
@@ -35,7 +34,6 @@ interface PostState {
   error: string | null
 
   // Actions
-  addPost: (post: Post) => void
   fetchPosts: () => Promise<void>
   refreshPosts: () => Promise<void>
   fetchStories: () => Promise<void>
@@ -59,10 +57,6 @@ export const usePostStore = create<PostState>((set, get) => ({
   error: null,
 
   // Actions
-  addPost: (post: Post) => {
-    set(state => ({ posts: [post, ...state.posts] }))
-  },
-
   fetchPosts: async () => {
     set({ isLoading: true, error: null })
     try {

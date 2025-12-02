@@ -15,7 +15,10 @@ async function capturePostSnapshot(postId: string): Promise<PostSnapshot> {
   const postStore = usePostStore.getState()
   const profileStore = useProfileStore.getState()
 
-  const postStorePost = postStore.posts.find(p => p.id === postId) || null
+  const postStorePost =
+    postStore.posts.find(p => p.id === postId) ||
+    postStore.stories.find(p => p.id === postId) ||
+    null
 
   let profileStorePost: Post | null = null
   let profileUserId: string | null = null
@@ -43,22 +46,22 @@ async function restorePostSnapshot(snapshot: PostSnapshot): Promise<void> {
   const profileStore = useProfileStore.getState()
 
   if (snapshot.postStorePost) {
-    const postIndex = postStore.posts.findIndex(
+    const isStory = snapshot.postStorePost.type === 'STORY'
+    const targetArray = isStory ? postStore.stories : postStore.posts
+    const stateKey = isStory ? 'stories' : 'posts'
+
+    const index = targetArray.findIndex(
       p => p.id === snapshot.postStorePost!.id
     )
-    if (postIndex !== -1) {
-      const updatedPosts = [...postStore.posts]
-      updatedPosts[postIndex] = snapshot.postStorePost
-      usePostStore.setState({ posts: updatedPosts })
+    if (index !== -1) {
+      const newArray = [...targetArray]
+      newArray[index] = snapshot.postStorePost
+      usePostStore.setState({ [stateKey]: newArray })
     } else {
       usePostStore.setState({
-        posts: [snapshot.postStorePost, ...postStore.posts],
+        [stateKey]: [snapshot.postStorePost, ...targetArray],
       })
     }
-  } else {
-    usePostStore.setState({
-      posts: postStore.posts.filter(p => p.id !== snapshot.postStorePost?.id),
-    })
   }
 
   if (snapshot.profileStorePost && snapshot.profileUserId) {
@@ -110,6 +113,13 @@ export async function updatePostInStores(
     usePostStore.setState({ posts: updatedPosts })
   }
 
+  const storyIndex = postStore.stories.findIndex(p => p.id === postId)
+  if (storyIndex !== -1) {
+    const updatedStories = [...postStore.stories]
+    updatedStories[storyIndex] = updater(updatedStories[storyIndex])
+    usePostStore.setState({ stories: updatedStories })
+  }
+
   for (const userId in profileStore.users) {
     const user = profileStore.users[userId]
     if (user.posts) {
@@ -146,9 +156,15 @@ export async function addPostToStores(post: Post): Promise<void> {
   const postStore = usePostStore.getState()
   const profileStore = useProfileStore.getState()
 
-  usePostStore.setState({
-    posts: [post, ...postStore.posts],
-  })
+  if (post.type === 'STORY') {
+    usePostStore.setState({
+      stories: [post, ...postStore.stories],
+    })
+  } else {
+    usePostStore.setState({
+      posts: [post, ...postStore.posts],
+    })
+  }
   const authorId = post.authorProfile?.id
   if (authorId && profileStore.users[authorId]) {
     const user = profileStore.users[authorId]
@@ -183,6 +199,7 @@ export async function deletePostFromStores(
 
   usePostStore.setState({
     posts: postStore.posts.filter(p => p.id !== postId),
+    stories: postStore.stories.filter(p => p.id !== postId),
   })
 
   for (const userId in profileStore.users) {
