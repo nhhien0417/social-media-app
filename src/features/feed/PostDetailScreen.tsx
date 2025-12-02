@@ -172,7 +172,7 @@ function PostDetailScreen() {
   const handleLikePost = async () => {
     if (!currentUserId) return
     setIsLiked(!isLiked)
-    await likePost({ postId: post.id, userId: currentUserId })
+    await likePost(post.id, currentUserId)
   }
 
   const handleEdit = () => {

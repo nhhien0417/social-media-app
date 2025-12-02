@@ -213,7 +213,7 @@ export default function StoryViewer() {
 
   const handleLike = async () => {
     if (!currentStory || !currentUser) return
-    await likePost({ postId: currentStory.id, userId: currentUser.id })
+    await likePost(currentStory.id, currentUser.id)
   }
 
   const handleReply = () => {

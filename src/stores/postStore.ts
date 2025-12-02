@@ -12,8 +12,6 @@ import {
   CreatePostResponse,
   UpdatePostRequest,
   UpdatePostResponse,
-  LikePostRequest,
-  LikePostResponse,
   getUserLikesApi,
 } from '@/api/api.post'
 import {
@@ -43,7 +41,7 @@ interface PostState {
   createPost: (data: CreatePostRequest) => Promise<CreatePostResponse>
   updatePost: (data: UpdatePostRequest) => Promise<UpdatePostResponse>
   deletePost: (postId: string) => Promise<void>
-  likePost: (data: LikePostRequest) => Promise<LikePostResponse>
+  likePost: (postId: string, userId: string) => Promise<void>
   getUserLikes: (postId: string) => Promise<User[]>
 }
 
@@ -162,13 +160,12 @@ export const usePostStore = create<PostState>((set, get) => ({
     }
   },
 
-  likePost: async (data: LikePostRequest) => {
+  likePost: async (postId: string, userId: string) => {
     let snapshot
     try {
-      snapshot = await toggleLikeInStores(data.postId, data.userId)
-      const response = await likePostApi(data)
+      snapshot = await toggleLikeInStores(postId, userId)
+      const response = await likePostApi({ postId, userId })
       console.log('Successful like post:', response)
-      return response
     } catch (error) {
       console.error('Error liking post:', error)
       if (snapshot) {

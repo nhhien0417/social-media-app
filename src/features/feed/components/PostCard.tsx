@@ -115,7 +115,7 @@ function PostCard({
       console.error('User not found')
       return
     }
-    await likePost({ postId: post.id, userId: currentUserId })
+    await likePost(post.id, currentUserId)
   }
 
   const handleEdit = () => {
