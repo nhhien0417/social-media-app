@@ -230,6 +230,19 @@ export async function deletePostFromStores(
   return snapshot
 }
 
+export async function addSeenToStores(
+  postId: string,
+  userId: string
+): Promise<void> {
+  await updatePostInStores(postId, post => {
+    const currentSeenBy = post.seenBy || []
+    if (currentSeenBy.includes(userId)) {
+      return post
+    }
+    return { ...post, seenBy: [...currentSeenBy, userId] }
+  })
+}
+
 export async function toggleLikeInStores(
   postId: string,
   userId: string

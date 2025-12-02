@@ -32,6 +32,7 @@ import PostOptionsSheet from '../feed/components/PostOptionsSheet'
 import DeleteConfirmModal from '../feed/components/DeleteConfirmModal'
 import Comment from '@/features/comment/Comment'
 import { useCurrentUser } from '@/hooks/useProfile'
+import { useSeenTracking } from '@/hooks/useSeenTracking'
 
 const STORY_DURATION = 5000
 
@@ -40,6 +41,7 @@ export default function StoryViewer() {
   const stories = usePostStore(state => state.stories)
   const addComment = useCommentStore(state => state.addComment)
   const currentUser = useCurrentUser()
+  const { trackSeen, cancelTracking } = useSeenTracking()
 
   // Group stories by author
   const groupedStories = useMemo(() => {
@@ -106,6 +108,17 @@ export default function StoryViewer() {
       router.back()
     }
   }, [currentUserStories, totalStories])
+
+  useEffect(() => {
+    if (currentStory?.id && isFocused) {
+      trackSeen(currentStory.id, 500)
+    }
+    return () => {
+      if (currentStory?.id) {
+        cancelTracking(currentStory.id)
+      }
+    }
+  }, [currentStory?.id, isFocused, trackSeen, cancelTracking])
 
   useEffect(() => {
     if (

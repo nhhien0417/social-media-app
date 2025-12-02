@@ -73,6 +73,8 @@ interface StoryBarProps {
 }
 
 function StoryBar({ stories }: StoryBarProps) {
+  const currentUser = useCurrentUser()
+
   const groupedStories = useMemo(() => {
     if (!stories) return []
 
@@ -98,11 +100,15 @@ function StoryBar({ stories }: StoryBarProps) {
         <CreateStoryItem />
         {groupedStories.map(userStories => {
           const author = userStories[0].authorProfile
+          const hasNew = userStories.some(
+            story => !story.seenBy?.includes(currentUser?.id || '')
+          )
+
           return (
             <StoryItem
               key={author.id}
               author={author}
-              hasNew={true}
+              hasNew={hasNew}
               onPress={() => router.push(`/story/${userStories[0].id}`)}
             />
           )

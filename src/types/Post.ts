@@ -13,6 +13,7 @@ export interface Post {
   type: PostType
   privacy: PostPrivacy
   likes: string[]
+  seenBy: string[]
   commentsCount: number
   authorProfile: User
 }

@@ -6,13 +6,15 @@ import {
   getPostDetailApi,
   createPostApi,
   updatePostApi,
-  likePostApi,
   deletePostApi,
+  likePostApi,
+  getUserLikesApi,
+  seenPostApi,
+  getUserSeenApi,
   CreatePostRequest,
   CreatePostResponse,
   UpdatePostRequest,
   UpdatePostResponse,
-  getUserLikesApi,
 } from '@/api/api.post'
 import {
   addPostToStores,
@@ -20,7 +22,13 @@ import {
   deletePostFromStores,
   toggleLikeInStores,
   restorePostSnapshot,
+  addSeenToStores,
 } from '@/utils/SyncPosts'
+
+const BATCH_FLUSH_DELAY = 3000
+const seenPostsCache = new Set<string>()
+let seenPendingBatch: Map<string, string> = new Map()
+let batchTimer: NodeJS.Timeout | null = null
 
 interface PostState {
   // State
@@ -43,6 +51,9 @@ interface PostState {
   deletePost: (postId: string) => Promise<void>
   likePost: (postId: string, userId: string) => Promise<void>
   getUserLikes: (postId: string) => Promise<User[]>
+  seenPost: (postId: string, userId: string) => void
+  getUserSeen: (postId: string) => Promise<User[]>
+  flushSeenBatch: () => Promise<void>
 }
 
 export const usePostStore = create<PostState>((set, get) => ({
@@ -182,6 +193,74 @@ export const usePostStore = create<PostState>((set, get) => ({
       return response.data
     } catch (error) {
       console.error('Error getting user likes:', error)
+      throw error
+    }
+  },
+
+  seenPost: (postId: string, userId: string) => {
+    if (seenPostsCache.has(postId)) {
+      return
+    }
+
+    seenPostsCache.add(postId)
+    seenPendingBatch.set(postId, userId)
+    addSeenToStores(postId, userId)
+
+    if (batchTimer) {
+      clearTimeout(batchTimer)
+    }
+    batchTimer = setTimeout(async () => {
+      await get().flushSeenBatch()
+    }, BATCH_FLUSH_DELAY)
+  },
+
+  flushSeenBatch: async () => {
+    if (seenPendingBatch.size === 0) return
+
+    const batch = new Map(seenPendingBatch)
+    seenPendingBatch.clear()
+
+    const userBatches = new Map<string, string[]>()
+    batch.forEach((userId, postId) => {
+      if (!userBatches.has(userId)) {
+        userBatches.set(userId, [])
+      }
+      userBatches.get(userId)?.push(postId)
+    })
+
+    try {
+      const promises = Array.from(userBatches.entries()).map(
+        async ([userId, postIds]) => {
+          try {
+            const response = await seenPostApi({ postIds, viewerId: userId })
+            console.log('Successful mark posts as seen:', response)
+          } catch (error) {
+            console.error(
+              `Failed to mark posts as seen for user ${userId}:`,
+              error
+            )
+            postIds.forEach(postId => {
+              seenPendingBatch.set(postId, userId)
+              seenPostsCache.delete(postId)
+            })
+          }
+        }
+      )
+
+      await Promise.all(promises)
+      console.log('Successfully flushed seen batch:', batch.size, 'posts')
+    } catch (error) {
+      console.error('Error flushing seen batch:', error)
+    }
+  },
+
+  getUserSeen: async (postId: string) => {
+    try {
+      const response = await getUserSeenApi(postId)
+      console.log('Successful get users seen:', response)
+      return response.data
+    } catch (error) {
+      console.error('Error getting users seen:', error)
       throw error
     }
   },

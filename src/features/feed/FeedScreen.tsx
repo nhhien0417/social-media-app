@@ -17,6 +17,7 @@ import PostingStatus from './components/PostingStatus'
 import { usePostStore } from '@/stores/postStore'
 import ButtonIcon from '@/components/IconButton'
 import { router } from 'expo-router'
+import { useSeenTracking } from '@/hooks/useSeenTracking'
 
 const HEADER_VIEW_HEIGHT = 50
 const AnimatedHeader = Animated.createAnimatedComponent(
@@ -56,6 +57,7 @@ export default function FeedScreen() {
 
   const offset = useSharedValue(0)
   const lastY = useSharedValue(0)
+  const { trackSeen, cancelTracking } = useSeenTracking()
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(
@@ -137,6 +139,24 @@ export default function FeedScreen() {
     }),
   }))
 
+  const onViewableItemsChanged = useCallback(
+    ({ viewableItems }: any) => {
+      viewableItems.forEach((item: any) => {
+        if (item.isViewable && item.item?.id) {
+          trackSeen(item.item.id)
+        } else if (!item.isViewable && item.item?.id) {
+          cancelTracking(item.item.id)
+        }
+      })
+    },
+    [trackSeen, cancelTracking]
+  )
+
+  const viewabilityConfig = {
+    itemVisiblePercentThreshold: 50,
+    minimumViewTime: 300,
+  }
+
   return (
     <YStack flex={1} backgroundColor="$background">
       <AnimatedHeader
@@ -159,6 +179,8 @@ export default function FeedScreen() {
         onScroll={onScroll}
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={viewabilityConfig}
         ListHeaderComponent={
           <>
             <AnimatedSpacer style={spacerStyle} />

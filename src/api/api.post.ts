@@ -79,6 +79,25 @@ export type GetUserLikesResponse = {
   data: User[]
 }
 
+export type SeenPostRequest = {
+  postIds: string[]
+  viewerId: string
+}
+
+export type SeenPostResponse = {
+  statusCode: number
+  error: null | string
+  message: string
+  data: Post[]
+}
+
+export type GetUserSeenResponse = {
+  statusCode: number
+  error: null | string
+  message: string
+  data: User[]
+}
+
 export type GetCommentResponse = {
   statusCode: number
   error: null | string
@@ -228,6 +247,16 @@ export const likePostApi = (data: LikePostRequest) => {
 export const getUserLikesApi = (postId: string) => {
   return ApiClient.get<GetUserLikesResponse>(
     ENDPOINTS.POSTS.POST_USERLIKES(postId)
+  )
+}
+
+export const seenPostApi = (data: SeenPostRequest) => {
+  return ApiClient.post<SeenPostResponse>(ENDPOINTS.POSTS.POST_SEEN, data)
+}
+
+export const getUserSeenApi = (postId: string) => {
+  return ApiClient.get<GetUserSeenResponse>(
+    ENDPOINTS.POSTS.POST_USERSSEEN(postId)
   )
 }
 
