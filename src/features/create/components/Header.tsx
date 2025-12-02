@@ -7,13 +7,7 @@ import {
   PanResponder,
   Easing,
 } from 'react-native'
-import {
-  XStack,
-  YStack,
-  Button,
-  SizableText,
-  useThemeName,
-} from 'tamagui'
+import { XStack, YStack, Button, SizableText, useThemeName } from 'tamagui'
 import {
   ChevronLeft,
   FileText,
@@ -201,7 +195,7 @@ export default function Header({
         {isEditMode ? (
           <YStack flex={1} alignItems="center" justifyContent="center">
             <SizableText size="$6" fontWeight="700" color="$color">
-              Update post
+              Update {mode === 'STORY' ? 'Story' : 'Post'}
             </SizableText>
           </YStack>
         ) : (

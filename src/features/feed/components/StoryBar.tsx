@@ -78,6 +78,7 @@ function StoryBar({ stories }: StoryBarProps) {
 
     const groups: { [key: string]: Post[] } = {}
     stories.forEach(story => {
+      if (!story.authorProfile) return
       const authorId = story.authorProfile.id
       if (!groups[authorId]) {
         groups[authorId] = []

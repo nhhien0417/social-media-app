@@ -13,7 +13,8 @@ import {
 import { YStack, XStack, Text } from 'tamagui'
 import { X, Heart, Send, MoreHorizontal } from '@tamagui/lucide-icons'
 import { LinearGradient } from 'expo-linear-gradient'
-import { router, useLocalSearchParams } from 'expo-router'
+import { router, useLocalSearchParams, useFocusEffect } from 'expo-router'
+import { useCallback } from 'react'
 import StoryProgressBar from './components/StoryProgressBar'
 import Avatar from '@/components/Avatar'
 import { usePostStore } from '@/stores/postStore'
@@ -34,6 +35,7 @@ export default function StoryViewer() {
   const groupedStories = useMemo(() => {
     const groups: { [key: string]: Post[] } = {}
     stories.forEach(story => {
+      if (!story.authorProfile) return
       const aId = story.authorProfile.id
       if (!groups[aId]) {
         groups[aId] = []
@@ -73,6 +75,19 @@ export default function StoryViewer() {
   const totalStories = currentUserStories?.length || 0
   const author = currentStory?.authorProfile
   const isOwner = currentUser?.id === author?.id
+  const [isFocused, setIsFocused] = useState(true)
+
+  useFocusEffect(
+    useCallback(() => {
+      setIsFocused(true)
+      setIsPaused(false)
+
+      return () => {
+        setIsFocused(false)
+        setIsPaused(true)
+      }
+    }, [])
+  )
 
   useEffect(() => {
     if (!currentUserStories || totalStories === 0) {
@@ -81,7 +96,8 @@ export default function StoryViewer() {
   }, [currentUserStories, totalStories])
 
   useEffect(() => {
-    if (isPaused || optionsSheetVisible || deleteModalVisible) return
+    if (isPaused || optionsSheetVisible || deleteModalVisible || !isFocused)
+      return
 
     timerRef.current = setTimeout(() => {
       handleNext()
@@ -96,6 +112,7 @@ export default function StoryViewer() {
     isPaused,
     optionsSheetVisible,
     deleteModalVisible,
+    isFocused,
   ])
 
   const handleNext = () => {
@@ -145,7 +162,9 @@ export default function StoryViewer() {
   }
 
   const handleLongPressOut = () => {
-    setIsPaused(false)
+    if (!showReplyInput) {
+      setIsPaused(false)
+    }
   }
 
   const handleClose = () => {
@@ -178,7 +197,11 @@ export default function StoryViewer() {
   }
 
   const handleEdit = () => {
-    setOptionsSheetVisible(false)
+    setIsPaused(true)
+    router.push({
+      pathname: '/create',
+      params: { editPostId: storyId, mode: 'STORY' },
+    })
   }
 
   const panResponder = useRef(
@@ -191,7 +214,9 @@ export default function StoryViewer() {
         setIsPaused(true)
       },
       onPanResponderRelease: (_, gestureState) => {
-        setIsPaused(false)
+        if (!showReplyInput) {
+          setIsPaused(false)
+        }
         if (Math.abs(gestureState.dx) > Math.abs(gestureState.dy)) {
           if (gestureState.dx > 50) {
             if (currentUserIndex > 0) {

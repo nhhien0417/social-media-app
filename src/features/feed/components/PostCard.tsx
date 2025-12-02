@@ -121,7 +121,7 @@ function PostCard({
   const handleEdit = () => {
     router.push({
       pathname: '/create',
-      params: { editPostId: post.id },
+      params: { editPostId: post.id, mode: 'POST' },
     })
   }
 
@@ -311,6 +311,7 @@ function PostCard({
         onClose={() => setOptionsSheetVisible(false)}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        mode="POST"
         isOwner={isOwner}
         isAdmin={isAdmin}
         onDeleteAsAdmin={
@@ -322,6 +323,7 @@ function PostCard({
         visible={deleteModalVisible}
         onClose={() => setDeleteModalVisible(false)}
         postId={post.id}
+        mode="POST"
         thumbnailUrl={media[0]}
       />
 

@@ -178,7 +178,7 @@ function PostDetailScreen() {
   const handleEdit = () => {
     router.push({
       pathname: '/create',
-      params: { editPostId: post.id },
+      params: { editPostId: post.id, mode: 'POST' },
     })
   }
 
@@ -386,16 +386,16 @@ function PostDetailScreen() {
         onClose={() => setOptionsSheetVisible(false)}
         onEdit={handleEdit}
         onDelete={handleDelete}
-        mode={post.type}
         isOwner={isOwner}
+        mode="POST"
       />
 
       <DeleteConfirmModal
         visible={deleteModalVisible}
         onClose={() => setDeleteModalVisible(false)}
         postId={post.id}
-        mode={post.type}
         thumbnailUrl={media[0]}
+        mode="POST"
       />
     </YStack>
   )
