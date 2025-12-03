@@ -42,15 +42,3 @@ npm i -D @tamagui/babel-plugin
 npx expo-router@latest typegen
 npx expo start
 ```
-
-//TODO
-
-- UI None user in each tab friend
-- Fix keyboard avoiding action bar in device
-- Fix react cmt 
-- UnAuthorized after login
-- Netword error on device
-- Preview media before post
-- Fix incorrect stretch camera
-- Signup need unique username
-- BE Push notification
