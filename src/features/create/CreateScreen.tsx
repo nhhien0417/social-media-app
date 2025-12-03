@@ -176,31 +176,42 @@ export default function NewPostScreen() {
       duration?: number
     }) => {
       const newMedia = getMediaItemFromCamera(media)
-      setMedia(prev => [
-        ...prev,
-        {
-          ...newMedia,
-          id: `captured-${Date.now()}`,
-          url: newMedia.uri,
-          type: newMedia.type as 'photo' | 'video',
-        },
-      ])
+      const mediaItem = {
+        ...newMedia,
+        id: `captured-${Date.now()}`,
+        url: newMedia.uri,
+        type: newMedia.type as 'photo' | 'video',
+      }
+
+      if (mode === 'STORY') {
+        setMedia([mediaItem])
+      } else {
+        setMedia(prev => [...prev, mediaItem])
+      }
       setShowCamera(false)
     },
-    []
+    [mode]
   )
 
-  const handleMediaSelect = useCallback((assets: any[]) => {
-    const newMediaItems = getMediaItemsFromPicker(assets)
-    const newMediaWithIds = newMediaItems.map(item => ({
-      ...item,
-      id: item.uri,
-      url: item.uri,
-      type: (item.type === 'video' ? 'video' : 'photo') as 'photo' | 'video',
-    }))
-    setMedia(prev => [...prev, ...newMediaWithIds])
-    setShowMediaPicker(false)
-  }, [])
+  const handleMediaSelect = useCallback(
+    (assets: any[]) => {
+      const newMediaItems = getMediaItemsFromPicker(assets)
+      const newMediaWithIds = newMediaItems.map(item => ({
+        ...item,
+        id: item.uri,
+        url: item.uri,
+        type: (item.type === 'video' ? 'video' : 'photo') as 'photo' | 'video',
+      }))
+
+      if (mode === 'STORY') {
+        setMedia(newMediaWithIds.slice(0, 1))
+      } else {
+        setMedia(prev => [...prev, ...newMediaWithIds])
+      }
+      setShowMediaPicker(false)
+    },
+    [mode]
+  )
 
   const handleShare = useCallback(async () => {
     if (isSubmitting) return
@@ -223,7 +234,7 @@ export default function NewPostScreen() {
 
       const updateData = {
         postId: editPostId,
-        content: caption.trim() || undefined,
+        content: mode === 'STORY' ? undefined : caption.trim() || undefined,
         privacy: privacy,
         media: mediaData.length > 0 ? mediaData : undefined,
       }
@@ -370,7 +381,7 @@ export default function NewPostScreen() {
         visible={showMediaPicker}
         onClose={() => setShowMediaPicker(false)}
         onSelect={handleMediaSelect}
-        maxSelection={10}
+        maxSelection={mode === 'STORY' ? 1 : 10}
       />
 
       <Camera
