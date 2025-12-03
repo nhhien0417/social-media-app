@@ -9,7 +9,7 @@ import React, {
 } from 'react'
 import * as Notifications from 'expo-notifications'
 import { useStomp, useStompEvent } from '@/hooks/useRealTimeNotification'
-import { NotificationItem, NotificationType } from '@/types/Notification'
+import { Notification, NotificationType } from '@/types/Notification'
 import {
   registerForPushNotificationsAsync,
   addNotificationReceivedListener,
@@ -25,7 +25,7 @@ import { getNotificationMessage } from '@/utils/NotificationMessage'
  * Notification Context value interface
  */
 interface NotificationContextValue {
-  notifications: NotificationItem[]
+  notifications: Notification[]
   unreadCount: number
   isConnected: boolean
   pushToken: string | null
@@ -33,6 +33,7 @@ interface NotificationContextValue {
   markAllAsRead: () => void
   deleteNotification: (id: string) => void
   clearAll: () => void
+  handleNotificationPress: (notification: Notification) => void
 }
 
 /**
@@ -56,14 +57,14 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   children,
   userId: propUserId,
 }) => {
-  const [notifications, setNotifications] = useState<NotificationItem[]>([])
+  const [notifications, setNotifications] = useState<Notification[]>([])
   const [pushToken, setPushToken] = useState<string | null>(null)
   const notificationListener = useRef<Notifications.Subscription | null>(null)
   const responseListener = useRef<Notifications.Subscription | null>(null)
   const userId = propUserId
   const router = useRouter()
   const [currentNotification, setCurrentNotification] =
-    useState<NotificationItem | null>(null)
+    useState<Notification | null>(null)
 
   // =====================================
   // SETUP PUSH NOTIFICATIONS
@@ -131,7 +132,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
           }
 
           // Create NotificationItem from push notification
-          const newNotification: NotificationItem = {
+          const newNotification: Notification = {
             id: notificationId.toString(),
             senderId: (data.senderId as string) || '0',
             receiverId: userId || '',
@@ -142,7 +143,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
             extraData: data,
           }
 
-          newNotification.message = getNotificationMessage(newNotification)
+          newNotification.message = getNotificationMessage(newNotification.type)
           return [newNotification, ...prev]
         })
       }
@@ -198,36 +199,33 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
    * Handle new notification received from Kafka/Backend via STOMP WebSocket
    * This is the main source when app is OPEN (real-time, prioritized over Push)
    */
-  const handleNewNotification = useCallback(
-    (notification: NotificationItem) => {
-      console.log('Notification received:', notification)
+  const handleNewNotification = useCallback((notification: Notification) => {
+    console.log('Notification received:', notification)
 
-      setNotifications(prev => {
-        // Check for duplicates
-        if (prev.some(n => n.id === notification.id)) {
-          console.log('Notification already exists, skipping...')
-          return prev
-        }
+    setNotifications(prev => {
+      // Check for duplicates
+      if (prev.some(n => n.id === notification.id)) {
+        console.log('Notification already exists, skipping...')
+        return prev
+      }
 
-        // Add new notification at the beginning
-        const formattedNotification = {
-          ...notification,
-          message: getNotificationMessage(notification),
-        }
-        return [formattedNotification, ...prev]
-      })
-
-      // Show in-app toast
-      setCurrentNotification({
+      // Add new notification at the beginning
+      const formattedNotification = {
         ...notification,
-        message: getNotificationMessage(notification),
-      })
-    },
-    []
-  )
+        message: getNotificationMessage(notification.type),
+      }
+      return [formattedNotification, ...prev]
+    })
+
+    // Show in-app toast
+    setCurrentNotification({
+      ...notification,
+      message: getNotificationMessage(notification.type),
+    })
+  }, [])
 
   // Listen to notification events from STOMP WebSocket
-  useStompEvent<NotificationItem>('notification', handleNewNotification)
+  useStompEvent<Notification>('notification', handleNewNotification)
 
   /**
    * Mark a single notification as read
@@ -287,9 +285,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
    * Handle notification press
    */
   const handleNotificationPress = useCallback(
-    (notification: NotificationItem) => {
-      console.log('Notification pressed:', notification)
-
+    (notification: Notification) => {
       // Mark as read
       if (!notification.read) {
         markAsRead(notification.id)
@@ -304,16 +300,14 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
       switch (type) {
         case 'NEW_POST':
         case 'LIKE_POST':
-        case 'COMMENT_ON_POST':
-        case 'MENTION_POST':
         case 'SHARE_POST':
-        case 'REPLY_COMMENT':
+        case 'MENTION_POST':
+        case 'COMMENT_ON_POST':
         case 'LIKE_COMMENT':
+        case 'REPLY_COMMENT':
         case 'MENTION_COMMENT':
           if (data?.postId) {
             router.push(`/post/${data.postId}`)
-          } else {
-            console.warn('No postId found in notification data')
           }
           break
 
@@ -326,9 +320,10 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
           break
 
         case 'GROUP_INVITE':
+        case 'GROUP_NEW_POST':
+        case 'GROUP_ROLE_CHANGE':
         case 'GROUP_JOIN_REQUEST':
         case 'GROUP_JOIN_ACCEPTED':
-        case 'GROUP_NEW_POST':
           if (data?.groupId) {
             router.push(`/group/${data.groupId}`)
           }
@@ -353,6 +348,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     markAllAsRead,
     deleteNotification,
     clearAll,
+    handleNotificationPress,
   }
 
   return (

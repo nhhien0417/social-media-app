@@ -1,7 +1,7 @@
-import React, { useEffect, useCallback } from 'react'
+import React, { useEffect, useCallback, useState } from 'react'
 import { YStack, XStack, Text, Button, PortalProvider, Portal } from 'tamagui'
 import Avatar from '@/components/Avatar'
-import { NotificationItem } from '@/types/Notification'
+import { Notification } from '@/types/Notification'
 import { X } from '@tamagui/lucide-icons'
 import Animated, {
   runOnJS,
@@ -11,10 +11,13 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
+import { useProfileStore } from '@/stores/profileStore'
+import { getNotificationMessage } from '@/utils/NotificationMessage'
+import { getNotificationIcon } from './NotificationIcon'
 
 interface NotificationToastProps {
-  notification: NotificationItem | null
-  onPress: (notification: NotificationItem) => void
+  notification: Notification | null
+  onPress: (notification: Notification) => void
   onDismiss: () => void
 }
 
@@ -25,9 +28,28 @@ export const NotificationToast: React.FC<NotificationToastProps> = ({
 }) => {
   const translateY = useSharedValue(-100)
   const context = useSharedValue({ y: 0 })
+  const { fetchUser, users } = useProfileStore()
+  const [sender, setSender] = useState(
+    notification ? users[notification.senderId] : null
+  )
+  const [isReady, setIsReady] = useState(false)
 
   useEffect(() => {
     if (notification) {
+      setIsReady(false)
+      const loadUser = async () => {
+        const user = await fetchUser(notification.senderId)
+        if (user) {
+          setSender(user)
+        }
+        setIsReady(true)
+      }
+      loadUser()
+    }
+  }, [notification, fetchUser])
+
+  useEffect(() => {
+    if (isReady && notification) {
       translateY.value = -100
       translateY.value = withTiming(0, {
         duration: 250,
@@ -36,10 +58,10 @@ export const NotificationToast: React.FC<NotificationToastProps> = ({
 
       const timer = setTimeout(() => {
         handleDismiss()
-      }, 2500)
+      }, 5000)
       return () => clearTimeout(timer)
     }
-  }, [notification])
+  }, [isReady, notification])
 
   const handleDismiss = useCallback(() => {
     'worklet'
@@ -78,7 +100,12 @@ export const NotificationToast: React.FC<NotificationToastProps> = ({
     transform: [{ translateY: translateY.value }],
   }))
 
-  if (!notification) return null
+  if (!notification || !isReady) return null
+
+  const senderName = sender?.username || 'Someone'
+  const avatarUrl = sender?.avatarUrl || undefined
+
+  const message = getNotificationMessage(notification.type, senderName)
 
   const ToastContent = (
     <GestureDetector gesture={pan}>
@@ -93,11 +120,12 @@ export const NotificationToast: React.FC<NotificationToastProps> = ({
           },
           animatedStyle,
         ]}
+        pointerEvents="box-none"
       >
         <YStack
           backgroundColor="$background"
-          borderRadius="$6"
-          padding="$3"
+          borderRadius="$5"
+          padding="$2.5"
           elevation={10}
           shadowColor="#000"
           shadowOpacity={0.15}
@@ -107,25 +135,36 @@ export const NotificationToast: React.FC<NotificationToastProps> = ({
           pressStyle={{ opacity: 0.95 }}
           borderWidth={1}
           borderColor="$borderColor"
+          pointerEvents="auto"
         >
           <XStack alignItems="center" gap="$3">
-            <Avatar
-              uri={`https://i.pravatar.cc/150?u=${notification.senderId}`}
-              size={40}
-            />
-            <YStack flex={1} gap="$1">
-              <Text fontWeight="600" fontSize="$4" numberOfLines={1}>
+            <YStack>
+              <Avatar uri={avatarUrl} size={50} />
+              <YStack
+                position="absolute"
+                bottom={-2}
+                right={-2}
+                backgroundColor="$background"
+                borderRadius={100}
+                padding={4}
+                elevation="$1"
+              >
+                {getNotificationIcon(notification.type)}
+              </YStack>
+            </YStack>
+            <YStack flex={1} gap="$0.5">
+              <Text fontWeight="bold" fontSize={15} numberOfLines={1}>
                 New Notification
               </Text>
-              <Text color="$color" fontSize="$4" numberOfLines={2}>
-                {notification.message}
+              <Text color="$color" fontSize={14} numberOfLines={2}>
+                {message}
               </Text>
             </YStack>
             <Button
               size="$2"
               circular
               chromeless
-              icon={<X size={16} />}
+              icon={<X size={18} />}
               onPress={e => {
                 e.stopPropagation()
                 handleDismiss()

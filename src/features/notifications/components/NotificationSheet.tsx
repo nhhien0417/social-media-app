@@ -1,10 +1,10 @@
 import { Sheet, Text, Button, Separator } from 'tamagui'
 import Avatar from '@/components/Avatar'
-import type { NotificationItem } from '@/types/Notification'
+import type { Notification } from '@/types/Notification'
 import { formatDate } from '@/utils/FormatDate'
 
 interface NotificationSheetProps {
-  notification: NotificationItem | null
+  notification: Notification | null
   onOpenChange: (open: boolean) => void
   onDelete: (id: string) => void
 }

@@ -114,9 +114,8 @@ export default function TabsLayout() {
                   <View
                     style={{
                       position: 'absolute',
-                      right: 0,
-                      top: 0,
-                      backgroundColor: 'red',
+                      right: -3,
+                      top: -3,
                       borderRadius: 10,
                       minWidth: 16,
                       height: 16,
@@ -127,18 +126,13 @@ export default function TabsLayout() {
                   >
                     <YStack
                       backgroundColor="$red10"
-                      width={16}
-                      height={16}
-                      borderRadius={10}
+                      borderRadius="$10"
+                      paddingHorizontal="$2"
+                      paddingVertical="$1"
+                      minWidth={20}
                       alignItems="center"
-                      justifyContent="center"
                     >
-                      <Text
-                        color="white"
-                        fontSize={10}
-                        fontWeight="bold"
-                        textAlign="center"
-                      >
+                      <Text fontSize="$2" fontWeight="700" color="white">
                         {unreadCount > 99 ? '99+' : unreadCount}
                       </Text>
                     </YStack>

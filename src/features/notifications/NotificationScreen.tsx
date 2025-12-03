@@ -1,26 +1,20 @@
 import { useState, useEffect } from 'react'
 import { YStack } from 'tamagui'
 import { useNotifications } from '@/providers/NotificationProvider'
-import type { NotificationItem } from '@/types/Notification'
+import type { Notification } from '@/types/Notification'
 import NotificationHeader from './components/NotificationHeader'
 import NotificationList from './components/NotificationList'
 import GlobalActionsSheet from './components/GlobalActionsSheet'
 import NotificationSheet from './components/NotificationSheet'
 
-/**
- * Notification Screen Component
- * Displays real-time notifications with actions
- */
 export default function NotificationScreen() {
-  // Get notification data and actions from context
   const {
     notifications,
     unreadCount,
-    isConnected,
-    markAsRead,
     markAllAsRead,
     deleteNotification,
     clearAll,
+    handleNotificationPress,
   } = useNotifications()
 
   const [isSheetOpen, setIsSheetOpen] = useState(false)
@@ -28,46 +22,24 @@ export default function NotificationScreen() {
   const [layoutHeight, setLayoutHeight] = useState(0)
   const [contentHeight, setContentHeight] = useState(0)
 
-  // Active notification for individual action sheet
   const [activeNotification, setActiveNotification] =
-    useState<NotificationItem | null>(null)
+    useState<Notification | null>(null)
 
-  /**
-   * Mark all notifications as read
-   */
   const handleMarkAllRead = () => {
     markAllAsRead()
     setIsSheetOpen(false)
   }
 
-  /**
-   * Delete a specific notification
-   */
   const handleDeleteNotification = (id: string) => {
     deleteNotification(id)
     setActiveNotification(null)
   }
 
-  /**
-   * Clear all notifications
-   */
   const handleClearAll = () => {
     clearAll()
     setIsSheetOpen(false)
   }
 
-  /**
-   * Handle notification press - mark as read and navigate
-   */
-  const handleNotificationPress = (notification: NotificationItem) => {
-    if (!notification.read) {
-      markAsRead(notification.id)
-    }
-    // TODO: Navigate to related content
-    // router.push(...)
-  }
-
-  // Check if content is scrollable
   useEffect(() => {
     if (layoutHeight > 0 && contentHeight > 0) {
       setIsScrollable(contentHeight > layoutHeight + 10)
@@ -76,11 +48,7 @@ export default function NotificationScreen() {
 
   return (
     <YStack flex={1} backgroundColor="$background">
-      <NotificationHeader
-        unreadCount={unreadCount}
-        isConnected={isConnected}
-        onMorePress={() => setIsSheetOpen(true)}
-      />
+      <NotificationHeader onMorePress={() => setIsSheetOpen(true)} />
 
       <NotificationList
         notifications={notifications}

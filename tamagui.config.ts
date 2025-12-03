@@ -9,7 +9,7 @@ const lightTheme = {
   background: '#FAFAFA',
   backgroundPress: '#F0F0F0',
   backgroundFocus: '#F0F0F0',
-  backgroundHover: '#F0F0F0',
+  backgroundHover: '#AAAAAA',
   backgroundModal: '#FFFFFF',
 
   color: '#000000',
@@ -32,7 +32,7 @@ const darkTheme = {
   background: '#000000',
   backgroundPress: '#121212',
   backgroundFocus: '#121212',
-  backgroundHover: '#121212',
+  backgroundHover: '#555555',
   backgroundModal: '#262626',
 
   color: '#FAFAFA',

@@ -1,10 +1,10 @@
-import { NotificationItem } from '@/types/Notification'
+import { Notification } from '@/types/Notification'
 
 export const getNotificationMessage = (
-  notification: NotificationItem
+  type: Notification['type'],
+  senderUsername?: string
 ): string => {
-  const { type, extraData: data } = notification
-  const senderName = data?.senderName || 'Someone'
+  const senderName = senderUsername || 'Someone'
 
   switch (type) {
     case 'NEW_POST':
@@ -31,15 +31,6 @@ export const getNotificationMessage = (
     case 'MENTION_COMMENT':
       return `${senderName} mentioned you in a comment`
 
-    case 'STORY_CREATE':
-      return `${senderName} added to their story`
-
-    case 'STORY_LIKE':
-      return `${senderName} liked your story`
-
-    case 'STORY_REPLY':
-      return `${senderName} replied to your story`
-
     case 'FRIEND_REQUEST':
       return `${senderName} sent you a friend request`
 
@@ -65,6 +56,6 @@ export const getNotificationMessage = (
       return `${senderName} posted in the group`
 
     default:
-      return notification.message || 'You have a new notification'
+      return 'You have a new notification'
   }
 }
