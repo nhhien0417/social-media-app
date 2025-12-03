@@ -24,6 +24,8 @@ import {
   restorePostSnapshot,
   addSeenToStores,
 } from '@/utils/SyncPosts'
+import { getUserId } from '@/utils/SecureStore'
+import { feedFilter } from '@/utils/FeedFilter'
 
 const BATCH_FLUSH_DELAY = 3000
 const seenPostsCache = new Set<string>()
@@ -71,7 +73,15 @@ export const usePostStore = create<PostState>((set, get) => ({
     try {
       const response = await getFeedApi('POST')
       console.log('Successful fetch posts:', response)
-      set({ posts: response.data.posts, isLoading: false })
+
+      const currentUserId = await getUserId()
+      const filteredPosts = feedFilter(
+        response.data.posts,
+        'POST',
+        currentUserId || undefined
+      )
+
+      set({ posts: filteredPosts, isLoading: false })
     } catch (error) {
       console.error('Error fetching posts:', error)
       set({ error: 'Failed to fetch posts', isLoading: false })
@@ -83,7 +93,15 @@ export const usePostStore = create<PostState>((set, get) => ({
     try {
       const response = await getFeedApi('POST')
       console.log('Successful refresh posts:', response)
-      set({ posts: response.data.posts, isRefreshing: false })
+
+      const currentUserId = await getUserId()
+      const filteredPosts = feedFilter(
+        response.data.posts,
+        'POST',
+        currentUserId || undefined
+      )
+
+      set({ posts: filteredPosts, isRefreshing: false })
     } catch (error) {
       console.error('Error refreshing posts:', error)
       set({ error: 'Failed to refresh posts', isRefreshing: false })
@@ -95,7 +113,15 @@ export const usePostStore = create<PostState>((set, get) => ({
     try {
       const response = await getFeedApi('STORY')
       console.log('Successful fetch stories:', response)
-      set({ stories: response.data.posts, isLoading: false })
+
+      const currentUserId = await getUserId()
+      const filteredStories = feedFilter(
+        response.data.posts,
+        'STORY',
+        currentUserId || undefined
+      )
+
+      set({ stories: filteredStories, isLoading: false })
     } catch (error) {
       console.error('Error fetching stories:', error)
       set({ error: 'Failed to fetch stories', isLoading: false })
@@ -107,7 +133,15 @@ export const usePostStore = create<PostState>((set, get) => ({
     try {
       const response = await getFeedApi('STORY')
       console.log('Successful refresh stories:', response)
-      set({ stories: response.data.posts, isRefreshing: false })
+
+      const currentUserId = await getUserId()
+      const filteredStories = feedFilter(
+        response.data.posts,
+        'STORY',
+        currentUserId || undefined
+      )
+
+      set({ stories: filteredStories, isRefreshing: false })
     } catch (error) {
       console.error('Error refreshing stories:', error)
       set({ error: 'Failed to refresh stories', isRefreshing: false })
