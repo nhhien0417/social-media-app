@@ -28,6 +28,8 @@ interface LikeListModalProps {
   visible: boolean
   onClose: () => void
   postId: string
+  mode: 'LIKES' | 'SEEN'
+  likedByUsers: string[]
 }
 
 import { User } from '@/types/User'
@@ -77,12 +79,14 @@ export default function LikeListModal({
   visible,
   onClose,
   postId,
+  mode,
+  likedByUsers,
 }: LikeListModalProps) {
   const [currentUserId, setCurrentUserId] = useState<string | undefined>()
   const [searchQuery, setSearchQuery] = useState('')
   const [users, setUsers] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const { getUserLikes } = usePostStore()
+  const { getUserLikes, getUserSeen } = usePostStore()
 
   useEffect(() => {
     getUserId().then(id => setCurrentUserId(id || undefined))
@@ -90,17 +94,20 @@ export default function LikeListModal({
 
   useEffect(() => {
     if (visible && postId) {
-      fetchLikes()
+      fetchData()
     }
-  }, [visible, postId])
+  }, [visible, postId, mode])
 
-  const fetchLikes = async () => {
+  const fetchData = async () => {
     setIsLoading(true)
     try {
-      const data = await getUserLikes(postId)
+      const data =
+        mode === 'LIKES'
+          ? await getUserLikes(postId)
+          : await getUserSeen(postId)
       setUsers(data)
     } catch (error) {
-      console.error('Failed to fetch likes:', error)
+      console.error(`Failed to fetch ${mode.toLowerCase()}:`, error)
     } finally {
       setIsLoading(false)
     }
@@ -295,7 +302,7 @@ export default function LikeListModal({
                 </YStack>
                 <XStack justifyContent="center" alignItems="center">
                   <SizableText fontSize={17} fontWeight="700" paddingTop="$1">
-                    Likes
+                    {mode === 'LIKES' ? 'Likes' : 'Views'}
                   </SizableText>
                 </XStack>
               </YStack>
@@ -341,6 +348,7 @@ export default function LikeListModal({
                   users={filteredUsers}
                   currentUserId={currentUserId}
                   onClose={closeSheet}
+                  likedByUsers={likedByUsers}
                 />
               )}
             </YStack>

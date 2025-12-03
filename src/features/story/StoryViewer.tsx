@@ -17,6 +17,7 @@ import {
   Send,
   MoreHorizontal,
   MessageCircle,
+  Eye,
 } from '@tamagui/lucide-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router, useLocalSearchParams, useFocusEffect } from 'expo-router'
@@ -30,6 +31,7 @@ import { formatDate } from '@/utils/FormatDate'
 import PostOptionsSheet from '../feed/components/PostOptionsSheet'
 import DeleteConfirmModal from '../feed/components/DeleteConfirmModal'
 import Comment from '@/features/comment/Comment'
+import LikeListModal from '../like/LikeListModal'
 import { useCurrentUser } from '@/hooks/useProfile'
 import { useSeenTracking } from '@/hooks/useSeenTracking'
 import {
@@ -76,6 +78,7 @@ export default function StoryViewer() {
   const [optionsSheetVisible, setOptionsSheetVisible] = useState(false)
   const [deleteModalVisible, setDeleteModalVisible] = useState(false)
   const [commentSheetVisible, setCommentSheetVisible] = useState(false)
+  const [seenListVisible, setSeenListVisible] = useState(false)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
 
   const currentUserStories = groupedStories[currentUserIndex]
@@ -428,6 +431,20 @@ export default function StoryViewer() {
                 {formatDate(currentStory.createdAt)}
               </Text>
             </YStack>
+
+            {isOwner && (
+              <Pressable
+                style={styles.moreButton}
+                hitSlop={8}
+                onPress={() => {
+                  setSeenListVisible(true)
+                  setIsPaused(true)
+                }}
+              >
+                <Eye size={24} color="#ffffff" strokeWidth={2.5} />
+              </Pressable>
+            )}
+
             <Pressable
               style={styles.moreButton}
               hitSlop={8}
@@ -555,6 +572,17 @@ export default function StoryViewer() {
         }}
         postId={currentStory.id}
         userAvatarUrl={currentUser?.avatarUrl || undefined}
+      />
+
+      <LikeListModal
+        visible={seenListVisible}
+        onClose={() => {
+          setSeenListVisible(false)
+          setIsPaused(false)
+        }}
+        mode="SEEN"
+        postId={currentStory.id}
+        likedByUsers={currentStory.likes}
       />
     </View>
   )

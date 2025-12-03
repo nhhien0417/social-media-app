@@ -5,18 +5,20 @@ import Avatar from '@/components/Avatar'
 import { router } from 'expo-router'
 import { User } from '@/types/User'
 import { useProfileActions } from '@/hooks/useProfile'
-import { UserCheck, UserMinus, UserPlus } from '@tamagui/lucide-icons'
+import { UserCheck, UserMinus, UserPlus, Heart } from '@tamagui/lucide-icons'
 
 interface LikeItemProps {
   user: User
   currentUserId?: string
   onClose?: () => void
+  isLiked?: boolean
 }
 
 export default function LikeItem({
   user,
   currentUserId,
   onClose,
+  isLiked,
 }: LikeItemProps) {
   const isMe = currentUserId === user.id
 
@@ -172,7 +174,26 @@ export default function LikeItem({
         }}
         style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
       >
-        <Avatar uri={user.avatarUrl || undefined} size={44} />
+        <YStack position="relative">
+          <Avatar uri={user.avatarUrl || undefined} size={44} />
+          {isLiked && (
+            <YStack
+              position="absolute"
+              bottom={-3}
+              right={-3}
+              backgroundColor="#ff3040"
+              borderRadius={20}
+              width={20}
+              height={20}
+              alignItems="center"
+              justifyContent="center"
+              borderWidth={1.5}
+              borderColor="$background"
+            >
+              <Heart size={12} color="white" fill="white" />
+            </YStack>
+          )}
+        </YStack>
         <YStack marginLeft="$3" flex={1}>
           <SizableText fontWeight="700" fontSize={14} color="$color">
             {user.username}

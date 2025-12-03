@@ -25,6 +25,8 @@ import { router, useLocalSearchParams } from 'expo-router'
 import { useProfileStore } from '@/stores/profileStore'
 import PostOptionsSheet from './components/PostOptionsSheet'
 import DeleteConfirmModal from './components/DeleteConfirmModal'
+import LikeListModal from '@/features/like/LikeListModal'
+import { formatNumber } from '@/utils/FormatNumber'
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window')
 
@@ -131,6 +133,7 @@ function PostDetailScreen() {
   const isLongCaption = !!content && content.length > 100
 
   const [commentSheetVisible, setCommentSheetVisible] = useState(false)
+  const [likeListVisible, setLikeListVisible] = useState(false)
   const [optionsSheetVisible, setOptionsSheetVisible] = useState(false)
   const [deleteModalVisible, setDeleteModalVisible] = useState(false)
   const [isLiked, setIsLiked] = useState(false)
@@ -340,33 +343,55 @@ function PostDetailScreen() {
             </Pressable>
           )}
 
-          {/* Likes + Timestamp */}
-          <XStack justifyContent="space-between" alignItems="center">
-            <Text color="white" fontWeight="600" fontSize={14}>
-              {post.likes.length.toLocaleString()} likes
-            </Text>
-            <Text color="white" fontSize={12}>
-              {formatDate(createdAt)}
-            </Text>
-          </XStack>
+          {/* Timestamp */}
+          <Text color="white" fontSize={12}>
+            {formatDate(createdAt)}
+          </Text>
 
           {/* Actions */}
           <XStack
-            gap="$5"
+            gap="$3"
             paddingTop="$2"
             borderTopWidth={1}
             borderTopColor="white"
+            alignItems="center"
           >
-            <Pressable onPress={handleLikePost} hitSlop={8}>
-              <Heart
-                size={26}
-                color={isLiked ? '#ff3b3b' : 'white'}
-                fill={isLiked ? '#ff3b3b' : 'none'}
-              />
-            </Pressable>
-            <Pressable onPress={() => setCommentSheetVisible(true)} hitSlop={8}>
-              <MessageCircle size={26} color="white" />
-            </Pressable>
+            <XStack alignItems="center" gap="$1">
+              <Pressable onPress={handleLikePost} hitSlop={8}>
+                <Heart
+                  size={26}
+                  color={isLiked ? '#ff3b3b' : 'white'}
+                  fill={isLiked ? '#ff3b3b' : 'none'}
+                />
+              </Pressable>
+              {post.likes && post.likes.length > 0 && (
+                <Pressable onPress={() => setLikeListVisible(true)} hitSlop={8}>
+                  <Text color="white" fontSize={14} fontWeight="600">
+                    {formatNumber(post.likes.length)}
+                  </Text>
+                </Pressable>
+              )}
+            </XStack>
+
+            <XStack alignItems="center" gap="$2">
+              <Pressable
+                onPress={() => setCommentSheetVisible(true)}
+                hitSlop={8}
+              >
+                <MessageCircle size={26} color="white" />
+              </Pressable>
+              {post.commentsCount > 0 && (
+                <Pressable
+                  onPress={() => setCommentSheetVisible(true)}
+                  hitSlop={8}
+                >
+                  <Text color="white" fontSize={14} fontWeight="600">
+                    {formatNumber(post.commentsCount)}
+                  </Text>
+                </Pressable>
+              )}
+            </XStack>
+
             <Pressable hitSlop={8}>
               <Send size={26} color="white" />
             </Pressable>
@@ -379,6 +404,14 @@ function PostDetailScreen() {
         visible={commentSheetVisible}
         onClose={() => setCommentSheetVisible(false)}
         postId={post.id}
+      />
+
+      <LikeListModal
+        visible={likeListVisible}
+        onClose={() => setLikeListVisible(false)}
+        mode="LIKES"
+        postId={post.id}
+        likedByUsers={post.likes}
       />
 
       <PostOptionsSheet

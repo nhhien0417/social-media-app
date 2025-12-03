@@ -330,7 +330,9 @@ function PostCard({
       <LikeListModal
         visible={likeListVisible}
         onClose={() => setLikeListVisible(false)}
+        mode="LIKES"
         postId={post.id}
+        likedByUsers={post.likes}
       />
     </YStack>
   )

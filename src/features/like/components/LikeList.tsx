@@ -8,12 +8,14 @@ interface LikeListProps {
   users: User[]
   currentUserId?: string
   onClose?: () => void
+  likedByUsers?: string[]
 }
 
 export default function LikeList({
   users,
   currentUserId,
   onClose,
+  likedByUsers,
 }: LikeListProps) {
   if (users.length === 0) {
     return (
@@ -28,7 +30,12 @@ export default function LikeList({
       data={users}
       keyExtractor={item => item.id}
       renderItem={({ item }) => (
-        <LikeItem user={item} currentUserId={currentUserId} onClose={onClose} />
+        <LikeItem
+          user={item}
+          currentUserId={currentUserId}
+          onClose={onClose}
+          isLiked={likedByUsers?.includes(item.id)}
+        />
       )}
       contentContainerStyle={styles.listContent}
       showsVerticalScrollIndicator={false}
