@@ -26,13 +26,16 @@ import Avatar from '@/components/Avatar'
 import ButtonIcon from '@/components/IconButton'
 import { usePostStore } from '@/stores/postStore'
 import { useCommentStore } from '@/stores/commentStore'
-import { Post } from '@/types/Post'
 import { formatDate } from '@/utils/FormatDate'
 import PostOptionsSheet from '../feed/components/PostOptionsSheet'
 import DeleteConfirmModal from '../feed/components/DeleteConfirmModal'
 import Comment from '@/features/comment/Comment'
 import { useCurrentUser } from '@/hooks/useProfile'
 import { useSeenTracking } from '@/hooks/useSeenTracking'
+import {
+  groupAndSortStories,
+  getFirstUnseenStoryIndex,
+} from '@/utils/StoryUtils'
 
 const STORY_DURATION = 5000
 
@@ -45,17 +48,8 @@ export default function StoryViewer() {
 
   // Group stories by author
   const groupedStories = useMemo(() => {
-    const groups: { [key: string]: Post[] } = {}
-    stories.forEach(story => {
-      if (!story.authorProfile) return
-      const aId = story.authorProfile.id
-      if (!groups[aId]) {
-        groups[aId] = []
-      }
-      groups[aId].push(story)
-    })
-    return Object.values(groups)
-  }, [stories])
+    return groupAndSortStories(stories, currentUser?.id)
+  }, [stories, currentUser?.id])
 
   const { initialUserIndex, initialStoryIndex } = useMemo(() => {
     let userIndex = 0
@@ -157,9 +151,15 @@ export default function StoryViewer() {
     } else {
       if (currentUserIndex < groupedStories.length - 1) {
         const nextUserIndex = currentUserIndex + 1
+        const nextUserStories = groupedStories[nextUserIndex]
+        const startStoryIndex = getFirstUnseenStoryIndex(
+          nextUserStories,
+          currentUser?.id
+        )
+
         setCurrentUserIndex(nextUserIndex)
-        setCurrentStoryIndex(0)
-        router.setParams({ id: groupedStories[nextUserIndex][0].id })
+        setCurrentStoryIndex(startStoryIndex)
+        router.setParams({ id: nextUserStories[startStoryIndex].id })
       } else {
         router.back()
       }
@@ -175,10 +175,14 @@ export default function StoryViewer() {
       if (currentUserIndex > 0) {
         const prevUserIndex = currentUserIndex - 1
         const prevUserStories = groupedStories[prevUserIndex]
-        const prevStoryIndex = prevUserStories.length - 1
+        const startStoryIndex = getFirstUnseenStoryIndex(
+          prevUserStories,
+          currentUser?.id
+        )
+
         setCurrentUserIndex(prevUserIndex)
-        setCurrentStoryIndex(prevStoryIndex)
-        router.setParams({ id: prevUserStories[prevStoryIndex].id })
+        setCurrentStoryIndex(startStoryIndex)
+        router.setParams({ id: prevUserStories[startStoryIndex].id })
       }
     }
   }
@@ -294,17 +298,28 @@ export default function StoryViewer() {
             if (currentUserIndex > 0) {
               const prevUserIndex = currentUserIndex - 1
               const prevUserStories = groupedStories[prevUserIndex]
+              const startStoryIndex = getFirstUnseenStoryIndex(
+                prevUserStories,
+                currentUser?.id
+              )
+
               setCurrentUserIndex(prevUserIndex)
-              setCurrentStoryIndex(0)
-              router.setParams({ id: prevUserStories[0].id })
+              setCurrentStoryIndex(startStoryIndex)
+              router.setParams({ id: prevUserStories[startStoryIndex].id })
             }
           } else if (gestureState.dx < -50) {
             // Swipe left - next user
             if (currentUserIndex < groupedStories.length - 1) {
               const nextUserIndex = currentUserIndex + 1
+              const nextUserStories = groupedStories[nextUserIndex]
+              const startStoryIndex = getFirstUnseenStoryIndex(
+                nextUserStories,
+                currentUser?.id
+              )
+
               setCurrentUserIndex(nextUserIndex)
-              setCurrentStoryIndex(0)
-              router.setParams({ id: groupedStories[nextUserIndex][0].id })
+              setCurrentStoryIndex(startStoryIndex)
+              router.setParams({ id: nextUserStories[startStoryIndex].id })
             } else {
               router.back()
             }

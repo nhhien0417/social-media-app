@@ -7,6 +7,9 @@ import StoryItem from './StoryItem'
 import { useCurrentUser } from '@/hooks/useProfile'
 import Avatar from '@/components/Avatar'
 import { Post } from '@/types/Post'
+import { LinearGradient } from 'expo-linear-gradient'
+import { INSTAGRAM_GRADIENT } from '@/utils/InstagramGradient'
+import { groupAndSortStories, getFirstUnseenStoryId } from '@/utils/StoryUtils'
 
 function CreateStoryItem() {
   const themeName = useThemeName()
@@ -26,32 +29,37 @@ function CreateStoryItem() {
     <Pressable onPress={handlePress}>
       <YStack alignItems="center" marginHorizontal="$2" width={74}>
         <YStack position="relative">
-          <YStack
-            style={[styles.storyRing, { backgroundColor: ringBackground }]}
-            alignItems="center"
-            justifyContent="center"
+          <LinearGradient
+            colors={INSTAGRAM_GRADIENT}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.gradientRing}
           >
-            <YStack style={styles.storyImageWrapper}>
-              <Avatar
-                uri={currentUser?.avatarUrl || undefined}
-                style={styles.storyImage}
-              />
+            <YStack
+              style={[styles.innerRing, { backgroundColor: ringBackground }]}
+            >
+              <YStack style={styles.imageWrapper}>
+                <Avatar
+                  uri={currentUser?.avatarUrl || undefined}
+                  style={styles.image}
+                />
+              </YStack>
             </YStack>
-          </YStack>
-          <Button
-            size="$2"
-            circular
-            icon={<Plus size={14} color="#ffffff" />}
-            backgroundColor="#0095F6"
-            position="absolute"
-            right={0}
-            bottom={0}
-            borderWidth={2}
-            borderColor={ringBackground}
-            padding={0}
-            width={24}
-            height={24}
-          />
+            <Button
+              size="$2"
+              circular
+              icon={<Plus size={14} color="#ffffff" />}
+              backgroundColor="#0095F6"
+              position="absolute"
+              right={0}
+              bottom={0}
+              borderWidth={2}
+              borderColor={ringBackground}
+              padding={0}
+              width={24}
+              height={24}
+            />
+          </LinearGradient>
         </YStack>
         <Text
           numberOfLines={1}
@@ -76,19 +84,8 @@ function StoryBar({ stories }: StoryBarProps) {
   const currentUser = useCurrentUser()
 
   const groupedStories = useMemo(() => {
-    if (!stories) return []
-
-    const groups: { [key: string]: Post[] } = {}
-    stories.forEach(story => {
-      if (!story.authorProfile) return
-      const authorId = story.authorProfile.id
-      if (!groups[authorId]) {
-        groups[authorId] = []
-      }
-      groups[authorId].push(story)
-    })
-    return Object.values(groups)
-  }, [stories])
+    return groupAndSortStories(stories, currentUser?.id)
+  }, [stories, currentUser?.id])
 
   return (
     <ScrollView
@@ -109,7 +106,13 @@ function StoryBar({ stories }: StoryBarProps) {
               key={author.id}
               author={author}
               hasNew={hasNew}
-              onPress={() => router.push(`/story/${userStories[0].id}`)}
+              onPress={() => {
+                const targetStoryId = getFirstUnseenStoryId(
+                  userStories,
+                  currentUser?.id
+                )
+                router.push(`/story/${targetStoryId}`)
+              }}
             />
           )
         })}
@@ -123,7 +126,7 @@ const RING_PADDING = 4
 const RING_SIZE = STORY_SIZE + RING_PADDING * 2
 
 const styles = StyleSheet.create({
-  storyRing: {
+  gradientRing: {
     width: RING_SIZE,
     height: RING_SIZE,
     borderRadius: RING_SIZE / 2,
@@ -131,13 +134,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  storyImageWrapper: {
+  innerRing: {
+    width: STORY_SIZE + RING_PADDING / 2,
+    height: STORY_SIZE + RING_PADDING / 2,
+    borderRadius: (STORY_SIZE + RING_PADDING / 2) / 2,
+    padding: RING_PADDING / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  imageWrapper: {
     width: STORY_SIZE,
     height: STORY_SIZE,
     borderRadius: STORY_SIZE / 2,
     overflow: 'hidden',
   },
-  storyImage: {
+  image: {
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
