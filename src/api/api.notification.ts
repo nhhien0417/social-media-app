@@ -1,10 +1,8 @@
 import apiClient from './apiClient'
 import { ENDPOINTS } from './endpoints'
 import { formatPushTokenForBackend } from '@/services/pushNotifications'
+import { NotificationType } from '@/types/Notification'
 
-/**
- * Interface cho Push Token Request
- */
 interface RegisterPushTokenRequest {
   token: string
   type: 'ios' | 'android'
@@ -12,24 +10,10 @@ interface RegisterPushTokenRequest {
   deviceName?: string
 }
 
-/**
- * Interface cho Push Settings
- */
-interface PushNotificationSettings {
+type PushNotificationSettings = {
   enabled: boolean
-  likes: boolean
-  comments: boolean
-  follows: boolean
-  messages: boolean
-  mentions: boolean
-}
+} & Partial<Record<NotificationType, boolean>>
 
-/**
- * Đăng ký Push Token với backend
- * Backend sẽ lưu token này để gửi push notifications
- * @param token - Expo Push Token
- * @param deviceInfo - Thông tin thiết bị (optional)
- */
 export const registerPushToken = async (
   token: string,
   deviceInfo?: { deviceId?: string; deviceName?: string }
@@ -45,34 +29,26 @@ export const registerPushToken = async (
       }
     )
 
-    console.log('Push Token đã được đăng ký thành công:', response.data)
+    console.log('Push Token registered successfully:', response.data)
   } catch (error) {
-    console.error('Lỗi khi đăng ký Push Token:', error)
+    console.error('Error registering Push Token:', error)
     throw error
   }
 }
 
-/**
- * Hủy đăng ký Push Token (khi logout hoặc tắt notifications)
- * @param token - Expo Push Token cần hủy
- */
 export const unregisterPushToken = async (token: string): Promise<void> => {
   try {
     await apiClient.post(ENDPOINTS.NOTIFICATIONS.UNREGISTER_PUSH_TOKEN, {
       token,
     })
 
-    console.log('Push Token đã được hủy đăng ký')
+    console.log('Push Token unregistered successfully')
   } catch (error) {
-    console.error('Lỗi khi hủy đăng ký Push Token:', error)
+    console.error('Error unregistering Push Token:', error)
     throw error
   }
 }
 
-/**
- * Cập nhật cài đặt Push Notifications
- * @param settings - Cài đặt mới
- */
 export const updatePushSettings = async (
   settings: Partial<PushNotificationSettings>
 ): Promise<void> => {
@@ -82,23 +58,20 @@ export const updatePushSettings = async (
       settings
     )
 
-    console.log('Cài đặt Push Notifications đã được cập nhật:', response.data)
+    console.log('Push Notification settings updated:', response.data)
   } catch (error) {
-    console.error('Lỗi khi cập nhật cài đặt:', error)
+    console.error('Error updating settings:', error)
     throw error
   }
 }
 
-/**
- * Lấy cài đặt Push Notifications hiện tại
- */
 export const getPushSettings = async (): Promise<PushNotificationSettings> => {
   try {
     const response = await apiClient.get(ENDPOINTS.NOTIFICATIONS.GET_SETTINGS)
 
     return response.data
   } catch (error) {
-    console.error('Lỗi khi lấy cài đặt:', error)
+    console.error('Error getting settings:', error)
     throw error
   }
 }

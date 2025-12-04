@@ -313,7 +313,6 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
 
         case 'FRIEND_REQUEST':
         case 'FRIEND_REQUEST_ACCEPTED':
-        case 'FRIEND_REQUEST_REMOVED':
           if (senderId) {
             router.push(`/profile/${senderId}`)
           }

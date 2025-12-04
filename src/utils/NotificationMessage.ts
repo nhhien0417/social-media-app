@@ -37,9 +37,6 @@ export const getNotificationMessage = (
     case 'FRIEND_REQUEST_ACCEPTED':
       return `${senderName} accepted your friend request`
 
-    case 'FRIEND_REQUEST_REMOVED':
-      return `${senderName} removed you from friends`
-
     case 'GROUP_INVITE':
       return `${senderName} invited you to a group`
 

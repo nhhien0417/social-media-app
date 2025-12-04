@@ -32,9 +32,6 @@ export const getNotificationIcon = (type: string) => {
     case 'FRIEND_REQUEST_ACCEPTED':
       return <UserPlus size={16} color="$green10" />
 
-    case 'FRIEND_REQUEST_REMOVED':
-      return <UserMinus size={16} color="$gray10" />
-
     case 'GROUP_INVITE':
     case 'GROUP_NEW_POST':
     case 'GROUP_ROLE_CHANGE':

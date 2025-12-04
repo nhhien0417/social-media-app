@@ -1,12 +1,6 @@
-/**
- * Custom Hook for Push Notifications
- * Provides easy-to-use functions for push notification management
- */
-
 import { useEffect, useState } from 'react'
 import * as Notifications from 'expo-notifications'
 import {
-  registerForPushNotificationsAsync,
   sendLocalNotification,
   scheduleNotification,
   cancelScheduledNotification,
@@ -17,17 +11,10 @@ import {
 } from '@/services/pushNotifications'
 import { useNotifications } from '@/providers/NotificationProvider'
 
-/**
- * Hook to manage Push Notifications
- * @returns Push notification utilities
- */
 export function usePushNotifications() {
   const { pushToken, notifications, unreadCount } = useNotifications()
   const [isLoading, setIsLoading] = useState(false)
 
-  /**
-   * Send a local test notification
-   */
   const sendTestNotification = async (
     title: string = 'Test Notification',
     body: string = 'This is a test notification',
@@ -45,9 +32,6 @@ export function usePushNotifications() {
     }
   }
 
-  /**
-   * Schedule a notification for later
-   */
   const scheduleNotificationLater = async (
     title: string,
     body: string,
@@ -66,9 +50,6 @@ export function usePushNotifications() {
     }
   }
 
-  /**
-   * Cancel a scheduled notification
-   */
   const cancelNotification = async (notificationId: string) => {
     try {
       await cancelScheduledNotification(notificationId)
@@ -79,9 +60,6 @@ export function usePushNotifications() {
     }
   }
 
-  /**
-   * Cancel all scheduled notifications
-   */
   const cancelAllNotifications = async () => {
     try {
       await cancelAllScheduledNotifications()
@@ -92,9 +70,6 @@ export function usePushNotifications() {
     }
   }
 
-  /**
-   * Clear all displayed notifications
-   */
   const clearAllNotifications = async () => {
     try {
       await dismissAllNotifications()
@@ -105,9 +80,6 @@ export function usePushNotifications() {
     }
   }
 
-  /**
-   * Update badge count
-   */
   const updateBadgeCount = async (count: number) => {
     try {
       await setBadgeCount(count)
@@ -118,9 +90,6 @@ export function usePushNotifications() {
     }
   }
 
-  /**
-   * Get current badge count
-   */
   const getCurrentBadgeCount = async () => {
     try {
       const count = await getBadgeCount()
@@ -131,21 +100,16 @@ export function usePushNotifications() {
     }
   }
 
-  /**
-   * Clear badge count
-   */
   const clearBadgeCount = async () => {
     return updateBadgeCount(0)
   }
 
   return {
-    // State
     pushToken,
     isLoading,
     notifications,
     unreadCount,
 
-    // Functions
     sendTestNotification,
     scheduleNotificationLater,
     cancelNotification,
@@ -157,11 +121,6 @@ export function usePushNotifications() {
   }
 }
 
-/**
- * Hook to listen to notification events
- * @param onReceived - Callback when notification is received
- * @param onTapped - Callback when notification is tapped
- */
 export function useNotificationListener(
   onReceived?: (notification: Notifications.Notification) => void,
   onTapped?: (response: Notifications.NotificationResponse) => void
@@ -191,9 +150,6 @@ export function useNotificationListener(
   }, [onReceived, onTapped])
 }
 
-/**
- * Hook to get last notification that opened the app
- */
 export function useLastNotificationResponse() {
   const [lastResponse, setLastResponse] =
     useState<Notifications.NotificationResponse | null>(null)
