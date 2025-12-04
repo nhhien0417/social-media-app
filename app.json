@@ -15,9 +15,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.anonymous.socialmediaapp",
       "infoPlist": {
-        "UIBackgroundModes": [
-          "remote-notification"
-        ]
+        "UIBackgroundModes": ["remote-notification"]
       }
     },
     "android": {
@@ -44,7 +42,8 @@
         "android.permission.RECORD_AUDIO",
         "android.permission.POST_NOTIFICATIONS"
       ],
-      "package": "com.anonymous.socialmediaapp"
+      "package": "com.anonymous.socialmediaapp",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {},
     "plugins": [
@@ -63,11 +62,7 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/notification-icon.png",
-          "color": "#ffffff",
-          "sounds": [
-            "./assets/notification-sound.wav"
-          ]
+          "color": "#ffffff"
         }
       ],
       "expo-web-browser",
@@ -75,6 +70,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "60e765d8-90e6-4ae0-85ea-6e40a86f75a1"
+      }
     }
   }
 }
