@@ -22,6 +22,7 @@ import Animated, {
   SlideInDown,
   SlideOutDown,
 } from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 interface CreateGroupModalProps {
   visible: boolean
@@ -65,6 +66,7 @@ export function CreateGroupModal({
   const [category, setCategory] = useState('General')
   const [customCategory, setCustomCategory] = useState('')
   const [showCategoryPicker, setShowCategoryPicker] = useState(false)
+  const insets = useSafeAreaInsets()
 
   const backgroundColor = isDark ? '#242526' : '#ffffff'
   const textColor = isDark ? '#e4e6eb' : '#050505'
@@ -495,6 +497,7 @@ export function CreateGroupModal({
                 {/* Footer */}
                 <YStack
                   padding="$4"
+                  paddingBottom={insets.bottom || 16}
                   borderTopWidth={1}
                   borderTopColor={borderColor}
                 >
@@ -539,7 +542,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   keyboardView: {
-    flex: 1,
     justifyContent: 'flex-end',
   },
   container: {
