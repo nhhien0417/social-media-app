@@ -463,7 +463,55 @@ export default function GroupDetailScreen() {
 
       case 'yourPosts':
         return (
-          <YStack gap="$2" paddingTop="$2">
+          <YStack gap="$2" paddingTop="$5">
+            {/* Create Post Button */}
+            <YStack
+              backgroundColor={cardBackground}
+              marginHorizontal="$3"
+              borderRadius={12}
+              borderWidth={1}
+              borderColor={borderColor}
+              overflow="hidden"
+            >
+              <Pressable
+                onPress={() =>
+                  router.push({
+                    pathname: '/create',
+                    params: { groupId: group.id, groupName: group.name },
+                  })
+                }
+              >
+                <XStack
+                  padding="$4"
+                  alignItems="center"
+                  gap="$3"
+                  backgroundColor={cardBackground}
+                  style={({ pressed }) => ({
+                    opacity: pressed ? 0.7 : 1,
+                  })}
+                >
+                  <YStack
+                    width={40}
+                    height={40}
+                    borderRadius={20}
+                    backgroundColor={isDark ? 'rgba(24,119,242,0.2)' : '#e7f3ff'}
+                    alignItems="center"
+                    justifyContent="center"
+                  >
+                    <Edit3 size={20} color="#1877F2" />
+                  </YStack>
+                  <YStack flex={1}>
+                    <Text fontSize={16} fontWeight="600" color={textColor}>
+                      Create a post
+                    </Text>
+                    <Text fontSize={13} color={subtitleColor} marginTop="$0.5">
+                      Share something with the group
+                    </Text>
+                  </YStack>
+                </XStack>
+              </Pressable>
+            </YStack>
+
             {userPosts.length > 0 ? (
               userPosts.map(post => (
                 <YStack key={post.id}>
