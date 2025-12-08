@@ -1,12 +1,13 @@
 import { useState, useMemo } from 'react'
-import { Pressable } from 'react-native'
+import { Pressable, Alert } from 'react-native'
 import { YStack, XStack, Text, Input, useThemeName } from 'tamagui'
-import { ChevronLeft, Search, X } from '@tamagui/lucide-icons'
+import { ChevronLeft, Search, X, Plus } from '@tamagui/lucide-icons'
 import { router } from 'expo-router'
 import { Tab, TabBar, TabValue } from './components/Tabs'
 import { GroupsList } from './components/List'
 import { joinedGroups, pendingGroups, groupSuggestions } from '@/mock/groups'
 import { Group } from '@/types/Group'
+import { CreateGroupModal } from './components/CreateGroupModal'
 
 interface GroupsScreenProps {
   isOwnProfile?: boolean
@@ -17,6 +18,7 @@ export default function GroupsScreen({
 }: GroupsScreenProps) {
   const [activeTab, setActiveTab] = useState<TabValue>('joined')
   const [searchQuery, setSearchQuery] = useState('')
+  const [showCreateModal, setShowCreateModal] = useState(false)
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
 
@@ -76,6 +78,39 @@ export default function GroupsScreen({
       }
       setIsProcessing(false)
     }, 500)
+  }
+
+  const handleCreateGroup = (groupData: {
+    name: string
+    description: string
+    privacy: 'PUBLIC' | 'PRIVATE'
+    category: string
+  }) => {
+    // Simulate API call
+    const newGroup: Group = {
+      id: `group-${Date.now()}`,
+      name: groupData.name,
+      description: groupData.description,
+      privacy: groupData.privacy,
+      category: groupData.category,
+      memberCount: 1,
+      status: 'JOINED',
+      coverImageUrl: undefined,
+      avatarUrl: undefined,
+    }
+
+    // Add to joined groups
+    setJoined([newGroup, ...joined])
+
+    // Show success message
+    Alert.alert(
+      'Success',
+      `Group "${groupData.name}" has been created successfully!`,
+      [{ text: 'OK' }]
+    )
+
+    // Switch to joined tab
+    setActiveTab('joined')
   }
 
   // Get current data based on active tab
@@ -157,23 +192,42 @@ export default function GroupsScreen({
         paddingVertical="$3"
         paddingTop="$3"
         alignItems="center"
-        gap="$3"
+        justifyContent="space-between"
       >
-        <Pressable
-          onPress={() => {
-            if (isOwnProfile) {
-              router.replace('/(tabs)/profile')
-            } else {
-              router.back()
-            }
-          }}
-          hitSlop={8}
-        >
-          <ChevronLeft size={25} color={textColor} />
-        </Pressable>
-        <Text fontSize={20} fontWeight="700" color={textColor}>
-          Groups
-        </Text>
+        <XStack alignItems="center" gap="$3">
+          <Pressable
+            onPress={() => {
+              if (isOwnProfile) {
+                router.replace('/(tabs)/profile')
+              } else {
+                router.back()
+              }
+            }}
+            hitSlop={8}
+          >
+            <ChevronLeft size={25} color={textColor} />
+          </Pressable>
+          <Text fontSize={20} fontWeight="700" color={textColor}>
+            Groups
+          </Text>
+        </XStack>
+        {isOwnProfile && (
+          <Pressable
+            onPress={() => setShowCreateModal(true)}
+            hitSlop={8}
+          >
+            <YStack
+              width={36}
+              height={36}
+              borderRadius={18}
+              backgroundColor={isDark ? '#3a3b3c' : '#e4e6eb'}
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Plus size={20} color={textColor} />
+            </YStack>
+          </Pressable>
+        )}
       </XStack>
 
       {/* Tabs */}
@@ -228,6 +282,14 @@ export default function GroupsScreen({
         onJoinGroup={handleJoinGroup}
         onCancelRequest={handleCancelRequest}
         onLeaveGroup={handleLeaveGroup}
+      />
+
+      {/* Create Group Modal */}
+      <CreateGroupModal
+        visible={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        isDark={isDark}
+        onCreateGroup={handleCreateGroup}
       />
     </YStack>
   )
