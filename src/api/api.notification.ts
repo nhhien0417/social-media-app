@@ -14,6 +14,8 @@ type PushNotificationSettings = {
   enabled: boolean
 } & Partial<Record<NotificationType, boolean>>
 
+// --- API Functions ---
+
 export const registerPushToken = async (
   token: string,
   deviceInfo?: { deviceId?: string; deviceName?: string }

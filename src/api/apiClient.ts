@@ -5,6 +5,16 @@ type Params = Record<string, any>
 type Data = Record<string, any>
 
 /**
+ * Generic response type for API responses
+ */
+export type GenericResponse<T> = {
+  statusCode: number
+  error: null | string
+  message: string
+  data: T
+}
+
+/**
  * API Client for JSON-based requests (uses Axios)
  */
 export const ApiClient = {
@@ -17,18 +27,16 @@ export const ApiClient = {
   put: <T = any>(url: string, data?: Data) =>
     api.put<T>(url, data).then(r => r.data),
 
-  delete: <T = any>(url: string) => api.delete<T>(url).then(r => r.data),
+  delete: <T = any>(url: string, data?: Data) =>
+    api.delete<T>(url, { data }).then(r => r.data),
 }
 
 /**
  * API Client for FormData uploads (uses XMLHttpRequest)
  */
 export const ApiClientForm = {
-  upload: <T>(
-    method: 'POST' | 'PUT',
-    endpoint: string,
-    formData: FormData
-  ) => uploadFormData<T>(method, endpoint, formData),
+  upload: <T>(method: 'POST' | 'PUT', endpoint: string, formData: FormData) =>
+    uploadFormData<T>(method, endpoint, formData),
 }
 
 export default ApiClient

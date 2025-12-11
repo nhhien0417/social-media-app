@@ -40,6 +40,8 @@ export type FriendActionResponse = {
   data: string
 }
 
+// --- API Functions ---
+
 export const getAllProfilesApi = () => {
   return ApiClient.get<AllProfileResponse>(ENDPOINTS.PROFILE.ALL)
 }

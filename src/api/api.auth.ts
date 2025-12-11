@@ -41,6 +41,8 @@ export type GoogleLoginData = {
 
 export type GoogleLoginResponse = AuthResponse
 
+// --- API Functions ---
+
 export const signInApi = (data: SignInData) => {
   return ApiClient.post<AuthResponse>(ENDPOINTS.IDENTITY.LOGIN, data)
 }

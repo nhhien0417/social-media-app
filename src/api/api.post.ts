@@ -143,6 +143,8 @@ export type LikeCommentResponse = {
   data: Comment
 }
 
+// --- API Functions ---
+
 export const getFeedApi = (type: PostType) => {
   return ApiClient.get<GetFeedResponse>(
     `${ENDPOINTS.POSTS.POST_FEED}?type=${type}`

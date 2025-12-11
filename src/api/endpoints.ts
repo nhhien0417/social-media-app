@@ -6,9 +6,11 @@ export const ENDPOINTS = {
     GOOGLE_LOGIN: 'identity/auth/google',
     TOKEN: 'identity/auth/refresh-token',
   },
+
   PROFILE: {
     ALL: 'profile/users',
     UPDATE: 'profile/users',
+
     DETAIL: (id: string | number) => `profile/users/${id}`,
     FRIENDS: (id: string | number) => `profile/friendships/${id}`,
     SENT: (id: string | number) => `profile/friendships/sent/${id}`,
@@ -18,12 +20,14 @@ export const ENDPOINTS = {
     ACCEPT: 'profile/friendships/accept',
     REJECT: 'profile/friendships/reject',
   },
+
   POSTS: {
     POST_FEED: 'post/get-post',
     POST_DETAIL: (id: string | number) => `post/${id}`,
     POST_CREATE: 'post/create-post',
     POST_UPDATE: 'post/update-post',
     POST_DELETE: (id: string | number) => `post/delete-post/${id}`,
+
     POST_LIKE: 'post/like-post',
     POST_USERLIKES: (id: string | number) => `post/userlikes/${id}`,
     POST_SEEN: 'post/seen',
@@ -35,6 +39,27 @@ export const ENDPOINTS = {
     COMMENT_DELETE: (id: string | number) => `post/comments/${id}`,
     COMMENT_LIKE: 'post/comments/like',
   },
+
+  GROUP: {
+    ALL: 'group/',
+    USER_GROUPS: 'group/',
+    POSTS: (id: string | number) => `post/group/${id}`,
+
+    CREATE: 'group/',
+    UPDATE: 'group/',
+    DELETE: (id: string | number) => `group/${id}`,
+    DETAIL: (id: string | number) => `group/${id}`,
+
+    JOIN: (id: string | number) => `group/${id}/join`,
+    LEAVE: (id: string | number) => `group/${id}/leave`,
+    GET_REQUEST: 'group/requests',
+    HANDLE_REQUEST: 'group/requests',
+
+    MEMBERS: (id: string | number) => `group/${id}/members`,
+    ROLE: 'group/members',
+    REMOVE: 'group/members',
+  },
+
   NOTIFICATIONS: {
     REGISTER_PUSH_TOKEN: 'notification/push-token/register',
     UNREGISTER_PUSH_TOKEN: 'notification/push-token/unregister',
