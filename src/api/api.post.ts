@@ -1,4 +1,4 @@
-import { ApiClient, ApiClientForm } from './apiClient'
+import { ApiClient, ApiClientForm, GenericResponse } from './apiClient'
 import { ENDPOINTS } from './endpoints'
 import { Post, PostPrivacy, PostType } from '@/types/Post'
 import { Comment } from '@/types/Comment'
@@ -6,21 +6,7 @@ import { User } from '@/types/User'
 import { Platform } from 'react-native'
 import { dataURItoBlob } from '@/utils/MediaUtils'
 
-export type GetFeedResponse = {
-  statusCode: number
-  error: null | string
-  message: string
-  data: {
-    posts: Post[]
-  }
-}
-
-export type GetPostDetailResponse = {
-  statusCode: number
-  error: null | string
-  message: string
-  data: Post
-}
+// --- Requests ---
 
 export type CreatePostRequest = {
   userId: string
@@ -35,13 +21,6 @@ export type CreatePostRequest = {
   }>
 }
 
-export type CreatePostResponse = {
-  statusCode: number
-  error: null | string
-  message: string
-  data: Post
-}
-
 export type UpdatePostRequest = {
   postId: string
   content?: string
@@ -53,56 +32,14 @@ export type UpdatePostRequest = {
   }>
 }
 
-export type UpdatePostResponse = {
-  statusCode: number
-  error: null | string
-  message: string
-  data: Post
-}
-
 export type LikePostRequest = {
   postId: string
   userId: string
 }
 
-export type LikePostResponse = {
-  statusCode: number
-  error: null | string
-  message: string
-  data: Post
-}
-
-export type GetUserLikesResponse = {
-  statusCode: number
-  error: null | string
-  message: string
-  data: User[]
-}
-
 export type SeenPostRequest = {
   postIds: string[]
   viewerId: string
-}
-
-export type SeenPostResponse = {
-  statusCode: number
-  error: null | string
-  message: string
-  data: Post[]
-}
-
-export type GetUserSeenResponse = {
-  statusCode: number
-  error: null | string
-  message: string
-  data: User[]
-}
-
-export type GetCommentResponse = {
-  statusCode: number
-  error: null | string
-  message: string
-  data: Comment[]
 }
 
 export type CreateCommentRequest = {
@@ -112,23 +49,9 @@ export type CreateCommentRequest = {
   content?: string
 }
 
-export type CreateCommnetResponse = {
-  statusCode: number
-  error: null | string
-  message: string
-  data: Comment
-}
-
 export type UpdateCommentRequest = {
   commentId: string
   content?: string
-}
-
-export type UpdateCommentResponse = {
-  statusCode: number
-  error: null | string
-  message: string
-  data: Comment
 }
 
 export type LikeCommentRequest = {
@@ -136,12 +59,31 @@ export type LikeCommentRequest = {
   userId: string
 }
 
-export type LikeCommentResponse = {
-  statusCode: number
-  error: null | string
-  message: string
-  data: Comment
-}
+// --- Responses ---
+
+export type GetFeedResponse = GenericResponse<{ posts: Post[] }>
+
+export type GetPostDetailResponse = GenericResponse<Post>
+
+export type CreatePostResponse = GenericResponse<Post>
+
+export type UpdatePostResponse = GenericResponse<Post>
+
+export type LikePostResponse = GenericResponse<Post>
+
+export type GetUserLikesResponse = GenericResponse<User[]>
+
+export type SeenPostResponse = GenericResponse<Post[]>
+
+export type GetUserSeenResponse = GenericResponse<User[]>
+
+export type GetCommentResponse = GenericResponse<Comment[]>
+
+export type CreateCommnetResponse = GenericResponse<Comment>
+
+export type UpdateCommentResponse = GenericResponse<Comment>
+
+export type LikeCommentResponse = GenericResponse<Comment>
 
 // --- API Functions ---
 

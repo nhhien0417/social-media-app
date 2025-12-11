@@ -1,22 +1,10 @@
 import { User } from '@/types/User'
-import { ApiClient, ApiClientForm } from './apiClient'
+import { ApiClient, ApiClientForm, GenericResponse } from './apiClient'
 import { ENDPOINTS } from './endpoints'
 import { dataURItoBlob } from '@/utils/MediaUtils'
 import { Platform } from 'react-native'
 
-export type AllProfileResponse = {
-  statusCode: number
-  error: null | string
-  message: string
-  data: User[]
-}
-
-export type UserProfileResponse = {
-  statusCode: number
-  error: null | string
-  message: string
-  data: User
-}
+// --- Requests ---
 
 export type UpdateProfileRequest = {
   userId: string
@@ -33,12 +21,13 @@ export type FriendActionRequest = {
   friendUserId: string
 }
 
-export type FriendActionResponse = {
-  statusCode: number
-  error: null | string
-  message: string
-  data: string
-}
+// --- Responses ---
+
+export type AllProfileResponse = GenericResponse<User[]>
+
+export type UserProfileResponse = GenericResponse<User>
+
+export type FriendActionResponse = GenericResponse<string>
 
 // --- API Functions ---
 

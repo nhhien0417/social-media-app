@@ -4,7 +4,7 @@ import { Platform } from 'react-native'
 import { dataURItoBlob } from '@/utils/MediaUtils'
 import { Post } from '@/types/Post'
 
-// --- Types ---
+// --- Models ---
 
 export type GroupPrivacy = 'PUBLIC' | 'PRIVATE'
 export type GroupRole = 'OWNER' | 'ADMIN' | 'MEMBER'
@@ -23,6 +23,8 @@ export type Group = {
   createdAt: string
   updatedAt: string
 }
+
+// --- Requests ---
 
 export type CreateGroupRequest = {
   name: string

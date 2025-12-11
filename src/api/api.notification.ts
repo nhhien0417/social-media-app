@@ -3,12 +3,16 @@ import { ENDPOINTS } from './endpoints'
 import { formatPushTokenForBackend } from '@/services/pushNotifications'
 import { NotificationType } from '@/types/Notification'
 
+// --- Requests ---
+
 interface RegisterPushTokenRequest {
   token: string
   type: 'ios' | 'android'
   deviceId?: string
   deviceName?: string
 }
+
+// --- Models ---
 
 type PushNotificationSettings = {
   enabled: boolean

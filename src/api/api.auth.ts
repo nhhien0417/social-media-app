@@ -1,5 +1,7 @@
-import ApiClient from './apiClient'
+import ApiClient, { GenericResponse } from './apiClient'
 import { ENDPOINTS } from './endpoints'
+
+// --- Requests ---
 
 export type SignInData = {
   email: string
@@ -12,34 +14,20 @@ export type SignUpData = {
   password: string
 }
 
-export type AuthResponse = {
-  statusCode: number
-  error: null | string
-  message: string
-  data: {
-    id: string
-    email: string
-    accessToken: string
-    refreshToken: string
-  }
-}
+export type RefreshTokenData = { refreshToken: string }
 
-export type RefreshTokenData = {
+export type GoogleLoginData = { idToken: string }
+
+// --- Responses ---
+
+export type AuthResponse = GenericResponse<{
+  id: string
+  email: string
+  accessToken: string
   refreshToken: string
-}
+}>
 
-export type RefreshTokenResponse = {
-  statusCode: number
-  error: null | string
-  message: string
-  data: string
-}
-
-export type GoogleLoginData = {
-  idToken: string
-}
-
-export type GoogleLoginResponse = AuthResponse
+export type RefreshTokenResponse = GenericResponse<string>
 
 // --- API Functions ---
 
@@ -60,8 +48,5 @@ export const refreshTokenApi = (data: RefreshTokenData) => {
 }
 
 export const googleLoginApi = (data: GoogleLoginData) => {
-  return ApiClient.post<GoogleLoginResponse>(
-    ENDPOINTS.IDENTITY.GOOGLE_LOGIN,
-    data
-  )
+  return ApiClient.post<AuthResponse>(ENDPOINTS.IDENTITY.GOOGLE_LOGIN, data)
 }
