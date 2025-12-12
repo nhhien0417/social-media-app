@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState } from 'react'
 import {
   Modal,
   Pressable,
@@ -10,7 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native'
-import { YStack, XStack, Text, Button, useThemeName } from 'tamagui'
+import { YStack, XStack, Text, Button } from 'tamagui'
 import {
   X,
   Image as ImageIcon,
@@ -18,10 +18,8 @@ import {
   Smile,
   MapPin,
   Tag,
-  Calendar,
   Camera,
   FileText,
-  Mic,
   MoreHorizontal,
 } from '@tamagui/lucide-icons'
 import * as ImagePicker from 'expo-image-picker'

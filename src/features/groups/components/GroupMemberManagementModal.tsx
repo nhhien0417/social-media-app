@@ -1,14 +1,7 @@
-import React, { useState } from 'react'
-import { Modal, Pressable, ScrollView, Alert } from 'react-native'
+import React from 'react'
+import { Modal, Pressable, Alert } from 'react-native'
 import { YStack, XStack, Text, Button } from 'tamagui'
-import {
-  X,
-  Shield,
-  UserX,
-  MoreHorizontal,
-  Crown,
-  Ban,
-} from '@tamagui/lucide-icons'
+import { X, UserX, Crown, Ban } from '@tamagui/lucide-icons'
 import { GroupMember } from '@/types/Group'
 
 interface GroupMemberManagementModalProps {
@@ -52,7 +45,7 @@ export const GroupMemberManagementModal: React.FC<
           text: 'Promote',
           style: 'default',
           onPress: () => {
-            onPromoteToAdmin(member.id)
+            onPromoteToAdmin(member.userId)
             onClose()
           },
         },
@@ -70,7 +63,7 @@ export const GroupMemberManagementModal: React.FC<
           text: 'Remove',
           style: 'destructive',
           onPress: () => {
-            onRemoveMember(member.id)
+            onRemoveMember(member.userId)
             onClose()
           },
         },
@@ -88,7 +81,7 @@ export const GroupMemberManagementModal: React.FC<
           text: 'Block',
           style: 'destructive',
           onPress: () => {
-            onBlockMember(member.id)
+            onBlockMember(member.userId)
             onClose()
           },
         },

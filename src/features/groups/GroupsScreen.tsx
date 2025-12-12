@@ -1,13 +1,12 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Pressable, Alert } from 'react-native'
 import { YStack, XStack, Text, Input, useThemeName } from 'tamagui'
 import { ChevronLeft, Search, X, Plus } from '@tamagui/lucide-icons'
 import { router } from 'expo-router'
 import { Tab, TabBar, TabValue } from './components/Tabs'
 import { GroupsList } from './components/List'
-import { joinedGroups, pendingGroups, groupSuggestions } from '@/mock/groups'
-import { Group } from '@/types/Group'
 import { CreateGroupModal } from './components/CreateGroupModal'
+import { useGroupStore } from '@/stores/groupStore'
 
 interface GroupsScreenProps {
   isOwnProfile?: boolean
@@ -24,119 +23,119 @@ export default function GroupsScreen({
 
   const [isProcessing, setIsProcessing] = useState(false)
 
-  // Mock data - in a real app, these would come from API/hooks
-  const [joined, setJoined] = useState<Group[]>(joinedGroups)
-  const [pending, setPending] = useState<Group[]>(pendingGroups)
-  const [suggestions, setSuggestions] = useState<Group[]>(groupSuggestions)
+  // Store
+  const {
+    groups,
+    myGroups,
+    isLoading,
+    fetchGroups,
+    fetchUserGroups,
+    joinGroup,
+    leaveGroup,
+    createGroup,
+  } = useGroupStore()
+
+  useEffect(() => {
+    fetchGroups()
+    fetchUserGroups()
+  }, [])
 
   // Handlers
   const handleJoinGroup = async (groupId: string) => {
     setIsProcessing(true)
-    // Simulate API call
-    setTimeout(() => {
-      const group = suggestions.find(g => g.id === groupId)
-      if (group) {
-        // If group is private, add to pending
-        if (group.privacy === 'PRIVATE') {
-          setPending([...pending, { ...group, status: 'PENDING' }])
-        } else {
-          // If public, add to joined
-          setJoined([...joined, { ...group, status: 'JOINED' }])
-        }
-        // Remove from suggestions
-        setSuggestions(suggestions.filter(g => g.id !== groupId))
-      }
+    try {
+      await joinGroup(groupId)
+    } catch (error) {
+      console.log(error)
+    } finally {
       setIsProcessing(false)
-    }, 500)
+    }
   }
 
   const handleCancelRequest = async (groupId: string) => {
     setIsProcessing(true)
-    // Simulate API call
-    setTimeout(() => {
-      const group = pending.find(g => g.id === groupId)
-      if (group) {
-        // Add back to suggestions
-        setSuggestions([...suggestions, { ...group, status: 'NONE' }])
-        // Remove from pending
-        setPending(pending.filter(g => g.id !== groupId))
-      }
+    try {
+      await leaveGroup(groupId)
+    } catch (error) {
+      console.log(error)
+    } finally {
       setIsProcessing(false)
-    }, 500)
+    }
   }
 
   const handleLeaveGroup = async (groupId: string) => {
     setIsProcessing(true)
-    // Simulate API call
-    setTimeout(() => {
-      const group = joined.find(g => g.id === groupId)
-      if (group) {
-        // Add back to suggestions
-        setSuggestions([...suggestions, { ...group, status: 'NONE' }])
-        // Remove from joined
-        setJoined(joined.filter(g => g.id !== groupId))
-      }
+    try {
+      await leaveGroup(groupId)
+    } catch (error) {
+      console.log(error)
+    } finally {
       setIsProcessing(false)
-    }, 500)
+    }
   }
 
-  const handleCreateGroup = (groupData: {
-    name: string
-    description: string
-    privacy: 'PUBLIC' | 'PRIVATE'
-    category: string
-  }) => {
-    // Simulate API call
-    const newGroup: Group = {
-      id: `group-${Date.now()}`,
-      name: groupData.name,
-      description: groupData.description,
-      privacy: groupData.privacy,
-      category: groupData.category,
-      memberCount: 1,
-      status: 'JOINED',
-      coverImageUrl: undefined,
-      avatarUrl: undefined,
+  const handleCreateGroup = async (
+    name: string,
+    description: string,
+    privacy: 'PUBLIC' | 'PRIVATE',
+    background?: { uri: string; name: string; type: string },
+    avatar?: { uri: string; name: string; type: string }
+  ) => {
+    try {
+      await createGroup(
+        {
+          name,
+          description,
+          privacy,
+        },
+        background,
+        avatar
+      )
+
+      Alert.alert('Success', `Group "${name}" has been created successfully!`, [
+        { text: 'OK' },
+      ])
+
+      setShowCreateModal(false)
+      setActiveTab('joined')
+    } catch (error) {
+      console.log(error)
     }
-
-    // Add to joined groups
-    setJoined([newGroup, ...joined])
-
-    // Show success message
-    Alert.alert(
-      'Success',
-      `Group "${groupData.name}" has been created successfully!`,
-      [{ text: 'OK' }]
-    )
-
-    // Switch to joined tab
-    setActiveTab('joined')
   }
 
   // Get current data based on active tab
   const currentData = useMemo(() => {
     switch (activeTab) {
       case 'joined':
-        return joined
+        return myGroups.filter(
+          g => g.role === 'MEMBER' || g.role === 'ADMIN' || g.role === 'OWNER'
+        )
       case 'pending':
-        return pending
+        return groups.filter(g => g.joinStatus === 'PENDING')
+      case 'suggestions':
+        return groups.filter(
+          g =>
+            !myGroups.some(mg => mg.id === g.id) && g.joinStatus !== 'PENDING'
+        )
       default:
         return []
     }
-  }, [activeTab, joined, pending])
+  }, [activeTab, groups, myGroups])
 
   // Filter data by search query
   const filteredData = useMemo(() => {
-    if (!searchQuery.trim()) return currentData
+    let data = currentData
 
-    const searchLower = searchQuery.toLowerCase()
-    return currentData.filter(group => {
-      return (
-        group.name.toLowerCase().includes(searchLower) ||
-        group.description?.toLowerCase().includes(searchLower) ||
-        group.category?.toLowerCase().includes(searchLower)
-      )
-    })
+    if (searchQuery.trim()) {
+      const searchLower = searchQuery.toLowerCase()
+      data = data.filter(group => {
+        return (
+          group.name.toLowerCase().includes(searchLower) ||
+          group.description?.toLowerCase().includes(searchLower)
+        )
+      })
+    }
+    return data
   }, [currentData, searchQuery])
 
   const backgroundColor = isDark ? '#000000' : '#FAFAFA'
@@ -148,12 +147,18 @@ export default function GroupsScreen({
     {
       value: 'joined',
       label: 'Joined',
-      count: joined.length,
+      count: myGroups.filter(
+        g => g.role === 'MEMBER' || g.role === 'ADMIN' || g.role === 'OWNER'
+      ).length,
     },
     {
       value: 'pending',
       label: 'Pending',
-      count: pending.length,
+      count: myGroups.filter(g => g.joinStatus === 'PENDING').length,
+    },
+    {
+      value: 'suggestions',
+      label: 'Discover',
     },
   ]
 
@@ -164,6 +169,8 @@ export default function GroupsScreen({
         return 'joined'
       case 'pending':
         return 'pending'
+      case 'suggestions':
+        return 'suggestion'
       default:
         return 'joined'
     }
@@ -179,6 +186,8 @@ export default function GroupsScreen({
         return 'No groups joined yet'
       case 'pending':
         return 'No pending requests'
+      case 'suggestions':
+        return 'No suggestions available'
       default:
         return 'No groups found'
     }
@@ -212,10 +221,7 @@ export default function GroupsScreen({
           </Text>
         </XStack>
         {isOwnProfile && (
-          <Pressable
-            onPress={() => setShowCreateModal(true)}
-            hitSlop={8}
-          >
+          <Pressable onPress={() => setShowCreateModal(true)} hitSlop={8}>
             <YStack
               width={36}
               height={36}
@@ -276,9 +282,7 @@ export default function GroupsScreen({
         isDark={isDark}
         isLoading={false}
         emptyMessage={getEmptyMessage()}
-        showSuggestions={!searchQuery}
-        suggestions={suggestions}
-        actionPending={isProcessing}
+        actionPending={isProcessing || isLoading}
         onJoinGroup={handleJoinGroup}
         onCancelRequest={handleCancelRequest}
         onLeaveGroup={handleLeaveGroup}

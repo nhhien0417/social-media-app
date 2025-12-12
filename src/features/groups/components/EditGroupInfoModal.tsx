@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Modal, Pressable, ScrollView, Alert, TextInput } from 'react-native'
 import { YStack, XStack, Text, Button } from 'tamagui'
-import { X, Edit3, Save } from '@tamagui/lucide-icons'
+import { X, Edit3, Save, Trash2 } from '@tamagui/lucide-icons'
 
 interface EditGroupInfoModalProps {
   visible: boolean
@@ -11,6 +11,7 @@ interface EditGroupInfoModalProps {
   groupCategory: string
   isDark: boolean
   onSave: (name: string, description: string, category: string) => void
+  onDelete?: () => void
 }
 
 export const EditGroupInfoModal: React.FC<EditGroupInfoModalProps> = ({
@@ -21,6 +22,7 @@ export const EditGroupInfoModal: React.FC<EditGroupInfoModalProps> = ({
   groupCategory,
   isDark,
   onSave,
+  onDelete,
 }) => {
   const [name, setName] = useState(groupName)
   const [description, setDescription] = useState(groupDescription)
@@ -163,6 +165,24 @@ export const EditGroupInfoModal: React.FC<EditGroupInfoModalProps> = ({
                 the information is accurate and appropriate.
               </Text>
             </YStack>
+
+            {/* Delete Group Button (Bottom) */}
+            {onDelete && (
+              <Button
+                marginTop="$4"
+                backgroundColor={isDark ? 'rgba(255,59,48,0.15)' : '#ffebee'}
+                color="#ef4444"
+                borderRadius={8}
+                fontWeight="600"
+                fontSize={15}
+                height={44}
+                pressStyle={{ opacity: 0.8, scale: 0.98 }}
+                onPress={onDelete}
+                icon={<Trash2 size={18} color="#ef4444" />}
+              >
+                Delete Group
+              </Button>
+            )}
           </YStack>
         </ScrollView>
       </YStack>

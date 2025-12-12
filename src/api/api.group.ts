@@ -3,26 +3,14 @@ import { ENDPOINTS } from './endpoints'
 import { Platform } from 'react-native'
 import { dataURItoBlob } from '@/utils/MediaUtils'
 import { Post } from '@/types/Post'
-
-// --- Models ---
-
-export type GroupPrivacy = 'PUBLIC' | 'PRIVATE'
-export type GroupRole = 'OWNER' | 'ADMIN' | 'MEMBER'
-export type JoinRequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED'
-
-export type Group = {
-  id: string
-  name: string
-  description?: string
-  avatarUrl?: string
-  backgroundUrl?: string
-  role?: GroupRole
-  joinStatus?: JoinRequestStatus
-  privacy: GroupPrivacy
-  memberCount: number
-  createdAt: string
-  updatedAt: string
-}
+import {
+  Group,
+  GroupRole,
+  GroupPrivacy,
+  GroupMember,
+  GroupJoinRequest,
+  JoinRequestStatus,
+} from '@/types/Group'
 
 // --- Requests ---
 
@@ -42,11 +30,6 @@ export type UpdateGroupRequest = {
 export type HandleJoinRequestRequest = {
   requestId: string
   approved: boolean
-}
-
-export type GetGroupJoinRequestsRequest = {
-  groupId: string
-  status?: JoinRequestStatus
 }
 
 export type UpdateMemberRoleRequest = {
@@ -86,16 +69,7 @@ export type LeaveGroupResponse = GenericResponse<{
   leftAt: string
 }>
 
-export type GetGroupJoinRequestsResponse = GenericResponse<
-  {
-    id: string
-    groupId: string
-    groupName: string
-    userId: string
-    status: JoinRequestStatus
-    requestedAt: string
-  }[]
->
+export type GetGroupJoinRequestsResponse = GenericResponse<GroupJoinRequest[]>
 
 export type HandleJoinRequestResponse = GenericResponse<{
   requestId: string
@@ -106,21 +80,9 @@ export type HandleJoinRequestResponse = GenericResponse<{
   handledAt: string
 }>
 
-export type GetGroupMembersResponse = GenericResponse<
-  {
-    userId: string
-    groupId: string
-    role: GroupRole
-    joinedAt: string
-  }[]
->
+export type GetGroupMembersResponse = GenericResponse<GroupMember[]>
 
-export type UpdateMemberRoleResponse = GenericResponse<{
-  userId: string
-  groupId: string
-  role: GroupRole
-  joinedAt: string
-}>
+export type UpdateMemberRoleResponse = GenericResponse<GroupMember>
 
 export type RemoveMemberResponse = GenericResponse<{
   groupId: string
@@ -251,10 +213,9 @@ export const leaveGroupApi = (groupId: string) => {
   return ApiClient.delete<LeaveGroupResponse>(ENDPOINTS.GROUP.LEAVE(groupId))
 }
 
-export const getGroupRequestsApi = (data: GetGroupJoinRequestsRequest) => {
+export const getGroupRequestsApi = (groupId: string) => {
   return ApiClient.get<GetGroupJoinRequestsResponse>(
-    ENDPOINTS.GROUP.GET_REQUEST,
-    data
+    ENDPOINTS.GROUP.GET_REQUEST(groupId)
   )
 }
 

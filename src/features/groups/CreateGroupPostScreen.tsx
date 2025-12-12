@@ -148,12 +148,7 @@ export default function CreateGroupPostScreen() {
 
   return (
     <YStack flex={1} backgroundColor="$background">
-      <Header
-        onBack={handleBack}
-        onShare={handleShare}
-        isLoading={isSubmitting}
-        disabled={!caption.trim() && media.length === 0}
-      />
+      <Header mode="POST" onBack={handleBack} onShare={handleShare} />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -177,10 +172,7 @@ export default function CreateGroupPostScreen() {
           />
         </ScrollView>
 
-        <PostAction
-          onMediaPickerPress={() => setShowMediaPicker(true)}
-          onCameraPress={() => setShowCamera(true)}
-        />
+        <PostAction />
       </KeyboardAvoidingView>
 
       <MediaPicker
@@ -199,7 +191,7 @@ export default function CreateGroupPostScreen() {
       <DiscardChangesModal
         visible={showDiscardModal}
         onDiscard={handleDiscard}
-        onKeepEditing={() => setShowDiscardModal(false)}
+        onCancel={() => setShowDiscardModal(false)}
       />
     </YStack>
   )

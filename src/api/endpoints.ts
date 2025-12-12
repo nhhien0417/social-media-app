@@ -52,7 +52,7 @@ export const ENDPOINTS = {
 
     JOIN: (id: string | number) => `group/${id}/join`,
     LEAVE: (id: string | number) => `group/${id}/leave`,
-    GET_REQUEST: 'group/requests',
+    GET_REQUEST: (id: string | number) => `group/${id}/requests`,
     HANDLE_REQUEST: 'group/requests',
 
     MEMBERS: (id: string | number) => `group/${id}/members`,

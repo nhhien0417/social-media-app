@@ -1,7 +1,7 @@
 import { Pressable } from 'react-native'
 import { XStack, Text, YStack } from 'tamagui'
 
-export type TabValue = 'joined' | 'pending'
+export type TabValue = 'joined' | 'pending' | 'suggestions'
 
 export interface Tab {
   value: TabValue

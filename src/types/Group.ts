@@ -1,27 +1,35 @@
-export type GroupStatus = 'JOINED' | 'PENDING' | 'NONE'
-
 export type GroupPrivacy = 'PUBLIC' | 'PRIVATE'
+export type GroupRole = 'OWNER' | 'ADMIN' | 'MEMBER'
+export type JoinRequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED'
 
-export type GroupRole = 'ADMIN' | 'MEMBER'
+export type Group = {
+  id: string
+  name: string
+  description?: string
+  avatarUrl?: string
+  backgroundUrl?: string
+  role?: GroupRole
+  joinStatus?: JoinRequestStatus
+  privacy: GroupPrivacy
+  memberCount: number
+  createdAt: string
+  updatedAt: string
+}
 
 export interface GroupMember {
-  id: string
+  userId: string
+  groupId: string
   name: string
   avatarUrl?: string
   role: GroupRole
   joinedAt: string
 }
 
-export interface Group {
+export type GroupJoinRequest = {
   id: string
-  name: string
-  description: string
-  coverUrl: string | null
-  avatarUrl: string | null
-  privacy: GroupPrivacy
-  memberCount: number
-  status: GroupStatus
-  createdAt: string
-  category?: string
-  currentUserRole?: GroupRole
+  groupId: string
+  groupName: string
+  userId: string
+  status: JoinRequestStatus
+  requestedAt: string
 }

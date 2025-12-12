@@ -11,8 +11,6 @@ interface GroupsListProps {
   isDark: boolean
   isLoading?: boolean
   emptyMessage?: string
-  showSuggestions?: boolean
-  suggestions?: Group[]
   onJoinGroup?: (groupId: string) => void
   onCancelRequest?: (groupId: string) => void
   onLeaveGroup?: (groupId: string) => void
@@ -25,8 +23,6 @@ export function GroupsList({
   isDark,
   isLoading = false,
   emptyMessage = 'No groups found',
-  showSuggestions = false,
-  suggestions = [],
   onJoinGroup,
   onCancelRequest,
   onLeaveGroup,
@@ -57,7 +53,7 @@ export function GroupsList({
 
   return (
     <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
-      {groups.length === 0 && !showSuggestions ? (
+      {groups.length === 0 ? (
         <YStack alignItems="center" justifyContent="center" padding="$8">
           <Text fontSize={15} color={subtitleColor}>
             {emptyMessage}
@@ -92,33 +88,6 @@ export function GroupsList({
                 />
               ))}
             </>
-          )}
-
-          {/* Suggestions Section */}
-          {showSuggestions && suggestions.length > 0 && (
-            <YStack marginTop={groups.length > 0 ? '$1' : '$0'}>
-              <Text
-                fontSize={15}
-                fontWeight="600"
-                color={textColor}
-                paddingHorizontal="$4"
-                paddingTop="$2"
-                paddingBottom="$2"
-              >
-                Suggested Groups
-              </Text>
-
-              {suggestions.map(group => (
-                <GroupCard
-                  key={group.id}
-                  group={group}
-                  type="suggestion"
-                  isDark={isDark}
-                  onJoinGroup={onJoinGroup}
-                  isLoading={actionPending}
-                />
-              ))}
-            </YStack>
           )}
         </YStack>
       )}
