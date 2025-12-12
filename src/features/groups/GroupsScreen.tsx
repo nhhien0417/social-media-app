@@ -5,7 +5,7 @@ import { ChevronLeft, Search, X, Plus } from '@tamagui/lucide-icons'
 import { router } from 'expo-router'
 import { Tab, TabBar, TabValue } from './components/Tabs'
 import { GroupsList } from './components/List'
-import { CreateGroupModal } from './components/CreateGroupModal'
+
 import { useGroupStore } from '@/stores/groupStore'
 
 interface GroupsScreenProps {
@@ -17,7 +17,7 @@ export default function GroupsScreen({
 }: GroupsScreenProps) {
   const [activeTab, setActiveTab] = useState<TabValue>('joined')
   const [searchQuery, setSearchQuery] = useState('')
-  const [showCreateModal, setShowCreateModal] = useState(false)
+
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
 
@@ -71,35 +71,6 @@ export default function GroupsScreen({
       console.log(error)
     } finally {
       setIsProcessing(false)
-    }
-  }
-
-  const handleCreateGroup = async (
-    name: string,
-    description: string,
-    privacy: 'PUBLIC' | 'PRIVATE',
-    background?: { uri: string; name: string; type: string },
-    avatar?: { uri: string; name: string; type: string }
-  ) => {
-    try {
-      await createGroup(
-        {
-          name,
-          description,
-          privacy,
-        },
-        background,
-        avatar
-      )
-
-      Alert.alert('Success', `Group "${name}" has been created successfully!`, [
-        { text: 'OK' },
-      ])
-
-      setShowCreateModal(false)
-      setActiveTab('joined')
-    } catch (error) {
-      console.log(error)
     }
   }
 
@@ -199,7 +170,6 @@ export default function GroupsScreen({
       <XStack
         paddingHorizontal="$3"
         paddingVertical="$3"
-        paddingTop="$3"
         alignItems="center"
         justifyContent="space-between"
       >
@@ -221,7 +191,7 @@ export default function GroupsScreen({
           </Text>
         </XStack>
         {isOwnProfile && (
-          <Pressable onPress={() => setShowCreateModal(true)} hitSlop={8}>
+          <Pressable onPress={() => router.push('/group/form')} hitSlop={8}>
             <YStack
               width={36}
               height={36}
@@ -286,14 +256,6 @@ export default function GroupsScreen({
         onJoinGroup={handleJoinGroup}
         onCancelRequest={handleCancelRequest}
         onLeaveGroup={handleLeaveGroup}
-      />
-
-      {/* Create Group Modal */}
-      <CreateGroupModal
-        visible={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        isDark={isDark}
-        onCreateGroup={handleCreateGroup}
       />
     </YStack>
   )

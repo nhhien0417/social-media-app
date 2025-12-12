@@ -8,7 +8,7 @@ import Animated, {
   SlideOutDown,
 } from 'react-native-reanimated'
 
-interface AvatarSelectionSheetProps {
+interface ImageSelectionSheetProps {
   visible: boolean
   onClose: () => void
   onTakePhoto: () => void
@@ -17,12 +17,12 @@ interface AvatarSelectionSheetProps {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
 
-export default function AvatarSelectionSheet({
+export default function ImageSelectionSheet({
   visible,
   onClose,
   onTakePhoto,
   onChooseFromLibrary,
-}: AvatarSelectionSheetProps) {
+}: ImageSelectionSheetProps) {
   const themeName = useThemeName()
   const isDark = themeName.includes('dark')
 

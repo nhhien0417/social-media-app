@@ -45,7 +45,7 @@ import {
   getMediaItemFromCamera,
   getMediaItemsFromPicker,
 } from '@/utils/MediaUtils'
-import AvatarSelectionSheet from './AvatarSelectionSheet'
+import ImageSelectionSheet from '@/components/ImageSelectionSheet'
 import MediaPicker from '@/components/MediaPicker'
 import Camera from '@/components/Camera'
 
@@ -228,7 +228,7 @@ export const EditProfileForm = forwardRef<
         }}
       >
         {/* Avatar Section */}
-        <YStack alignItems="center" marginBottom="$6">
+        <YStack alignItems="center" marginBottom="$4">
           <TouchableOpacity onPress={handleAvatarPress} activeOpacity={0.8}>
             <YStack position="relative">
               <LinearGradient
@@ -272,16 +272,6 @@ export const EditProfileForm = forwardRef<
               </YStack>
             </YStack>
           </TouchableOpacity>
-          <Button
-            unstyled
-            marginTop="$3"
-            onPress={handleAvatarPress}
-            pressStyle={{ opacity: 0.7 }}
-          >
-            <Text color={primaryColor} fontWeight="600" fontSize={16}>
-              Change Profile Photo
-            </Text>
-          </Button>
         </YStack>
 
         <YStack gap="$4">
@@ -504,7 +494,7 @@ export const EditProfileForm = forwardRef<
       </Modal>
 
       {/* Avatar Selection Sheet */}
-      <AvatarSelectionSheet
+      <ImageSelectionSheet
         visible={showAvatarSelection}
         onClose={() => setShowAvatarSelection(false)}
         onTakePhoto={() => setShowCamera(true)}

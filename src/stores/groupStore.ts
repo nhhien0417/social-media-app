@@ -69,6 +69,7 @@ interface GroupState {
     role: GroupRole
   ) => Promise<void>
   removeMember: (groupId: string, memberId: string) => Promise<void>
+  clearCurrentGroup: () => void
 }
 
 const enrichMemberWithMockData = (member: any): GroupMember => {
@@ -352,5 +353,15 @@ export const useGroupStore = create<GroupState>((set, get) => ({
       console.error('Error handling join request:', error)
       throw error
     }
+  },
+
+  clearCurrentGroup: () => {
+    set({
+      currentGroup: null,
+      members: [],
+      posts: [],
+      joinRequests: [],
+      error: null,
+    })
   },
 }))

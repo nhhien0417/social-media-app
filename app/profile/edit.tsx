@@ -6,7 +6,8 @@ import {
   EditProfileFormRef,
 } from '@/features/profile/components/EditProfileForm'
 import { useCurrentUser } from '@/hooks/useProfile'
-import { ActivityIndicator, Platform } from 'react-native'
+import { ActivityIndicator, Platform, Pressable } from 'react-native'
+import { ChevronLeft } from '@tamagui/lucide-icons'
 
 export default function EditProfileScreen() {
   const formRef = useRef<EditProfileFormRef>(null)
@@ -60,21 +61,14 @@ export default function EditProfileScreen() {
         borderBottomWidth={1}
         borderColor={borderColor}
         justifyContent="space-between"
-        paddingTop={Platform.OS === 'android' ? 40 : '$3'}
       >
-        <Button
-          size="$3"
-          backgroundColor="transparent"
-          borderColor="transparent"
-          onPress={handleCancel}
-          paddingHorizontal="$2"
-        >
-          <Text fontSize="$4" color={textColor}>
-            Cancel
-          </Text>
-        </Button>
+        <XStack alignItems="center" marginRight="$6">
+          <Pressable onPress={handleCancel} hitSlop={8}>
+            <ChevronLeft size={25} color={textColor} />
+          </Pressable>
+        </XStack>
 
-        <Text fontSize="$5" fontWeight="700" color={textColor}>
+        <Text fontSize="$6" fontWeight="700" color={textColor}>
           Edit Profile
         </Text>
 
@@ -90,7 +84,7 @@ export default function EditProfileScreen() {
           {isSaving ? (
             <ActivityIndicator size="small" color={accentColor} />
           ) : (
-            <Text fontSize="$4" fontWeight="700" color={accentColor}>
+            <Text fontSize="$5" fontWeight="700" color={accentColor}>
               Done
             </Text>
           )}

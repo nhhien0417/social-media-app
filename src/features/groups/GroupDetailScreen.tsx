@@ -7,7 +7,15 @@ import {
   RefreshControl,
   Alert,
 } from 'react-native'
-import { YStack, XStack, Text, useThemeName, Button, Separator } from 'tamagui'
+import {
+  YStack,
+  XStack,
+  Text,
+  useThemeName,
+  Button,
+  Separator,
+  Spinner,
+} from 'tamagui'
 import {
   ChevronLeft,
   Lock,
@@ -31,7 +39,6 @@ import { useGroupStore } from '@/stores/groupStore'
 import { GroupNotificationSheet } from './components/GroupNotificationSheet'
 import { GroupSearchModal } from './components/GroupSearchModal'
 import { GroupMemberManagementModal } from './components/GroupMemberManagementModal'
-import { EditGroupInfoModal } from './components/EditGroupInfoModal'
 import { getUserId } from '@/utils/SecureStore'
 
 type GroupTab = 'discussion' | 'members' | 'about' | 'yourPosts' | 'requests'
@@ -51,11 +58,10 @@ export default function GroupDetailScreen() {
     fetchJoinRequests,
     joinGroup,
     leaveGroup,
-    updateGroup,
     updateMemberRole,
     removeMember,
     handleJoinRequest,
-    deleteGroup,
+    clearCurrentGroup,
   } = useGroupStore()
 
   const [activeTab, setActiveTab] = useState<GroupTab>('discussion')
@@ -64,7 +70,7 @@ export default function GroupDetailScreen() {
     useState(false)
   const [searchModalVisible, setSearchModalVisible] = useState(false)
   const [memberManagementVisible, setMemberManagementVisible] = useState(false)
-  const [editGroupInfoVisible, setEditGroupInfoVisible] = useState(false)
+
   const [selectedMember, setSelectedMember] = useState<GroupMember | null>(null)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const themeName = useThemeName()
@@ -83,6 +89,7 @@ export default function GroupDetailScreen() {
 
   useEffect(() => {
     if (groupId) {
+      clearCurrentGroup()
       const loadUserId = async () => {
         const userId = await getUserId()
         setCurrentUserId(userId)
@@ -116,6 +123,19 @@ export default function GroupDetailScreen() {
   }
 
   const group = currentGroup
+
+  if ((isLoading && !group) || (group && group.id !== groupId)) {
+    return (
+      <YStack
+        flex={1}
+        backgroundColor={backgroundColor}
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Spinner size="large" color="#0095F6" />
+      </YStack>
+    )
+  }
 
   if (!group && !isLoading) {
     return (
@@ -210,45 +230,6 @@ export default function GroupDetailScreen() {
     } catch (error) {
       Alert.alert('Error', 'Failed to reject request')
     }
-  }
-
-  const handleSaveGroupInfo = async (
-    name: string,
-    description: string,
-    category: string
-  ) => {
-    try {
-      await updateGroup({ groupId, name, description, privacy: group?.privacy })
-      setEditGroupInfoVisible(false)
-      Alert.alert('Success', 'Group information updated successfully')
-    } catch (error) {
-      Alert.alert('Error', 'Failed to update group information')
-    }
-  }
-
-  const handleDeleteGroup = () => {
-    Alert.alert(
-      'Delete Group',
-      'Are you sure you want to delete this group? This action cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await deleteGroup(groupId)
-              setEditGroupInfoVisible(false)
-              Alert.alert('Success', 'Group deleted successfully', [
-                { text: 'OK', onPress: () => router.back() },
-              ])
-            } catch (error) {
-              Alert.alert('Error', 'Failed to delete group')
-            }
-          },
-        },
-      ]
-    )
   }
 
   const handlePromoteToAdmin = async (memberId: string) => {
@@ -575,7 +556,12 @@ export default function GroupDetailScreen() {
                     height={40}
                     icon={<Settings size={18} color="#1877F2" />}
                     pressStyle={{ opacity: 0.8, scale: 0.98 }}
-                    onPress={() => setEditGroupInfoVisible(true)}
+                    onPress={() =>
+                      router.push({
+                        pathname: '/group/form',
+                        params: { mode: 'EDIT', id: groupId },
+                      })
+                    }
                   >
                     Edit Group Info
                   </Button>
@@ -737,8 +723,6 @@ export default function GroupDetailScreen() {
         alignItems="center"
         justifyContent="space-between"
         backgroundColor={cardBackground}
-        borderBottomColor={borderColor}
-        borderBottomWidth={1}
       >
         <XStack alignItems="center" gap="$3" flex={1}>
           <Pressable onPress={() => router.back()} hitSlop={8}>
@@ -748,18 +732,18 @@ export default function GroupDetailScreen() {
             {group.name}
           </Text>
         </XStack>
-        <XStack gap="$2">
+        <XStack gap="$3">
           <Pressable hitSlop={8} onPress={() => setSearchModalVisible(true)}>
-            <Search size={22} color={textColor} />
+            <Search size={20} color={textColor} />
           </Pressable>
           <Pressable
             hitSlop={8}
             onPress={() => setNotificationSheetVisible(true)}
           >
-            <Bell size={22} color={textColor} />
+            <Bell size={20} color={textColor} />
           </Pressable>
           <Pressable hitSlop={8}>
-            <Settings size={22} color={textColor} />
+            <Settings size={20} color={textColor} />
           </Pressable>
         </XStack>
       </XStack>
@@ -950,18 +934,6 @@ export default function GroupDetailScreen() {
             )
             setMemberManagementVisible(false)
           }}
-          isDark={isDark}
-        />
-      )}
-
-      {group && (
-        <EditGroupInfoModal
-          visible={editGroupInfoVisible}
-          onClose={() => setEditGroupInfoVisible(false)}
-          groupName={group.name}
-          groupDescription={group.description || ''}
-          groupCategory={''}
-          onSave={handleSaveGroupInfo}
           isDark={isDark}
         />
       )}

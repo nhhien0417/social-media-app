@@ -25,7 +25,6 @@ function ToggleSwitch({ value, onValueChange, isDark }: ToggleSwitchProps) {
         backgroundColor: trackColor,
         padding: 2,
         justifyContent: 'center',
-        transition: 'background-color 0.2s',
       }}
     >
       <Animated.View
