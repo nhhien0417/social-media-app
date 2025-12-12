@@ -146,22 +146,16 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
     const targetUserId = userId || get().currentUserId
     if (!targetUserId) return
 
-    const isOwnProfile = targetUserId === get().currentUserId
-    if (isOwnProfile) set({ isLoading: true, error: null })
-
+    set({ isLoading: true, error: null })
     try {
       const response = await getFriendApi(targetUserId)
       const friendsList = response.data || []
       console.log('Successful fetch friends:', response)
 
-      if (isOwnProfile) {
-        set({ friends: friendsList, isLoading: false })
-      }
+      set({ friends: friendsList, isLoading: false })
     } catch (error) {
       console.error('Error fetch friends:', error)
-      if (isOwnProfile) {
-        set({ error: 'Failed to fetch friends', isLoading: false })
-      }
+      set({ error: 'Failed to fetch friends', isLoading: false })
     }
   },
 

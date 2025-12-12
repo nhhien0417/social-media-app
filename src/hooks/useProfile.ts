@@ -45,9 +45,8 @@ export const useFriends = (userId?: string) => {
     }
   }, [userId, currentUser?.id])
 
-  const friends = userId
-    ? users[userId]?.friendships || []
-    : currentUser?.friendships || []
+  const friendsStore = useProfileStore(state => state.friends)
+  const friends = friendsStore || []
 
   return { friends, isLoading }
 }

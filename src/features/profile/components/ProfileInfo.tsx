@@ -67,9 +67,7 @@ export function ProfileInfo({
         <Pressable onPress={onFriendsPress}>
           <YStack alignItems="center" gap="$1">
             <Text fontSize="$6" fontWeight="700">
-              {formatNumber(
-                Array.isArray(user.friendships) ? user.friendships.length : 0
-              )}
+              {formatNumber(user.friendCount || 0)}
             </Text>
             <Text fontSize="$3" fontWeight="500" color={captionColor}>
               Friends
@@ -80,7 +78,7 @@ export function ProfileInfo({
         <Pressable onPress={onGroupsPress}>
           <YStack alignItems="center" gap="$1">
             <Text fontSize="$6" fontWeight="700">
-              {formatNumber(12)}
+              {formatNumber(user.groupCount || 0)}
             </Text>
             <Text fontSize="$3" fontWeight="500" color={captionColor}>
               Groups

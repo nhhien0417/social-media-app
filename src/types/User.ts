@@ -19,6 +19,7 @@ export interface User {
   dob: string | null
   bio: string | null
   posts: Post[] | null
-  friendships: User[] | null
+  groupCount: number
+  friendCount: number
   friendStatus: string | null
 }
