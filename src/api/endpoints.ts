@@ -52,8 +52,11 @@ export const ENDPOINTS = {
 
     JOIN: (id: string | number) => `group/${id}/join`,
     LEAVE: (id: string | number) => `group/${id}/leave`,
-    GET_REQUEST: (id: string | number) => `group/${id}/requests`,
+
+    GET_USER_REQUEST: 'group/requests',
+    GET_GROUP_REQUEST: (id: string | number) => `group/${id}/requests`,
     HANDLE_REQUEST: 'group/requests',
+    CANCEL_REQUEST: (id: string | number) => `group/requests/${id}`,
 
     MEMBERS: (id: string | number) => `group/${id}/members`,
     ROLE: 'group/members',

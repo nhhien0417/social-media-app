@@ -3,7 +3,6 @@ import {
   Group,
   GroupMember,
   GroupRole,
-  JoinRequestStatus,
   GroupJoinRequest,
 } from '@/types/Group'
 import { Post } from '@/types/Post'
@@ -17,8 +16,10 @@ import {
   deleteGroupApi,
   joinGroupApi,
   leaveGroupApi,
+  getUserRequestsApi,
   getGroupRequestsApi,
   handleGroupRequestApi,
+  cancelRequestApi,
   getGroupMembersApi,
   updateMemberRoleApi,
   removeMemberApi,
@@ -34,7 +35,8 @@ interface GroupState {
   currentGroup: Group | null
   posts: Post[]
   members: GroupMember[]
-  joinRequests: GroupJoinRequest[]
+  userRequests: GroupJoinRequest[]
+  groupRequests: GroupJoinRequest[]
   isLoading: boolean
   isRefreshing: boolean
   error: string | null
@@ -59,8 +61,10 @@ interface GroupState {
 
   joinGroup: (groupId: string) => Promise<void>
   leaveGroup: (groupId: string) => Promise<void>
-  fetchJoinRequests: (groupId: string) => Promise<void>
+  fetchUserRequests: () => Promise<void>
+  fetchGroupRequests: (groupId: string) => Promise<void>
   handleJoinRequest: (requestId: string, approved: boolean) => Promise<void>
+  cancelRequest: (requestId: string) => Promise<void>
 
   fetchGroupMembers: (groupId: string) => Promise<void>
   updateMemberRole: (
@@ -122,7 +126,8 @@ export const useGroupStore = create<GroupState>((set, get) => ({
   groups: [],
   myGroups: [],
   currentGroup: null,
-  joinRequests: [],
+  userRequests: [],
+  groupRequests: [],
   members: [],
   posts: [],
   isLoading: false,
@@ -263,6 +268,23 @@ export const useGroupStore = create<GroupState>((set, get) => ({
     try {
       const response = await joinGroupApi(groupId)
       console.log('Successful join group:', response)
+
+      if (response.data.status === 'PENDING') {
+        set(state => ({
+          userRequests: [
+            ...state.userRequests,
+            {
+              id: response.data.id,
+              groupId: response.data.groupId,
+              groupName: response.data.groupName,
+              userId: response.data.userId,
+              status: response.data.status,
+              requestedAt: response.data.requestedAt,
+            },
+          ],
+        }))
+      }
+
       await Promise.all([
         get().fetchGroups(),
         get().fetchUserGroups(),
@@ -325,12 +347,23 @@ export const useGroupStore = create<GroupState>((set, get) => ({
     }
   },
 
-  fetchJoinRequests: async (groupId: string) => {
+  fetchUserRequests: async () => {
+    try {
+      const response = await getUserRequestsApi()
+      console.log('Successful fetch user requests:', response)
+      const enrichedRequests = response.data.map(enrichRequestWithMockData)
+      set({ userRequests: enrichedRequests })
+    } catch (error) {
+      console.error('Error fetching user requests:', error)
+    }
+  },
+
+  fetchGroupRequests: async (groupId: string) => {
     try {
       const response = await getGroupRequestsApi(groupId)
       console.log('Successful fetch join requests:', response)
       const enrichedRequests = response.data.map(enrichRequestWithMockData)
-      set({ joinRequests: enrichedRequests })
+      set({ groupRequests: enrichedRequests })
     } catch (error) {
       console.error('Error fetching join requests:', error)
     }
@@ -341,7 +374,7 @@ export const useGroupStore = create<GroupState>((set, get) => ({
       const response = await handleGroupRequestApi({ requestId, approved })
       console.log('Successful handle join request:', response)
       set(state => ({
-        joinRequests: state.joinRequests.filter(r => r.id !== requestId),
+        groupRequests: state.groupRequests.filter(r => r.id !== requestId),
       }))
       if (approved && get().currentGroup?.id) {
         const currentGroupId = get().currentGroup?.id
@@ -355,12 +388,34 @@ export const useGroupStore = create<GroupState>((set, get) => ({
     }
   },
 
+  cancelRequest: async (requestId: string) => {
+    try {
+      const response = await cancelRequestApi(requestId)
+      console.log('Successful cancel request:', response)
+
+      set(state => ({
+        userRequests: state.userRequests.filter(r => r.id !== requestId),
+        groups: state.groups.map(g =>
+          g.id === response.data.groupId ? { ...g, joinStatus: undefined } : g
+        ),
+      }))
+
+      if (get().currentGroup?.id === response.data.groupId) {
+        await get().fetchGroupDetail(response.data.groupId)
+      }
+    } catch (error) {
+      console.error('Error canceling request:', error)
+      throw error
+    }
+  },
+
   clearCurrentGroup: () => {
     set({
       currentGroup: null,
       members: [],
       posts: [],
-      joinRequests: [],
+      userRequests: [],
+      groupRequests: [],
       error: null,
     })
   },

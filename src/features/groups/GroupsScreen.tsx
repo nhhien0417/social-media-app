@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { Pressable, Alert } from 'react-native'
+import { Pressable } from 'react-native'
 import { YStack, XStack, Text, Input, useThemeName } from 'tamagui'
 import { ChevronLeft, Search, X, Plus } from '@tamagui/lucide-icons'
 import { router } from 'expo-router'
@@ -27,17 +27,19 @@ export default function GroupsScreen({
   const {
     groups,
     myGroups,
+    userRequests,
     isLoading,
     fetchGroups,
     fetchUserGroups,
+    fetchUserRequests,
     joinGroup,
-    leaveGroup,
-    createGroup,
+    cancelRequest,
   } = useGroupStore()
 
   useEffect(() => {
     fetchGroups()
     fetchUserGroups()
+    fetchUserRequests()
   }, [])
 
   // Handlers
@@ -52,21 +54,10 @@ export default function GroupsScreen({
     }
   }
 
-  const handleCancelRequest = async (groupId: string) => {
+  const handleCancelRequest = async (requestId: string) => {
     setIsProcessing(true)
     try {
-      await leaveGroup(groupId)
-    } catch (error) {
-      console.log(error)
-    } finally {
-      setIsProcessing(false)
-    }
-  }
-
-  const handleLeaveGroup = async (groupId: string) => {
-    setIsProcessing(true)
-    try {
-      await leaveGroup(groupId)
+      await cancelRequest(requestId)
     } catch (error) {
       console.log(error)
     } finally {
@@ -82,16 +73,35 @@ export default function GroupsScreen({
           g => g.role === 'MEMBER' || g.role === 'ADMIN' || g.role === 'OWNER'
         )
       case 'pending':
-        return groups.filter(g => g.joinStatus === 'PENDING')
+        return userRequests
+          .map(req => {
+            const group = groups.find(g => g.id === req.groupId)
+            if (group) {
+              return {
+                ...group,
+                requestId: req.id,
+              }
+            }
+            // Fallback if group not in discovery list
+            return {
+              id: req.groupId,
+              name: req.groupName,
+              requestId: req.id,
+              privacy: 'PRIVATE' as const,
+              memberCount: 0,
+              createdAt: req.requestedAt,
+              updatedAt: req.requestedAt,
+            }
+          })
+          .filter(Boolean)
       case 'suggestions':
-        return groups.filter(
-          g =>
-            !myGroups.some(mg => mg.id === g.id) && g.joinStatus !== 'PENDING'
-        )
+        const joinedIds = new Set(myGroups.map(g => g.id))
+        const pendingIds = new Set(userRequests.map(r => r.groupId))
+        return groups.filter(g => !joinedIds.has(g.id) && !pendingIds.has(g.id))
       default:
         return []
     }
-  }, [activeTab, groups, myGroups])
+  }, [activeTab, groups, myGroups, userRequests])
 
   // Filter data by search query
   const filteredData = useMemo(() => {
@@ -125,7 +135,7 @@ export default function GroupsScreen({
     {
       value: 'pending',
       label: 'Pending',
-      count: myGroups.filter(g => g.joinStatus === 'PENDING').length,
+      count: userRequests.length,
     },
     {
       value: 'suggestions',
@@ -255,7 +265,6 @@ export default function GroupsScreen({
         actionPending={isProcessing || isLoading}
         onJoinGroup={handleJoinGroup}
         onCancelRequest={handleCancelRequest}
-        onLeaveGroup={handleLeaveGroup}
       />
     </YStack>
   )

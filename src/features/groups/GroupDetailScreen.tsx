@@ -55,7 +55,7 @@ export default function GroupDetailScreen() {
     fetchGroupDetail,
     fetchGroupMembers,
     fetchGroupPosts,
-    fetchJoinRequests,
+    fetchGroupRequests,
     joinGroup,
     leaveGroup,
     updateMemberRole,
@@ -106,7 +106,7 @@ export default function GroupDetailScreen() {
       activeTab === 'requests' &&
       (currentGroup?.role === 'ADMIN' || currentGroup?.role === 'OWNER')
     ) {
-      fetchJoinRequests(groupId)
+      fetchGroupRequests(groupId)
     }
   }, [activeTab, groupId, currentGroup?.role])
 
@@ -160,7 +160,7 @@ export default function GroupDetailScreen() {
     setIsRefreshing(true)
     await fetchData()
     if (activeTab === 'requests') {
-      await fetchJoinRequests(groupId)
+      await fetchGroupRequests(groupId)
     }
     setIsRefreshing(false)
   }

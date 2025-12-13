@@ -69,6 +69,8 @@ export type LeaveGroupResponse = GenericResponse<{
   leftAt: string
 }>
 
+export type GetUserJoinRequestsResponse = GenericResponse<GroupJoinRequest[]>
+
 export type GetGroupJoinRequestsResponse = GenericResponse<GroupJoinRequest[]>
 
 export type HandleJoinRequestResponse = GenericResponse<{
@@ -78,6 +80,14 @@ export type HandleJoinRequestResponse = GenericResponse<{
   userId: string
   status: JoinRequestStatus
   handledAt: string
+}>
+
+export type CancelRequestResponse = GenericResponse<{
+  requestId: string
+  groupId: string
+  groupName: string
+  userId: string
+  canceledAt: string
 }>
 
 export type GetGroupMembersResponse = GenericResponse<GroupMember[]>
@@ -213,9 +223,15 @@ export const leaveGroupApi = (groupId: string) => {
   return ApiClient.delete<LeaveGroupResponse>(ENDPOINTS.GROUP.LEAVE(groupId))
 }
 
+export const getUserRequestsApi = () => {
+  return ApiClient.get<GetUserJoinRequestsResponse>(
+    ENDPOINTS.GROUP.GET_USER_REQUEST
+  )
+}
+
 export const getGroupRequestsApi = (groupId: string) => {
   return ApiClient.get<GetGroupJoinRequestsResponse>(
-    ENDPOINTS.GROUP.GET_REQUEST(groupId)
+    ENDPOINTS.GROUP.GET_GROUP_REQUEST(groupId)
   )
 }
 
@@ -223,6 +239,12 @@ export const handleGroupRequestApi = (data: HandleJoinRequestRequest) => {
   return ApiClient.put<HandleJoinRequestResponse>(
     ENDPOINTS.GROUP.HANDLE_REQUEST,
     data
+  )
+}
+
+export const cancelRequestApi = (requestId: string) => {
+  return ApiClient.delete<CancelRequestResponse>(
+    ENDPOINTS.GROUP.CANCEL_REQUEST(requestId)
   )
 }
 

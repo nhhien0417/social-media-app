@@ -13,7 +13,6 @@ interface GroupCardProps {
   isDark: boolean
   onJoinGroup?: (groupId: string) => void
   onCancelRequest?: (groupId: string) => void
-  onLeaveGroup?: (groupId: string) => void
   isLoading?: boolean
 }
 
@@ -23,7 +22,6 @@ export function GroupCard({
   isDark,
   onJoinGroup,
   onCancelRequest,
-  onLeaveGroup,
   isLoading = false,
 }: GroupCardProps) {
   const textColor = isDark ? '#f5f5f5' : '#111827'
@@ -88,7 +86,7 @@ export function GroupCard({
               pressStyle={{ opacity: 0.8, scale: 0.97 }}
               onPress={e => {
                 e.stopPropagation()
-                onCancelRequest?.(group.id)
+                onCancelRequest?.((group as any).requestId || group.id)
               }}
               disabled={isLoading}
             >

@@ -13,7 +13,6 @@ interface GroupsListProps {
   emptyMessage?: string
   onJoinGroup?: (groupId: string) => void
   onCancelRequest?: (groupId: string) => void
-  onLeaveGroup?: (groupId: string) => void
   actionPending?: boolean
 }
 
@@ -25,7 +24,6 @@ export function GroupsList({
   emptyMessage = 'No groups found',
   onJoinGroup,
   onCancelRequest,
-  onLeaveGroup,
   actionPending = false,
 }: GroupsListProps) {
   const textColor = isDark ? '#f5f5f5' : '#111827'
@@ -83,7 +81,6 @@ export function GroupsList({
                   isDark={isDark}
                   onJoinGroup={onJoinGroup}
                   onCancelRequest={onCancelRequest}
-                  onLeaveGroup={onLeaveGroup}
                   isLoading={actionPending}
                 />
               ))}
