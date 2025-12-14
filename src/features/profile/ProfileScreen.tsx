@@ -78,6 +78,11 @@ export default function ProfileScreen() {
   const handleGroupsPress = () => {
     if (isOwnProfile) {
       router.push('/profile/groups')
+    } else if (displayUser) {
+      router.push({
+        pathname: '/profile/groups',
+        params: { userId: displayUser.id, isOwnProfile: 'false' },
+      })
     }
   }
 

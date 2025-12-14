@@ -86,7 +86,7 @@ export function GroupCard({
               pressStyle={{ opacity: 0.8, scale: 0.97 }}
               onPress={e => {
                 e.stopPropagation()
-                onCancelRequest?.((group as any).requestId || group.id)
+                onCancelRequest?.(group.id)
               }}
               disabled={isLoading}
             >

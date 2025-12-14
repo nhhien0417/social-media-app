@@ -56,11 +56,12 @@ export const ENDPOINTS = {
     GET_USER_REQUEST: 'group/requests',
     GET_GROUP_REQUEST: (id: string | number) => `group/${id}/requests`,
     HANDLE_REQUEST: 'group/requests',
-    CANCEL_REQUEST: (id: string | number) => `group/requests/${id}`,
+    CANCEL_REQUEST: (id: string | number) => `group/${id}/requests`,
 
     MEMBERS: (id: string | number) => `group/${id}/members`,
     ROLE: 'group/members',
-    REMOVE: 'group/members',
+    REMOVE: (groupId: string | number, memberId: string | number) =>
+      `group/${groupId}/members/${memberId}`,
   },
 
   NOTIFICATIONS: {

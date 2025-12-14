@@ -9,8 +9,10 @@ interface GroupMemberManagementModalProps {
   onClose: () => void
   member: GroupMember
   isAdmin: boolean
+  isOwner: boolean
   isDark: boolean
   onPromoteToAdmin: (memberId: string) => void
+  onDemoteToMember: (memberId: string) => void
   onRemoveMember: (memberId: string) => void
   onBlockMember: (memberId: string) => void
 }
@@ -22,8 +24,10 @@ export const GroupMemberManagementModal: React.FC<
   onClose,
   member,
   isAdmin,
+  isOwner,
   isDark,
   onPromoteToAdmin,
+  onDemoteToMember,
   onRemoveMember,
   onBlockMember,
 }) => {
@@ -36,60 +40,30 @@ export const GroupMemberManagementModal: React.FC<
   const successColor = '#10b981'
 
   const handlePromoteToAdmin = () => {
-    Alert.alert(
-      'Promote to Admin',
-      `Are you sure you want to make ${member.name} an admin?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Promote',
-          style: 'default',
-          onPress: () => {
-            onPromoteToAdmin(member.userId)
-            onClose()
-          },
-        },
-      ]
-    )
+    onPromoteToAdmin(member.user.id)
+    onClose()
+  }
+
+  const handleDemoteToMember = () => {
+    onDemoteToMember(member.user.id)
+    onClose()
   }
 
   const handleRemoveMember = () => {
-    Alert.alert(
-      'Remove Member',
-      `Are you sure you want to remove ${member.name} from this group?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: () => {
-            onRemoveMember(member.userId)
-            onClose()
-          },
-        },
-      ]
-    )
+    onRemoveMember(member.user.id)
+    onClose()
   }
 
   const handleBlockMember = () => {
-    Alert.alert(
-      'Block Member',
-      `Are you sure you want to block ${member.name}? They won't be able to join this group again.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Block',
-          style: 'destructive',
-          onPress: () => {
-            onBlockMember(member.userId)
-            onClose()
-          },
-        },
-      ]
-    )
+    onBlockMember(member.user.id)
+    onClose()
   }
 
-  if (!isAdmin || member.role === 'ADMIN') {
+  const canPromote = member.role === 'MEMBER'
+  const canDemote = isOwner && member.role === 'ADMIN'
+  const showManagement = isAdmin && member.role !== 'OWNER'
+
+  if (!showManagement) {
     return null
   }
 
@@ -142,12 +116,12 @@ export const GroupMemberManagementModal: React.FC<
                 justifyContent="center"
               >
                 <Text fontSize={18} fontWeight="700" color={textColor}>
-                  {member.name.charAt(0)}
+                  {member.user.username.charAt(0)}
                 </Text>
               </YStack>
               <YStack flex={1}>
                 <Text fontSize={16} fontWeight="600" color={textColor}>
-                  {member.name}
+                  {member.user.username}
                 </Text>
                 <Text fontSize={13} color={subtitleColor}>
                   Member
@@ -157,28 +131,57 @@ export const GroupMemberManagementModal: React.FC<
 
             {/* Actions */}
             <YStack gap="$2">
-              <Button
-                backgroundColor="transparent"
-                borderWidth={1}
-                borderColor={borderColor}
-                borderRadius={10}
-                height={50}
-                onPress={handlePromoteToAdmin}
-                pressStyle={{ opacity: 0.8, scale: 0.98 }}
-              >
-                <XStack alignItems="center" gap="$3" flex={1}>
-                  <Crown size={20} color={successColor} />
-                  <YStack flex={1}>
-                    <Text fontSize={15} fontWeight="600" color={textColor}>
-                      Promote to Admin
-                    </Text>
-                    <Text fontSize={12} color={subtitleColor}>
-                      Give admin privileges
-                    </Text>
-                  </YStack>
-                </XStack>
-              </Button>
+              {/* Promote to Admin - only for MEMBER role */}
+              {canPromote && (
+                <Button
+                  backgroundColor="transparent"
+                  borderWidth={1}
+                  borderColor={borderColor}
+                  borderRadius={10}
+                  height={50}
+                  onPress={handlePromoteToAdmin}
+                  pressStyle={{ opacity: 0.8, scale: 0.98 }}
+                >
+                  <XStack alignItems="center" gap="$3" flex={1}>
+                    <Crown size={20} color={successColor} />
+                    <YStack flex={1}>
+                      <Text fontSize={15} fontWeight="600" color={textColor}>
+                        Promote to Admin
+                      </Text>
+                      <Text fontSize={12} color={subtitleColor}>
+                        Give admin privileges
+                      </Text>
+                    </YStack>
+                  </XStack>
+                </Button>
+              )}
 
+              {/* Demote to Member - only for ADMIN role and owner */}
+              {canDemote && (
+                <Button
+                  backgroundColor="transparent"
+                  borderWidth={1}
+                  borderColor={borderColor}
+                  borderRadius={10}
+                  height={50}
+                  onPress={handleDemoteToMember}
+                  pressStyle={{ opacity: 0.8, scale: 0.98 }}
+                >
+                  <XStack alignItems="center" gap="$3" flex={1}>
+                    <Crown size={20} color="#f59e0b" />
+                    <YStack flex={1}>
+                      <Text fontSize={15} fontWeight="600" color={textColor}>
+                        Demote to Member
+                      </Text>
+                      <Text fontSize={12} color={subtitleColor}>
+                        Remove admin privileges
+                      </Text>
+                    </YStack>
+                  </XStack>
+                </Button>
+              )}
+
+              {/* Remove from Group */}
               <Button
                 backgroundColor="transparent"
                 borderWidth={1}
@@ -201,6 +204,7 @@ export const GroupMemberManagementModal: React.FC<
                 </XStack>
               </Button>
 
+              {/* Block Member */}
               <Button
                 backgroundColor="transparent"
                 borderWidth={1}

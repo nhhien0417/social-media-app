@@ -1,10 +1,5 @@
 import { create } from 'zustand'
-import {
-  Group,
-  GroupMember,
-  GroupRole,
-  GroupJoinRequest,
-} from '@/types/Group'
+import { Group, GroupMember, GroupRole, GroupJoinRequest } from '@/types/Group'
 import { Post } from '@/types/Post'
 import {
   getAllGroupsApi,
@@ -64,7 +59,7 @@ interface GroupState {
   fetchUserRequests: () => Promise<void>
   fetchGroupRequests: (groupId: string) => Promise<void>
   handleJoinRequest: (requestId: string, approved: boolean) => Promise<void>
-  cancelRequest: (requestId: string) => Promise<void>
+  cancelRequest: (groupId: string) => Promise<void>
 
   fetchGroupMembers: (groupId: string) => Promise<void>
   updateMemberRole: (
@@ -74,51 +69,6 @@ interface GroupState {
   ) => Promise<void>
   removeMember: (groupId: string, memberId: string) => Promise<void>
   clearCurrentGroup: () => void
-}
-
-const enrichMemberWithMockData = (member: any): GroupMember => {
-  const mockNames = [
-    'Alice Johnson',
-    'Bob Smith',
-    'Charlie Brown',
-    'David Wilson',
-    'Eva Green',
-    'Frank White',
-    'Grace Lee',
-    'Henry Taylor',
-  ]
-  const randomName = mockNames[Math.floor(Math.random() * mockNames.length)]
-
-  return {
-    ...member,
-    name: member.name || `${randomName} (${member.userId.slice(0, 4)})`,
-    avatarUrl:
-      member.avatarUrl ||
-      `https://ui-avatars.com/api/?name=${encodeURIComponent(randomName)}&background=random`,
-    userId: member.userId,
-  }
-}
-
-const enrichRequestWithMockData = (request: any): GroupJoinRequest => {
-  const mockNames = [
-    'Alice Johnson',
-    'Bob Smith',
-    'Charlie Brown',
-    'David Wilson',
-    'Eva Green',
-    'Frank White',
-    'Grace Lee',
-    'Henry Taylor',
-  ]
-  const randomName = mockNames[Math.floor(Math.random() * mockNames.length)]
-
-  return {
-    ...request,
-    user: {
-      name: `${randomName} (${request.userId.slice(0, 4)})`,
-      avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(randomName)}&background=random`,
-    },
-  }
 }
 
 export const useGroupStore = create<GroupState>((set, get) => ({
@@ -179,8 +129,7 @@ export const useGroupStore = create<GroupState>((set, get) => ({
     try {
       const response = await getGroupMembersApi(groupId)
       console.log('Successful fetch group members:', response)
-      const enrichedMembers = response.data.map(enrichMemberWithMockData)
-      set({ members: enrichedMembers, isLoading: false })
+      set({ members: response.data, isLoading: false })
     } catch (error) {
       console.error('Error fetching group members:', error)
       set({ error: 'Failed to fetch group members', isLoading: false })
@@ -271,17 +220,7 @@ export const useGroupStore = create<GroupState>((set, get) => ({
 
       if (response.data.status === 'PENDING') {
         set(state => ({
-          userRequests: [
-            ...state.userRequests,
-            {
-              id: response.data.id,
-              groupId: response.data.groupId,
-              groupName: response.data.groupName,
-              userId: response.data.userId,
-              status: response.data.status,
-              requestedAt: response.data.requestedAt,
-            },
-          ],
+          userRequests: [...state.userRequests, response.data],
         }))
       }
 
@@ -325,7 +264,7 @@ export const useGroupStore = create<GroupState>((set, get) => ({
       console.log('Successful update member role:', response)
       set(state => ({
         members: state.members.map(m =>
-          m.userId === memberId ? { ...m, role } : m
+          m.user.id === memberId ? { ...m, role } : m
         ),
       }))
     } catch (error) {
@@ -336,10 +275,10 @@ export const useGroupStore = create<GroupState>((set, get) => ({
 
   removeMember: async (groupId: string, memberId: string) => {
     try {
-      const response = await removeMemberApi({ groupId, memberId })
+      const response = await removeMemberApi(groupId, memberId)
       console.log('Successful remove member:', response)
       set(state => ({
-        members: state.members.filter(m => m.userId !== memberId),
+        members: state.members.filter(m => m.user.id !== memberId),
       }))
     } catch (error) {
       console.error('Error removing member:', error)
@@ -351,8 +290,7 @@ export const useGroupStore = create<GroupState>((set, get) => ({
     try {
       const response = await getUserRequestsApi()
       console.log('Successful fetch user requests:', response)
-      const enrichedRequests = response.data.map(enrichRequestWithMockData)
-      set({ userRequests: enrichedRequests })
+      set({ userRequests: response.data })
     } catch (error) {
       console.error('Error fetching user requests:', error)
     }
@@ -362,8 +300,7 @@ export const useGroupStore = create<GroupState>((set, get) => ({
     try {
       const response = await getGroupRequestsApi(groupId)
       console.log('Successful fetch join requests:', response)
-      const enrichedRequests = response.data.map(enrichRequestWithMockData)
-      set({ groupRequests: enrichedRequests })
+      set({ groupRequests: response.data })
     } catch (error) {
       console.error('Error fetching join requests:', error)
     }
@@ -388,20 +325,20 @@ export const useGroupStore = create<GroupState>((set, get) => ({
     }
   },
 
-  cancelRequest: async (requestId: string) => {
+  cancelRequest: async (groupId: string) => {
     try {
-      const response = await cancelRequestApi(requestId)
+      const response = await cancelRequestApi(groupId)
       console.log('Successful cancel request:', response)
 
       set(state => ({
-        userRequests: state.userRequests.filter(r => r.id !== requestId),
+        userRequests: state.userRequests.filter(r => r.group.id !== groupId),
         groups: state.groups.map(g =>
-          g.id === response.data.groupId ? { ...g, joinStatus: undefined } : g
+          g.id === groupId ? { ...g, joinStatus: undefined } : g
         ),
       }))
 
-      if (get().currentGroup?.id === response.data.groupId) {
-        await get().fetchGroupDetail(response.data.groupId)
+      if (get().currentGroup?.id === groupId) {
+        await get().fetchGroupDetail(groupId)
       }
     } catch (error) {
       console.error('Error canceling request:', error)

@@ -10,10 +10,12 @@ import { useGroupStore } from '@/stores/groupStore'
 
 interface GroupsScreenProps {
   isOwnProfile?: boolean
+  userId?: string
 }
 
 export default function GroupsScreen({
   isOwnProfile = true,
+  userId,
 }: GroupsScreenProps) {
   const [activeTab, setActiveTab] = useState<TabValue>('joined')
   const [searchQuery, setSearchQuery] = useState('')
@@ -37,10 +39,14 @@ export default function GroupsScreen({
   } = useGroupStore()
 
   useEffect(() => {
-    fetchGroups()
-    fetchUserGroups()
-    fetchUserRequests()
-  }, [])
+    if (isOwnProfile) {
+      fetchGroups()
+      fetchUserGroups()
+      fetchUserRequests()
+    } else if (userId) {
+      fetchUserGroups(userId)
+    }
+  }, [userId, isOwnProfile])
 
   // Handlers
   const handleJoinGroup = async (groupId: string) => {
@@ -54,10 +60,10 @@ export default function GroupsScreen({
     }
   }
 
-  const handleCancelRequest = async (requestId: string) => {
+  const handleCancelRequest = async (groupId: string) => {
     setIsProcessing(true)
     try {
-      await cancelRequest(requestId)
+      await cancelRequest(groupId)
     } catch (error) {
       console.log(error)
     } finally {
@@ -69,34 +75,12 @@ export default function GroupsScreen({
   const currentData = useMemo(() => {
     switch (activeTab) {
       case 'joined':
-        return myGroups.filter(
-          g => g.role === 'MEMBER' || g.role === 'ADMIN' || g.role === 'OWNER'
-        )
+        return myGroups
       case 'pending':
-        return userRequests
-          .map(req => {
-            const group = groups.find(g => g.id === req.groupId)
-            if (group) {
-              return {
-                ...group,
-                requestId: req.id,
-              }
-            }
-            // Fallback if group not in discovery list
-            return {
-              id: req.groupId,
-              name: req.groupName,
-              requestId: req.id,
-              privacy: 'PRIVATE' as const,
-              memberCount: 0,
-              createdAt: req.requestedAt,
-              updatedAt: req.requestedAt,
-            }
-          })
-          .filter(Boolean)
+        return userRequests.map(req => req.group)
       case 'suggestions':
         const joinedIds = new Set(myGroups.map(g => g.id))
-        const pendingIds = new Set(userRequests.map(r => r.groupId))
+        const pendingIds = new Set(userRequests.map(r => r.group.id))
         return groups.filter(g => !joinedIds.has(g.id) && !pendingIds.has(g.id))
       default:
         return []
@@ -128,9 +112,7 @@ export default function GroupsScreen({
     {
       value: 'joined',
       label: 'Joined',
-      count: myGroups.filter(
-        g => g.role === 'MEMBER' || g.role === 'ADMIN' || g.role === 'OWNER'
-      ).length,
+      count: myGroups.length,
     },
     {
       value: 'pending',
@@ -217,12 +199,14 @@ export default function GroupsScreen({
       </XStack>
 
       {/* Tabs */}
-      <TabBar
-        activeTab={activeTab}
-        tabs={tabs}
-        onTabChange={setActiveTab}
-        isDark={isDark}
-      />
+      {isOwnProfile && (
+        <TabBar
+          activeTab={activeTab}
+          tabs={tabs}
+          onTabChange={setActiveTab}
+          isDark={isDark}
+        />
+      )}
 
       {/* Search Bar */}
       <YStack paddingHorizontal="$3" paddingVertical="$3">
@@ -263,6 +247,7 @@ export default function GroupsScreen({
         isLoading={false}
         emptyMessage={getEmptyMessage()}
         actionPending={isProcessing || isLoading}
+        groupCount={!isOwnProfile ? myGroups.length : undefined}
         onJoinGroup={handleJoinGroup}
         onCancelRequest={handleCancelRequest}
       />

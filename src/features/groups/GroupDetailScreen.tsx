@@ -51,6 +51,7 @@ export default function GroupDetailScreen() {
     currentGroup,
     members,
     posts,
+    groupRequests,
     isLoading,
     fetchGroupDetail,
     fetchGroupMembers,
@@ -188,7 +189,7 @@ export default function GroupDetailScreen() {
       setSelectedMember(member)
       setMemberManagementVisible(true)
     } else {
-      router.push(`/profile/${member.userId}`)
+      router.push(`/profile/${member.user.id}`)
     }
   }
 
@@ -196,31 +197,24 @@ export default function GroupDetailScreen() {
     try {
       await joinGroup(groupId)
     } catch (error) {
-      Alert.alert('Error', 'Failed to join group')
+      console.error('Error joining group:', error)
     }
   }
 
-  const handleLeavePromise = async () => {
+  const handleLeave = async () => {
     try {
       await leaveGroup(groupId)
       router.back()
     } catch (error) {
-      Alert.alert('Error', 'Failed to leave group')
+      console.error('Error leaving group:', error)
     }
-  }
-
-  const handleLeave = () => {
-    Alert.alert('Leave Group', 'Are you sure you want to leave this group?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Leave', style: 'destructive', onPress: handleLeavePromise },
-    ])
   }
 
   const handleApproveRequest = async (requestId: string) => {
     try {
       await handleJoinRequest(requestId, true)
     } catch (error) {
-      Alert.alert('Error', 'Failed to approve request')
+      console.error('Error approving request:', error)
     }
   }
 
@@ -228,27 +222,34 @@ export default function GroupDetailScreen() {
     try {
       await handleJoinRequest(requestId, false)
     } catch (error) {
-      Alert.alert('Error', 'Failed to reject request')
+      console.error('Error rejecting request:', error)
     }
   }
 
   const handlePromoteToAdmin = async (memberId: string) => {
     try {
       await updateMemberRole(groupId, memberId, 'ADMIN')
-      Alert.alert('Success', 'Member promoted to admin successfully')
       setMemberManagementVisible(false)
     } catch (error) {
-      Alert.alert('Error', 'Failed to promote member')
+      console.error('Error promoting member:', error)
     }
   }
 
   const handleRemoveMember = async (memberId: string) => {
     try {
       await removeMember(groupId, memberId)
-      Alert.alert('Success', 'Member removed from group')
       setMemberManagementVisible(false)
     } catch (error) {
-      Alert.alert('Error', 'Failed to remove member')
+      console.error('Error removing member:', error)
+    }
+  }
+
+  const handleDemoteToMember = async (memberId: string) => {
+    try {
+      await updateMemberRole(groupId, memberId, 'MEMBER')
+      setMemberManagementVisible(false)
+    } catch (error) {
+      console.error('Error demoting member:', error)
     }
   }
 
@@ -338,8 +339,8 @@ export default function GroupDetailScreen() {
                   .filter(m => m.role === 'ADMIN' || m.role === 'OWNER')
                   .map((member, index, arr) => (
                     <Pressable
-                      key={member.userId}
-                      onPress={() => router.push(`/profile/${member.userId}`)}
+                      key={member.user.id}
+                      onPress={() => router.push(`/profile/${member.user.id}`)}
                     >
                       <XStack
                         paddingVertical="$3"
@@ -348,9 +349,9 @@ export default function GroupDetailScreen() {
                         borderBottomWidth={index < arr.length - 1 ? 1 : 0}
                         borderBottomColor={borderColor}
                       >
-                        {member.avatarUrl ? (
+                        {member.user.avatarUrl ? (
                           <Image
-                            source={{ uri: member.avatarUrl }}
+                            source={{ uri: member.user.avatarUrl }}
                             style={{
                               width: 52,
                               height: 52,
@@ -371,7 +372,7 @@ export default function GroupDetailScreen() {
                               fontWeight="700"
                               color={textColor}
                             >
-                              {member.name.charAt(0)}
+                              {member.user.username.charAt(0)}
                             </Text>
                           </YStack>
                         )}
@@ -382,7 +383,7 @@ export default function GroupDetailScreen() {
                               fontWeight="600"
                               color={textColor}
                             >
-                              {member.name}
+                              {member.user.username}
                             </Text>
                             <Crown size={16} color="#f59e0b" />
                           </XStack>
@@ -421,7 +422,7 @@ export default function GroupDetailScreen() {
                 .filter(m => m.role === 'MEMBER')
                 .map((member, index) => (
                   <Pressable
-                    key={member.userId}
+                    key={member.user.id}
                     onPress={() => handleMemberPress(member)}
                   >
                     <XStack
@@ -436,9 +437,9 @@ export default function GroupDetailScreen() {
                       }
                       borderBottomColor={borderColor}
                     >
-                      {member.avatarUrl ? (
+                      {member.user.avatarUrl ? (
                         <Image
-                          source={{ uri: member.avatarUrl }}
+                          source={{ uri: member.user.avatarUrl }}
                           style={{
                             width: 52,
                             height: 52,
@@ -459,7 +460,7 @@ export default function GroupDetailScreen() {
                             fontWeight="700"
                             color={textColor}
                           >
-                            {member.name.charAt(0)}
+                            {member.user.username.charAt(0)}
                           </Text>
                         </YStack>
                       )}
@@ -470,7 +471,7 @@ export default function GroupDetailScreen() {
                             fontWeight="600"
                             color={textColor}
                           >
-                            {member.name}
+                            {member.user.username}
                           </Text>
                           {member.role === 'ADMIN' && (
                             <Crown size={14} color="#f59e0b" />
@@ -711,6 +712,123 @@ export default function GroupDetailScreen() {
             )}
           </YStack>
         )
+
+      case 'requests':
+        return (
+          <YStack padding="$3" gap="$3">
+            {groupRequests.length > 0 ? (
+              <YStack
+                backgroundColor={cardBackground}
+                borderRadius={12}
+                padding="$4"
+                borderColor={borderColor}
+                borderWidth={1}
+              >
+                <Text
+                  fontSize={16}
+                  fontWeight="600"
+                  color={textColor}
+                  marginBottom="$3"
+                >
+                  Join Requests · {groupRequests.length}
+                </Text>
+
+                {groupRequests.map((request, index) => (
+                  <XStack
+                    key={request.id}
+                    paddingVertical="$3"
+                    alignItems="center"
+                    gap="$3"
+                    borderBottomWidth={index < groupRequests.length - 1 ? 1 : 0}
+                    borderBottomColor={borderColor}
+                  >
+                    {/* User Avatar */}
+                    {request.user.avatarUrl ? (
+                      <Image
+                        source={{ uri: request.user.avatarUrl }}
+                        style={{
+                          width: 52,
+                          height: 52,
+                          borderRadius: 26,
+                        }}
+                      />
+                    ) : (
+                      <YStack
+                        width={52}
+                        height={52}
+                        borderRadius={26}
+                        backgroundColor={isDark ? '#2a2a2a' : '#e4e6eb'}
+                        alignItems="center"
+                        justifyContent="center"
+                      >
+                        <Text fontSize={18} fontWeight="700" color={textColor}>
+                          {request.user.username.charAt(0)}
+                        </Text>
+                      </YStack>
+                    )}
+
+                    {/* User Info */}
+                    <YStack flex={1}>
+                      <Text fontSize={15} fontWeight="600" color={textColor}>
+                        {request.user.username}
+                      </Text>
+                      <Text fontSize={13} color={subtitleColor}>
+                        Wants to join
+                      </Text>
+                    </YStack>
+
+                    {/* Actions */}
+                    <XStack gap="$2">
+                      <Button
+                        size="$3"
+                        backgroundColor="#10b981"
+                        color="#ffffff"
+                        borderRadius={8}
+                        paddingHorizontal="$3"
+                        fontWeight="600"
+                        fontSize={13}
+                        pressStyle={{ opacity: 0.8, scale: 0.97 }}
+                        onPress={() => handleApproveRequest(request.id)}
+                      >
+                        Approve
+                      </Button>
+                      <Button
+                        size="$3"
+                        backgroundColor={
+                          isDark ? 'rgba(255,255,255,0.1)' : '#efefef'
+                        }
+                        color={textColor}
+                        borderRadius={8}
+                        paddingHorizontal="$3"
+                        fontWeight="600"
+                        fontSize={13}
+                        pressStyle={{ opacity: 0.8, scale: 0.97 }}
+                        onPress={() => handleRejectRequest(request.id)}
+                      >
+                        Reject
+                      </Button>
+                    </XStack>
+                  </XStack>
+                ))}
+              </YStack>
+            ) : (
+              <YStack
+                backgroundColor={cardBackground}
+                borderRadius={12}
+                padding="$6"
+                alignItems="center"
+                gap="$3"
+              >
+                <Text fontSize={16} fontWeight="600" color={textColor}>
+                  No pending requests
+                </Text>
+                <Text fontSize={14} color={subtitleColor} textAlign="center">
+                  There are no pending join requests at the moment
+                </Text>
+              </YStack>
+            )}
+          </YStack>
+        )
     }
   }
 
@@ -925,14 +1043,12 @@ export default function GroupDetailScreen() {
           }}
           member={selectedMember}
           isAdmin={isAdmin}
+          isOwner={isOwner}
           onPromoteToAdmin={handlePromoteToAdmin}
+          onDemoteToMember={handleDemoteToMember}
           onRemoveMember={handleRemoveMember}
-          onBlockMember={id => {
-            Alert.alert(
-              'Block Member',
-              'Block member functionality not implemented yet'
-            )
-            setMemberManagementVisible(false)
+          onBlockMember={(id: string) => {
+            // Handle block member
           }}
           isDark={isDark}
         />

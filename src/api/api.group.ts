@@ -38,11 +38,6 @@ export type UpdateMemberRoleRequest = {
   role: GroupRole
 }
 
-export type RemoveMemberRequest = {
-  groupId: string
-  memberId: string
-}
-
 // --- Responses ---
 
 export type CreateGroupResponse = GenericResponse<Group>
@@ -53,53 +48,17 @@ export type GetGroupDetailResponse = GenericResponse<Group>
 
 export type GetAllGroupsResponse = GenericResponse<Group[]>
 
-export type JoinGroupResponse = GenericResponse<{
-  id: string
-  groupId: string
-  groupName: string
-  userId: string
-  status: JoinRequestStatus
-  requestedAt: string
-}>
-
-export type LeaveGroupResponse = GenericResponse<{
-  groupId: string
-  groupName: string
-  userId: string
-  leftAt: string
-}>
+export type JoinGroupResponse = GenericResponse<GroupJoinRequest>
 
 export type GetUserJoinRequestsResponse = GenericResponse<GroupJoinRequest[]>
 
 export type GetGroupJoinRequestsResponse = GenericResponse<GroupJoinRequest[]>
 
-export type HandleJoinRequestResponse = GenericResponse<{
-  requestId: string
-  groupId: string
-  groupName: string
-  userId: string
-  status: JoinRequestStatus
-  handledAt: string
-}>
-
-export type CancelRequestResponse = GenericResponse<{
-  requestId: string
-  groupId: string
-  groupName: string
-  userId: string
-  canceledAt: string
-}>
+export type HandleJoinRequestResponse = GenericResponse<GroupJoinRequest>
 
 export type GetGroupMembersResponse = GenericResponse<GroupMember[]>
 
 export type UpdateMemberRoleResponse = GenericResponse<GroupMember>
-
-export type RemoveMemberResponse = GenericResponse<{
-  groupId: string
-  groupName: string
-  userId: string
-  removedAt: string
-}>
 
 export type GetGroupPostsResponse = GenericResponse<{
   posts: Post[]
@@ -220,7 +179,7 @@ export const joinGroupApi = (groupId: string) => {
 }
 
 export const leaveGroupApi = (groupId: string) => {
-  return ApiClient.delete<LeaveGroupResponse>(ENDPOINTS.GROUP.LEAVE(groupId))
+  return ApiClient.delete<string>(ENDPOINTS.GROUP.LEAVE(groupId))
 }
 
 export const getUserRequestsApi = () => {
@@ -242,10 +201,8 @@ export const handleGroupRequestApi = (data: HandleJoinRequestRequest) => {
   )
 }
 
-export const cancelRequestApi = (requestId: string) => {
-  return ApiClient.delete<CancelRequestResponse>(
-    ENDPOINTS.GROUP.CANCEL_REQUEST(requestId)
-  )
+export const cancelRequestApi = (groupId: string) => {
+  return ApiClient.delete<string>(ENDPOINTS.GROUP.CANCEL_REQUEST(groupId))
 }
 
 export const getGroupMembersApi = (groupId: string) => {
@@ -258,6 +215,6 @@ export const updateMemberRoleApi = (data: UpdateMemberRoleRequest) => {
   return ApiClient.put<UpdateMemberRoleResponse>(ENDPOINTS.GROUP.ROLE, data)
 }
 
-export const removeMemberApi = (data: RemoveMemberRequest) => {
-  return ApiClient.delete<RemoveMemberResponse>(ENDPOINTS.GROUP.REMOVE, data)
+export const removeMemberApi = (groupId: string, memberId: string) => {
+  return ApiClient.delete<string>(ENDPOINTS.GROUP.REMOVE(groupId, memberId))
 }

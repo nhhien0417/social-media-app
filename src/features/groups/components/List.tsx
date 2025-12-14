@@ -14,6 +14,7 @@ interface GroupsListProps {
   onJoinGroup?: (groupId: string) => void
   onCancelRequest?: (groupId: string) => void
   actionPending?: boolean
+  groupCount?: number
 }
 
 export function GroupsList({
@@ -25,12 +26,16 @@ export function GroupsList({
   onJoinGroup,
   onCancelRequest,
   actionPending = false,
+  groupCount,
 }: GroupsListProps) {
   const textColor = isDark ? '#f5f5f5' : '#111827'
   const subtitleColor = isDark ? 'rgba(255,255,255,0.6)' : '#6b7280'
 
   // Get section title based on type
   const getSectionTitle = () => {
+    if (groupCount !== undefined) {
+      return `All Groups (${groupCount})`
+    }
     switch (type) {
       case 'joined':
         return 'Your Groups'

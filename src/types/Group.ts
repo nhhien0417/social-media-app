@@ -1,8 +1,10 @@
+import { User } from './User'
+
 export type GroupPrivacy = 'PUBLIC' | 'PRIVATE'
 export type GroupRole = 'OWNER' | 'ADMIN' | 'MEMBER'
 export type JoinRequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED'
 
-export type Group = {
+export interface Group {
   id: string
   name: string
   description?: string
@@ -17,19 +19,13 @@ export type Group = {
 }
 
 export interface GroupMember {
-  userId: string
-  groupId: string
-  name: string
-  avatarUrl?: string
+  user: User
   role: GroupRole
-  joinedAt: string
 }
 
-export type GroupJoinRequest = {
+export interface GroupJoinRequest {
   id: string
-  groupId: string
-  groupName: string
-  userId: string
+  group: Group
+  user: User
   status: JoinRequestStatus
-  requestedAt: string
 }
