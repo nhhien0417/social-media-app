@@ -128,11 +128,15 @@ export default function PostOptionsSheet({
               />
             )}
 
-            {/* Delete Option - For owner */}
-            {isOwner && (
+            {/* Delete Option - For owner OR admin */}
+            {(isOwner || (isAdmin && onDeleteAsAdmin)) && (
               <Pressable
                 onPress={() => {
-                  onDelete()
+                  if (isOwner) {
+                    onDelete()
+                  } else if (isAdmin && onDeleteAsAdmin) {
+                    onDeleteAsAdmin()
+                  }
                   onClose()
                 }}
                 style={({ pressed }) => [
@@ -167,55 +171,9 @@ export default function PostOptionsSheet({
                       Delete {mode === 'STORY' ? 'Story' : 'Post'}
                     </Text>
                     <Text fontSize={13} color={isDark ? '#8e8e93' : '#8e8e93'}>
-                      Permanently remove this{' '}
-                      {mode === 'STORY' ? 'story' : 'post'}
-                    </Text>
-                  </YStack>
-                </XStack>
-              </Pressable>
-            )}
-
-            {/* Admin Delete Option - Only for admin who is not the owner */}
-            {isAdmin && !isOwner && onDeleteAsAdmin && (
-              <Pressable
-                onPress={() => {
-                  onDeleteAsAdmin()
-                  onClose()
-                }}
-                style={({ pressed }) => [
-                  styles.option,
-                  {
-                    backgroundColor: pressed
-                      ? isDark
-                        ? '#2c2c2e'
-                        : '#f5f5f5'
-                      : 'transparent',
-                  },
-                ]}
-              >
-                <XStack
-                  alignItems="center"
-                  gap="$3"
-                  paddingVertical="$3.5"
-                  paddingHorizontal="$4"
-                >
-                  <YStack
-                    width={36}
-                    height={36}
-                    borderRadius={18}
-                    backgroundColor="#ff3b301a"
-                    alignItems="center"
-                    justifyContent="center"
-                  >
-                    <Trash2 size={18} color="#ff3b30" />
-                  </YStack>
-                  <YStack flex={1}>
-                    <Text fontSize={16} fontWeight="600" color="#ff3b30">
-                      Delete {mode === 'STORY' ? 'Story' : 'Post'} (Admin)
-                    </Text>
-                    <Text fontSize={13} color={isDark ? '#8e8e93' : '#8e8e93'}>
-                      Remove this {mode === 'STORY' ? 'story' : 'post'} as group
-                      admin
+                      {isOwner
+                        ? `Permanently remove this ${mode === 'STORY' ? 'story' : 'post'}`
+                        : `Remove this ${mode === 'STORY' ? 'story' : 'post'} as admin`}
                     </Text>
                   </YStack>
                 </XStack>

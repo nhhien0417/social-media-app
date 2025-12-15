@@ -174,9 +174,8 @@ export const EditProfileForm = forwardRef<
           },
           processedAvatar
         )
-        Alert.alert('Success', 'Profile updated successfully')
       } catch (error) {
-        Alert.alert('Error', 'Failed to update profile')
+        console.log(error)
       } finally {
         setIsUpdating(false)
       }

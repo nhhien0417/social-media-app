@@ -2,7 +2,7 @@ import { Modal, Pressable, StyleSheet } from 'react-native'
 import { YStack, Text, useThemeName } from 'tamagui'
 import { usePostStore } from '@/stores/postStore'
 import { usePostStatus } from '@/providers/PostStatusProvider'
-import { router } from 'expo-router'
+import { router, useSegments } from 'expo-router'
 import { AlertCircle } from '@tamagui/lucide-icons'
 import Animated, {
   FadeIn,
@@ -30,6 +30,7 @@ export default function DeleteConfirmModal({
 }: DeleteConfirmModalProps) {
   const deletePost = usePostStore(state => state.deletePost)
   const { startDeleting, finishDeleting, failDeleting } = usePostStatus()
+  const segments = useSegments()
   const themeName = useThemeName()
   const isDark = themeName.includes('dark')
 
@@ -40,8 +41,9 @@ export default function DeleteConfirmModal({
     try {
       await deletePost(postId)
       finishDeleting()
-      // Navigate back if we're on the detail screen
-      if (router.canGoBack()) {
+
+      const isDetailScreen = segments.some(s => s === 'post')
+      if (isDetailScreen && router.canGoBack()) {
         router.back()
       }
     } catch (error) {

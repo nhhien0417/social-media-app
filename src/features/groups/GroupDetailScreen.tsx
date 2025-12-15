@@ -44,6 +44,8 @@ import { getUserId } from '@/utils/SecureStore'
 import Avatar from '@/components/Avatar'
 import { useCurrentUser } from '@/hooks/useProfile'
 import PostingStatus from '../feed/components/PostingStatus'
+import DeleteConfirmModal from '../feed/components/DeleteConfirmModal'
+import { usePostStatus } from '@/providers/PostStatusProvider'
 
 type GroupTab = 'discussion' | 'members' | 'about' | 'yourPosts'
 
@@ -79,11 +81,13 @@ export default function GroupDetailScreen() {
   const [searchModalVisible, setSearchModalVisible] = useState(false)
   const [memberManagementVisible, setMemberManagementVisible] = useState(false)
   const [settingsSheetVisible, setSettingsSheetVisible] = useState(false)
-  const [deleteModalVisible, setDeleteModalVisible] = useState(false)
+  const [deleteGroupModalVisible, setDeleteGroupModalVisible] = useState(false)
+  const [deletePostModalVisible, setDeletePostModalVisible] = useState(false)
   const [leaveModalVisible, setLeaveModalVisible] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isLeaving, setIsLeaving] = useState(false)
   const [isCancelingRequest, setIsCancelingRequest] = useState(false)
+  const [postToDelete, setPostToDelete] = useState<string | null>(null)
 
   const [selectedMember, setSelectedMember] = useState<GroupMember | null>(null)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
@@ -190,16 +194,8 @@ export default function GroupDetailScreen() {
   }
 
   const handleDeleteGroupPost = (postId: string) => {
-    Alert.alert('Delete Post', 'Are you sure you want to delete this post?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => {
-          Alert.alert('Success', 'Post deleted successfully')
-        },
-      },
-    ])
+    setPostToDelete(postId)
+    setDeletePostModalVisible(true)
   }
 
   const handleMemberPress = (member: GroupMember) => {
@@ -282,7 +278,7 @@ export default function GroupDetailScreen() {
     setIsDeleting(true)
     try {
       await deleteGroup(groupId)
-      setDeleteModalVisible(false)
+      setDeleteGroupModalVisible(false)
       router.navigate('/profile/groups')
     } catch (error) {
       console.error('Error deleting group:', error)
@@ -901,17 +897,29 @@ export default function GroupDetailScreen() {
         visible={settingsSheetVisible}
         onClose={() => setSettingsSheetVisible(false)}
         onEdit={handleEditGroup}
-        onDelete={() => setDeleteModalVisible(true)}
+        onDelete={() => setDeleteGroupModalVisible(true)}
         isOwner={isOwner}
       />
 
       <DeleteGroupModal
-        visible={deleteModalVisible}
-        onClose={() => setDeleteModalVisible(false)}
+        visible={deleteGroupModalVisible}
+        onClose={() => setDeleteGroupModalVisible(false)}
         onConfirm={handleDeleteGroup}
         isDeleting={isDeleting}
         groupName={group.name}
       />
+
+      {postToDelete && (
+        <DeleteConfirmModal
+          visible={deletePostModalVisible}
+          onClose={() => {
+            setDeletePostModalVisible(false)
+            setPostToDelete(null)
+          }}
+          postId={postToDelete}
+          mode="POST"
+        />
+      )}
 
       <LeaveGroupModal
         visible={leaveModalVisible}
