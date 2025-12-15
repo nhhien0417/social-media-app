@@ -43,6 +43,7 @@ import LeaveGroupModal from './components/LeaveGroupModal'
 import { getUserId } from '@/utils/SecureStore'
 import Avatar from '@/components/Avatar'
 import { useCurrentUser } from '@/hooks/useProfile'
+import PostingStatus from '../feed/components/PostingStatus'
 
 type GroupTab = 'discussion' | 'members' | 'about' | 'yourPosts'
 
@@ -344,6 +345,7 @@ export default function GroupDetailScreen() {
             </YStack>
 
             {/* Posts */}
+            <PostingStatus />
             {groupPosts.map(post => (
               <PostCard
                 key={post.id}

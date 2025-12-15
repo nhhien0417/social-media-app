@@ -23,7 +23,8 @@ const TRACK_H = 4
 const BAR_RATIO = 0.35
 
 export default function PostingStatus() {
-  const { status, mediaUrl, lastOperation, mode } = usePostStatus()
+  const { status, mediaUrl, lastOperation, mode, customSuccessMessage } =
+    usePostStatus()
   const isVisible = status !== 'idle'
 
   const containerOpacity = useSharedValue(0)
@@ -40,6 +41,8 @@ export default function PostingStatus() {
   const TypeText = mode === 'STORY' ? 'Story' : 'Post'
 
   const getSuccessMessage = () => {
+    if (customSuccessMessage) return customSuccessMessage
+
     switch (lastOperation) {
       case 'updating':
         return {

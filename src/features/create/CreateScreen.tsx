@@ -233,7 +233,14 @@ export default function NewPostScreen() {
     const firstMediaUrl = media.length > 0 ? media[0].url : undefined
 
     if (isEditMode && editPostId) {
-      startUpdating(firstMediaUrl, mode)
+      const successMsg = groupName
+        ? {
+            title: 'Post updated!',
+            subtitle: 'Members of the group can see your changes',
+          }
+        : undefined
+
+      startUpdating(firstMediaUrl, mode, successMsg)
 
       const mediaData = await processMediaForUpload(
         media.map(m => ({ ...m, uri: m.url }))
@@ -246,7 +253,15 @@ export default function NewPostScreen() {
         media: mediaData.length > 0 ? mediaData : undefined,
       }
 
-      router.replace('/(tabs)')
+      if (groupName) {
+        if (router.canGoBack()) {
+          router.back()
+        } else {
+          router.replace('/(tabs)')
+        }
+      } else {
+        router.replace('/(tabs)')
+      }
 
       updatePost(updateData)
         .then(() => {
@@ -267,7 +282,14 @@ export default function NewPostScreen() {
         })
     } else {
       // Create new post
-      startPosting(firstMediaUrl, mode)
+      const successMsg = groupName
+        ? {
+            title: 'Post shared!',
+            subtitle: `Members of ${groupName} can see your post`,
+          }
+        : undefined
+
+      startPosting(firstMediaUrl, mode, successMsg)
 
       const postData = {
         userId: currentUser.id,
@@ -283,7 +305,15 @@ export default function NewPostScreen() {
             : undefined,
       }
 
-      router.replace('/(tabs)')
+      if (groupName) {
+        if (router.canGoBack()) {
+          router.back()
+        } else {
+          router.replace('/(tabs)')
+        }
+      } else {
+        router.replace('/(tabs)')
+      }
 
       createPost(postData)
         .then(() => {
@@ -291,6 +321,12 @@ export default function NewPostScreen() {
             usePostStore.getState().refreshStories()
           } else {
             usePostStore.getState().refreshPosts()
+            if (params.groupId) {
+              usePostStore
+                .getState()
+                .fetchGroupPosts(params.groupId)
+                .catch(console.error)
+            }
           }
           finishPosting()
           setIsSubmitting(false)
@@ -320,6 +356,9 @@ export default function NewPostScreen() {
     failUpdating,
     createPost,
     updatePost,
+    groupName,
+    mode,
+    params.groupId,
   ])
 
   const navigateBack = useCallback(() => {

@@ -20,14 +20,27 @@ type PostStatusContextType = {
   mediaUrl?: string
   errorMessage?: string
   lastOperation?: 'posting' | 'updating' | 'deleting'
-  startPosting: (mediaUrl?: string, mode?: 'POST' | 'STORY') => void
+  customSuccessMessage?: { title: string; subtitle: string }
+  startPosting: (
+    mediaUrl?: string,
+    mode?: 'POST' | 'STORY',
+    successMessage?: { title: string; subtitle: string }
+  ) => void
   finishPosting: () => void
   failPosting: (error: string) => void
   resetPosting: () => void
-  startDeleting: (mediaUrl?: string, mode?: 'POST' | 'STORY') => void
+  startDeleting: (
+    mediaUrl?: string,
+    mode?: 'POST' | 'STORY',
+    successMessage?: { title: string; subtitle: string }
+  ) => void
   finishDeleting: () => void
   failDeleting: (error: string) => void
-  startUpdating: (mediaUrl?: string, mode?: 'POST' | 'STORY') => void
+  startUpdating: (
+    mediaUrl?: string,
+    mode?: 'POST' | 'STORY',
+    successMessage?: { title: string; subtitle: string }
+  ) => void
   finishUpdating: () => void
   failUpdating: (error: string) => void
 }
@@ -44,14 +57,23 @@ export function PostStatusProvider({ children }: PropsWithChildren) {
     'posting' | 'updating' | 'deleting'
   >()
   const [mode, setMode] = useState<'POST' | 'STORY'>('POST')
+  const [customSuccessMessage, setCustomSuccessMessage] = useState<{
+    title: string
+    subtitle: string
+  }>()
 
   const startPosting = useCallback(
-    (media?: string, newMode: 'POST' | 'STORY' = 'POST') => {
+    (
+      media?: string,
+      newMode: 'POST' | 'STORY' = 'POST',
+      successMessage?: { title: string; subtitle: string }
+    ) => {
       setStatus('posting')
       setMode(newMode)
       setMediaUrl(media)
       setErrorMessage(undefined)
       setLastOperation('posting')
+      setCustomSuccessMessage(successMessage)
     },
     []
   )
@@ -63,6 +85,7 @@ export function PostStatusProvider({ children }: PropsWithChildren) {
     setTimeout(() => {
       setStatus('idle')
       setMediaUrl(undefined)
+      setCustomSuccessMessage(undefined)
     }, 10000)
   }, [])
 
@@ -74,6 +97,7 @@ export function PostStatusProvider({ children }: PropsWithChildren) {
       setStatus('idle')
       setErrorMessage(undefined)
       setMediaUrl(undefined)
+      setCustomSuccessMessage(undefined)
     }, 3000)
   }, [])
 
@@ -81,15 +105,21 @@ export function PostStatusProvider({ children }: PropsWithChildren) {
     setStatus('idle')
     setErrorMessage(undefined)
     setMediaUrl(undefined)
+    setCustomSuccessMessage(undefined)
   }, [])
 
   const startDeleting = useCallback(
-    (media?: string, newMode: 'POST' | 'STORY' = 'POST') => {
+    (
+      media?: string,
+      newMode: 'POST' | 'STORY' = 'POST',
+      successMessage?: { title: string; subtitle: string }
+    ) => {
       setStatus('deleting')
       setMode(newMode)
       setMediaUrl(media)
       setErrorMessage(undefined)
       setLastOperation('deleting')
+      setCustomSuccessMessage(successMessage)
     },
     []
   )
@@ -101,6 +131,7 @@ export function PostStatusProvider({ children }: PropsWithChildren) {
     setTimeout(() => {
       setStatus('idle')
       setMediaUrl(undefined)
+      setCustomSuccessMessage(undefined)
     }, 3000)
   }, [])
 
@@ -112,16 +143,22 @@ export function PostStatusProvider({ children }: PropsWithChildren) {
       setStatus('idle')
       setErrorMessage(undefined)
       setMediaUrl(undefined)
+      setCustomSuccessMessage(undefined)
     }, 3000)
   }, [])
 
   const startUpdating = useCallback(
-    (media?: string, newMode: 'POST' | 'STORY' = 'POST') => {
+    (
+      media?: string,
+      newMode: 'POST' | 'STORY' = 'POST',
+      successMessage?: { title: string; subtitle: string }
+    ) => {
       setStatus('updating')
       setMode(newMode)
       setMediaUrl(media)
       setErrorMessage(undefined)
       setLastOperation('updating')
+      setCustomSuccessMessage(successMessage)
     },
     []
   )
@@ -133,6 +170,7 @@ export function PostStatusProvider({ children }: PropsWithChildren) {
     setTimeout(() => {
       setStatus('idle')
       setMediaUrl(undefined)
+      setCustomSuccessMessage(undefined)
     }, 3000)
   }, [])
 
@@ -144,6 +182,7 @@ export function PostStatusProvider({ children }: PropsWithChildren) {
       setStatus('idle')
       setErrorMessage(undefined)
       setMediaUrl(undefined)
+      setCustomSuccessMessage(undefined)
     }, 3000)
   }, [])
 
@@ -155,6 +194,7 @@ export function PostStatusProvider({ children }: PropsWithChildren) {
         mediaUrl,
         errorMessage,
         lastOperation,
+        customSuccessMessage,
         startPosting,
         finishPosting,
         failPosting,

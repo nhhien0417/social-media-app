@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { Post } from '@/types/Post'
 import { User } from '@/types/User'
+import { useProfileStore } from './profileStore'
 import {
   getFeedApi,
   getGroupPostsApi,
@@ -210,7 +211,21 @@ export const usePostStore = create<PostState>((set, get) => ({
     try {
       const response = await createPostApi(data)
       console.log('Successful create post:', response)
-      const newPost = response.data
+      let newPost = response.data
+
+      if (!newPost.authorProfile) {
+        const currentUser = useProfileStore.getState().currentUser
+        if (currentUser && currentUser.id === data.userId) {
+          newPost = { ...newPost, authorProfile: currentUser }
+        } else {
+          newPost = {
+            ...newPost,
+            authorProfile: {
+              id: data.userId,
+            } as User,
+          }
+        }
+      }
 
       if (data.groupId) {
         set(state => ({
@@ -241,7 +256,34 @@ export const usePostStore = create<PostState>((set, get) => ({
     try {
       const response = await updatePostApi(data)
       console.log('Successful update post:', response)
-      const updatedPost = response.data
+      let updatedPost = response.data
+
+      if (!updatedPost.authorProfile) {
+        const originalPost =
+          oldState.posts.find(p => p.id === data.postId) ||
+          oldState.stories.find(p => p.id === data.postId) ||
+          (oldState.currentPost?.id === data.postId
+            ? oldState.currentPost
+            : undefined) ||
+          Object.values(oldState.groupPosts)
+            .flat()
+            .find(p => p.id === data.postId) ||
+          Object.values(oldState.userPosts)
+            .flat()
+            .find(p => p.id === data.postId)
+
+        if (originalPost?.authorProfile) {
+          updatedPost = {
+            ...updatedPost,
+            authorProfile: originalPost.authorProfile,
+          }
+        } else {
+          const currentUser = useProfileStore.getState().currentUser
+          if (currentUser) {
+            updatedPost = { ...updatedPost, authorProfile: currentUser }
+          }
+        }
+      }
 
       set(state => ({
         posts: state.posts.map(p =>
