@@ -37,6 +37,7 @@ import { GroupSearchModal } from './components/GroupSearchModal'
 import { GroupMemberManagementModal } from './components/GroupMemberManagementModal'
 import GroupSettingsSheet from './components/GroupSettingsSheet'
 import DeleteGroupModal from './components/DeleteGroupModal'
+import LeaveGroupModal from './components/LeaveGroupModal'
 import { getUserId } from '@/utils/SecureStore'
 import Avatar from '@/components/Avatar'
 import { useCurrentUser } from '@/hooks/useProfile'
@@ -73,7 +74,9 @@ export default function GroupDetailScreen() {
   const [memberManagementVisible, setMemberManagementVisible] = useState(false)
   const [settingsSheetVisible, setSettingsSheetVisible] = useState(false)
   const [deleteModalVisible, setDeleteModalVisible] = useState(false)
+  const [leaveModalVisible, setLeaveModalVisible] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isLeaving, setIsLeaving] = useState(false)
   const [isCancelingRequest, setIsCancelingRequest] = useState(false)
 
   const [selectedMember, setSelectedMember] = useState<GroupMember | null>(null)
@@ -202,12 +205,20 @@ export default function GroupDetailScreen() {
   }
 
   const handleLeave = async () => {
+    setIsLeaving(true)
     try {
       await leaveGroup(groupId)
-      router.back()
+      setLeaveModalVisible(false)
+      router.push('/profile/groups')
     } catch (error) {
       console.error('Error leaving group:', error)
+    } finally {
+      setIsLeaving(false)
     }
+  }
+
+  const handleShowLeaveConfirm = () => {
+    setLeaveModalVisible(true)
   }
 
   const handleApproveRequest = async (requestId: string) => {
@@ -888,7 +899,7 @@ export default function GroupDetailScreen() {
                   fontSize={15}
                   height={44}
                   pressStyle={{ opacity: 0.9, scale: 0.98 }}
-                  onPress={handleLeave}
+                  onPress={handleShowLeaveConfirm}
                 >
                   Joined
                 </Button>
@@ -1008,6 +1019,14 @@ export default function GroupDetailScreen() {
         onClose={() => setDeleteModalVisible(false)}
         onConfirm={handleDeleteGroup}
         isDeleting={isDeleting}
+        groupName={group.name}
+      />
+
+      <LeaveGroupModal
+        visible={leaveModalVisible}
+        onClose={() => setLeaveModalVisible(false)}
+        onConfirm={handleLeave}
+        isLeaving={isLeaving}
         groupName={group.name}
       />
     </YStack>
