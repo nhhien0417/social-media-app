@@ -54,6 +54,9 @@ export default function NewPostScreen() {
   const [showCamera, setShowCamera] = useState(false)
   const [showDiscardModal, setShowDiscardModal] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [groupName, setGroupName] = useState<string | undefined>(
+    params.groupName || (params.groupId ? 'Group' : undefined)
+  )
 
   const user: UserInfoData = useMemo(() => {
     if (!currentUser) {
@@ -125,6 +128,10 @@ export default function NewPostScreen() {
               }
 
               setPrivacy(post.privacy)
+
+              if (post.groupId && !groupName) {
+                setGroupName('Group')
+              }
             }
           } catch (error) {
             console.error('Failed to load post:', error)
@@ -137,7 +144,7 @@ export default function NewPostScreen() {
         setShowCamera(false)
         setShowMediaPicker(false)
         setShowDiscardModal(false)
-        setMode((params.mode as PostType) || 'POST')
+        setMode(groupName ? 'POST' : params.mode || 'POST')
       }
 
       loadPostData()
@@ -235,7 +242,7 @@ export default function NewPostScreen() {
       const updateData = {
         postId: editPostId,
         content: mode === 'STORY' ? undefined : caption.trim() || undefined,
-        privacy: privacy,
+        privacy: groupName ? 'PUBLIC' : privacy,
         media: mediaData.length > 0 ? mediaData : undefined,
       }
 
@@ -266,7 +273,7 @@ export default function NewPostScreen() {
         userId: currentUser.id,
         content: caption.trim() || undefined,
         groupId: params.groupId || undefined,
-        privacy: privacy,
+        privacy: groupName ? 'PUBLIC' : privacy,
         type: mode,
         media:
           media.length > 0
@@ -344,7 +351,8 @@ export default function NewPostScreen() {
     <YStack flex={1} backgroundColor="$background">
       <Header
         mode={mode}
-        onChangeMode={setMode}
+        onChangeMode={groupName ? undefined : setMode}
+        groupName={groupName}
         onBack={handleBack}
         onShare={handleShare}
         canShare={canShare}
@@ -368,9 +376,9 @@ export default function NewPostScreen() {
             media={media}
             onRemoveMedia={handleRemove}
             privacy={privacy}
-            onChangePrivacy={setPrivacy}
+            onChangePrivacy={groupName ? () => {} : setPrivacy}
             showCaption={mode === 'POST'}
-            groupName={params.groupName}
+            groupName={groupName}
           />
         </ScrollView>
 

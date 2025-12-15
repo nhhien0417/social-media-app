@@ -10,6 +10,7 @@ type Props = {
   canShare?: boolean
   isSubmitting?: boolean
   isEditMode?: boolean
+  groupName?: string
   onBack?: () => void
   onShare?: () => void
   onChangeMode?: (mode: PostType) => void
@@ -20,6 +21,7 @@ export default function Header({
   canShare = true,
   isSubmitting = false,
   isEditMode = false,
+  groupName,
   onBack,
   onShare,
   onChangeMode,
@@ -46,10 +48,12 @@ export default function Header({
       >
         <IconButton Icon={ChevronLeft} onPress={onBack} Size={30} />
 
-        {isEditMode ? (
+        {groupName || isEditMode ? (
           <YStack flex={1} alignItems="center" justifyContent="center">
             <SizableText size="$6" fontWeight="700" color="$color">
-              Update {mode === 'STORY' ? 'Story' : 'Post'}
+              {isEditMode
+                ? `Update ${mode === 'STORY' ? 'Story' : 'Post'}`
+                : 'Create Post'}
             </SizableText>
           </YStack>
         ) : (

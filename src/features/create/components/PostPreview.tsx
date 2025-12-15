@@ -186,27 +186,29 @@ export default function PostPreview({
               )}
             </YStack>
 
-            <Button
-              size="$3"
-              height={30}
-              paddingHorizontal="$3"
-              borderRadius="$9"
-              backgroundColor={chipBackground}
-              borderWidth={1}
-              borderColor={chipBorder}
-              onPress={() => setShowPrivacyModal(true)}
-            >
-              <XStack alignItems="center" gap="$1.5">
-                <SelectedIcon
-                  size={14}
-                  color={isDark ? '#f5f5f5' : '#0f172a'}
-                />
-                <SizableText size="$3" fontWeight="600">
-                  {selectedOption.label}
-                </SizableText>
-                <ChevronDown size={14} color={mutedTextColor} />
-              </XStack>
-            </Button>
+            {!groupName && (
+              <Button
+                size="$3"
+                height={30}
+                paddingHorizontal="$3"
+                borderRadius="$9"
+                backgroundColor={chipBackground}
+                borderWidth={1}
+                borderColor={chipBorder}
+                onPress={() => setShowPrivacyModal(true)}
+              >
+                <XStack alignItems="center" gap="$1.5">
+                  <SelectedIcon
+                    size={14}
+                    color={isDark ? '#f5f5f5' : '#0f172a'}
+                  />
+                  <SizableText size="$3" fontWeight="600">
+                    {selectedOption.label}
+                  </SizableText>
+                  <ChevronDown size={14} color={mutedTextColor} />
+                </XStack>
+              </Button>
+            )}
           </XStack>
 
           {showCaption && (

@@ -4,6 +4,7 @@ import { Users, Lock } from '@tamagui/lucide-icons'
 import { router } from 'expo-router'
 import { Group } from '@/types/Group'
 import { formatNumber } from '@/utils/FormatNumber'
+import { getAvatarUrl } from '@/utils/Avatar'
 
 type CardType = 'joined' | 'pending' | 'suggestion'
 
@@ -27,9 +28,7 @@ export function GroupCard({
   const textColor = isDark ? '#f5f5f5' : '#111827'
   const subtitleColor = isDark ? 'rgba(255,255,255,0.6)' : '#6b7280'
 
-  const avatarUrl =
-    group.avatarUrl ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(group.name)}&background=random`
+  const avatarUrl = group.avatarUrl || getAvatarUrl(group.name)
 
   const handleNavigateToGroup = () => {
     router.push(`/group/${group.id}`)
