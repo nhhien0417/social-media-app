@@ -5,15 +5,18 @@ type PostUpdater = (post: Post) => Post
 interface PostSnapshot {
   postStorePost: Post | null
   profileStorePost: Post | null
+  groupStorePost: Post | null
   profileUserId: string | null
 }
 
 async function capturePostSnapshot(postId: string): Promise<PostSnapshot> {
   const { usePostStore } = await import('@/stores/postStore')
   const { useProfileStore } = await import('@/stores/profileStore')
+  const { useGroupStore } = await import('@/stores/groupStore')
 
   const postStore = usePostStore.getState()
   const profileStore = useProfileStore.getState()
+  const groupStore = useGroupStore.getState()
 
   const postStorePost =
     postStore.posts.find(p => p.id === postId) ||
@@ -35,12 +38,15 @@ async function capturePostSnapshot(postId: string): Promise<PostSnapshot> {
     }
   }
 
-  return { postStorePost, profileStorePost, profileUserId }
+  const groupStorePost = groupStore.posts.find(p => p.id === postId) || null
+
+  return { postStorePost, profileStorePost, groupStorePost, profileUserId }
 }
 
 async function restorePostSnapshot(snapshot: PostSnapshot): Promise<void> {
   const { usePostStore } = await import('@/stores/postStore')
   const { useProfileStore } = await import('@/stores/profileStore')
+  const { useGroupStore } = await import('@/stores/groupStore')
 
   const postStore = usePostStore.getState()
   const profileStore = useProfileStore.getState()
@@ -94,6 +100,22 @@ async function restorePostSnapshot(snapshot: PostSnapshot): Promise<void> {
       })
     }
   }
+
+  if (snapshot.groupStorePost) {
+    const groupStore = useGroupStore.getState()
+    const index = groupStore.posts.findIndex(
+      p => p.id === snapshot.groupStorePost!.id
+    )
+    if (index !== -1) {
+      const newPosts = [...groupStore.posts]
+      newPosts[index] = snapshot.groupStorePost
+      useGroupStore.setState({ posts: newPosts })
+    } else {
+      useGroupStore.setState({
+        posts: [snapshot.groupStorePost, ...groupStore.posts],
+      })
+    }
+  }
 }
 
 export async function updatePostInStores(
@@ -102,9 +124,11 @@ export async function updatePostInStores(
 ): Promise<void> {
   const { usePostStore } = await import('@/stores/postStore')
   const { useProfileStore } = await import('@/stores/profileStore')
+  const { useGroupStore } = await import('@/stores/groupStore')
 
   const postStore = usePostStore.getState()
   const profileStore = useProfileStore.getState()
+  const groupStore = useGroupStore.getState()
 
   const postIndex = postStore.posts.findIndex(p => p.id === postId)
   if (postIndex !== -1) {
@@ -147,14 +171,25 @@ export async function updatePostInStores(
       }
     }
   }
+
+  const groupPostIndex = groupStore.posts.findIndex(p => p.id === postId)
+  if (groupPostIndex !== -1) {
+    const updatedGroupPosts = [...groupStore.posts]
+    updatedGroupPosts[groupPostIndex] = updater(
+      updatedGroupPosts[groupPostIndex]
+    )
+    useGroupStore.setState({ posts: updatedGroupPosts })
+  }
 }
 
 export async function addPostToStores(post: Post): Promise<void> {
   const { usePostStore } = await import('@/stores/postStore')
   const { useProfileStore } = await import('@/stores/profileStore')
+  const { useGroupStore } = await import('@/stores/groupStore')
 
   const postStore = usePostStore.getState()
   const profileStore = useProfileStore.getState()
+  const groupStore = useGroupStore.getState()
 
   if (post.type === 'STORY') {
     usePostStore.setState({
@@ -165,6 +200,7 @@ export async function addPostToStores(post: Post): Promise<void> {
       posts: [post, ...postStore.posts],
     })
   }
+
   const authorId = post.authorProfile?.id
   if (authorId && profileStore.users[authorId]) {
     const user = profileStore.users[authorId]
@@ -184,6 +220,12 @@ export async function addPostToStores(post: Post): Promise<void> {
           : profileStore.currentUser,
     })
   }
+
+  if (post.groupId && groupStore.currentGroup?.id === post.groupId) {
+    useGroupStore.setState({
+      posts: [post, ...groupStore.posts],
+    })
+  }
 }
 
 export async function deletePostFromStores(
@@ -193,9 +235,11 @@ export async function deletePostFromStores(
 
   const { usePostStore } = await import('@/stores/postStore')
   const { useProfileStore } = await import('@/stores/profileStore')
+  const { useGroupStore } = await import('@/stores/groupStore')
 
   const postStore = usePostStore.getState()
   const profileStore = useProfileStore.getState()
+  const groupStore = useGroupStore.getState()
 
   usePostStore.setState({
     posts: postStore.posts.filter(p => p.id !== postId),
@@ -226,6 +270,10 @@ export async function deletePostFromStores(
       }
     }
   }
+
+  useGroupStore.setState({
+    posts: groupStore.posts.filter(p => p.id !== postId),
+  })
 
   return snapshot
 }

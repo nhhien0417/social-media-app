@@ -153,7 +153,10 @@ export const usePostStore = create<PostState>((set, get) => ({
     try {
       const response = await getPostDetailApi(postId)
       console.log('Successful get post detail:', response)
-      set({ currentPost: response.data, isLoading: false })
+      const post = response.data
+      await addPostToStores(post)
+
+      set({ currentPost: post, isLoading: false })
     } catch (error) {
       console.error('Error fetching post detail:', error)
       set({ error: 'Failed to fetch post detail', isLoading: false })

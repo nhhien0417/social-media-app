@@ -74,7 +74,33 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
 
       const response = await getUserApi(userId)
       const user = response.data
+
+      // Populate authorProfile for each post
       if (user.posts) {
+        user.posts = user.posts.map(post => {
+          if (!post.authorProfile) {
+            return {
+              ...post,
+              authorProfile: {
+                id: user.id,
+                username: user.username,
+                avatarUrl: user.avatarUrl,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+                gender: user.gender,
+                dob: user.dob,
+                bio: user.bio,
+                posts: null,
+                groupCount: user.groupCount,
+                friendCount: user.friendCount,
+                friendStatus: null,
+              },
+            }
+          }
+          return post
+        })
+
         user.posts.sort(
           (a, b) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -126,7 +152,33 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
     try {
       const response = await getUserApi(userId)
       const user = response.data
+
+      // Populate authorProfile for each post
       if (user.posts) {
+        user.posts = user.posts.map(post => {
+          if (!post.authorProfile) {
+            return {
+              ...post,
+              authorProfile: {
+                id: user.id,
+                username: user.username,
+                avatarUrl: user.avatarUrl,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: '',
+                gender: user.gender,
+                dob: user.dob,
+                bio: user.bio,
+                posts: null,
+                groupCount: user.groupCount,
+                friendCount: user.friendCount,
+                friendStatus: null,
+              },
+            }
+          }
+          return post
+        })
+
         user.posts.sort(
           (a, b) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()

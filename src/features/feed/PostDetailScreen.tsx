@@ -1,4 +1,4 @@
-import { memo, useState, useRef, useCallback, useEffect } from 'react'
+import { memo, useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import {
   FlatList,
   NativeScrollEvent,
@@ -85,53 +85,21 @@ function PaginationDots({
 
 function PostDetailScreen() {
   const { id: postId } = useLocalSearchParams<{ id: string }>()
+
+  // Store selectors
   const posts = usePostStore(state => state.posts)
   const users = useProfileStore(state => state.users)
   const currentUser = useProfileStore(state => state.currentUser)
+  const getPostDetail = usePostStore(state => state.getPostDetail)
+  const currentPost = usePostStore(state => state.currentPost)
+  const likePost = usePostStore(state => state.likePost)
 
-  // Find post in postStore or profileStore
-  let post = posts.find(p => p.id === postId)
-  if (!post) {
-    for (const userId in users) {
-      const user = users[userId]
-      if (user.posts) {
-        const foundPost = user.posts.find(p => p.id === postId)
-        if (foundPost) {
-          post = foundPost
-          break
-        }
-      }
-    }
-    if (!post && currentUser?.posts) {
-      post = currentUser.posts.find(p => p.id === postId)
-    }
-  }
-
-  if (!post) {
-    return (
-      <YStack
-        flex={1}
-        backgroundColor="#000"
-        alignItems="center"
-        justifyContent="center"
-      >
-        <Text color="white">Post not found</Text>
-      </YStack>
-    )
-  }
-
-  const { authorProfile: author, media = [], content, createdAt } = post
-
-  if (!author) return null
-
+  // ALL useState hooks MUST be at the top
+  const [isLoading, setIsLoading] = useState(false)
+  const [fetchError, setFetchError] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
-  const listRef = useRef<FlatList<string>>(null)
   const [isUIVisible, setIsUIVisible] = useState(true)
-  const fadeAnim = useRef(new Animated.Value(1)).current
-
   const [isCaptionExpanded, setIsCaptionExpanded] = useState(false)
-  const isLongCaption = !!content && content.length > 100
-
   const [commentSheetVisible, setCommentSheetVisible] = useState(false)
   const [likeListVisible, setLikeListVisible] = useState(false)
   const [optionsSheetVisible, setOptionsSheetVisible] = useState(false)
@@ -139,18 +107,84 @@ function PostDetailScreen() {
   const [isLiked, setIsLiked] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
-  const isOwner = currentUserId === author.id
+  // ALL useRef hooks
+  const listRef = useRef<FlatList<string>>(null)
+  const fadeAnim = useRef(new Animated.Value(1)).current
 
+  // Find post using useMemo
+  const post = useMemo(() => {
+    console.log('PostDetailScreen: Looking for post', postId)
+
+    let foundPost = posts.find(p => p.id === postId)
+    if (foundPost) {
+      console.log('PostDetailScreen: Found in postStore', foundPost)
+      return foundPost
+    }
+
+    for (const userId in users) {
+      const user = users[userId]
+      if (user.posts) {
+        foundPost = user.posts.find(p => p.id === postId)
+        if (foundPost) {
+          console.log(
+            'PostDetailScreen: Found in profileStore user',
+            userId,
+            foundPost
+          )
+          return foundPost
+        }
+      }
+    }
+
+    if (currentUser?.posts) {
+      foundPost = currentUser.posts.find(p => p.id === postId)
+      if (foundPost) {
+        console.log('PostDetailScreen: Found in currentUser', foundPost)
+        return foundPost
+      }
+    }
+
+    if (currentPost?.id === postId) {
+      console.log('PostDetailScreen: Found in currentPost', currentPost)
+      return currentPost
+    }
+
+    console.log('PostDetailScreen: Post not found anywhere')
+    return null
+  }, [postId, posts, users, currentUser, currentPost])
+
+  // ALL useEffect hooks MUST be here
+  // Fetch post detail if not found
+  useEffect(() => {
+    if (!post && postId) {
+      console.log('PostDetailScreen: Post not found, fetching...', postId)
+      setIsLoading(true)
+      setFetchError(false)
+      getPostDetail(postId)
+        .then(() => {
+          console.log('PostDetailScreen: Fetch successful')
+          setFetchError(false)
+        })
+        .catch(err => {
+          console.error('PostDetailScreen: Fetch failed', err)
+          setFetchError(true)
+        })
+        .finally(() => setIsLoading(false))
+    }
+  }, [post, postId, getPostDetail])
+
+  // Get current user ID and update isLiked
   useEffect(() => {
     getUserId().then(id => {
       setCurrentUserId(id)
-      if (id && post.likes) {
+      if (id && post?.likes) {
         const isLikedByMe = post.likes.includes(id)
         setIsLiked(isLikedByMe)
       }
     })
-  }, [post.likes])
+  }, [post?.likes])
 
+  // ALL useCallback hooks
   const handleScroll = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
       const x = e.nativeEvent.contentOffset.x
@@ -171,23 +205,93 @@ function PostDetailScreen() {
     }).start()
   }, [isUIVisible, fadeAnim])
 
-  const likePost = usePostStore(state => state.likePost)
-  const handleLikePost = async () => {
-    if (!currentUserId) return
+  const handleLikePost = useCallback(async () => {
+    if (!currentUserId || !post) return
     setIsLiked(!isLiked)
     await likePost(post.id, currentUserId)
-  }
+  }, [currentUserId, post, isLiked, likePost])
 
-  const handleEdit = () => {
+  const handleEdit = useCallback(() => {
+    if (!post) return
     router.push({
       pathname: '/create',
       params: { editPostId: post.id, mode: 'POST' },
     })
+  }, [post])
+
+  const handleDelete = useCallback(() => {
+    setDeleteModalVisible(true)
+  }, [])
+
+  // NOW we can do early returns (after ALL hooks)
+  if (isLoading) {
+    console.log('PostDetailScreen: Rendering loading state')
+    return (
+      <YStack
+        flex={1}
+        backgroundColor="$background"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Text color="$color">Loading...</Text>
+      </YStack>
+    )
   }
 
-  const handleDelete = () => {
-    setDeleteModalVisible(true)
+  if (fetchError) {
+    console.log('PostDetailScreen: Rendering error state')
+    return (
+      <YStack
+        flex={1}
+        backgroundColor="#000"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Text color="white">Post not found - Error loading</Text>
+      </YStack>
+    )
   }
+
+  if (!post) {
+    console.log('PostDetailScreen: Rendering not found state (no post)')
+    return (
+      <YStack
+        flex={1}
+        backgroundColor="#000"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Text color="white">Post not found</Text>
+      </YStack>
+    )
+  }
+
+  const { authorProfile: author, media = [], content, createdAt } = post
+
+  if (!author) {
+    console.log('PostDetailScreen: Rendering not found state (no author)', {
+      post,
+    })
+    return (
+      <YStack
+        flex={1}
+        backgroundColor="#000"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Text color="white">Post author not found</Text>
+      </YStack>
+    )
+  }
+
+  console.log('PostDetailScreen: Rendering post', {
+    postId,
+    author: author.username,
+    mediaCount: media.length,
+  })
+
+  const isLongCaption = !!content && content.length > 100
+  const isOwner = currentUserId === author.id
 
   return (
     <YStack flex={1} backgroundColor="$background">
