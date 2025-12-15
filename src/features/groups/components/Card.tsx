@@ -60,9 +60,6 @@ export function GroupCard({
               <Text fontSize={15} fontWeight="700" color={textColor}>
                 {group.name}
               </Text>
-              {group.privacy === 'PRIVATE' && (
-                <Lock size={15} color={subtitleColor} />
-              )}
             </XStack>
             <XStack alignItems="center" gap="$1.5">
               <Users size={14} color={subtitleColor} />
@@ -71,6 +68,10 @@ export function GroupCard({
               </Text>
             </XStack>
           </YStack>
+
+          {group.privacy === 'PRIVATE' && (
+            <Lock size={15} color={subtitleColor} />
+          )}
 
           {/* PENDING REQUEST */}
           {type === 'pending' && (

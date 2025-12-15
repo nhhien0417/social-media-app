@@ -21,11 +21,8 @@ import {
   Lock,
   Globe,
   Settings,
-  Share2,
-  Bell,
   Search,
   Edit3,
-  Trash2,
   Shield,
   Crown,
   MoreVertical,
@@ -67,6 +64,7 @@ export default function GroupDetailScreen() {
     handleJoinRequest,
     clearCurrentGroup,
     deleteGroup,
+    cancelRequest,
   } = useGroupStore()
   const currentUser = useCurrentUser()
   const [activeTab, setActiveTab] = useState<GroupTab>('discussion')
@@ -76,6 +74,7 @@ export default function GroupDetailScreen() {
   const [settingsSheetVisible, setSettingsSheetVisible] = useState(false)
   const [deleteModalVisible, setDeleteModalVisible] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isCancelingRequest, setIsCancelingRequest] = useState(false)
 
   const [selectedMember, setSelectedMember] = useState<GroupMember | null>(null)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
@@ -169,10 +168,6 @@ export default function GroupDetailScreen() {
       await fetchGroupRequests(groupId)
     }
     setIsRefreshing(false)
-  }
-
-  const handleEditPost = (postId: string) => {
-    Alert.alert('Edit Post', `Edit post ${postId}`)
   }
 
   const handleDeleteGroupPost = (postId: string) => {
@@ -280,6 +275,17 @@ export default function GroupDetailScreen() {
 
   const handleSettingsPress = () => {
     setSettingsSheetVisible(true)
+  }
+
+  const handleCancelRequest = async () => {
+    setIsCancelingRequest(true)
+    try {
+      await cancelRequest(groupId)
+    } catch (error) {
+      console.error('Error canceling request:', error)
+    } finally {
+      setIsCancelingRequest(false)
+    }
   }
 
   const renderTabContent = () => {
@@ -870,37 +876,55 @@ export default function GroupDetailScreen() {
           </XStack>
 
           {/* Action Buttons */}
-          <XStack gap="$2.5">
-            {isMember ? (
-              <Button
-                flex={1}
-                backgroundColor={isDark ? 'rgba(128,128,128,0.2)' : '#e4e6eb'}
-                color={textColor}
-                borderRadius={10}
-                fontWeight="600"
-                fontSize={15}
-                height={44}
-                pressStyle={{ opacity: 0.9, scale: 0.98 }}
-                onPress={handleLeave}
-              >
-                Joined
-              </Button>
-            ) : (
-              <Button
-                flex={1}
-                backgroundColor="#1877F2"
-                color="#ffffff"
-                borderRadius={10}
-                fontWeight="600"
-                fontSize={15}
-                height={44}
-                pressStyle={{ opacity: 0.9, scale: 0.98 }}
-                onPress={handleJoin}
-              >
-                Join Group
-              </Button>
-            )}
-          </XStack>
+          {!isOwner && (
+            <XStack gap="$2.5">
+              {isMember ? (
+                <Button
+                  flex={1}
+                  backgroundColor={isDark ? 'rgba(128,128,128,0.2)' : '#e4e6eb'}
+                  color={textColor}
+                  borderRadius={10}
+                  fontWeight="600"
+                  fontSize={15}
+                  height={44}
+                  pressStyle={{ opacity: 0.9, scale: 0.98 }}
+                  onPress={handleLeave}
+                >
+                  Joined
+                </Button>
+              ) : currentGroup.joinStatus === 'PENDING' ? (
+                <Button
+                  flex={1}
+                  backgroundColor={isDark ? 'rgba(255,255,255,0.1)' : '#efefef'}
+                  color={textColor}
+                  borderRadius={10}
+                  fontWeight="600"
+                  fontSize={15}
+                  height={44}
+                  opacity={isCancelingRequest ? 0.6 : 1}
+                  pressStyle={{ opacity: 0.9, scale: 0.98 }}
+                  onPress={handleCancelRequest}
+                  disabled={isCancelingRequest}
+                >
+                  {isCancelingRequest ? 'Canceling...' : 'Cancel Request'}
+                </Button>
+              ) : (
+                <Button
+                  flex={1}
+                  backgroundColor="#1877F2"
+                  color="#ffffff"
+                  borderRadius={10}
+                  fontWeight="600"
+                  fontSize={15}
+                  height={44}
+                  pressStyle={{ opacity: 0.9, scale: 0.98 }}
+                  onPress={handleJoin}
+                >
+                  Join Group
+                </Button>
+              )}
+            </XStack>
+          )}
         </YStack>
 
         {/* Tabs */}
