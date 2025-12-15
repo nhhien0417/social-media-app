@@ -16,6 +16,7 @@ export interface User {
   gender: string | null
   dob: string | null
   bio: string | null
+  postCount: number
   groupCount: number
   friendCount: number
   friendStatus: string | null

@@ -57,13 +57,12 @@ export default function ProfileScreen() {
   )
   const userPosts = userPostsData || []
 
-  const posts = userPosts
   const filteredPosts = useMemo(() => {
     if (tab === 'posts') {
-      return posts.filter((p: Post) => p.media && p.media.length > 0)
+      return userPosts.filter((p: Post) => p.media && p.media.length > 0)
     }
-    return posts
-  }, [posts, tab])
+    return userPosts
+  }, [userPosts, tab])
 
   const navIconColor = isDark ? '#f5f5f5' : '#111827'
   const { toggleTheme } = useAppTheme()
@@ -199,7 +198,6 @@ export default function ProfileScreen() {
             onFriendsPress={handleFriendsPress}
             onGroupsPress={handleGroupsPress}
             onPostsPress={handlePostsPress}
-            postCount={userPosts.length}
           />
           <ProfileBio user={displayUser} isOwnProfile={isOwnProfile} />
           <ProfileActions user={displayUser} isOwnProfile={isOwnProfile} />

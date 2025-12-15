@@ -10,7 +10,6 @@ interface ProfileInfoProps extends ProfileComponentProps {
   onFriendsPress?: () => void
   onGroupsPress?: () => void
   onPostsPress?: () => void
-  postCount?: number
 }
 
 export function ProfileInfo({
@@ -18,8 +17,7 @@ export function ProfileInfo({
   isOwnProfile,
   onFriendsPress,
   onGroupsPress,
-  onPostsPress,
-  postCount,
+  onPostsPress
 }: ProfileInfoProps) {
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
@@ -56,7 +54,7 @@ export function ProfileInfo({
         <Pressable onPress={onPostsPress}>
           <YStack alignItems="center" gap="$1">
             <Text fontSize="$6" fontWeight="700">
-              {formatNumber(postCount || 0)}
+              {formatNumber(user.postCount || 0)}
             </Text>
             <Text fontSize="$3" fontWeight="500" color={captionColor}>
               Posts
