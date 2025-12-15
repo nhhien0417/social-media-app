@@ -1,5 +1,3 @@
-export type ProfileTabKey = 'posts' | 'reels' | 'tagged'
-
 export interface HighlightStory {
   id: string
   imageUrl: string
@@ -17,7 +15,7 @@ export interface ProfileHighlight {
 export interface ProfilePost {
   id: string
   imageUrl: string
-  type: 'post' | 'reel' | 'tagged'
+  type: 'post'
 }
 
 export interface ProfileUser {
@@ -34,8 +32,6 @@ export interface ProfileUser {
   }
   highlights: ProfileHighlight[]
   posts: ProfilePost[]
-  reels: ProfilePost[]
-  tagged: ProfilePost[]
 }
 
 export const profileMock: ProfileUser = {
@@ -143,15 +139,5 @@ export const profileMock: ProfileUser = {
     id: `post-${index + 1}`,
     imageUrl: `https://source.unsplash.com/random/800x800?travel&sig=${index + 1}`,
     type: 'post',
-  })),
-  reels: Array.from({ length: 6 }).map((_, index) => ({
-    id: `reel-${index + 1}`,
-    imageUrl: `https://source.unsplash.com/random/800x800?city&sig=${index + 20}`,
-    type: 'reel',
-  })),
-  tagged: Array.from({ length: 4 }).map((_, index) => ({
-    id: `tagged-${index + 1}`,
-    imageUrl: `https://source.unsplash.com/random/800x800?friends&sig=${index + 40}`,
-    type: 'tagged',
   })),
 }

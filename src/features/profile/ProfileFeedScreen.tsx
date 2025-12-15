@@ -131,7 +131,7 @@ export default function ProfileFeedScreen() {
               color={isDark ? 'rgba(255,255,255,0.6)' : '#6b7280'}
               textAlign="center"
             >
-              Once you share photos and reels, they will appear here.
+              Once you share photos and videos, they will appear here.
             </Text>
           </YStack>
         )

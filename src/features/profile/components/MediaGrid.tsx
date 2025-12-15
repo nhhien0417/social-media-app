@@ -63,7 +63,7 @@ export default function MediaGrid({
           textAlign="center"
           paddingHorizontal="$4"
         >
-          Once you share photos and reels, they will appear here.
+          Once you share photos and videos, they will appear here.
         </Text>
       </YStack>
     )

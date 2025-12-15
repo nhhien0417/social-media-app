@@ -6,6 +6,7 @@ import {
   Pressable,
   Animated,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native'
 import { YStack, XStack, Text, View, Image } from 'tamagui'
 import Avatar from '@/components/Avatar'
@@ -181,7 +182,7 @@ function PostDetailScreen() {
         alignItems="center"
         justifyContent="center"
       >
-        <Text color="$color">Loading...</Text>
+        <ActivityIndicator size="large" color="white" />
       </YStack>
     )
   }

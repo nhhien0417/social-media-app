@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ActivityIndicator, Pressable, ScrollView } from 'react-native'
 import { Text, XStack, YStack, useThemeName, Button } from 'tamagui'
-import { ChevronLeft, Menu, Plus } from '@tamagui/lucide-icons'
+import { ChevronLeft, Grid3x3, Menu, Plus } from '@tamagui/lucide-icons'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { ProfileInfo } from './components/ProfileInfo'
 import { ProfileBio } from './components/ProfileBio'
 import { ProfileActions } from './components/ProfileActions'
 import { StoryHighlights } from './components/StoryHighlights'
-import { ProfileTabBar } from './components/ProfileTabBar'
 import { useCurrentUser, useUser } from '@/hooks/useProfile'
 import MediaGrid from './components/MediaGrid'
 import { profileMock } from '@/mock/profile'
@@ -19,8 +18,6 @@ import { useAppTheme } from '@/providers/ThemeProvider'
 import { usePostStore } from '@/stores/postStore'
 import { Post } from '@/types/Post'
 
-export type ProfileTabKey = 'posts' | 'reels' | 'tagged'
-
 export interface ProfileComponentProps {
   user: User
   isOwnProfile: boolean
@@ -30,11 +27,11 @@ export default function ProfileScreen() {
   const { id: userId } = useLocalSearchParams<{ id: string }>()
 
   const router = useRouter()
-  const [tab, setTab] = useState<ProfileTabKey>('posts')
   const [showSettings, setShowSettings] = useState(false)
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
+  const activeColor = '#1877F2'
 
   const currentUser = useCurrentUser()
   const otherUser = useUser(userId)
@@ -58,11 +55,8 @@ export default function ProfileScreen() {
   const userPosts = userPostsData || []
 
   const filteredPosts = useMemo(() => {
-    if (tab === 'posts') {
-      return userPosts.filter((p: Post) => p.media && p.media.length > 0)
-    }
-    return userPosts
-  }, [userPosts, tab])
+    return userPosts.filter((p: Post) => p.media && p.media.length > 0)
+  }, [userPosts])
 
   const navIconColor = isDark ? '#f5f5f5' : '#111827'
   const { toggleTheme } = useAppTheme()
@@ -206,7 +200,19 @@ export default function ProfileScreen() {
             username={displayUser.username}
             avatarUrl={displayUser.avatarUrl || undefined}
           />
-          <ProfileTabBar value={tab} onChange={setTab} />
+          <XStack
+            borderTopWidth={1}
+            borderColor={isDark ? 'rgba(255,255,255,0.1)' : '#e5e7eb'}
+            alignItems="center"
+            justifyContent="center"
+            paddingVertical="$3"
+            gap="$2"
+          >
+            <Grid3x3 size={22} color={activeColor} />
+            <Text fontSize="$4" color={activeColor}>
+              Posts
+            </Text>
+          </XStack>
           <MediaGrid
             items={filteredPosts}
             isDark={isDark}
