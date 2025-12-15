@@ -36,10 +36,13 @@ import { formatNumber } from '@/utils/FormatNumber'
 import { GroupMember } from '@/types/Group'
 import PostCard from '../feed/components/PostCard'
 import { useGroupStore } from '@/stores/groupStore'
-import { GroupNotificationSheet } from './components/GroupNotificationSheet'
 import { GroupSearchModal } from './components/GroupSearchModal'
 import { GroupMemberManagementModal } from './components/GroupMemberManagementModal'
+import GroupSettingsSheet from './components/GroupSettingsSheet'
+import DeleteGroupModal from './components/DeleteGroupModal'
 import { getUserId } from '@/utils/SecureStore'
+import Avatar from '@/components/Avatar'
+import { useCurrentUser } from '@/hooks/useProfile'
 
 type GroupTab = 'discussion' | 'members' | 'about' | 'yourPosts' | 'requests'
 
@@ -63,14 +66,16 @@ export default function GroupDetailScreen() {
     removeMember,
     handleJoinRequest,
     clearCurrentGroup,
+    deleteGroup,
   } = useGroupStore()
-
+  const currentUser = useCurrentUser()
   const [activeTab, setActiveTab] = useState<GroupTab>('discussion')
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const [notificationSheetVisible, setNotificationSheetVisible] =
-    useState(false)
   const [searchModalVisible, setSearchModalVisible] = useState(false)
   const [memberManagementVisible, setMemberManagementVisible] = useState(false)
+  const [settingsSheetVisible, setSettingsSheetVisible] = useState(false)
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const [selectedMember, setSelectedMember] = useState<GroupMember | null>(null)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
@@ -253,6 +258,30 @@ export default function GroupDetailScreen() {
     }
   }
 
+  const handleEditGroup = () => {
+    router.push({
+      pathname: '/group/form',
+      params: { mode: 'EDIT', id: groupId },
+    })
+  }
+
+  const handleDeleteGroup = async () => {
+    setIsDeleting(true)
+    try {
+      await deleteGroup(groupId)
+      setDeleteModalVisible(false)
+      router.navigate('/profile/groups')
+    } catch (error) {
+      console.error('Error deleting group:', error)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const handleSettingsPress = () => {
+    setSettingsSheetVisible(true)
+  }
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'discussion':
@@ -275,18 +304,7 @@ export default function GroupDetailScreen() {
                 }
               >
                 <XStack gap="$3" alignItems="center">
-                  <YStack
-                    width={40}
-                    height={40}
-                    borderRadius={20}
-                    backgroundColor={isDark ? '#2a2a2a' : '#e4e6eb'}
-                    alignItems="center"
-                    justifyContent="center"
-                  >
-                    <Text fontSize={16} fontWeight="700" color={textColor}>
-                      U
-                    </Text>
-                  </YStack>
+                  <Avatar uri={currentUser?.avatarUrl || undefined} size={45} />
                   <YStack
                     flex={1}
                     backgroundColor={isDark ? '#2a2a2a' : '#f0f2f5'}
@@ -542,32 +560,6 @@ export default function GroupDetailScreen() {
                   </Text>
                 </YStack>
               </XStack>
-
-              {isAdmin && (
-                <>
-                  <Separator borderColor={borderColor} />
-                  <Button
-                    backgroundColor={
-                      isDark ? 'rgba(24,119,242,0.15)' : '#e7f3ff'
-                    }
-                    color="#1877F2"
-                    borderRadius={8}
-                    fontWeight="600"
-                    fontSize={14}
-                    height={40}
-                    icon={<Settings size={18} color="#1877F2" />}
-                    pressStyle={{ opacity: 0.8, scale: 0.98 }}
-                    onPress={() =>
-                      router.push({
-                        pathname: '/group/form',
-                        params: { mode: 'EDIT', id: groupId },
-                      })
-                    }
-                  >
-                    Edit Group Info
-                  </Button>
-                </>
-              )}
             </YStack>
           </YStack>
         )
@@ -626,55 +618,7 @@ export default function GroupDetailScreen() {
             </YStack>
 
             {userPosts.length > 0 ? (
-              userPosts.map(post => (
-                <YStack key={post.id}>
-                  <PostCard post={post} />
-                  {/* Edit/Delete Actions */}
-                  <YStack
-                    backgroundColor={cardBackground}
-                    paddingHorizontal="$4"
-                    paddingVertical="$3"
-                    borderTopWidth={1}
-                    borderTopColor={borderColor}
-                    marginTop={-8}
-                  >
-                    <XStack gap="$2">
-                      <Button
-                        flex={1}
-                        backgroundColor={
-                          isDark ? 'rgba(255,255,255,0.1)' : '#f0f2f5'
-                        }
-                        color={textColor}
-                        borderRadius={8}
-                        fontWeight="500"
-                        fontSize={14}
-                        height={40}
-                        icon={<Edit3 size={16} color={textColor} />}
-                        pressStyle={{ opacity: 0.8, scale: 0.98 }}
-                        onPress={() => handleEditPost(post.id)}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        flex={1}
-                        backgroundColor={
-                          isDark ? 'rgba(255,59,48,0.15)' : '#ffebee'
-                        }
-                        color="#ef4444"
-                        borderRadius={8}
-                        fontWeight="500"
-                        fontSize={14}
-                        height={40}
-                        icon={<Trash2 size={16} color="#ef4444" />}
-                        pressStyle={{ opacity: 0.8, scale: 0.98 }}
-                        onPress={() => handleDeleteGroupPost(post.id)}
-                      >
-                        Delete
-                      </Button>
-                    </XStack>
-                  </YStack>
-                </YStack>
-              ))
+              userPosts.map(post => <PostCard post={post} />)
             ) : (
               <YStack
                 backgroundColor={cardBackground}
@@ -854,15 +798,11 @@ export default function GroupDetailScreen() {
           <Pressable hitSlop={8} onPress={() => setSearchModalVisible(true)}>
             <Search size={20} color={textColor} />
           </Pressable>
-          <Pressable
-            hitSlop={8}
-            onPress={() => setNotificationSheetVisible(true)}
-          >
-            <Bell size={20} color={textColor} />
-          </Pressable>
-          <Pressable hitSlop={8}>
-            <Settings size={20} color={textColor} />
-          </Pressable>
+          {isAdmin && (
+            <Pressable hitSlop={8} onPress={handleSettingsPress}>
+              <Settings size={20} color={textColor} />
+            </Pressable>
+          )}
         </XStack>
       </XStack>
 
@@ -960,19 +900,6 @@ export default function GroupDetailScreen() {
                 Join Group
               </Button>
             )}
-            <Button
-              flex={1}
-              backgroundColor={isDark ? 'rgba(255,255,255,0.1)' : '#e4e6eb'}
-              color={textColor}
-              borderRadius={10}
-              fontWeight="600"
-              fontSize={15}
-              height={44}
-              icon={<Share2 size={18} color={textColor} />}
-              pressStyle={{ opacity: 0.9, scale: 0.98 }}
-            >
-              Share
-            </Button>
           </XStack>
         </YStack>
 
@@ -1019,13 +946,6 @@ export default function GroupDetailScreen() {
       </ScrollView>
 
       {/* Modals */}
-      <GroupNotificationSheet
-        visible={notificationSheetVisible}
-        onClose={() => setNotificationSheetVisible(false)}
-        isDark={isDark}
-        groupName={group.name}
-      />
-
       <GroupSearchModal
         visible={searchModalVisible}
         onClose={() => setSearchModalVisible(false)}
@@ -1047,12 +967,25 @@ export default function GroupDetailScreen() {
           onPromoteToAdmin={handlePromoteToAdmin}
           onDemoteToMember={handleDemoteToMember}
           onRemoveMember={handleRemoveMember}
-          onBlockMember={(id: string) => {
-            // Handle block member
-          }}
           isDark={isDark}
         />
       )}
+
+      <GroupSettingsSheet
+        visible={settingsSheetVisible}
+        onClose={() => setSettingsSheetVisible(false)}
+        onEdit={handleEditGroup}
+        onDelete={() => setDeleteModalVisible(true)}
+        isOwner={isOwner}
+      />
+
+      <DeleteGroupModal
+        visible={deleteModalVisible}
+        onClose={() => setDeleteModalVisible(false)}
+        onConfirm={handleDeleteGroup}
+        isDeleting={isDeleting}
+        groupName={group.name}
+      />
     </YStack>
   )
 }

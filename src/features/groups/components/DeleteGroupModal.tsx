@@ -13,6 +13,7 @@ interface DeleteGroupModalProps {
   onClose: () => void
   onConfirm: () => void
   isDeleting: boolean
+  groupName: string
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
@@ -22,6 +23,7 @@ export default function DeleteGroupModal({
   onClose,
   onConfirm,
   isDeleting,
+  groupName,
 }: DeleteGroupModalProps) {
   const themeName = useThemeName()
   const isDark = themeName.includes('dark')
@@ -90,8 +92,9 @@ export default function DeleteGroupModal({
                   textAlign="center"
                   lineHeight={20}
                 >
-                  This group will be permanently deleted. This action cannot be
-                  undone.
+                  Are you sure you want to delete "{groupName}"? All posts,
+                  members, and data will be permanently removed. This action
+                  cannot be undone.
                 </Text>
               </YStack>
 

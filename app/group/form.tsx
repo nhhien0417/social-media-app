@@ -30,7 +30,6 @@ import { useGroupStore } from '@/stores/groupStore'
 import ImageSelectionSheet from '@/components/ImageSelectionSheet'
 import MediaPicker from '@/components/MediaPicker'
 import Camera from '@/components/Camera'
-import DeleteGroupModal from '@/features/groups/components/DeleteGroupModal'
 import {
   getMediaItemFromCamera,
   getMediaItemsFromPicker,
@@ -44,7 +43,7 @@ export default function GroupFormScreen() {
   const router = useRouter()
   const params = useLocalSearchParams()
   const insets = useSafeAreaInsets()
-  const { createGroup, updateGroup, deleteGroup, currentGroup, groups } =
+  const { createGroup, updateGroup, currentGroup, groups } =
     useGroupStore()
 
   const themeName = useThemeName()
@@ -98,7 +97,6 @@ export default function GroupFormScreen() {
   const [showSheet, setShowSheet] = useState(false)
   const [showCamera, setShowCamera] = useState(false)
   const [showMediaPicker, setShowMediaPicker] = useState(false)
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
   // Handlers
@@ -178,20 +176,6 @@ export default function GroupFormScreen() {
       console.error(error)
     } finally {
       setIsLoading(false)
-    }
-  }
-
-  const confirmDelete = async () => {
-    if (!existingGroup) return
-    setIsLoading(true)
-    try {
-      await deleteGroup(existingGroup.id)
-      router.navigate('/profile/groups')
-    } catch (error) {
-      console.log('Failed to delete', error)
-    } finally {
-      setIsLoading(false)
-      setShowDeleteModal(false)
     }
   }
 
@@ -478,21 +462,6 @@ export default function GroupFormScreen() {
                 'Save Changes'
               )}
             </Button>
-
-            {mode === 'EDIT' && (
-              <Button
-                marginTop="$2"
-                backgroundColor={isDark ? '#2c1515' : '#ffebee'}
-                color={isDark ? '#ff453a' : '#ff3b30'}
-                onPress={() => setShowDeleteModal(true)}
-                opacity={isLoading ? 0.7 : 1}
-                disabled={isLoading}
-                borderRadius="$4"
-                height={50}
-              >
-                Delete Group
-              </Button>
-            )}
           </YStack>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -515,13 +484,6 @@ export default function GroupFormScreen() {
         visible={showCamera}
         onClose={() => setShowCamera(false)}
         onCapture={handleCameraCapture}
-      />
-
-      <DeleteGroupModal
-        visible={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        onConfirm={confirmDelete}
-        isDeleting={isLoading}
       />
     </>
   )

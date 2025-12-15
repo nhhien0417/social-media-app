@@ -1,7 +1,7 @@
 import React from 'react'
-import { Modal, Pressable, Alert } from 'react-native'
+import { Modal, Pressable } from 'react-native'
 import { YStack, XStack, Text, Button } from 'tamagui'
-import { X, UserX, Crown, Ban } from '@tamagui/lucide-icons'
+import { X, UserX, Crown } from '@tamagui/lucide-icons'
 import { GroupMember } from '@/types/Group'
 
 interface GroupMemberManagementModalProps {
@@ -14,7 +14,6 @@ interface GroupMemberManagementModalProps {
   onPromoteToAdmin: (memberId: string) => void
   onDemoteToMember: (memberId: string) => void
   onRemoveMember: (memberId: string) => void
-  onBlockMember: (memberId: string) => void
 }
 
 export const GroupMemberManagementModal: React.FC<
@@ -28,8 +27,7 @@ export const GroupMemberManagementModal: React.FC<
   isDark,
   onPromoteToAdmin,
   onDemoteToMember,
-  onRemoveMember,
-  onBlockMember,
+  onRemoveMember
 }) => {
   const backgroundColor = isDark ? '#242526' : '#ffffff'
   const textColor = isDark ? '#e4e6eb' : '#050505'
@@ -51,11 +49,6 @@ export const GroupMemberManagementModal: React.FC<
 
   const handleRemoveMember = () => {
     onRemoveMember(member.user.id)
-    onClose()
-  }
-
-  const handleBlockMember = () => {
-    onBlockMember(member.user.id)
     onClose()
   }
 
@@ -199,29 +192,6 @@ export const GroupMemberManagementModal: React.FC<
                     </Text>
                     <Text fontSize={12} color={subtitleColor}>
                       They can join again later
-                    </Text>
-                  </YStack>
-                </XStack>
-              </Button>
-
-              {/* Block Member */}
-              <Button
-                backgroundColor="transparent"
-                borderWidth={1}
-                borderColor={borderColor}
-                borderRadius={10}
-                height={50}
-                onPress={handleBlockMember}
-                pressStyle={{ opacity: 0.8, scale: 0.98 }}
-              >
-                <XStack alignItems="center" gap="$3" flex={1}>
-                  <Ban size={20} color={dangerColor} />
-                  <YStack flex={1}>
-                    <Text fontSize={15} fontWeight="600" color={dangerColor}>
-                      Block Member
-                    </Text>
-                    <Text fontSize={12} color={subtitleColor}>
-                      Permanently prevent from joining
                     </Text>
                   </YStack>
                 </XStack>
