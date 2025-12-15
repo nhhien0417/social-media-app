@@ -4,13 +4,13 @@ import { StyleSheet, Pressable } from 'react-native'
 import { INSTAGRAM_GRADIENT } from '@/utils/InstagramGradient'
 import { formatNumber } from '@/utils/FormatNumber'
 import { ProfileComponentProps } from '../ProfileScreen'
-import { useRouter } from 'expo-router'
 import Avatar from '@/components/Avatar'
 
 interface ProfileInfoProps extends ProfileComponentProps {
   onFriendsPress?: () => void
   onGroupsPress?: () => void
   onPostsPress?: () => void
+  postCount?: number
 }
 
 export function ProfileInfo({
@@ -19,8 +19,8 @@ export function ProfileInfo({
   onFriendsPress,
   onGroupsPress,
   onPostsPress,
+  postCount,
 }: ProfileInfoProps) {
-  const router = useRouter()
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
   const captionColor = isDark ? 'rgba(255,255,255,0.7)' : '#4b5563'
@@ -56,7 +56,7 @@ export function ProfileInfo({
         <Pressable onPress={onPostsPress}>
           <YStack alignItems="center" gap="$1">
             <Text fontSize="$6" fontWeight="700">
-              {formatNumber(Array.isArray(user.posts) ? user.posts.length : 0)}
+              {formatNumber(postCount || 0)}
             </Text>
             <Text fontSize="$3" fontWeight="500" color={captionColor}>
               Posts

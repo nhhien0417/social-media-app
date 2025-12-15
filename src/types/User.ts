@@ -1,5 +1,3 @@
-import { Post } from './Post'
-
 export type Gender = 'MALE' | 'FEMALE' | 'OTHER'
 export type FriendStatus =
   | 'NONE'
@@ -18,7 +16,6 @@ export interface User {
   gender: string | null
   dob: string | null
   bio: string | null
-  posts: Post[] | null
   groupCount: number
   friendCount: number
   friendStatus: string | null

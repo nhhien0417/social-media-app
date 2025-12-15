@@ -22,7 +22,6 @@ import Comment from '@/features/comment/Comment'
 import { getUserId } from '@/utils/SecureStore'
 import { usePostStore } from '@/stores/postStore'
 import { router, useLocalSearchParams } from 'expo-router'
-import { useProfileStore } from '@/stores/profileStore'
 import PostOptionsSheet from './components/PostOptionsSheet'
 import DeleteConfirmModal from './components/DeleteConfirmModal'
 import LikeListModal from '@/features/like/LikeListModal'
@@ -86,15 +85,11 @@ function PaginationDots({
 function PostDetailScreen() {
   const { id: postId } = useLocalSearchParams<{ id: string }>()
 
-  // Store selectors
   const posts = usePostStore(state => state.posts)
-  const users = useProfileStore(state => state.users)
-  const currentUser = useProfileStore(state => state.currentUser)
-  const getPostDetail = usePostStore(state => state.getPostDetail)
   const currentPost = usePostStore(state => state.currentPost)
+  const getPostDetail = usePostStore(state => state.getPostDetail)
   const likePost = usePostStore(state => state.likePost)
 
-  // ALL useState hooks MUST be at the top
   const [isLoading, setIsLoading] = useState(false)
   const [fetchError, setFetchError] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
@@ -107,68 +102,22 @@ function PostDetailScreen() {
   const [isLiked, setIsLiked] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
-  // ALL useRef hooks
   const listRef = useRef<FlatList<string>>(null)
   const fadeAnim = useRef(new Animated.Value(1)).current
 
-  // Find post using useMemo
   const post = useMemo(() => {
-    console.log('PostDetailScreen: Looking for post', postId)
+    return (
+      posts.find(p => p.id === postId) ||
+      (currentPost?.id === postId ? currentPost : null)
+    )
+  }, [postId, posts, currentPost])
 
-    let foundPost = posts.find(p => p.id === postId)
-    if (foundPost) {
-      console.log('PostDetailScreen: Found in postStore', foundPost)
-      return foundPost
-    }
-
-    for (const userId in users) {
-      const user = users[userId]
-      if (user.posts) {
-        foundPost = user.posts.find(p => p.id === postId)
-        if (foundPost) {
-          console.log(
-            'PostDetailScreen: Found in profileStore user',
-            userId,
-            foundPost
-          )
-          return foundPost
-        }
-      }
-    }
-
-    if (currentUser?.posts) {
-      foundPost = currentUser.posts.find(p => p.id === postId)
-      if (foundPost) {
-        console.log('PostDetailScreen: Found in currentUser', foundPost)
-        return foundPost
-      }
-    }
-
-    if (currentPost?.id === postId) {
-      console.log('PostDetailScreen: Found in currentPost', currentPost)
-      return currentPost
-    }
-
-    console.log('PostDetailScreen: Post not found anywhere')
-    return null
-  }, [postId, posts, users, currentUser, currentPost])
-
-  // ALL useEffect hooks MUST be here
-  // Fetch post detail if not found
   useEffect(() => {
     if (!post && postId) {
-      console.log('PostDetailScreen: Post not found, fetching...', postId)
       setIsLoading(true)
       setFetchError(false)
       getPostDetail(postId)
-        .then(() => {
-          console.log('PostDetailScreen: Fetch successful')
-          setFetchError(false)
-        })
-        .catch(err => {
-          console.error('PostDetailScreen: Fetch failed', err)
-          setFetchError(true)
-        })
+        .catch(() => setFetchError(true))
         .finally(() => setIsLoading(false))
     }
   }, [post, postId, getPostDetail])
@@ -223,7 +172,6 @@ function PostDetailScreen() {
     setDeleteModalVisible(true)
   }, [])
 
-  // NOW we can do early returns (after ALL hooks)
   if (isLoading) {
     console.log('PostDetailScreen: Rendering loading state')
     return (

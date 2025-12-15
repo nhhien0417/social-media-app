@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ActivityIndicator, Pressable, ScrollView } from 'react-native'
 import { Text, XStack, YStack, useThemeName, Button } from 'tamagui'
 import { ChevronLeft, Menu, Plus } from '@tamagui/lucide-icons'
@@ -16,6 +16,8 @@ import SettingsSheet from './components/SettingsSheet'
 import LogoutConfirmModal from './components/LogoutConfirmModal'
 import { removeTokensAndUserId } from '@/utils/SecureStore'
 import { useAppTheme } from '@/providers/ThemeProvider'
+import { usePostStore } from '@/stores/postStore'
+import { Post } from '@/types/Post'
 
 export type ProfileTabKey = 'posts' | 'reels' | 'tagged'
 
@@ -40,11 +42,25 @@ export default function ProfileScreen() {
   const displayUser = userId ? otherUser : currentUser
   const isOwnProfile = !userId || userId === currentUser?.id
   const isLoading = !displayUser
+  const displayUserId = displayUser?.id
 
-  const posts = Array.isArray(displayUser?.posts) ? displayUser.posts : []
+  const fetchUserPosts = usePostStore(state => state.fetchUserPosts)
+
+  useEffect(() => {
+    if (displayUserId) {
+      fetchUserPosts(displayUserId)
+    }
+  }, [displayUserId])
+
+  const userPostsData = usePostStore(state =>
+    displayUser ? state.userPosts[displayUser.id] : undefined
+  )
+  const userPosts = userPostsData || []
+
+  const posts = userPosts
   const filteredPosts = useMemo(() => {
     if (tab === 'posts') {
-      return posts.filter(p => p.media && p.media.length > 0)
+      return posts.filter((p: Post) => p.media && p.media.length > 0)
     }
     return posts
   }, [posts, tab])
@@ -183,6 +199,7 @@ export default function ProfileScreen() {
             onFriendsPress={handleFriendsPress}
             onGroupsPress={handleGroupsPress}
             onPostsPress={handlePostsPress}
+            postCount={userPosts.length}
           />
           <ProfileBio user={displayUser} isOwnProfile={isOwnProfile} />
           <ProfileActions user={displayUser} isOwnProfile={isOwnProfile} />

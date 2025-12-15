@@ -34,6 +34,7 @@ import { formatNumber } from '@/utils/FormatNumber'
 import { GroupMember, GroupRole } from '@/types/Group'
 import PostCard from '../feed/components/PostCard'
 import { useGroupStore } from '@/stores/groupStore'
+import { usePostStore } from '@/stores/postStore'
 import { GroupSearchModal } from './components/GroupSearchModal'
 import { GroupMemberManagementModal } from './components/GroupMemberManagementModal'
 import GroupSettingsSheet from './components/GroupSettingsSheet'
@@ -52,12 +53,10 @@ export default function GroupDetailScreen() {
   const {
     currentGroup,
     members,
-    posts,
     groupRequests,
     isLoading,
     fetchGroupDetail,
     fetchGroupMembers,
-    fetchGroupPosts,
     fetchGroupRequests,
     joinGroup,
     leaveGroup,
@@ -68,6 +67,11 @@ export default function GroupDetailScreen() {
     deleteGroup,
     cancelRequest,
   } = useGroupStore()
+
+  const groupPostsData = usePostStore(state => state.groupPosts[groupId])
+  const groupPosts = groupPostsData || []
+  const fetchGroupPosts = usePostStore(state => state.fetchGroupPosts)
+
   const currentUser = useCurrentUser()
   const [activeTab, setActiveTab] = useState<GroupTab>('discussion')
   const [isRefreshing, setIsRefreshing] = useState(false)
@@ -93,8 +97,8 @@ export default function GroupDetailScreen() {
 
   const userPosts = useMemo(() => {
     if (!currentUserId) return []
-    return posts.filter(post => post.authorProfile.id === currentUserId)
-  }, [currentUserId, posts])
+    return groupPosts.filter(post => post.authorProfile.id === currentUserId)
+  }, [currentUserId, groupPosts])
 
   useEffect(() => {
     if (groupId) {
@@ -340,7 +344,7 @@ export default function GroupDetailScreen() {
             </YStack>
 
             {/* Posts */}
-            {posts.map(post => (
+            {groupPosts.map(post => (
               <PostCard
                 key={post.id}
                 post={post}

@@ -3,6 +3,8 @@ import { Post } from '@/types/Post'
 import { User } from '@/types/User'
 import {
   getFeedApi,
+  getGroupPostsApi,
+  getUserPostsApi,
   getPostDetailApi,
   createPostApi,
   updatePostApi,
@@ -16,14 +18,6 @@ import {
   UpdatePostRequest,
   UpdatePostResponse,
 } from '@/api/api.post'
-import {
-  addPostToStores,
-  updatePostWithSnapshot,
-  deletePostFromStores,
-  toggleLikeInStores,
-  restorePostSnapshot,
-  addSeenToStores,
-} from '@/utils/SyncPosts'
 import { getUserId } from '@/utils/SecureStore'
 import { feedFilter } from '@/utils/FeedFilter'
 
@@ -36,6 +30,8 @@ interface PostState {
   // State
   posts: Post[]
   stories: Post[]
+  groupPosts: Record<string, Post[]>
+  userPosts: Record<string, Post[]>
   currentPost: Post | null
   isLoading: boolean
   isRefreshing: boolean
@@ -46,6 +42,8 @@ interface PostState {
   refreshPosts: () => Promise<void>
   fetchStories: () => Promise<void>
   refreshStories: () => Promise<void>
+  fetchGroupPosts: (groupId: string, page?: number) => Promise<void>
+  fetchUserPosts: (userId: string, page?: number) => Promise<void>
   getPostDetail: (postId: string) => Promise<void>
 
   createPost: (data: CreatePostRequest) => Promise<CreatePostResponse>
@@ -62,6 +60,8 @@ export const usePostStore = create<PostState>((set, get) => ({
   // Initial State
   posts: [],
   stories: [],
+  groupPosts: {},
+  userPosts: {},
   currentPost: null,
   isLoading: false,
   isRefreshing: false,
@@ -148,15 +148,58 @@ export const usePostStore = create<PostState>((set, get) => ({
     }
   },
 
+  fetchGroupPosts: async (groupId: string, page = 0) => {
+    set({ isLoading: true, error: null })
+    try {
+      const response = await getGroupPostsApi(groupId, page)
+      console.log('Successful fetch group posts:', response)
+
+      set(state => ({
+        groupPosts: {
+          ...state.groupPosts,
+          [groupId]: response.data.posts,
+        },
+        isLoading: false,
+      }))
+    } catch (error) {
+      console.error('Error fetching group posts:', error)
+      set({ error: 'Failed to fetch group posts', isLoading: false })
+    }
+  },
+
+  fetchUserPosts: async (userId: string, page = 0) => {
+    set({ isLoading: true, error: null })
+    try {
+      const response = await getUserPostsApi(userId, page)
+      console.log('Successful fetch user posts:', response)
+
+      set(state => ({
+        userPosts: {
+          ...state.userPosts,
+          [userId]: response.data.posts,
+        },
+        isLoading: false,
+      }))
+    } catch (error) {
+      console.error('Error fetching user posts:', error)
+      set({ error: 'Failed to fetch user posts', isLoading: false })
+    }
+  },
+
   getPostDetail: async (postId: string) => {
     set({ isLoading: true, error: null })
     try {
       const response = await getPostDetailApi(postId)
       console.log('Successful get post detail:', response)
       const post = response.data
-      await addPostToStores(post)
 
-      set({ currentPost: post, isLoading: false })
+      set(state => ({
+        posts: state.posts.some(p => p.id === postId)
+          ? state.posts
+          : [post, ...state.posts],
+        currentPost: post,
+        isLoading: false,
+      }))
     } catch (error) {
       console.error('Error fetching post detail:', error)
       set({ error: 'Failed to fetch post detail', isLoading: false })
@@ -167,7 +210,24 @@ export const usePostStore = create<PostState>((set, get) => ({
     try {
       const response = await createPostApi(data)
       console.log('Successful create post:', response)
-      await addPostToStores(response.data)
+      const newPost = response.data
+
+      if (data.groupId) {
+        set(state => ({
+          groupPosts: {
+            ...state.groupPosts,
+            [data.groupId!]: [
+              newPost,
+              ...(state.groupPosts[data.groupId!] || []),
+            ],
+          },
+        }))
+      } else if (data.type === 'STORY') {
+        set(state => ({ stories: [newPost, ...state.stories] }))
+      } else {
+        set(state => ({ posts: [newPost, ...state.posts] }))
+      }
+
       return response
     } catch (error) {
       console.error('Error creating post:', error)
@@ -176,49 +236,139 @@ export const usePostStore = create<PostState>((set, get) => ({
   },
 
   updatePost: async (data: UpdatePostRequest) => {
-    let snapshot
+    const oldState = get()
+
     try {
       const response = await updatePostApi(data)
       console.log('Successful update post:', response)
       const updatedPost = response.data
-      snapshot = await updatePostWithSnapshot(updatedPost.id, updatedPost)
+
+      set(state => ({
+        posts: state.posts.map(p =>
+          p.id === updatedPost.id ? updatedPost : p
+        ),
+        stories: state.stories.map(p =>
+          p.id === updatedPost.id ? updatedPost : p
+        ),
+        groupPosts: Object.keys(state.groupPosts).reduce(
+          (acc, groupId) => {
+            acc[groupId] = state.groupPosts[groupId].map(p =>
+              p.id === updatedPost.id ? updatedPost : p
+            )
+            return acc
+          },
+          {} as Record<string, Post[]>
+        ),
+        userPosts: Object.keys(state.userPosts).reduce(
+          (acc, userId) => {
+            acc[userId] = state.userPosts[userId].map(p =>
+              p.id === updatedPost.id ? updatedPost : p
+            )
+            return acc
+          },
+          {} as Record<string, Post[]>
+        ),
+        currentPost:
+          state.currentPost?.id === updatedPost.id
+            ? updatedPost
+            : state.currentPost,
+      }))
 
       return response
     } catch (error) {
       console.error('Error updating post:', error)
-      if (snapshot) {
-        await restorePostSnapshot(snapshot)
-      }
+      set({
+        posts: oldState.posts,
+        stories: oldState.stories,
+        groupPosts: oldState.groupPosts,
+        userPosts: oldState.userPosts,
+        currentPost: oldState.currentPost,
+      })
       throw error
     }
   },
 
   deletePost: async (postId: string) => {
-    let snapshot
+    const oldState = get()
+
+    set(state => ({
+      posts: state.posts.filter(p => p.id !== postId),
+      stories: state.stories.filter(p => p.id !== postId),
+      groupPosts: Object.keys(state.groupPosts).reduce(
+        (acc, groupId) => {
+          acc[groupId] = state.groupPosts[groupId].filter(p => p.id !== postId)
+          return acc
+        },
+        {} as Record<string, Post[]>
+      ),
+      userPosts: Object.keys(state.userPosts).reduce(
+        (acc, userId) => {
+          acc[userId] = state.userPosts[userId].filter(p => p.id !== postId)
+          return acc
+        },
+        {} as Record<string, Post[]>
+      ),
+      currentPost: state.currentPost?.id === postId ? null : state.currentPost,
+    }))
+
     try {
-      snapshot = await deletePostFromStores(postId)
       await deletePostApi(postId)
       console.log('Successful delete post')
     } catch (error) {
       console.error('Error deleting post:', error)
-      if (snapshot) {
-        await restorePostSnapshot(snapshot)
-      }
+      set({
+        posts: oldState.posts,
+        stories: oldState.stories,
+        groupPosts: oldState.groupPosts,
+        userPosts: oldState.userPosts,
+        currentPost: oldState.currentPost,
+      })
       throw error
     }
   },
 
   likePost: async (postId: string, userId: string) => {
-    let snapshot
+    const toggleLike = (post: Post) => {
+      if (post.id !== postId) return post
+      const likes = post.likes.includes(userId)
+        ? post.likes.filter(id => id !== userId)
+        : [...post.likes, userId]
+      return { ...post, likes }
+    }
+
+    const oldState = get()
+    set(state => ({
+      posts: state.posts.map(toggleLike),
+      stories: state.stories.map(toggleLike),
+      groupPosts: Object.keys(state.groupPosts).reduce(
+        (acc, groupId) => {
+          acc[groupId] = state.groupPosts[groupId].map(toggleLike)
+          return acc
+        },
+        {} as Record<string, Post[]>
+      ),
+      userPosts: Object.keys(state.userPosts).reduce(
+        (acc, uid) => {
+          acc[uid] = state.userPosts[uid].map(toggleLike)
+          return acc
+        },
+        {} as Record<string, Post[]>
+      ),
+      currentPost: state.currentPost ? toggleLike(state.currentPost) : null,
+    }))
+
     try {
-      snapshot = await toggleLikeInStores(postId, userId)
       const response = await likePostApi({ postId, userId })
       console.log('Successful like post:', response)
     } catch (error) {
       console.error('Error liking post:', error)
-      if (snapshot) {
-        await restorePostSnapshot(snapshot)
-      }
+      set({
+        posts: oldState.posts,
+        stories: oldState.stories,
+        groupPosts: oldState.groupPosts,
+        userPosts: oldState.userPosts,
+        currentPost: oldState.currentPost,
+      })
       throw error
     }
   },
@@ -241,7 +391,6 @@ export const usePostStore = create<PostState>((set, get) => ({
 
     seenPostsCache.add(postId)
     seenPendingBatch.set(postId, userId)
-    addSeenToStores(postId, userId)
 
     if (batchTimer) {
       clearTimeout(batchTimer)

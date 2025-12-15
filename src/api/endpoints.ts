@@ -23,6 +23,8 @@ export const ENDPOINTS = {
 
   POSTS: {
     POST_FEED: 'post/get-post',
+    POST_GROUP: (id: string | number) => `post/group/${id}`,
+    POST_PROFILE: (id: string | number) => `post/profile/${id}`,
     POST_DETAIL: (id: string | number) => `post/${id}`,
     POST_CREATE: 'post/create-post',
     POST_UPDATE: 'post/update-post',
@@ -43,7 +45,6 @@ export const ENDPOINTS = {
   GROUP: {
     ALL: 'group/',
     USER_GROUPS: 'group/',
-    POSTS: (id: string | number) => `post/group/${id}`,
 
     CREATE: 'group/',
     UPDATE: 'group/',

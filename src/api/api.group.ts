@@ -2,7 +2,6 @@ import { ApiClient, ApiClientForm, GenericResponse } from './apiClient'
 import { ENDPOINTS } from './endpoints'
 import { Platform } from 'react-native'
 import { dataURItoBlob } from '@/utils/MediaUtils'
-import { Post } from '@/types/Post'
 import {
   Group,
   GroupRole,
@@ -60,16 +59,6 @@ export type GetGroupMembersResponse = GenericResponse<GroupMember[]>
 
 export type UpdateMemberRoleResponse = GenericResponse<GroupMember>
 
-export type GetGroupPostsResponse = GenericResponse<{
-  posts: Post[]
-  currentPage: number
-  totalPages: number
-  totalElements: number
-  pageSize: number
-  hasNext: boolean
-  hasPrevious: boolean
-}>
-
 // --- API Functions ---
 
 export const getAllGroupsApi = () => {
@@ -79,12 +68,6 @@ export const getAllGroupsApi = () => {
 export const getUserGroupsApi = (userId: string) => {
   return ApiClient.get<GetAllGroupsResponse>(
     `${ENDPOINTS.GROUP.USER_GROUPS}?userId=${userId}`
-  )
-}
-
-export const getGroupPostsApi = (groupId: string, page = 0, size = 10) => {
-  return ApiClient.get<GetGroupPostsResponse>(
-    `${ENDPOINTS.GROUP.POSTS(groupId)}?page=${page}&size=${size}`
   )
 }
 

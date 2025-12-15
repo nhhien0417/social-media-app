@@ -5,6 +5,7 @@ import { ChevronLeft } from '@tamagui/lucide-icons'
 import { useMemo, useEffect, useState } from 'react'
 import PostCard from '@/features/feed/components/PostCard'
 import { useProfileStore } from '@/stores/profileStore'
+import { usePostStore } from '@/stores/postStore'
 import ButtonIcon from '@/components/IconButton'
 import { useAppTheme } from '@/providers/ThemeProvider'
 
@@ -20,6 +21,12 @@ export default function ProfileFeedScreen() {
   const { currentUser, users, fetchUser } = useProfileStore()
   const displayUser = userId ? users[userId] : currentUser
 
+  const displayUserId = displayUser?.id
+  const userPosts = usePostStore(state =>
+    displayUserId ? state.userPosts[displayUserId] || [] : []
+  )
+  const fetchUserPosts = usePostStore(state => state.fetchUserPosts)
+
   useEffect(() => {
     if (userId && !users[userId]) {
       console.log('Fetching user:', userId)
@@ -27,13 +34,18 @@ export default function ProfileFeedScreen() {
     }
   }, [userId, users, fetchUser])
 
+  useEffect(() => {
+    if (displayUserId) {
+      fetchUserPosts(displayUserId)
+    }
+  }, [displayUserId, fetchUserPosts])
+
   const posts = useMemo(() => {
-    const userPosts = Array.isArray(displayUser?.posts) ? displayUser.posts : []
     return userPosts.map(post => ({
       ...post,
       authorProfile: post.authorProfile || displayUser,
     }))
-  }, [displayUser])
+  }, [userPosts, displayUser])
 
   const initialScrollIndex = useMemo(() => {
     if (!initialPostId) return 0
@@ -46,10 +58,7 @@ export default function ProfileFeedScreen() {
   useEffect(() => {
     if (posts.length > 0) {
       setIsReady(true)
-    } else if (
-      displayUser &&
-      (!displayUser.posts || displayUser.posts.length === 0)
-    ) {
+    } else if (displayUser) {
       setIsReady(true)
     }
   }, [posts, displayUser])

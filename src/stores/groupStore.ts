@@ -1,10 +1,8 @@
 import { create } from 'zustand'
 import { Group, GroupMember, GroupRole, GroupJoinRequest } from '@/types/Group'
-import { Post } from '@/types/Post'
 import {
   getAllGroupsApi,
   getUserGroupsApi,
-  getGroupPostsApi,
   getGroupDetailApi,
   createGroupApi,
   updateGroupApi,
@@ -28,7 +26,6 @@ interface GroupState {
   groups: Group[]
   myGroups: Group[]
   currentGroup: Group | null
-  posts: Post[]
   members: GroupMember[]
   userRequests: GroupJoinRequest[]
   groupRequests: GroupJoinRequest[]
@@ -39,7 +36,6 @@ interface GroupState {
   // Actions
   fetchGroups: () => Promise<void>
   fetchUserGroups: (userId?: string) => Promise<void>
-  fetchGroupPosts: (groupId: string, page?: number) => Promise<void>
 
   createGroup: (
     data: CreateGroupRequest,
@@ -79,7 +75,6 @@ export const useGroupStore = create<GroupState>((set, get) => ({
   userRequests: [],
   groupRequests: [],
   members: [],
-  posts: [],
   isLoading: false,
   isRefreshing: false,
   error: null,
@@ -133,26 +128,6 @@ export const useGroupStore = create<GroupState>((set, get) => ({
     } catch (error) {
       console.error('Error fetching group members:', error)
       set({ error: 'Failed to fetch group members', isLoading: false })
-    }
-  },
-
-  fetchGroupPosts: async (groupId: string, page = 0) => {
-    // Only set global loading for first page to avoid flickering
-    if (page === 0) set({ isLoading: true, error: null })
-    try {
-      const response = await getGroupPostsApi(groupId, page)
-      console.log('Successful fetch group posts:', response)
-      if (page === 0) {
-        set({ posts: response.data.posts, isLoading: false })
-      } else {
-        set(state => ({
-          posts: [...state.posts, ...response.data.posts],
-          isLoading: false,
-        }))
-      }
-    } catch (error) {
-      console.error('Error fetching group posts:', error)
-      set({ error: 'Failed to fetch group posts', isLoading: false })
     }
   },
 
@@ -350,7 +325,6 @@ export const useGroupStore = create<GroupState>((set, get) => ({
     set({
       currentGroup: null,
       members: [],
-      posts: [],
       userRequests: [],
       groupRequests: [],
       error: null,

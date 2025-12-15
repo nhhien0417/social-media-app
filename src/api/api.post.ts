@@ -61,7 +61,15 @@ export type LikeCommentRequest = {
 
 // --- Responses ---
 
-export type GetFeedResponse = GenericResponse<{ posts: Post[] }>
+export type GetPostsResponse = GenericResponse<{
+  posts: Post[]
+  currentPage: number
+  totalPages: number
+  totalElements: number
+  pageSize: number
+  hasNext: boolean
+  hasPrevious: boolean
+}>
 
 export type GetPostDetailResponse = GenericResponse<Post>
 
@@ -87,9 +95,21 @@ export type LikeCommentResponse = GenericResponse<Comment>
 
 // --- API Functions ---
 
-export const getFeedApi = (type: PostType) => {
-  return ApiClient.get<GetFeedResponse>(
-    `${ENDPOINTS.POSTS.POST_FEED}?type=${type}`
+export const getFeedApi = (type: PostType, page = 0, size = 10) => {
+  return ApiClient.get<GetPostsResponse>(
+    `${ENDPOINTS.POSTS.POST_FEED}?type=${type}&page=${page}&size=${size}`
+  )
+}
+
+export const getGroupPostsApi = (groupId: string, page = 0, size = 10) => {
+  return ApiClient.get<GetPostsResponse>(
+    `${ENDPOINTS.POSTS.POST_GROUP(groupId)}?page=${page}&size=${size}`
+  )
+}
+
+export const getUserPostsApi = (userId: string, page = 0, size = 10) => {
+  return ApiClient.get<GetPostsResponse>(
+    `${ENDPOINTS.POSTS.POST_PROFILE(userId)}?page=${page}&size=${size}`
   )
 }
 
