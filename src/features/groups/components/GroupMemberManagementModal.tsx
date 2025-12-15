@@ -1,18 +1,18 @@
 import React from 'react'
 import { Modal, Pressable } from 'react-native'
 import { YStack, XStack, Text, Button } from 'tamagui'
-import { X, UserX, Crown } from '@tamagui/lucide-icons'
-import { GroupMember } from '@/types/Group'
+import { X, UserX, Crown, Shield } from '@tamagui/lucide-icons'
+import { GroupMember, GroupRole } from '@/types/Group'
+import Avatar from '@/components/Avatar'
 
 interface GroupMemberManagementModalProps {
   visible: boolean
   onClose: () => void
   member: GroupMember
-  isAdmin: boolean
-  isOwner: boolean
+  currentUserRole: GroupRole
+  currentUserId: string
   isDark: boolean
-  onPromoteToAdmin: (memberId: string) => void
-  onDemoteToMember: (memberId: string) => void
+  onUpdateRole: (memberId: string, newRole: GroupRole) => void
   onRemoveMember: (memberId: string) => void
 }
 
@@ -22,12 +22,11 @@ export const GroupMemberManagementModal: React.FC<
   visible,
   onClose,
   member,
-  isAdmin,
-  isOwner,
+  currentUserRole,
+  currentUserId,
   isDark,
-  onPromoteToAdmin,
-  onDemoteToMember,
-  onRemoveMember
+  onUpdateRole,
+  onRemoveMember,
 }) => {
   const backgroundColor = isDark ? '#242526' : '#ffffff'
   const textColor = isDark ? '#e4e6eb' : '#050505'
@@ -36,14 +35,41 @@ export const GroupMemberManagementModal: React.FC<
   const overlayColor = isDark ? 'rgba(0,0,0,0.85)' : 'rgba(0,0,0,0.7)'
   const dangerColor = '#ef4444'
   const successColor = '#10b981'
+  const warningColor = '#f59e0b'
 
-  const handlePromoteToAdmin = () => {
-    onPromoteToAdmin(member.user.id)
-    onClose()
+  // Prevent managing self
+  const isSelf = member.user.id === currentUserId
+
+  // Prevent managing owner
+  const isTargetOwner = member.role === 'OWNER'
+
+  // Owner can change MEMBER↔ADMIN (but NOT to OWNER)
+  const ownerCanPromote =
+    currentUserRole === 'OWNER' && member.role === 'MEMBER' && !isSelf
+  const ownerCanDemote =
+    currentUserRole === 'OWNER' && member.role === 'ADMIN' && !isSelf
+
+  // Admin can only promote MEMBER to ADMIN
+  const adminCanPromote =
+    currentUserRole === 'ADMIN' && member.role === 'MEMBER'
+
+  // Both owner and admin can remove members (but not owner)
+  const canRemove =
+    !isTargetOwner &&
+    !isSelf &&
+    (currentUserRole === 'OWNER' || currentUserRole === 'ADMIN')
+
+  // Don't show modal if nothing can be done
+  if (
+    isSelf ||
+    isTargetOwner ||
+    (!ownerCanPromote && !ownerCanDemote && !adminCanPromote && !canRemove)
+  ) {
+    return null
   }
 
-  const handleDemoteToMember = () => {
-    onDemoteToMember(member.user.id)
+  const handleUpdateRole = (newRole: GroupRole) => {
+    onUpdateRole(member.user.id, newRole)
     onClose()
   }
 
@@ -52,12 +78,26 @@ export const GroupMemberManagementModal: React.FC<
     onClose()
   }
 
-  const canPromote = member.role === 'MEMBER'
-  const canDemote = isOwner && member.role === 'ADMIN'
-  const showManagement = isAdmin && member.role !== 'OWNER'
+  const getRoleLabel = (role: GroupRole) => {
+    switch (role) {
+      case 'OWNER':
+        return 'Owner'
+      case 'ADMIN':
+        return 'Admin'
+      case 'MEMBER':
+        return 'Member'
+    }
+  }
 
-  if (!showManagement) {
-    return null
+  const getRoleIcon = (role: GroupRole) => {
+    switch (role) {
+      case 'OWNER':
+        return <Crown size={16} color="#f59e0b" />
+      case 'ADMIN':
+        return <Shield size={16} color="#10b981" />
+      default:
+        return null
+    }
   }
 
   return (
@@ -100,68 +140,60 @@ export const GroupMemberManagementModal: React.FC<
               backgroundColor={isDark ? '#3a3b3c' : '#f0f2f5'}
               borderRadius={12}
             >
-              <YStack
-                width={48}
-                height={48}
-                borderRadius={24}
-                backgroundColor={isDark ? '#4a4b4c' : '#e4e6eb'}
-                alignItems="center"
-                justifyContent="center"
-              >
-                <Text fontSize={18} fontWeight="700" color={textColor}>
-                  {member.user.username.charAt(0)}
-                </Text>
-              </YStack>
+              <Avatar uri={member.user.avatarUrl || undefined} size={48} />
               <YStack flex={1}>
-                <Text fontSize={16} fontWeight="600" color={textColor}>
-                  {member.user.username}
-                </Text>
+                <XStack alignItems="center" gap="$2">
+                  <Text fontSize={16} fontWeight="600" color={textColor}>
+                    {member.user.username}
+                  </Text>
+                  {member.role !== 'MEMBER' && getRoleIcon(member.role)}
+                </XStack>
                 <Text fontSize={13} color={subtitleColor}>
-                  Member
+                  {getRoleLabel(member.role)}
                 </Text>
               </YStack>
             </XStack>
 
             {/* Actions */}
             <YStack gap="$2">
-              {/* Promote to Admin - only for MEMBER role */}
-              {canPromote && (
+              {/* Owner - Promote MEMBER to ADMIN */}
+              {ownerCanPromote && (
                 <Button
                   backgroundColor="transparent"
                   borderWidth={1}
                   borderColor={borderColor}
                   borderRadius={10}
                   height={50}
-                  onPress={handlePromoteToAdmin}
+                  onPress={() => handleUpdateRole('ADMIN')}
                   pressStyle={{ opacity: 0.8, scale: 0.98 }}
                 >
                   <XStack alignItems="center" gap="$3" flex={1}>
-                    <Crown size={20} color={successColor} />
+                    <Shield size={20} color={successColor} />
                     <YStack flex={1}>
                       <Text fontSize={15} fontWeight="600" color={textColor}>
                         Promote to Admin
                       </Text>
                       <Text fontSize={12} color={subtitleColor}>
-                        Give admin privileges
+                        Can manage members and posts
                       </Text>
                     </YStack>
                   </XStack>
                 </Button>
               )}
 
-              {/* Demote to Member - only for ADMIN role and owner */}
-              {canDemote && (
+              {/* Owner - Demote ADMIN to MEMBER */}
+              {ownerCanDemote && (
                 <Button
                   backgroundColor="transparent"
                   borderWidth={1}
                   borderColor={borderColor}
                   borderRadius={10}
                   height={50}
-                  onPress={handleDemoteToMember}
+                  onPress={() => handleUpdateRole('MEMBER')}
                   pressStyle={{ opacity: 0.8, scale: 0.98 }}
                 >
                   <XStack alignItems="center" gap="$3" flex={1}>
-                    <Crown size={20} color="#f59e0b" />
+                    <Shield size={20} color={warningColor} />
                     <YStack flex={1}>
                       <Text fontSize={15} fontWeight="600" color={textColor}>
                         Demote to Member
@@ -174,28 +206,55 @@ export const GroupMemberManagementModal: React.FC<
                 </Button>
               )}
 
+              {/* Admin - Promote to Admin */}
+              {adminCanPromote && (
+                <Button
+                  backgroundColor="transparent"
+                  borderWidth={1}
+                  borderColor={borderColor}
+                  borderRadius={10}
+                  height={50}
+                  onPress={() => handleUpdateRole('ADMIN')}
+                  pressStyle={{ opacity: 0.8, scale: 0.98 }}
+                >
+                  <XStack alignItems="center" gap="$3" flex={1}>
+                    <Shield size={20} color={successColor} />
+                    <YStack flex={1}>
+                      <Text fontSize={15} fontWeight="600" color={textColor}>
+                        Promote to Admin
+                      </Text>
+                      <Text fontSize={12} color={subtitleColor}>
+                        Give admin privileges
+                      </Text>
+                    </YStack>
+                  </XStack>
+                </Button>
+              )}
+
               {/* Remove from Group */}
-              <Button
-                backgroundColor="transparent"
-                borderWidth={1}
-                borderColor={borderColor}
-                borderRadius={10}
-                height={50}
-                onPress={handleRemoveMember}
-                pressStyle={{ opacity: 0.8, scale: 0.98 }}
-              >
-                <XStack alignItems="center" gap="$3" flex={1}>
-                  <UserX size={20} color={dangerColor} />
-                  <YStack flex={1}>
-                    <Text fontSize={15} fontWeight="600" color={dangerColor}>
-                      Remove from Group
-                    </Text>
-                    <Text fontSize={12} color={subtitleColor}>
-                      They can join again later
-                    </Text>
-                  </YStack>
-                </XStack>
-              </Button>
+              {canRemove && (
+                <Button
+                  backgroundColor="transparent"
+                  borderWidth={1}
+                  borderColor={borderColor}
+                  borderRadius={10}
+                  height={50}
+                  onPress={handleRemoveMember}
+                  pressStyle={{ opacity: 0.8, scale: 0.98 }}
+                >
+                  <XStack alignItems="center" gap="$3" flex={1}>
+                    <UserX size={20} color={dangerColor} />
+                    <YStack flex={1}>
+                      <Text fontSize={15} fontWeight="600" color={dangerColor}>
+                        Remove from Group
+                      </Text>
+                      <Text fontSize={12} color={subtitleColor}>
+                        They can join again later
+                      </Text>
+                    </YStack>
+                  </XStack>
+                </Button>
+              )}
             </YStack>
           </YStack>
         </Pressable>
