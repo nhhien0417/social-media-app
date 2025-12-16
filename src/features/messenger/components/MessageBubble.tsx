@@ -1,50 +1,12 @@
 import { useState } from 'react'
 import { Text, XStack, YStack, useThemeName } from 'tamagui'
+import { CURRENT_USER_ID, mockMessages } from '../data/mock'
+import { Message } from '@/types/Message'
 
 interface MessageBubbleProps {
   chatId: string
-  message?: {
-    id: string
-    text: string
-    senderId: string
-    isMe?: boolean
-    createdAt?: string
-  }
+  message?: Message
 }
-
-// demo tạm thời, mày có thể truyền data thật sau
-const mockMessages = [
-  {
-    id: '1',
-    text: 'Hey, how are you?',
-    senderId: 'u1',
-    isMe: false,
-    createdAt: '2025-11-07T08:00:00.000Z',
-  },
-  {
-    id: '2',
-    text: 'I’m good, you?',
-    senderId: 'u2',
-    isMe: true,
-    createdAt: '2025-11-07T08:03:00.000Z',
-    status: 'sent',
-  },
-  {
-    id: '3',
-    text: 'Still up for coffee later today?',
-    senderId: 'u1',
-    isMe: false,
-    createdAt: '2025-11-07T08:18:30.000Z',
-  },
-  {
-    id: '4',
-    text: 'Absolutely, see you at 5!',
-    senderId: 'u2',
-    isMe: true,
-    createdAt: '2025-11-07T08:20:00.000Z',
-    status: 'seen',
-  },
-]
 
 const TEN_MINUTES_MS = 10 * 60 * 1000
 
@@ -72,10 +34,16 @@ export default function MessageBubble({ chatId }: MessageBubbleProps) {
   const theme = useThemeName()
   const [expandedMessages, setExpandedMessages] = useState<Set<string>>()
 
-  const messages = mockMessages
-  const lastOutgoingMessageId = [...messages]
+  // In real app, filter by chatId
+  const messages = mockMessages.filter((m: Message) => m.chatId === chatId)
+
+  // If no messages found for this chat in mock, just show all for demo purposes
+  // or show empty. Let's show all if filter is empty to keep demo working if ids don't match perfect
+  const displayMessages = messages.length > 0 ? messages : mockMessages
+
+  const lastOutgoingMessageId = [...displayMessages]
     .reverse()
-    .find(msg => msg.isMe)?.id
+    .find(msg => msg.senderId === CURRENT_USER_ID)?.id
 
   const metaTextColor =
     theme === 'dark' ? 'rgba(255,255,255,0.65)' : 'rgba(0,0,0,0.45)'
@@ -94,8 +62,9 @@ export default function MessageBubble({ chatId }: MessageBubbleProps) {
 
   return (
     <YStack flex={1} padding="$3" gap="$3">
-      {messages.map((msg, index) => {
-        const previousMessage = index > 0 ? messages[index - 1] : undefined
+      {displayMessages.map((msg, index) => {
+        const previousMessage =
+          index > 0 ? displayMessages[index - 1] : undefined
 
         const hasLongGap = (() => {
           if (!previousMessage?.createdAt || !msg.createdAt) return false
@@ -112,8 +81,9 @@ export default function MessageBubble({ chatId }: MessageBubbleProps) {
         const showTimestamp =
           Boolean(timestampLabel) && (shouldForceTimestamp || isExpanded)
         const isLastOutgoing = msg.id === lastOutgoingMessageId
+        const isMe = msg.senderId === CURRENT_USER_ID
 
-        const bubbleColor = msg.isMe
+        const bubbleColor = isMe
           ? theme === 'dark'
             ? '$blue10'
             : '$blue8'
@@ -129,7 +99,7 @@ export default function MessageBubble({ chatId }: MessageBubbleProps) {
               </Text>
             )}
 
-            <XStack justifyContent={msg.isMe ? 'flex-end' : 'flex-start'}>
+            <XStack justifyContent={isMe ? 'flex-end' : 'flex-start'}>
               <YStack
                 onPress={
                   timestampLabel ? () => toggleTimestamp(msg.id) : undefined
@@ -142,17 +112,9 @@ export default function MessageBubble({ chatId }: MessageBubbleProps) {
                 cursor={timestampLabel ? 'pointer' : 'default'}
                 hoverStyle={timestampLabel ? { opacity: 0.92 } : undefined}
               >
-                <Text color={msg.isMe ? 'white' : '$color'}>{msg.text}</Text>
+                <Text color={isMe ? 'white' : '$color'}>{msg.content}</Text>
               </YStack>
             </XStack>
-
-            {isLastOutgoing && (
-              <Text alignSelf="flex-end" fontSize="$2" color={metaTextColor}>
-                {(msg.status ?? 'sent').toLowerCase() === 'seen'
-                  ? 'Seen'
-                  : 'Sent'}
-              </Text>
-            )}
           </YStack>
         )
       })}
