@@ -4,15 +4,19 @@ import { useRouter } from 'expo-router'
 import { Pressable } from 'react-native'
 import { useChatStore } from '@/stores/chatStore'
 import Avatar from '@/components/Avatar'
+import { useLocalSearchParams } from 'expo-router'
 
 export default function ChatDetailHeader() {
   const router = useRouter()
-  const { currentChat: chat } = useChatStore()
+  const params = useLocalSearchParams<{ id?: string }>()
+  const { currentChat: chat, chats } = useChatStore()
 
-  const other = chat?.otherParticipant
-  const name = other?.username || 'Unknown'
-  const avatar = other?.avatarUrl
-  const id = chat?.id
+  const fromStore = chat?.otherParticipant
+  const fromList = chats.find(c => c.id === params.id)?.otherParticipant
+
+  const name = fromStore?.username || fromList?.username
+  const avatar = fromStore?.avatarUrl || fromList?.avatarUrl
+  const id = chat?.id || params.id
 
   return (
     <XStack

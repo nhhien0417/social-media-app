@@ -1,7 +1,7 @@
 import { FlatList } from 'react-native'
 import { YStack, Spinner, Text } from 'tamagui'
 import { useLocalSearchParams } from 'expo-router'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import MessageBubble from './components/MessageBubble'
 import MessageInput from './components/MessageInput'
 import ChatDetailHeader from './components/ChatDetailHeader'
@@ -12,9 +12,10 @@ import { useChatStore } from '@/stores/chatStore'
 export function ChatList() {
   const { chats, fetchChats, isLoading, isRefreshing, chatsPagination } =
     useChatStore()
+  const [isFirstLoad, setIsFirstLoad] = useState(true)
 
   useEffect(() => {
-    fetchChats(true)
+    fetchChats(true).finally(() => setIsFirstLoad(false))
   }, [])
 
   const handleLoadMore = () => {
@@ -26,7 +27,7 @@ export function ChatList() {
   return (
     <YStack flex={1} backgroundColor="$background">
       <ChatListHeader />
-      {isLoading && chats.length === 0 ? (
+      {isFirstLoad || (isLoading && chats.length === 0) ? (
         <YStack flex={1} justifyContent="center" alignItems="center">
           <Spinner size="large" color="$color" />
         </YStack>
