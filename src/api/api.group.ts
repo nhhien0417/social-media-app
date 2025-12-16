@@ -8,7 +8,6 @@ import {
   GroupPrivacy,
   GroupMember,
   GroupJoinRequest,
-  JoinRequestStatus,
 } from '@/types/Group'
 
 // --- Requests ---

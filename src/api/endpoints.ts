@@ -65,6 +65,18 @@ export const ENDPOINTS = {
       `group/${groupId}/members/${memberId}`,
   },
 
+  CHAT: {
+    CHAT_ALL: 'chat/',
+    CHAT_CREATE_GET: 'chat/',
+    CHAT_DELETE: (id: string | number) => `chat/${id}`,
+    CHAT_DETAIL: (id: string | number) => `chat/${id}`,
+    CHAT_SEEN: (id: string | number) => `chat/${id}`,
+
+    MESSAGE_SEND: 'chat/messages',
+    MESSAGE_GET: (id: string | number) => `chat/${id}/messages`,
+    MESSAGE_DELETE: (id: string | number) => `chat/messages/${id}`,
+  },
+
   NOTIFICATIONS: {
     REGISTER_PUSH_TOKEN: 'notification/push-token/register',
     UNREGISTER_PUSH_TOKEN: 'notification/push-token/unregister',
