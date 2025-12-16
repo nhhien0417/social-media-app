@@ -1,25 +1,47 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { FlatList, Pressable } from 'react-native'
-import { Input, Text, XStack, YStack } from 'tamagui'
-import { ArrowLeft, ChevronLeft } from '@tamagui/lucide-icons'
+import { Input, Text, XStack, YStack, Spinner } from 'tamagui'
+import { ChevronLeft } from '@tamagui/lucide-icons'
 import { useRouter } from 'expo-router'
-import { mockUsers } from '@/features/messenger/data/mock'
 import { User } from '@/types/User'
 import Avatar from '@/components/Avatar'
+import { useChatStore } from '@/stores/chatStore'
+import { useProfileStore } from '@/stores/profileStore'
 
 export default function NewMessageScreen() {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
+  const { createGetChat, isLoading: isChatLoading } = useChatStore()
+  const {
+    friends,
+    fetchFriends,
+    isLoading: isProfileLoading,
+  } = useProfileStore()
 
-  const users = Object.values(mockUsers)
-    .filter(u => u.id !== 'me')
-    .filter(u => {
-      const query = searchQuery.toLowerCase()
-      const fullName = [u.firstName, u.lastName].join(' ').toLowerCase()
-      return (
-        fullName.includes(query) || u.username.toLowerCase().includes(query)
-      )
-    })
+  useEffect(() => {
+    fetchFriends()
+  }, [])
+
+  const filteredFriends = friends.filter(u => {
+    const query = searchQuery.toLowerCase()
+    const fullName = [u.firstName, u.lastName]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase()
+    return fullName.includes(query) || u.username.toLowerCase().includes(query)
+  })
+
+  const handleUserSelect = async (userId: string) => {
+    try {
+      await createGetChat(userId)
+      const chat = useChatStore.getState().currentChat
+      if (chat) {
+        router.replace(`/message/${chat.id}`)
+      }
+    } catch (error) {
+      console.error('Failed to create chat', error)
+    }
+  }
 
   const renderItem = ({ item }: { item: User }) => {
     const name =
@@ -27,12 +49,11 @@ export default function NewMessageScreen() {
 
     return (
       <Pressable
-        onPress={() => {
-          console.log('Selected user:', item.username)
-        }}
+        onPress={() => handleUserSelect(item.id)}
         style={({ pressed }) => ({
           opacity: pressed ? 0.7 : 1,
         })}
+        disabled={isChatLoading}
       >
         <XStack alignItems="center" gap="$3" paddingVertical="$3">
           <Avatar size={55} uri={item.avatarUrl || undefined} />
@@ -50,11 +71,7 @@ export default function NewMessageScreen() {
   }
 
   return (
-    <YStack
-      flex={1}
-      backgroundColor="$background"
-      padding="$3"
-    >
+    <YStack flex={1} backgroundColor="$background" padding="$3">
       {/* Header */}
       <XStack
         justifyContent="space-between"
@@ -115,12 +132,21 @@ export default function NewMessageScreen() {
         Suggestion
       </Text>
 
-      <FlatList
-        data={users}
-        keyExtractor={item => item.id}
-        renderItem={renderItem}
-        showsVerticalScrollIndicator={false}
-      />
+      {isProfileLoading && friends.length === 0 ? (
+        <Spinner size="large" color="$color" marginTop="$5" />
+      ) : (
+        <FlatList
+          data={filteredFriends}
+          keyExtractor={item => item.id}
+          renderItem={renderItem}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <Text color="#888" textAlign="center" marginTop="$5">
+              No friends found
+            </Text>
+          }
+        />
+      )}
     </YStack>
   )
 }

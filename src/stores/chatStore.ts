@@ -237,7 +237,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
             c.id === data.chatId
               ? {
                   ...c,
-                  lastMessage: response.data.content || 'Attachment',
+                  lastMessage: response.data.content,
                   lastMessageTime: response.data.createdAt,
                   lastMessageSenderId: response.data.senderId,
                 }
@@ -247,7 +247,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
             state.currentChat?.id === data.chatId
               ? {
                   ...state.currentChat,
-                  lastMessage: response.data.content || 'Attachment',
+                  lastMessage: response.data.content,
                   lastMessageTime: response.data.createdAt,
                   lastMessageSenderId: response.data.senderId,
                 }
