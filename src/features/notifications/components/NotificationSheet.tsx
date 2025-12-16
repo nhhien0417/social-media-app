@@ -24,7 +24,7 @@ export default function NotificationSheet({
       animation="quick"
     >
       <Sheet.Overlay backgroundColor="$shadow6" />
-      <Sheet.Handle backgroundColor="$gray6" />
+      <Sheet.Handle backgroundColor="#888" />
       <Sheet.Frame
         backgroundColor="$background"
         borderTopLeftRadius="$6"
@@ -50,7 +50,7 @@ export default function NotificationSheet({
             >
               {notification.message}
             </Text>
-            <Text color="$gray8" fontSize="$3">
+            <Text color="#888" fontSize="$3">
               {formatDate(notification.createdAt)}
             </Text>
 
@@ -69,7 +69,7 @@ export default function NotificationSheet({
             <Button
               variant="outlined"
               borderRadius="$6"
-              color="$gray9"
+              color="#888"
               width="100%"
               onPress={() => onOpenChange(false)}
             >

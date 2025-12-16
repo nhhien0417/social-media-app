@@ -108,19 +108,19 @@ export default function NotificationTestScreen() {
 
         <YStack gap="$2">
           <XStack justifyContent="space-between">
-            <Text color="$gray10">Connection:</Text>
+            <Text color="#888">Connection:</Text>
             <Text color={isConnected ? '$green10' : '$red10'} fontWeight="600">
               {isConnected ? 'Connected ✅' : 'Disconnected ❌'}
             </Text>
           </XStack>
           <XStack justifyContent="space-between">
-            <Text color="$gray10">Total Notifications:</Text>
+            <Text color="#888">Total Notifications:</Text>
             <Text color="$color" fontWeight="600">
               {notifications.length}
             </Text>
           </XStack>
           <XStack justifyContent="space-between">
-            <Text color="$gray10">Unread Count:</Text>
+            <Text color="#888">Unread Count:</Text>
             <XStack alignItems="center" gap="$2">
               <Text color="$color" fontWeight="600">
                 {unreadCount}
@@ -129,7 +129,7 @@ export default function NotificationTestScreen() {
             </XStack>
           </XStack>
           <XStack justifyContent="space-between">
-            <Text color="$gray10">Push Token:</Text>
+            <Text color="#888">Push Token:</Text>
             <Text color="$color" fontWeight="600" numberOfLines={1}>
               {pushToken ? '✅' : '❌'}
             </Text>
@@ -168,8 +168,8 @@ export default function NotificationTestScreen() {
 
         {notifications.length === 0 ? (
           <YStack flex={1} alignItems="center" justifyContent="center" gap="$3">
-            <Bell size={48} color="$gray8" />
-            <Text color="$gray10" fontSize="$4" textAlign="center">
+            <Bell size={48} color="#888" />
+            <Text color="#888" fontSize="$4" textAlign="center">
               Chưa có notification nào{'\n'}
               Gửi friend request từ client khác để test
             </Text>
@@ -188,14 +188,14 @@ export default function NotificationTestScreen() {
                 >
                   <XStack justifyContent="space-between" marginBottom="$2">
                     <XStack alignItems="center" gap="$2">
-                      <Text fontSize="$2" color="$gray10">
+                      <Text fontSize="$2" color="#888">
                         #{index + 1}
                       </Text>
                       {notif.unread && (
                         <Circle size={6} backgroundColor="$blue10" />
                       )}
                     </XStack>
-                    <Text fontSize="$2" color="$gray10">
+                    <Text fontSize="$2" color="#888">
                       {notif.section}
                     </Text>
                   </XStack>
@@ -207,7 +207,7 @@ export default function NotificationTestScreen() {
                   <YStack gap="$1">
                     {notif.type && (
                       <XStack gap="$2">
-                        <Text fontSize="$2" color="$gray10">
+                        <Text fontSize="$2" color="#888">
                           Type:
                         </Text>
                         <Text fontSize="$2" color="$color" fontWeight="600">
@@ -217,7 +217,7 @@ export default function NotificationTestScreen() {
                     )}
                     {notif.senderId && (
                       <XStack gap="$2">
-                        <Text fontSize="$2" color="$gray10">
+                        <Text fontSize="$2" color="#888">
                           Sender:
                         </Text>
                         <Text fontSize="$2" color="$color" fontFamily="$mono">
@@ -227,7 +227,7 @@ export default function NotificationTestScreen() {
                     )}
                     {notif.time && (
                       <XStack gap="$2">
-                        <Text fontSize="$2" color="$gray10">
+                        <Text fontSize="$2" color="#888">
                           Time:
                         </Text>
                         <Text fontSize="$2" color="$color">

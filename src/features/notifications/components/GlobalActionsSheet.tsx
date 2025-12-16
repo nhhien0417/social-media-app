@@ -27,7 +27,7 @@ export default function GlobalActionsSheet({
       animation="quick"
     >
       <Sheet.Overlay backgroundColor="$shadow6" />
-      <Sheet.Handle backgroundColor="$gray6" />
+      <Sheet.Handle backgroundColor="#888" />
       <Sheet.Frame
         backgroundColor="$background"
         borderTopLeftRadius="$6"
@@ -62,7 +62,7 @@ export default function GlobalActionsSheet({
         <Button
           variant="outlined"
           borderRadius="$6"
-          color="$gray9"
+          color="#888"
           onPress={() => onOpenChange(false)}
           width="100%"
         >

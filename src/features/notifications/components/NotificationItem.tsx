@@ -87,7 +87,7 @@ export default function NotificationItem({
             </Text>{' '}
             {message.replace(senderName, '').trim()}
           </Text>
-          <Text color="$gray8" fontSize="$3" marginTop={2}>
+          <Text color="#888" fontSize="$3" marginTop={2}>
             {formatDate(notification.createdAt)}
           </Text>
         </YStack>

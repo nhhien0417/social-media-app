@@ -40,6 +40,6 @@ export const getNotificationIcon = (type: string) => {
       return <Users size={16} color="$purple10" />
 
     default:
-      return <Bell size={16} color="$gray10" />
+      return <Bell size={16} color="#888" />
   }
 }

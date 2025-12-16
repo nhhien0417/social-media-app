@@ -436,7 +436,7 @@ export default function PostingStatus() {
             <Text fontSize="$5" fontWeight="700" color="$color">
               {getSuccessMessage().title}
             </Text>
-            <Text fontSize="$3" color="$gray10">
+            <Text fontSize="$3" color="#888">
               {getSuccessMessage().subtitle}
             </Text>
           </YStack>
@@ -459,7 +459,7 @@ export default function PostingStatus() {
             <Text fontSize="$5" fontWeight="700" color="#ef4444">
               {getErrorMessage().title}
             </Text>
-            <Text fontSize="$3" color="$gray10" numberOfLines={2}>
+            <Text fontSize="$3" color="#888" numberOfLines={2}>
               {getErrorMessage().subtitle}
             </Text>
           </YStack>

@@ -39,7 +39,7 @@ export default function NotificationList({
 
       {isScrollable && (
         <YStack alignItems="center" marginTop="$4" marginBottom="$8">
-          <Button variant="outlined" borderRadius="$6" color="$gray9" size="$4">
+          <Button variant="outlined" borderRadius="$6" color="#888" size="$4">
             See previous notifications
           </Button>
         </YStack>

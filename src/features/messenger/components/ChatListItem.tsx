@@ -46,7 +46,7 @@ export default function ChatListItem({ item }: ChatListItemProps) {
         <XStack alignItems="center" gap="$3" flex={1}>
           <Avatar circular size="$5">
             <Avatar.Image source={{ uri: avatar || undefined }} />
-            <Avatar.Fallback backgroundColor="$gray5" />
+            <Avatar.Fallback backgroundColor="#888" />
           </Avatar>
 
           <YStack flex={1} alignItems="flex-start">

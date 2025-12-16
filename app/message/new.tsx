@@ -51,14 +51,14 @@ export default function NewMessageScreen() {
         <XStack alignItems="center" gap="$3" paddingVertical="$2">
           <Avatar circular size="$4.5">
             <AvatarImage source={{ uri: item.avatarUrl || undefined }} />
-            <AvatarFallback backgroundColor="$gray5" />
+            <AvatarFallback backgroundColor="#888" />
           </Avatar>
 
           <YStack>
             <Text color="$color" fontWeight="700" fontSize="$4">
               {name}
             </Text>
-            <Text color="$gray10" fontSize="$3">
+            <Text color="#888" fontSize="$3">
               {item.username}
             </Text>
           </YStack>
@@ -81,14 +81,14 @@ export default function NewMessageScreen() {
 
       {/* Search Input */}
       <XStack alignItems="center" marginBottom="$6" gap="$3">
-        <Text fontSize="$4" color="$gray10">
+        <Text fontSize="$4" color="#999">
           Đến:
         </Text>
         <Input
           flex={1}
           unstyled
           placeholder="Tìm kiếm"
-          placeholderTextColor="$gray9"
+          placeholderTextColor="#888"
           value={searchQuery}
           onChangeText={setSearchQuery}
           fontSize="$4"
