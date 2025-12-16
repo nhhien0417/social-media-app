@@ -38,7 +38,7 @@ export default function ChatDetailHeader() {
             }
           }}
         >
-          <ChevronLeft size={24} />
+          <ChevronLeft size={22} />
         </Pressable>
 
         <Avatar circular size="$3.5" marginLeft={-3}>
@@ -56,7 +56,7 @@ export default function ChatDetailHeader() {
         </Avatar>
 
         <Text
-          fontSize="$5"
+          fontSize={20}
           fontWeight="700"
           numberOfLines={1}
           ellipsizeMode="tail"

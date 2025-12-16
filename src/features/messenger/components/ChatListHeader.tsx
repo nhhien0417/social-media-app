@@ -10,7 +10,7 @@ export default function ChatListHeader() {
     <XStack
       justifyContent="space-between"
       alignItems="center"
-      paddingHorizontal="$4"
+      paddingHorizontal="$3"
       paddingVertical="$3"
       backgroundColor="$background"
     >
@@ -37,7 +37,7 @@ export default function ChatListHeader() {
           <ChevronLeft size={22} color="$color" />
         </Pressable>
 
-        <Text fontSize="$6" fontWeight="700">
+        <Text fontSize={20} fontWeight="700">
           Chats
         </Text>
       </XStack>

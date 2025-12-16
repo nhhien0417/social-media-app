@@ -1,27 +1,16 @@
 import { useState } from 'react'
 import { FlatList, Pressable } from 'react-native'
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-  Input,
-  Text,
-  XStack,
-  YStack,
-  useThemeName,
-} from 'tamagui'
-import { ArrowLeft } from '@tamagui/lucide-icons'
+import { Input, Text, XStack, YStack } from 'tamagui'
+import { ArrowLeft, ChevronLeft } from '@tamagui/lucide-icons'
 import { useRouter } from 'expo-router'
 import { mockUsers } from '@/features/messenger/data/mock'
 import { User } from '@/types/User'
+import Avatar from '@/components/Avatar'
 
 export default function NewMessageScreen() {
   const router = useRouter()
-  const theme = useThemeName()
   const [searchQuery, setSearchQuery] = useState('')
 
-  // Filter users based on search query
-  // Exclude 'me' from the list
   const users = Object.values(mockUsers)
     .filter(u => u.id !== 'me')
     .filter(u => {
@@ -39,21 +28,14 @@ export default function NewMessageScreen() {
     return (
       <Pressable
         onPress={() => {
-          // In a real app, this would check if a chat exists and navigate to it, or create a new one.
-          // For now, we'll just go back or log it.
-          // router.push(`/message/${existingChatId}`)
           console.log('Selected user:', item.username)
         }}
         style={({ pressed }) => ({
           opacity: pressed ? 0.7 : 1,
         })}
       >
-        <XStack alignItems="center" gap="$3" paddingVertical="$2">
-          <Avatar circular size="$4.5">
-            <AvatarImage source={{ uri: item.avatarUrl || undefined }} />
-            <AvatarFallback backgroundColor="#888" />
-          </Avatar>
-
+        <XStack alignItems="center" gap="$3" paddingVertical="$3">
+          <Avatar size={55} uri={item.avatarUrl || undefined} />
           <YStack>
             <Text color="$color" fontWeight="700" fontSize="$4">
               {name}
@@ -68,26 +50,55 @@ export default function NewMessageScreen() {
   }
 
   return (
-    <YStack flex={1} backgroundColor="$background" padding="$4" paddingTop="$8">
+    <YStack
+      flex={1}
+      backgroundColor="$background"
+      padding="$3"
+    >
       {/* Header */}
-      <XStack alignItems="center" gap="$4" marginBottom="$6">
-        <Pressable onPress={() => router.back()}>
-          <ArrowLeft size={24} color="$color" />
-        </Pressable>
-        <Text fontSize={20} fontWeight="700">
-          Tin nhắn mới
-        </Text>
+      <XStack
+        justifyContent="space-between"
+        alignItems="center"
+        backgroundColor="$background"
+      >
+        <XStack alignItems="center" gap="$3">
+          <Pressable
+            onPress={() => {
+              if (router.canGoBack()) {
+                router.back()
+              } else {
+                router.replace('/message')
+              }
+            }}
+            style={({ pressed }) => ({
+              padding: 0,
+              margin: 0,
+              minWidth: 0,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'transparent',
+              opacity: pressed ? 0.5 : 1,
+            })}
+            android_ripple={{ color: '#00000010', borderless: true }}
+          >
+            <ChevronLeft size={22} color="$color" />
+          </Pressable>
+
+          <Text fontSize={20} fontWeight="700">
+            New Message
+          </Text>
+        </XStack>
       </XStack>
 
       {/* Search Input */}
-      <XStack alignItems="center" marginBottom="$6" gap="$3">
+      <XStack alignItems="center" gap="$3" marginTop="$3">
         <Text fontSize="$4" color="#999">
-          Đến:
+          To:
         </Text>
         <Input
           flex={1}
           unstyled
-          placeholder="Tìm kiếm"
+          placeholder="Search"
           placeholderTextColor="#888"
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -100,8 +111,8 @@ export default function NewMessageScreen() {
       </XStack>
 
       {/* User List */}
-      <Text fontSize="$4" fontWeight="600" marginBottom="$4">
-        Gợi ý
+      <Text fontSize="$5" fontWeight="600" marginTop="$3">
+        Suggestion
       </Text>
 
       <FlatList
@@ -109,7 +120,6 @@ export default function NewMessageScreen() {
         keyExtractor={item => item.id}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 20 }}
       />
     </YStack>
   )
