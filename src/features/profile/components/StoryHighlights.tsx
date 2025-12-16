@@ -1,39 +1,34 @@
 import { memo } from 'react'
 import { ScrollView, StyleSheet, Image, Pressable } from 'react-native'
-import { Text, YStack, useThemeName } from 'tamagui'
+import { YStack, useThemeName } from 'tamagui'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
-import type { ProfileHighlight } from '../../../mock/profile'
 import { INSTAGRAM_GRADIENT } from '@/utils/InstagramGradient'
+import { Post } from '@/types/Post'
 
 interface StoryHighlightsProps {
-  highlights: ProfileHighlight[]
-  username?: string
-  avatarUrl?: string
+  stories: Post[]
 }
 
 export const StoryHighlights = memo(function StoryHighlights({
-  highlights,
-  username,
-  avatarUrl,
+  stories,
 }: StoryHighlightsProps) {
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
-  const labelColor = isDark ? 'rgba(255,255,255,0.8)' : '#111827'
-  const fallbackBackground = isDark ? '#10131a' : '#e2e8f0'
   const ringBackground = isDark ? '#050506' : '#ffffff'
+  const fallbackBackground = isDark ? '#10131a' : '#e2e8f0'
 
-  if (!highlights.length) {
+  if (!stories.length) {
     return null
   }
 
-  const handleHighlightPress = (highlight: ProfileHighlight) => {
+  const handleStoryPress = (story: Post) => {
     router.push({
-      pathname: '/story/highlight/[id]',
+      pathname: '/story/[id]',
       params: {
-        id: highlight.id,
-        username: username || 'User',
-        avatarUrl: avatarUrl || '',
+        id: story.id,
+        mode: 'HIGHLIGHT',
+        userId: story.authorProfile.id,
       },
     })
   }
@@ -44,9 +39,11 @@ export const StoryHighlights = memo(function StoryHighlights({
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={{ paddingHorizontal: 12, gap: 16 }}
     >
-      {highlights.map(item => (
-        <Pressable key={item.id} onPress={() => handleHighlightPress(item)}>
-          <YStack alignItems="center" gap="$2">
+      {stories.map(story => {
+        const coverImage = story.media?.[0]
+
+        return (
+          <Pressable key={story.id} onPress={() => handleStoryPress(story)}>
             <LinearGradient
               colors={INSTAGRAM_GRADIENT}
               start={{ x: 0, y: 0.35 }}
@@ -60,9 +57,9 @@ export const StoryHighlights = memo(function StoryHighlights({
                 ]}
               >
                 <YStack style={styles.highlightImageWrapper}>
-                  {item.coverImage ? (
+                  {coverImage ? (
                     <Image
-                      source={{ uri: item.coverImage }}
+                      source={{ uri: coverImage }}
                       style={styles.highlightImage}
                     />
                   ) : (
@@ -71,21 +68,14 @@ export const StoryHighlights = memo(function StoryHighlights({
                       alignItems="center"
                       justifyContent="center"
                       backgroundColor={fallbackBackground}
-                    >
-                      <Text fontSize="$3" fontWeight="600" color="#f8fafc">
-                        {item.label[0]?.toUpperCase() ?? 'S'}
-                      </Text>
-                    </YStack>
+                    ></YStack>
                   )}
                 </YStack>
               </YStack>
             </LinearGradient>
-            <Text fontSize="$2" color={labelColor}>
-              {item.label}
-            </Text>
-          </YStack>
-        </Pressable>
-      ))}
+          </Pressable>
+        )
+      })}
     </ScrollView>
   )
 })

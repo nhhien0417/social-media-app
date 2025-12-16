@@ -107,9 +107,14 @@ export const getGroupPostsApi = (groupId: string, page = 0, size = 10) => {
   )
 }
 
-export const getUserPostsApi = (userId: string, page = 0, size = 10) => {
+export const getUserPostsApi = (
+  userId: string,
+  page = 0,
+  size = 10,
+  type: PostType = 'POST'
+) => {
   return ApiClient.get<GetPostsResponse>(
-    `${ENDPOINTS.POSTS.POST_PROFILE(userId)}?page=${page}&size=${size}`
+    `${ENDPOINTS.POSTS.POST_PROFILE(userId)}?page=${page}&size=${size}&type=${type}`
   )
 }
 

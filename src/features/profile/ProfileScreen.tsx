@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ActivityIndicator, Pressable, ScrollView } from 'react-native'
 import { Text, XStack, YStack, useThemeName, Button } from 'tamagui'
-import { ChevronLeft, Grid3x3, Menu, Plus } from '@tamagui/lucide-icons'
+import { ChevronLeft, Menu, Plus } from '@tamagui/lucide-icons'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { ProfileInfo } from './components/ProfileInfo'
 import { ProfileBio } from './components/ProfileBio'
@@ -9,7 +9,7 @@ import { ProfileActions } from './components/ProfileActions'
 import { StoryHighlights } from './components/StoryHighlights'
 import { useCurrentUser, useUser } from '@/hooks/useProfile'
 import MediaGrid from './components/MediaGrid'
-import { profileMock } from '@/mock/profile'
+
 import { User } from '@/types/User'
 import SettingsSheet from './components/SettingsSheet'
 import LogoutConfirmModal from './components/LogoutConfirmModal'
@@ -31,7 +31,6 @@ export default function ProfileScreen() {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
-  const activeColor = '#1877F2'
 
   const currentUser = useCurrentUser()
   const otherUser = useUser(userId)
@@ -41,13 +40,20 @@ export default function ProfileScreen() {
   const isLoading = !displayUser
   const displayUserId = displayUser?.id
 
+  const fetchUserStories = usePostStore(state => state.fetchUserStories)
   const fetchUserPosts = usePostStore(state => state.fetchUserPosts)
 
   useEffect(() => {
     if (displayUserId) {
+      fetchUserStories(displayUserId)
       fetchUserPosts(displayUserId)
     }
   }, [displayUserId])
+
+  const userStoriesData = usePostStore(state =>
+    displayUser ? state.userStories[displayUser.id] : undefined
+  )
+  const userStories = userStoriesData || []
 
   const userPostsData = usePostStore(state =>
     displayUser ? state.userPosts[displayUser.id] : undefined
@@ -147,7 +153,7 @@ export default function ProfileScreen() {
   return (
     <YStack flex={1} backgroundColor="$background">
       <ScrollView showsVerticalScrollIndicator={false}>
-        <YStack gap="$3" paddingVertical="$3">
+        <YStack gap="$5" paddingVertical="$3">
           <XStack
             alignItems="center"
             justifyContent="space-between"
@@ -195,24 +201,7 @@ export default function ProfileScreen() {
           />
           <ProfileBio user={displayUser} isOwnProfile={isOwnProfile} />
           <ProfileActions user={displayUser} isOwnProfile={isOwnProfile} />
-          <StoryHighlights
-            highlights={profileMock.highlights}
-            username={displayUser.username}
-            avatarUrl={displayUser.avatarUrl || undefined}
-          />
-          <XStack
-            borderTopWidth={1}
-            borderColor={isDark ? 'rgba(255,255,255,0.1)' : '#e5e7eb'}
-            alignItems="center"
-            justifyContent="center"
-            paddingVertical="$3"
-            gap="$2"
-          >
-            <Grid3x3 size={22} color={activeColor} />
-            <Text fontSize="$4" color={activeColor}>
-              Posts
-            </Text>
-          </XStack>
+          <StoryHighlights stories={userStories} />
           <MediaGrid
             items={filteredPosts}
             isDark={isDark}

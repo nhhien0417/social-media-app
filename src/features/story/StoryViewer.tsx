@@ -42,16 +42,33 @@ import {
 const STORY_DURATION = 5000
 
 export default function StoryViewer() {
-  const { id: storyId } = useLocalSearchParams<{ id: string }>()
+  const {
+    id: storyId,
+    mode,
+    userId,
+  } = useLocalSearchParams<{
+    id: string
+    mode?: 'FEED' | 'HIGHLIGHT'
+    userId?: string
+  }>()
   const stories = usePostStore(state => state.stories)
+  const userStoriesMap = usePostStore(state => state.userStories)
   const addComment = useCommentStore(state => state.addComment)
   const currentUser = useCurrentUser()
   const { trackSeen, cancelTracking } = useSeenTracking()
 
   // Group stories by author
   const groupedStories = useMemo(() => {
+    if (mode === 'HIGHLIGHT' && userId) {
+      const userStories = userStoriesMap[userId] || []
+      const sortedStories = [...userStories].sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      )
+      return [sortedStories]
+    }
     return groupAndSortStories(stories, currentUser?.id)
-  }, [stories, currentUser?.id])
+  }, [stories, userStoriesMap, currentUser?.id, mode, userId])
 
   const { initialUserIndex, initialStoryIndex } = useMemo(() => {
     let userIndex = 0

@@ -33,6 +33,7 @@ interface PostState {
   stories: Post[]
   groupPosts: Record<string, Post[]>
   userPosts: Record<string, Post[]>
+  userStories: Record<string, Post[]>
   currentPost: Post | null
   isLoading: boolean
   isRefreshing: boolean
@@ -45,6 +46,7 @@ interface PostState {
   refreshStories: () => Promise<void>
   fetchGroupPosts: (groupId: string, page?: number) => Promise<void>
   fetchUserPosts: (userId: string, page?: number) => Promise<void>
+  fetchUserStories: (userId: string, page?: number) => Promise<void>
   getPostDetail: (postId: string) => Promise<void>
 
   createPost: (data: CreatePostRequest) => Promise<CreatePostResponse>
@@ -63,6 +65,7 @@ export const usePostStore = create<PostState>((set, get) => ({
   stories: [],
   groupPosts: {},
   userPosts: {},
+  userStories: {},
   currentPost: null,
   isLoading: false,
   isRefreshing: false,
@@ -187,6 +190,25 @@ export const usePostStore = create<PostState>((set, get) => ({
     }
   },
 
+  fetchUserStories: async (userId: string, page = 0) => {
+    set({ isLoading: true, error: null })
+    try {
+      const response = await getUserPostsApi(userId, page, 10, 'STORY')
+      console.log('Successful fetch user stories:', response)
+
+      set(state => ({
+        userStories: {
+          ...state.userStories,
+          [userId]: response.data.posts,
+        },
+        isLoading: false,
+      }))
+    } catch (error) {
+      console.error('Error fetching user stories:', error)
+      set({ error: 'Failed to fetch user stories', isLoading: false })
+    }
+  },
+
   getPostDetail: async (postId: string) => {
     set({ isLoading: true, error: null })
     try {
@@ -270,6 +292,9 @@ export const usePostStore = create<PostState>((set, get) => ({
             .find(p => p.id === data.postId) ||
           Object.values(oldState.userPosts)
             .flat()
+            .find(p => p.id === data.postId) ||
+          Object.values(oldState.userStories)
+            .flat()
             .find(p => p.id === data.postId)
 
         if (originalPost?.authorProfile) {
@@ -310,6 +335,15 @@ export const usePostStore = create<PostState>((set, get) => ({
           },
           {} as Record<string, Post[]>
         ),
+        userStories: Object.keys(state.userStories).reduce(
+          (acc, userId) => {
+            acc[userId] = state.userStories[userId].map(p =>
+              p.id === updatedPost.id ? updatedPost : p
+            )
+            return acc
+          },
+          {} as Record<string, Post[]>
+        ),
         currentPost:
           state.currentPost?.id === updatedPost.id
             ? updatedPost
@@ -324,6 +358,7 @@ export const usePostStore = create<PostState>((set, get) => ({
         stories: oldState.stories,
         groupPosts: oldState.groupPosts,
         userPosts: oldState.userPosts,
+        userStories: oldState.userStories,
         currentPost: oldState.currentPost,
       })
       throw error
@@ -350,6 +385,13 @@ export const usePostStore = create<PostState>((set, get) => ({
         },
         {} as Record<string, Post[]>
       ),
+      userStories: Object.keys(state.userStories).reduce(
+        (acc, userId) => {
+          acc[userId] = state.userStories[userId].filter(p => p.id !== postId)
+          return acc
+        },
+        {} as Record<string, Post[]>
+      ),
       currentPost: state.currentPost?.id === postId ? null : state.currentPost,
     }))
 
@@ -363,6 +405,7 @@ export const usePostStore = create<PostState>((set, get) => ({
         stories: oldState.stories,
         groupPosts: oldState.groupPosts,
         userPosts: oldState.userPosts,
+        userStories: oldState.userStories,
         currentPost: oldState.currentPost,
       })
       throw error
@@ -396,6 +439,13 @@ export const usePostStore = create<PostState>((set, get) => ({
         },
         {} as Record<string, Post[]>
       ),
+      userStories: Object.keys(state.userStories).reduce(
+        (acc, uid) => {
+          acc[uid] = state.userStories[uid].map(toggleLike)
+          return acc
+        },
+        {} as Record<string, Post[]>
+      ),
       currentPost: state.currentPost ? toggleLike(state.currentPost) : null,
     }))
 
@@ -409,6 +459,7 @@ export const usePostStore = create<PostState>((set, get) => ({
         stories: oldState.stories,
         groupPosts: oldState.groupPosts,
         userPosts: oldState.userPosts,
+        userStories: oldState.userStories,
         currentPost: oldState.currentPost,
       })
       throw error
