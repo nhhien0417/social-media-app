@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { Chat } from '@/types/Chat'
 import { Message } from '@/types/Message'
+import { ChatMessageEvent } from '@/types/Chat'
 import {
   getUserChatsApi,
   getChatDetailApi,
@@ -40,6 +41,10 @@ interface ChatState {
     }
   >
 
+  // Realtime State
+  onlineUsers: Set<string>
+  typingByChatId: Record<string, string[]>
+
   // Actions
   fetchChats: (refresh?: boolean) => Promise<void>
   fetchChatDetail: (chatId: string) => Promise<void>
@@ -53,6 +58,12 @@ interface ChatState {
   ) => Promise<void>
   deleteMessage: (messageId: string) => Promise<void>
   markAsRead: (chatId: string) => Promise<void>
+
+  // Realtime Actions
+  receiveNewMessage: (event: ChatMessageEvent) => void
+  receiveMessageRead: (event: ChatMessageEvent) => void
+  updateOnlineStatus: (userId: string, isOnline: boolean) => void
+  setTypingStatus: (chatId: string, userId: string, isTyping: boolean) => void
 
   clearCurrentChat: () => void
 }
@@ -70,6 +81,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
     hasNext: true,
   },
   paginationByChatId: {},
+  onlineUsers: new Set<string>(),
+  typingByChatId: {},
 
   // Actions
   fetchChats: async (refresh = false) => {
@@ -359,6 +372,105 @@ export const useChatStore = create<ChatState>((set, get) => ({
     } catch (error) {
       console.error('Error marking as read:', error)
     }
+  },
+
+  // Realtime Actions
+  receiveNewMessage: event => {
+    if (!event.chatId || !event.messageId) return
+
+    const newMessage: Message = {
+      id: event.messageId,
+      chatId: event.chatId,
+      senderId: event.sender?.id || '',
+      content: event.content,
+      attachments: event.attachments,
+      createdAt: event.createdAt || new Date().toISOString(),
+      updatedAt: event.createdAt || new Date().toISOString(),
+      status: 'sent',
+    }
+
+    set(state => {
+      const existingMessages = state.messagesByChatId[event.chatId!] || []
+      const isDuplicate = existingMessages.some(m => m.id === event.messageId)
+      if (isDuplicate) return {}
+
+      // Update messages
+      const updatedMessages = [newMessage, ...existingMessages]
+
+      // Update chat list
+      const lastMsgText =
+        event.content || (event.attachments?.length ? 'Sent an attachment' : '')
+      const chatIndex = state.chats.findIndex(c => c.id === event.chatId)
+      let updatedChats = state.chats
+
+      if (chatIndex > -1) {
+        const updatedChat = {
+          ...state.chats[chatIndex],
+          lastMessage: lastMsgText,
+          lastMessageTime: event.createdAt || new Date().toISOString(),
+          lastMessageSenderId: event.sender?.id || '',
+          unreadCount: state.chats[chatIndex].unreadCount + 1,
+        }
+        updatedChats = [
+          updatedChat,
+          ...state.chats.filter((_, i) => i !== chatIndex),
+        ]
+      }
+
+      return {
+        messagesByChatId: {
+          ...state.messagesByChatId,
+          [event.chatId!]: updatedMessages,
+        },
+        chats: updatedChats,
+      }
+    })
+  },
+
+  receiveMessageRead: event => {
+    if (!event.chatId || !event.readBy) return
+
+    set(state => {
+      const messages = state.messagesByChatId[event.chatId!] || []
+      const updatedMessages = messages.map(m =>
+        m.id === event.messageId ? { ...m, readBy: event.readBy } : m
+      )
+      return {
+        messagesByChatId: {
+          ...state.messagesByChatId,
+          [event.chatId!]: updatedMessages,
+        },
+      }
+    })
+  },
+
+  updateOnlineStatus: (userId, isOnline) => {
+    set(state => {
+      const newOnlineUsers = new Set(state.onlineUsers)
+      if (isOnline) {
+        newOnlineUsers.add(userId)
+      } else {
+        newOnlineUsers.delete(userId)
+      }
+      return { onlineUsers: newOnlineUsers }
+    })
+  },
+
+  setTypingStatus: (chatId, userId, isTyping) => {
+    set(state => {
+      const current = state.typingByChatId[chatId] || []
+      let updated: string[]
+
+      if (isTyping) {
+        updated = current.includes(userId) ? current : [...current, userId]
+      } else {
+        updated = current.filter(id => id !== userId)
+      }
+
+      return {
+        typingByChatId: { ...state.typingByChatId, [chatId]: updated },
+      }
+    })
   },
 
   clearCurrentChat: () => {

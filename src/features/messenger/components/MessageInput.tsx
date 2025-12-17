@@ -29,6 +29,7 @@ import {
   getMediaItemsFromPicker,
   MediaItem,
 } from '@/utils/MediaUtils'
+import { useSendTyping } from '@/hooks/useChatWebSocket'
 
 interface MessageInputProps {
   chatId: string
@@ -39,6 +40,7 @@ export default function MessageInput({ chatId }: MessageInputProps) {
   const inputRef = useRef<any>(null)
   const theme = useThemeName()
   const { sendMessage } = useChatStore()
+  const { sendTyping, stopTyping } = useSendTyping(chatId)
 
   const [selectedMedia, setSelectedMedia] = useState<MediaItem[]>([])
   const [showMediaPicker, setShowMediaPicker] = useState(false)
@@ -165,6 +167,7 @@ export default function MessageInput({ chatId }: MessageInputProps) {
     )
       return
 
+    stopTyping()
     setIsSending(true)
     try {
       const mediaToSend = [...selectedMedia]
@@ -341,7 +344,10 @@ export default function MessageInput({ chatId }: MessageInputProps) {
               flex={1}
               placeholder="Type a message..."
               value={text}
-              onChangeText={setText}
+              onChangeText={value => {
+                setText(value)
+                if (value.length > 0) sendTyping()
+              }}
               borderRadius="$4"
               backgroundColor="$gray2"
               paddingHorizontal="$3"

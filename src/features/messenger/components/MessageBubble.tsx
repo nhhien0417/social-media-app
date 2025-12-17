@@ -15,7 +15,15 @@ import BubbleFile from './BubbleFile'
 
 const TEN_MINUTES_MS = 10 * 60 * 1000
 
-export default function MessageBubble({ chatId }: { chatId: string }) {
+interface MessageBubbleProps {
+  chatId: string
+  typingUsers?: string[]
+}
+
+export default function MessageBubble({
+  chatId,
+  typingUsers = [],
+}: MessageBubbleProps) {
   const theme = useThemeName()
   const [expandedMessages, setExpandedMessages] = useState<Set<string>>(
     new Set()
@@ -194,6 +202,22 @@ export default function MessageBubble({ chatId }: { chatId: string }) {
         onEndReached={onEndReached}
         onEndReachedThreshold={0.5}
         showsVerticalScrollIndicator={false}
+        ListHeaderComponent={
+          typingUsers.length > 0 ? (
+            <XStack paddingHorizontal="$3" paddingVertical="$2">
+              <YStack
+                backgroundColor={theme === 'dark' ? '$gray8' : '$gray4'}
+                borderRadius={15}
+                paddingHorizontal="$3"
+                paddingVertical="$2"
+              >
+                <Text fontSize="$2" color={metaTextColor}>
+                  Typing...
+                </Text>
+              </YStack>
+            </XStack>
+          ) : null
+        }
       />
       <MessageOptionsSheet
         visible={showOptions}

@@ -11,8 +11,6 @@ const getWebSocketURL = (): string => {
     }
     return 'http://192.168.1.4:9101/ws'
   }
-
-  // Production mode - Use Gateway route or direct connection
   return 'https://notifications.your-domain.com/ws'
 }
 
@@ -37,7 +35,6 @@ class StompService {
 
     this.currentUserId = userId
     const url = getWebSocketURL()
-    console.log('Connecting to STOMP WebSocket:', url)
 
     const config: StompConfig = {
       // Use SockJS for transport compatibility
@@ -50,7 +47,7 @@ class StompService {
       },
 
       // Auto reconnect configuration
-      reconnectDelay: 5000, // 5 seconds
+      reconnectDelay: 5000,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
 
@@ -95,20 +92,6 @@ class StompService {
         // Emit disconnect event
         this.emit('disconnect', { frame })
       },
-
-      // Debug logs (disable in production)
-      debug: __DEV__
-        ? (str: string) => {
-            // Only log important messages, not all frames
-            if (
-              str.includes('ERROR') ||
-              str.includes('CONNECTED') ||
-              str.includes('DISCONNECT')
-            ) {
-              console.log('STOMP:', str)
-            }
-          }
-        : undefined,
     }
 
     // Create and activate STOMP client
