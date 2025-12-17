@@ -1,11 +1,13 @@
 import { XStack, Text, YStack } from 'tamagui'
 import { FileText, Download } from '@tamagui/lucide-icons'
-import { Linking, Pressable } from 'react-native'
+import { Pressable } from 'react-native'
+import * as FileSystem from 'expo-file-system/legacy'
+import { shareAsync } from 'expo-sharing'
 
 interface BubbleFileProps {
   uri: string
   name?: string
-  size?: number // bytes
+  size?: number 
 }
 
 export default function BubbleFile({
@@ -13,8 +15,20 @@ export default function BubbleFile({
   name = 'File',
   size,
 }: BubbleFileProps) {
-  const handleOpen = () => {
-    Linking.openURL(uri)
+  const handleOpen = async () => {
+    try {
+      const cacheDir = FileSystem.cacheDirectory
+      if (!cacheDir) {
+        console.warn('No cache directory available')
+        return
+      }
+
+      const fileUri = cacheDir + name
+      const { uri: localUri } = await FileSystem.downloadAsync(uri, fileUri)
+      await shareAsync(localUri)
+    } catch (e) {
+      console.error('Download error:', e)
+    }
   }
 
   return (

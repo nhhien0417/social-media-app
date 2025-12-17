@@ -6,7 +6,7 @@ import { useChatStore } from '@/stores/chatStore'
 import { getUserId } from '@/utils/SecureStore'
 
 import { formatTime } from '@/utils/FormatTime'
-import { getMediaTypeFromUrl } from '@/utils/GetMediaType'
+import { getMediaTypeFromUrl } from '@/utils/MediaUtils'
 import BubbleImage from './BubbleImage'
 import BubbleVideo from './BubbleVideo'
 import BubbleAudio from './BubbleAudio'
@@ -93,7 +93,7 @@ export default function MessageBubble({ chatId }: { chatId: string }) {
           case MessageType.AUDIO:
             return <BubbleAudio key={key} uri={url} />
           default:
-            return <BubbleFile key={key} uri={url} />
+            return <BubbleFile key={key} uri={url} name="File" />
         }
       }
 

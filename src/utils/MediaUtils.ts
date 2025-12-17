@@ -1,3 +1,5 @@
+import { MessageType } from '@/types/Message'
+
 export type MediaItem = {
   uri: string
   name?: string
@@ -138,4 +140,17 @@ export const urlToDataURI = async (url: string): Promise<string> => {
     reader.onerror = reject
     reader.readAsDataURL(blob)
   })
+}
+
+export const getMediaTypeFromUrl = (url: string): MessageType => {
+  if (!url) return MessageType.TEXT
+  const lowerUrl = url.toLowerCase()
+
+  if (lowerUrl.includes('audio_')) return MessageType.AUDIO
+
+  if (lowerUrl.match(/\.(jpeg|jpg|png|gif|webp|bmp|heic)$/))
+    return MessageType.IMAGE
+  if (lowerUrl.match(/\.(mp4|mov|avi|wmv|flv|mkv)$/)) return MessageType.VIDEO
+  if (lowerUrl.match(/\.(mp3|wav|ogg|m4a|aac|webm)$/)) return MessageType.AUDIO
+  return MessageType.FILE
 }

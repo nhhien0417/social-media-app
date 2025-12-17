@@ -1,71 +1,98 @@
+import { useState, useEffect } from 'react'
 import { XStack, Text, YStack } from 'tamagui'
 import { Play, Pause } from '@tamagui/lucide-icons'
-import { useState } from 'react'
 import { Pressable } from 'react-native'
-import { API_BASE_URL } from '@/utils/BaseUrl'
+import { useAudioPlayer } from 'expo-audio'
 
 interface BubbleAudioProps {
   uri: string
   duration?: number
 }
 
-const getFullUrl = (uri: string) => {
-  if (!uri) return ''
-  if (uri.startsWith('http')) return uri
-  const origin = API_BASE_URL.split('/api')[0]
-  return `${origin}${uri.startsWith('/') ? '' : '/'}${uri}`
+const formatTime = (seconds: number) => {
+  if (!seconds) return '0:00'
+  const mins = Math.floor(seconds / 60)
+  const secs = Math.floor(seconds % 60)
+  return `${mins}:${secs.toString().padStart(2, '0')}`
 }
 
 export default function BubbleAudio({ uri, duration }: BubbleAudioProps) {
+  const player = useAudioPlayer({ uri })
   const [isPlaying, setIsPlaying] = useState(false)
-  const fullUri = getFullUrl(uri)
+  const [currentPosition, setCurrentPosition] = useState(0)
+  const [totalDuration, setTotalDuration] = useState(duration || 0)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsPlaying(player.playing)
+      setCurrentPosition(player.currentTime)
+      if (player.duration) {
+        setTotalDuration(player.duration)
+      }
+    }, 200)
+    return () => clearInterval(interval)
+  }, [player])
 
   const handleTogglePlay = () => {
-    setIsPlaying(!isPlaying)
+    if (isPlaying) {
+      player.pause()
+      setIsPlaying(false)
+    } else {
+      player.play()
+      setIsPlaying(true)
+    }
   }
+
+  const progress =
+    totalDuration > 0 ? (currentPosition / totalDuration) * 100 : 0
 
   return (
     <XStack
-      backgroundColor="$backgroundPress"
-      padding="$3"
-      borderRadius={20}
-      gap="$3"
+      backgroundColor="$background"
+      paddingHorizontal="$3"
+      paddingVertical="$2"
+      borderRadius={50}
+      gap="$2"
       alignItems="center"
-      minWidth={180}
+      maxWidth={250}
+      borderWidth={1}
+      borderColor="$borderColor"
     >
       <Pressable onPress={handleTogglePlay}>
         <YStack
-          width={40}
-          height={40}
+          width={32}
+          height={32}
           backgroundColor="$color5"
-          borderRadius={20}
+          borderRadius={16}
           alignItems="center"
           justifyContent="center"
         >
           {isPlaying ? (
-            <Pause size={20} color="$color" />
+            <Pause size={16} color="$color" />
           ) : (
-            <Play size={20} color="$color" />
+            <Play size={16} color="$color" />
           )}
         </YStack>
       </Pressable>
 
-      <YStack flex={1} gap="$1">
+      <XStack flex={1} alignItems="center" gap="$2">
         <XStack
+          flex={1}
           height={4}
           backgroundColor="$color5"
           borderRadius={2}
           overflow="hidden"
         >
-          <XStack width="30%" backgroundColor="$blue10" height="100%" />
+          <XStack
+            width={`${progress}%`}
+            backgroundColor="$blue10"
+            height="100%"
+          />
         </XStack>
-        <Text fontSize="$2" color="$color10">
-          0:05 /{' '}
-          {duration
-            ? `${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')}`
-            : '0:30'}
+        <Text fontSize="$1" color="$color10" minWidth={65} textAlign="right">
+          {formatTime(currentPosition)} / {formatTime(totalDuration)}
         </Text>
-      </YStack>
+      </XStack>
     </XStack>
   )
 }
