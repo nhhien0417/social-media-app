@@ -1,11 +1,5 @@
 import { useRef, useState } from 'react'
-import {
-  Pressable,
-  StyleSheet,
-  Image,
-  ScrollView,
-  ActivityIndicator,
-} from 'react-native'
+import { Pressable, StyleSheet, Image, ScrollView } from 'react-native'
 import { Input, XStack, YStack, useThemeName } from 'tamagui'
 import {
   ChevronRight,
@@ -21,6 +15,7 @@ import Camera from '@/components/Camera'
 import {
   getMediaItemFromCamera,
   getMediaItemsFromPicker,
+  MediaItem,
 } from '@/utils/MediaUtils'
 
 interface MessageInputProps {
@@ -34,7 +29,7 @@ export default function MessageInput({ chatId }: MessageInputProps) {
   const theme = useThemeName()
   const { sendMessage } = useChatStore()
 
-  const [selectedMedia, setSelectedMedia] = useState<string[]>([])
+  const [selectedMedia, setSelectedMedia] = useState<MediaItem[]>([])
   const [showMediaPicker, setShowMediaPicker] = useState(false)
   const [showCamera, setShowCamera] = useState(false)
   const [isSending, setIsSending] = useState(false)
@@ -49,34 +44,16 @@ export default function MessageInput({ chatId }: MessageInputProps) {
       const mediaToSend = [...selectedMedia]
       const textToSend = text.trim()
 
-      if (textToSend || mediaToSend.length > 0) {
-        const firstMedia = mediaToSend.shift()
-
-        await sendMessage(
-          { chatId, content: textToSend },
-          firstMedia
-            ? {
-                uri: firstMedia,
-                name: `media_0_${Date.now()}.jpg`,
-                type: 'image/jpeg',
-              }
-            : undefined
-        )
-      }
-
-      for (let i = 0; i < mediaToSend.length; i++) {
-        await sendMessage(
-          { chatId, content: '' },
-          {
-            uri: mediaToSend[i],
-            name: `media_${i + 1}_${Date.now()}.jpg`,
-            type: 'image/jpeg',
-          }
-        )
-      }
-
       setText('')
       setSelectedMedia([])
+
+      const attachments = mediaToSend.map((item, index) => ({
+        uri: item.uri,
+        name: item.fileName || `media_${index}_${Date.now()}`,
+        type: item.mimeType || item.type || 'image/jpeg',
+      }))
+
+      await sendMessage({ chatId, content: textToSend }, attachments)
     } catch (error) {
       console.error('Failed to send message', error)
     } finally {
@@ -115,10 +92,10 @@ export default function MessageInput({ chatId }: MessageInputProps) {
           style={{ backgroundColor: isDark ? '#222' : '#f5f5f5', padding: 8 }}
         >
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {selectedMedia.map((uri, index) => (
+            {selectedMedia.map((item, index) => (
               <YStack key={index} position="relative" marginRight={8}>
                 <Image
-                  source={{ uri }}
+                  source={{ uri: item.uri }}
                   style={{ width: 100, height: 100, borderRadius: 8 }}
                 />
                 <Pressable
@@ -182,7 +159,7 @@ export default function MessageInput({ chatId }: MessageInputProps) {
         <Input
           ref={inputRef}
           flex={1}
-          placeholder="Nhắn tin..."
+          placeholder="Type your message..."
           value={text}
           onChangeText={setText}
           borderRadius="$4"
@@ -196,11 +173,7 @@ export default function MessageInput({ chatId }: MessageInputProps) {
 
         {hasText ? (
           <Pressable onPress={handleSend} disabled={isSending}>
-            {isSending ? (
-              <ActivityIndicator size="small" color={likeColor} />
-            ) : (
-              <Send size={24} color={likeColor} />
-            )}
+            <Send size={24} color={likeColor} opacity={isSending ? 0.5 : 1} />
           </Pressable>
         ) : (
           <Pressable onPress={handleLike} disabled={isSending}>
@@ -215,8 +188,7 @@ export default function MessageInput({ chatId }: MessageInputProps) {
         onClose={() => setShowMediaPicker(false)}
         onSelect={assets => {
           const mediaItems = getMediaItemsFromPicker(assets)
-          const uris = mediaItems.map(item => item.uri)
-          setSelectedMedia(prev => [...prev, ...uris])
+          setSelectedMedia(prev => [...prev, ...mediaItems])
         }}
         maxSelection={10 - selectedMedia.length}
       />
@@ -227,7 +199,7 @@ export default function MessageInput({ chatId }: MessageInputProps) {
         onClose={() => setShowCamera(false)}
         onCapture={media => {
           const mediaItem = getMediaItemFromCamera(media)
-          setSelectedMedia(prev => [...prev, mediaItem.uri])
+          setSelectedMedia(prev => [...prev, mediaItem])
         }}
       />
     </YStack>

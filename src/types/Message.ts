@@ -1,18 +1,18 @@
 export enum MessageType {
-  TEXT,
-  IMAGE,
-  VIDEO,
-  AUDIO,
-  FILE,
+  TEXT = 'TEXT',
+  IMAGE = 'IMAGE',
+  VIDEO = 'VIDEO',
+  AUDIO = 'AUDIO',
+  FILE = 'FILE',
 }
 
 export interface Message {
   id: string
   chatId: string
   senderId: string
-  type: MessageType
-  content: string
-  fileUrl: string
+  content?: string
+  attachments?: string[]
   createdAt: string
   updatedAt: string
+  status?: 'sending' | 'sent' | 'error'
 }

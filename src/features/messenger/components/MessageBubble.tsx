@@ -1,11 +1,17 @@
 import { useState, useEffect, useCallback } from 'react'
 import { FlatList, ListRenderItem } from 'react-native'
 import { Text, XStack, YStack, useThemeName } from 'tamagui'
-import { Message } from '@/types/Message'
+import { Message, MessageType } from '@/types/Message'
 import { useChatStore } from '@/stores/chatStore'
 import { getUserId } from '@/utils/SecureStore'
 
 import { formatTime } from '@/utils/FormatTime'
+import { getMediaTypeFromUrl } from '@/utils/GetMediaType'
+import BubbleImage from './BubbleImage'
+import BubbleVideo from './BubbleVideo'
+import BubbleAudio from './BubbleAudio'
+import BubbleFile from './BubbleFile'
+
 const TEN_MINUTES_MS = 10 * 60 * 1000
 
 export default function MessageBubble({ chatId }: { chatId: string }) {
@@ -75,6 +81,24 @@ export default function MessageBubble({ chatId }: { chatId: string }) {
           ? '$green8'
           : '$green4'
 
+      const renderAttachment = (url: string, index: number) => {
+        const type = getMediaTypeFromUrl(url)
+        const key = `${msg.id}-att-${index}`
+
+        switch (type) {
+          case MessageType.IMAGE:
+            return <BubbleImage key={key} uri={url} />
+          case MessageType.VIDEO:
+            return <BubbleVideo key={key} uri={url} />
+          case MessageType.AUDIO:
+            return <BubbleAudio key={key} uri={url} />
+          default:
+            return <BubbleFile key={key} uri={url} />
+        }
+      }
+
+      const attachments = msg.attachments || []
+
       return (
         <YStack key={msg.id} gap="$3" paddingVertical="$1.5">
           {(shouldForceTimestamp || isExpanded) && timestampLabel ? (
@@ -92,15 +116,44 @@ export default function MessageBubble({ chatId }: { chatId: string }) {
             <YStack
               onPress={() => toggleTimestamp(msg.id)}
               maxWidth="75%"
-              padding="$3"
               borderRadius={15}
-              backgroundColor={bubbleColor}
-              pressStyle={{ opacity: 0.85 }}
+              backgroundColor={msg.content ? bubbleColor : 'transparent'}
+              padding={msg.content ? '$3' : 0}
+              gap="$2"
+              pressStyle={msg.content ? { opacity: 0.85 } : undefined}
               cursor="pointer"
+              overflow="hidden"
             >
-              <Text color={isMe ? 'white' : '$color'}>{msg.content}</Text>
+              {/* Render Text Content */}
+              {!!msg.content && (
+                <Text color={isMe ? 'white' : '$color'}>{msg.content}</Text>
+              )}
+
+              {/* Render Attachments */}
+              {attachments.map((url, i) => (
+                <YStack key={i} borderRadius={10} overflow="hidden">
+                  {renderAttachment(url, i)}
+                </YStack>
+              ))}
             </YStack>
           </XStack>
+
+          {/* Status Message */}
+          {msg.status && (
+            <Text
+              alignSelf={isMe ? 'flex-end' : 'flex-start'}
+              fontSize="$1"
+              color={msg.status === 'error' ? '$red10' : metaTextColor}
+              paddingHorizontal="$2"
+              marginTop="$-2"
+            >
+              {msg.status === 'sending'
+                ? 'Sending...'
+                : msg.status === 'sent'
+                  ? 'Sent'
+                  : 'Failed'}
+            </Text>
+          )}
         </YStack>
       )
     },

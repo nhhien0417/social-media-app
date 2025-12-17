@@ -68,25 +68,27 @@ export const markAsReadApi = (chatId: string) => {
 
 export const sendMessageApi = async (
   data: SendMessageRequest,
-  file?: { uri: string; name: string; type: string }
+  attachments?: { uri: string; name: string; type: string }[]
 ): Promise<MessageResponse> => {
   const formData = new FormData()
   formData.append('message', JSON.stringify(data))
 
-  if (file) {
-    if (file.uri.startsWith('data:')) {
-      const blob = dataURItoBlob(file.uri)
-      formData.append('file', blob, file.name)
-    } else if (Platform.OS === 'web') {
-      const response = await fetch(file.uri)
-      const blob = await response.blob()
-      formData.append('file', blob, file.name)
-    } else {
-      formData.append('file', {
-        uri: file.uri,
-        name: file.name,
-        type: file.type,
-      } as any)
+  if (attachments && attachments.length > 0) {
+    for (const attachment of attachments) {
+      if (attachment.uri.startsWith('data:')) {
+        const blob = dataURItoBlob(attachment.uri)
+        formData.append('attachments', blob, attachment.name)
+      } else if (Platform.OS === 'web') {
+        const response = await fetch(attachment.uri)
+        const blob = await response.blob()
+        formData.append('attachments', blob, attachment.name)
+      } else {
+        formData.append('attachments', {
+          uri: attachment.uri,
+          name: attachment.name,
+          type: attachment.type,
+        } as any)
+      }
     }
   }
 

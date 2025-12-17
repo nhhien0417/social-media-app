@@ -11,6 +11,7 @@ import {
   deleteMessageApi,
   markAsReadApi,
 } from '@/api/api.chat'
+import { getUserId } from '@/utils/SecureStore'
 
 interface ChatState {
   // State
@@ -48,7 +49,7 @@ interface ChatState {
   fetchMessages: (chatId: string, refresh?: boolean) => Promise<void>
   sendMessage: (
     data: { chatId: string; content?: string },
-    file?: { uri: string; name: string; type: string }
+    files?: { uri: string; name: string; type: string }[]
   ) => Promise<void>
   deleteMessage: (messageId: string) => Promise<void>
   markAsRead: (chatId: string) => Promise<void>
@@ -127,8 +128,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
       set(state => {
         const exists = state.chats.find(c => c.id === chat.id)
         if (exists) return { currentChat: chat, isLoading: false }
+
+        const shouldAdd = !!chat.lastMessage
+
         return {
-          chats: [chat, ...state.chats],
+          chats: shouldAdd ? [chat, ...state.chats] : state.chats,
           currentChat: chat,
           isLoading: false,
         }
@@ -147,7 +151,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
       console.log('Successful delete chat:', response)
 
       set(state => {
-        // Remove messages from cache to free memory
         const { [chatId]: _, ...restMessages } = state.messagesByChatId
         const { [chatId]: __, ...restPagination } = state.paginationByChatId
 
@@ -220,34 +223,79 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
   },
 
-  sendMessage: async (data, file) => {
+  sendMessage: async (data, attachments) => {
+    const tempId = `temp-${Date.now()}`
+    const userId = await getUserId()
+    const tempMessage: Message = {
+      id: tempId,
+      chatId: data.chatId,
+      senderId: userId || 'unknown',
+      content: data.content,
+      attachments: attachments?.map(a => a.uri) || [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      status: 'sending',
+    }
+
+    set(state => {
+      const currentMessages = state.messagesByChatId[data.chatId] || []
+      return {
+        messagesByChatId: {
+          ...state.messagesByChatId,
+          [data.chatId]: [tempMessage, ...currentMessages],
+        },
+      }
+    })
+
     try {
-      const response = await sendMessageApi(data, file)
+      const response = await sendMessageApi(data, attachments)
       console.log('Successful send message:', response)
 
       set(state => {
         const currentMessages = state.messagesByChatId[data.chatId] || []
+        const updatedMessages = currentMessages.map(m =>
+          m.id === tempId ? { ...response.data, status: 'sent' } : m
+        ) as Message[]
+
+        let newChats = state.chats
+        const chatIndex = newChats.findIndex(c => c.id === data.chatId)
+
+        const lastMsgText =
+          response.data.content ||
+          (response.data.attachments?.length ? 'Sent an attachment' : '')
+
+        if (chatIndex > -1) {
+          const updatedChat = {
+            ...newChats[chatIndex],
+            lastMessage: lastMsgText,
+            lastMessageTime: response.data.createdAt,
+            lastMessageSenderId: response.data.senderId,
+          }
+          newChats = [
+            updatedChat,
+            ...newChats.filter((_, i) => i !== chatIndex),
+          ]
+        } else if (state.currentChat && state.currentChat.id === data.chatId) {
+          const newChat = {
+            ...state.currentChat,
+            lastMessage: lastMsgText,
+            lastMessageTime: response.data.createdAt,
+            lastMessageSenderId: response.data.senderId,
+          }
+          newChats = [newChat, ...newChats]
+        }
 
         return {
           messagesByChatId: {
             ...state.messagesByChatId,
-            [data.chatId]: [response.data, ...currentMessages],
+            [data.chatId]: updatedMessages,
           },
-          chats: state.chats.map(c =>
-            c.id === data.chatId
-              ? {
-                  ...c,
-                  lastMessage: response.data.content,
-                  lastMessageTime: response.data.createdAt,
-                  lastMessageSenderId: response.data.senderId,
-                }
-              : c
-          ),
+          chats: newChats,
           currentChat:
             state.currentChat?.id === data.chatId
               ? {
                   ...state.currentChat,
-                  lastMessage: response.data.content,
+                  lastMessage: lastMsgText,
                   lastMessageTime: response.data.createdAt,
                   lastMessageSenderId: response.data.senderId,
                 }
@@ -256,7 +304,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
       })
     } catch (error) {
       console.error('Error sending message:', error)
-      throw error
+      set(state => ({
+        messagesByChatId: {
+          ...state.messagesByChatId,
+          [data.chatId]: (state.messagesByChatId[data.chatId] || []).map(m =>
+            m.id === tempId ? { ...m, status: 'error' } : m
+          ),
+        },
+      }))
     }
   },
 
