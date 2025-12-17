@@ -330,10 +330,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
         return {
           messagesByChatId: {
             ...state.messagesByChatId,
-            [chatId]: state.messagesByChatId[chatId].map(m =>
-              m.id === messageId
-                ? { ...m, isDeleted: true, content: 'Message deleted' }
-                : m
+            [chatId]: state.messagesByChatId[chatId].filter(
+              m => m.id !== messageId
             ),
           },
         }

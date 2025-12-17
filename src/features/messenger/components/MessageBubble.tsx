@@ -1,3 +1,4 @@
+import MessageOptionsSheet from './MessageOptionsSheet'
 import { useState, useEffect, useCallback } from 'react'
 import { FlatList, ListRenderItem } from 'react-native'
 import { Text, XStack, YStack, useThemeName } from 'tamagui'
@@ -20,10 +21,31 @@ export default function MessageBubble({ chatId }: { chatId: string }) {
     new Set()
   )
 
-  const { messagesByChatId, paginationByChatId, fetchMessages, isLoading } =
-    useChatStore()
+  const {
+    messagesByChatId,
+    paginationByChatId,
+    fetchMessages,
+    isLoading,
+    deleteMessage,
+  } = useChatStore()
 
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(
+    null
+  )
+  const [showOptions, setShowOptions] = useState(false)
+
+  const handleDeleteMessage = async () => {
+    if (selectedMessageId) {
+      await deleteMessage(selectedMessageId)
+      setShowOptions(false)
+    }
+  }
+
+  const handleLongPress = (msgId: string) => {
+    setSelectedMessageId(msgId)
+    setShowOptions(true)
+  }
 
   useEffect(() => {
     getUserId().then(setCurrentUserId)
@@ -115,6 +137,7 @@ export default function MessageBubble({ chatId }: { chatId: string }) {
           <XStack justifyContent={isMe ? 'flex-end' : 'flex-start'}>
             <YStack
               onPress={() => toggleTimestamp(msg.id)}
+              onLongPress={() => handleLongPress(msg.id)}
               maxWidth="75%"
               borderRadius={15}
               backgroundColor={msg.content ? bubbleColor : 'transparent'}
@@ -171,6 +194,11 @@ export default function MessageBubble({ chatId }: { chatId: string }) {
         onEndReached={onEndReached}
         onEndReachedThreshold={0.5}
         showsVerticalScrollIndicator={false}
+      />
+      <MessageOptionsSheet
+        visible={showOptions}
+        onClose={() => setShowOptions(false)}
+        onDelete={handleDeleteMessage}
       />
     </YStack>
   )

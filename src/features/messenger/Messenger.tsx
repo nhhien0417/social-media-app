@@ -54,12 +54,14 @@ export function ChatList() {
 
 export function ChatDetail() {
   const { id } = useLocalSearchParams<{ id: string }>()
-  const { fetchChatDetail, fetchMessages, clearCurrentChat } = useChatStore()
+  const { fetchChatDetail, fetchMessages, clearCurrentChat, markAsRead } =
+    useChatStore()
 
   useEffect(() => {
     if (id) {
       fetchChatDetail(id)
       fetchMessages(id, true)
+      markAsRead(id)
     }
     return () => {
       clearCurrentChat()
