@@ -348,6 +348,7 @@ export default function MessageInput({ chatId }: MessageInputProps) {
                 setText(value)
                 if (value.length > 0) sendTyping()
               }}
+              onBlur={stopTyping}
               borderRadius="$4"
               backgroundColor="$gray2"
               paddingHorizontal="$3"

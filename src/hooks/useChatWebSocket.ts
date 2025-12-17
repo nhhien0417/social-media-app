@@ -101,7 +101,7 @@ export const useChatEvent = <T = ChatMessageEvent>(
 /**
  * Hook to send typing indicator with debounce
  */
-export const useSendTyping = (chatId: string, debounceMs = 500) => {
+export const useSendTyping = (chatId: string, debounceMs = 3000) => {
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const isTypingRef = useRef(false)
 

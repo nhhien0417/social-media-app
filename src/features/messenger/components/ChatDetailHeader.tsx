@@ -1,4 +1,4 @@
-import { Text, XStack } from 'tamagui'
+import { Text, XStack, YStack } from 'tamagui'
 import { ChevronLeft, Phone, Video } from '@tamagui/lucide-icons'
 import { useRouter } from 'expo-router'
 import { Pressable } from 'react-native'
@@ -9,7 +9,7 @@ import { useLocalSearchParams } from 'expo-router'
 export default function ChatDetailHeader() {
   const router = useRouter()
   const params = useLocalSearchParams<{ id?: string }>()
-  const { currentChat: chat, chats } = useChatStore()
+  const { currentChat: chat, chats, onlineUsers } = useChatStore()
 
   const fromStore = chat?.otherParticipant
   const fromList = chats.find(c => c.id === params.id)?.otherParticipant
@@ -17,6 +17,9 @@ export default function ChatDetailHeader() {
   const name = fromStore?.username || fromList?.username
   const avatar = fromStore?.avatarUrl || fromList?.avatarUrl
   const id = chat?.id || params.id
+  const otherUserId = fromStore?.id || fromList?.id
+
+  const isOnline = otherUserId ? onlineUsers.has(otherUserId) : false
 
   return (
     <XStack
@@ -42,16 +45,20 @@ export default function ChatDetailHeader() {
 
         <Avatar size={45} uri={avatar || undefined} />
 
-        <Text
-          fontSize="$5"
-          fontWeight="700"
-          numberOfLines={1}
-          ellipsizeMode="tail"
-          maxWidth={200}
-          flexShrink={1}
-        >
-          {name}
-        </Text>
+        <YStack flexShrink={1}>
+          <Text
+            fontSize="$5"
+            fontWeight="700"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            maxWidth={200}
+          >
+            {name}
+          </Text>
+          <Text fontSize="$2" color={isOnline ? '$green10' : '$gray10'}>
+            {isOnline ? 'Online' : 'Offline'}
+          </Text>
+        </YStack>
       </XStack>
 
       <XStack gap="$4">

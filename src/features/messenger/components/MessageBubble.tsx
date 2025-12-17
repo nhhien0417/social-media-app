@@ -2,7 +2,8 @@ import MessageOptionsSheet from './MessageOptionsSheet'
 import { useState, useEffect, useCallback } from 'react'
 import { FlatList, ListRenderItem } from 'react-native'
 import { Text, XStack, YStack, useThemeName } from 'tamagui'
-import { Message, MessageType } from '@/types/Message'
+import { TypingIndicator } from './TypingIndicator'
+import { MessageType, Message } from '@/types/Message'
 import { useChatStore } from '@/stores/chatStore'
 import { getUserId } from '@/utils/SecureStore'
 
@@ -102,6 +103,12 @@ export default function MessageBubble({
 
       const isExpanded = expandedMessages.has(msg.id)
       const isMe = currentUserId && msg.senderId === currentUserId
+      const isLastMyMessage = isMe && index === 0
+
+      const isSeen =
+        (msg as any).readBy &&
+        (msg as any).readBy.length > 1 &&
+        (msg as any).readBy.some((id: string) => id !== currentUserId)
 
       const bubbleColor = isMe
         ? theme === 'dark'
@@ -169,10 +176,10 @@ export default function MessageBubble({
             </YStack>
           </XStack>
 
-          {/* Status Message */}
-          {msg.status && (
+          {/* Status Message - Only show on last message from current user */}
+          {isLastMyMessage && msg.status && (
             <Text
-              alignSelf={isMe ? 'flex-end' : 'flex-start'}
+              alignSelf="flex-end"
               fontSize="$1"
               color={msg.status === 'error' ? '$red10' : metaTextColor}
               paddingHorizontal="$2"
@@ -180,9 +187,11 @@ export default function MessageBubble({
             >
               {msg.status === 'sending'
                 ? 'Sending...'
-                : msg.status === 'sent'
-                  ? 'Sent'
-                  : 'Failed'}
+                : msg.status === 'error'
+                  ? 'Failed'
+                  : isSeen
+                    ? 'Seen'
+                    : 'Sent'}
             </Text>
           )}
         </YStack>
@@ -206,14 +215,12 @@ export default function MessageBubble({
           typingUsers.length > 0 ? (
             <XStack paddingHorizontal="$3" paddingVertical="$2">
               <YStack
-                backgroundColor={theme === 'dark' ? '$gray8' : '$gray4'}
+                backgroundColor={theme === 'dark' ? '$green8' : '$green4'}
                 borderRadius={15}
                 paddingHorizontal="$3"
                 paddingVertical="$2"
               >
-                <Text fontSize="$2" color={metaTextColor}>
-                  Typing...
-                </Text>
+                <TypingIndicator />
               </YStack>
             </XStack>
           ) : null
