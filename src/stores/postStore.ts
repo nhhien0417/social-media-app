@@ -37,6 +37,7 @@ interface PostState {
   currentPost: Post | null
   isLoading: boolean
   isRefreshing: boolean
+  isFetchingPosts: boolean
   error: string | null
 
   // Pagination State
@@ -71,15 +72,21 @@ export const usePostStore = create<PostState>((set, get) => ({
   currentPost: null,
   isLoading: false,
   isRefreshing: false,
+  isFetchingPosts: false,
   error: null,
   feedPagination: { page: 0, hasNext: true },
   groupPostsPagination: {},
 
   // Actions
   fetchPosts: async (refresh = false) => {
-    const { feedPagination, isLoading, isRefreshing } = get()
+    const { feedPagination, isLoading, isRefreshing, posts, isFetchingPosts } =
+      get()
 
-    if (isLoading || isRefreshing) {
+    if (isLoading || isRefreshing || isFetchingPosts) {
+      return
+    }
+
+    if (!refresh && posts.length > 0 && feedPagination.page === 0) {
       return
     }
 
@@ -88,6 +95,8 @@ export const usePostStore = create<PostState>((set, get) => ({
     if (!refresh && !feedPagination.hasNext) {
       return
     }
+
+    set({ isFetchingPosts: true })
 
     if (refresh) {
       set({ isRefreshing: true, error: null })
@@ -114,6 +123,7 @@ export const usePostStore = create<PostState>((set, get) => ({
         },
         isLoading: false,
         isRefreshing: false,
+        isFetchingPosts: false,
       }))
     } catch (error) {
       console.error('Error fetching posts:', error)
@@ -121,6 +131,7 @@ export const usePostStore = create<PostState>((set, get) => ({
         error: 'Failed to fetch posts',
         isLoading: false,
         isRefreshing: false,
+        isFetchingPosts: false,
       })
     }
   },
