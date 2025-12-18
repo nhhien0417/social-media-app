@@ -14,8 +14,6 @@ export type SignUpData = {
   password: string
 }
 
-export type RefreshTokenData = { refreshToken: string }
-
 export type GoogleLoginData = { idToken: string }
 
 // --- Responses ---
@@ -26,8 +24,6 @@ export type AuthResponse = GenericResponse<{
   accessToken: string
   refreshToken: string
 }>
-
-export type RefreshTokenResponse = GenericResponse<string>
 
 // --- API Functions ---
 
@@ -41,10 +37,6 @@ export const signUpApi = (data: SignUpData) => {
 
 export const signOutApi = (email: string) => {
   return ApiClient.post<string>(`${ENDPOINTS.IDENTITY.LOGOUT}?email=${email}`)
-}
-
-export const refreshTokenApi = (data: RefreshTokenData) => {
-  return ApiClient.post<RefreshTokenResponse>(ENDPOINTS.IDENTITY.TOKEN, data)
 }
 
 export const googleLoginApi = (data: GoogleLoginData) => {

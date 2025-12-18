@@ -1,18 +1,7 @@
 import { Client, StompConfig, IFrame, IMessage } from '@stomp/stompjs'
 import SockJS from 'sockjs-client'
-import { Platform } from 'react-native'
 import { getAccessToken } from '@/utils/SecureStore'
-
-const getWebSocketURL = (): string => {
-  if (__DEV__) {
-    // Development mode
-    if (Platform.OS === 'web') {
-      return 'http://localhost:9101/ws'
-    }
-    return 'http://192.168.1.4:9101/ws'
-  }
-  return 'https://notifications.your-domain.com/ws'
-}
+import { NOTIFICATION_WEBSOCKET_URL } from '@/utils/BaseUrl'
 
 /**
  * STOMP Service - Singleton pattern
@@ -34,7 +23,7 @@ class StompService {
     }
 
     this.currentUserId = userId
-    const url = getWebSocketURL()
+    const url = NOTIFICATION_WEBSOCKET_URL
 
     const config: StompConfig = {
       // Use SockJS for transport compatibility

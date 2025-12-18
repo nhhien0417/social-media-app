@@ -4,10 +4,10 @@ import {
   saveTokens,
   removeTokensAndUserId,
 } from '../utils/SecureStore'
-import { refreshTokenApi } from './api.auth'
+import { refreshTokenApi } from './api.token'
 import { router } from 'expo-router'
 import { ENDPOINTS } from './endpoints'
-import { API_BASE_URL } from '@/utils/BaseUrl'
+import { API_URL } from '@/utils/BaseUrl'
 
 let isRefreshing = false
 let failedQueue: Array<{
@@ -119,7 +119,7 @@ export const uploadFormData = <T = any>(
 
       const url = endpoint.startsWith('http')
         ? endpoint
-        : `${API_BASE_URL}${endpoint}`
+        : `${API_URL}${endpoint}`
 
       xhr.open(method, url, true)
 

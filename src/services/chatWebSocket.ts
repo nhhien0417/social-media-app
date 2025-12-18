@@ -1,18 +1,8 @@
 import { Client, StompConfig, IFrame, IMessage } from '@stomp/stompjs'
 import SockJS from 'sockjs-client'
-import { Platform } from 'react-native'
 import { getAccessToken } from '@/utils/SecureStore'
 import { ChatMessageEvent } from '@/types/Chat'
-
-const getChatWebSocketURL = (): string => {
-  if (__DEV__) {
-    if (Platform.OS === 'web') {
-      return 'http://localhost:9086/chat/ws'
-    }
-    return 'http://192.168.1.4:9086/chat/ws'
-  }
-  return 'https://chat.your-domain.com/chat/ws'
-}
+import { CHAT_WEBSOCKET_URL } from '@/utils/BaseUrl'
 
 /**
  * Chat STOMP Service - Singleton pattern
@@ -34,7 +24,7 @@ class ChatStompService {
     }
 
     this.currentUserId = userId
-    const url = getChatWebSocketURL()
+    const url = CHAT_WEBSOCKET_URL
 
     // Get JWT token (must await!)
     const token = await getAccessToken()

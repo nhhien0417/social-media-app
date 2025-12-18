@@ -1,4 +1,4 @@
-import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
+import { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import {
   getAccessToken,
   getRefreshToken,
@@ -7,17 +7,8 @@ import {
 } from '../utils/SecureStore'
 import { ENDPOINTS } from './endpoints'
 import { router } from 'expo-router'
-import { refreshTokenApi } from './api.auth'
-import { API_BASE_URL } from '@/utils/BaseUrl'
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
-  },
-})
+import { refreshTokenApi } from './api.token'
+import api from './axios.instance'
 
 let isRefreshing = false
 let failedQueue: Array<{
