@@ -256,6 +256,10 @@ export const usePostStore = create<PostState>((set, get) => ({
       console.log('Successful create post:', response)
       let newPost = response.data
 
+      if (!newPost.likes) {
+        newPost = { ...newPost, likes: [] }
+      }
+
       if (!newPost.authorProfile) {
         const currentUser = useProfileStore.getState().currentUser
         if (currentUser && currentUser.id === data.userId) {
@@ -436,9 +440,11 @@ export const usePostStore = create<PostState>((set, get) => ({
   likePost: async (postId: string, userId: string) => {
     const toggleLike = (post: Post) => {
       if (post.id !== postId) return post
-      const likes = post.likes.includes(userId)
-        ? post.likes.filter(id => id !== userId)
-        : [...post.likes, userId]
+
+      const currentLikes = post.likes || []
+      const likes = currentLikes.includes(userId)
+        ? currentLikes.filter(id => id !== userId)
+        : [...currentLikes, userId]
       return { ...post, likes }
     }
 

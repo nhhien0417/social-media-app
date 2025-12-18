@@ -265,11 +265,6 @@ export default function NewPostScreen() {
 
       updatePost(updateData)
         .then(() => {
-          if (mode === 'STORY') {
-            usePostStore.getState().refreshStories()
-          } else {
-            usePostStore.getState().refreshPosts()
-          }
           finishUpdating()
           setIsSubmitting(false)
         })
@@ -317,17 +312,6 @@ export default function NewPostScreen() {
 
       createPost(postData)
         .then(() => {
-          if (mode === 'STORY') {
-            usePostStore.getState().refreshStories()
-          } else {
-            usePostStore.getState().refreshPosts()
-            if (params.groupId) {
-              usePostStore
-                .getState()
-                .fetchGroupPosts(params.groupId)
-                .catch(console.error)
-            }
-          }
           finishPosting()
           setIsSubmitting(false)
         })
