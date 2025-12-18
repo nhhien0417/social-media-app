@@ -95,13 +95,14 @@ export type LikeCommentResponse = GenericResponse<Comment>
 
 // --- API Functions ---
 
-export const getFeedApi = (type: PostType, page = 0, size = 10) => {
+export const getFeedApi = (type: PostType, page = 0, size?: number) => {
+  const pageSize = size ?? (type === 'STORY' ? 1000 : 15)
   return ApiClient.get<GetPostsResponse>(
-    `${ENDPOINTS.POSTS.POST_FEED}?type=${type}&page=${page}&size=${size}`
+    `${ENDPOINTS.POSTS.POST_FEED}?type=${type}&page=${page}&size=${pageSize}`
   )
 }
 
-export const getGroupPostsApi = (groupId: string, page = 0, size = 10) => {
+export const getGroupPostsApi = (groupId: string, page = 0, size = 15) => {
   return ApiClient.get<GetPostsResponse>(
     `${ENDPOINTS.POSTS.POST_GROUP(groupId)}?page=${page}&size=${size}`
   )
@@ -109,12 +110,12 @@ export const getGroupPostsApi = (groupId: string, page = 0, size = 10) => {
 
 export const getUserPostsApi = (
   userId: string,
+  type: PostType,
   page = 0,
-  size = 10,
-  type: PostType = 'POST'
+  size = 1000
 ) => {
   return ApiClient.get<GetPostsResponse>(
-    `${ENDPOINTS.POSTS.POST_PROFILE(userId)}?page=${page}&size=${size}&type=${type}`
+    `${ENDPOINTS.POSTS.POST_PROFILE(userId)}?type=${type}&page=${page}&size=${size}`
   )
 }
 

@@ -1,11 +1,12 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import {
   ScrollView,
   Image,
   StyleSheet,
   Pressable,
   RefreshControl,
-  Alert,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
 } from 'react-native'
 import {
   YStack,
@@ -45,7 +46,6 @@ import Avatar from '@/components/Avatar'
 import { useCurrentUser } from '@/hooks/useProfile'
 import PostingStatus from '../feed/components/PostingStatus'
 import DeleteConfirmModal from '../feed/components/DeleteConfirmModal'
-import { usePostStatus } from '@/providers/PostStatusProvider'
 
 type GroupTab = 'discussion' | 'members' | 'about' | 'yourPosts'
 
@@ -74,6 +74,10 @@ export default function GroupDetailScreen() {
   const groupPostsData = usePostStore(state => state.groupPosts[groupId])
   const groupPosts = groupPostsData || []
   const fetchGroupPosts = usePostStore(state => state.fetchGroupPosts)
+  const groupPostsPagination = usePostStore(
+    state => state.groupPostsPagination[groupId]
+  )
+  const isLoadingPosts = usePostStore(state => state.isLoading)
 
   const currentUser = useCurrentUser()
   const [activeTab, setActiveTab] = useState<GroupTab>('discussion')
@@ -124,7 +128,7 @@ export default function GroupDetailScreen() {
     switch (activeTab) {
       case 'discussion':
       case 'yourPosts':
-        fetchGroupPosts(groupId)
+        fetchGroupPosts(groupId, false)
         break
       case 'members':
         fetchGroupMembers(groupId)
@@ -134,6 +138,28 @@ export default function GroupDetailScreen() {
         break
     }
   }, [activeTab, groupId, currentGroup?.role])
+
+  const handleScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const { layoutMeasurement, contentOffset, contentSize } =
+        event.nativeEvent
+
+      const threshold = layoutMeasurement.height * 0.5
+      const isCloseToBottom =
+        layoutMeasurement.height + contentOffset.y >=
+        contentSize.height - threshold
+
+      if (
+        isCloseToBottom &&
+        !isLoadingPosts &&
+        groupPostsPagination?.hasNext &&
+        (activeTab === 'discussion' || activeTab === 'yourPosts')
+      ) {
+        fetchGroupPosts(groupId, false)
+      }
+    },
+    [isLoadingPosts, groupPostsPagination, groupId, activeTab, fetchGroupPosts]
+  )
 
   if (!groupId) {
     return null
@@ -180,7 +206,7 @@ export default function GroupDetailScreen() {
     switch (activeTab) {
       case 'discussion':
       case 'yourPosts':
-        await fetchGroupPosts(groupId)
+        await fetchGroupPosts(groupId, true)
         break
       case 'members':
         await fetchGroupMembers(groupId)
@@ -318,9 +344,10 @@ export default function GroupDetailScreen() {
             >
               <Pressable
                 onPress={() =>
-                  router.push(
-                    `/create?groupId=${groupId}&groupName=${encodeURIComponent(group.name)}`
-                  )
+                  router.push({
+                    pathname: '/create',
+                    params: { groupId: group.id, groupName: group.name },
+                  })
                 }
               >
                 <XStack gap="$3" alignItems="center">
@@ -714,6 +741,8 @@ export default function GroupDetailScreen() {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={400}
         refreshControl={
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
         }

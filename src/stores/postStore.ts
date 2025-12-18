@@ -39,14 +39,16 @@ interface PostState {
   isRefreshing: boolean
   error: string | null
 
+  // Pagination State
+  feedPagination: { page: number; hasNext: boolean }
+  groupPostsPagination: Record<string, { page: number; hasNext: boolean }>
+
   // Actions
-  fetchPosts: () => Promise<void>
-  refreshPosts: () => Promise<void>
+  fetchPosts: (refresh?: boolean) => Promise<void>
   fetchStories: () => Promise<void>
-  refreshStories: () => Promise<void>
-  fetchGroupPosts: (groupId: string, page?: number) => Promise<void>
-  fetchUserPosts: (userId: string, page?: number) => Promise<void>
-  fetchUserStories: (userId: string, page?: number) => Promise<void>
+  fetchGroupPosts: (groupId: string, refresh?: boolean) => Promise<void>
+  fetchUserPosts: (userId: string) => Promise<void>
+  fetchUserStories: (userId: string) => Promise<void>
   getPostDetail: (postId: string) => Promise<void>
 
   createPost: (data: CreatePostRequest) => Promise<CreatePostResponse>
@@ -70,12 +72,31 @@ export const usePostStore = create<PostState>((set, get) => ({
   isLoading: false,
   isRefreshing: false,
   error: null,
+  feedPagination: { page: 0, hasNext: true },
+  groupPostsPagination: {},
 
   // Actions
-  fetchPosts: async () => {
-    set({ isLoading: true, error: null })
+  fetchPosts: async (refresh = false) => {
+    const { feedPagination, isLoading, isRefreshing } = get()
+
+    if (isLoading || isRefreshing) {
+      return
+    }
+
+    const page = refresh ? 0 : feedPagination.page
+
+    if (!refresh && !feedPagination.hasNext) {
+      return
+    }
+
+    if (refresh) {
+      set({ isRefreshing: true, error: null })
+    } else {
+      set({ isLoading: true, error: null })
+    }
+
     try {
-      const response = await getFeedApi('POST')
+      const response = await getFeedApi('POST', page)
       console.log('Successful fetch posts:', response)
 
       const currentUserId = await getUserId()
@@ -85,30 +106,22 @@ export const usePostStore = create<PostState>((set, get) => ({
         currentUserId || undefined
       )
 
-      set({ posts: filteredPosts, isLoading: false })
+      set(state => ({
+        posts: refresh ? filteredPosts : [...state.posts, ...filteredPosts],
+        feedPagination: {
+          page: page + 1,
+          hasNext: response.data.hasNext,
+        },
+        isLoading: false,
+        isRefreshing: false,
+      }))
     } catch (error) {
       console.error('Error fetching posts:', error)
-      set({ error: 'Failed to fetch posts', isLoading: false })
-    }
-  },
-
-  refreshPosts: async () => {
-    set({ isRefreshing: true, error: null })
-    try {
-      const response = await getFeedApi('POST')
-      console.log('Successful refresh posts:', response)
-
-      const currentUserId = await getUserId()
-      const filteredPosts = feedFilter(
-        response.data.posts,
-        'POST',
-        currentUserId || undefined
-      )
-
-      set({ posts: filteredPosts, isRefreshing: false })
-    } catch (error) {
-      console.error('Error refreshing posts:', error)
-      set({ error: 'Failed to refresh posts', isRefreshing: false })
+      set({
+        error: 'Failed to fetch posts',
+        isLoading: false,
+        isRefreshing: false,
+      })
     }
   },
 
@@ -132,49 +145,57 @@ export const usePostStore = create<PostState>((set, get) => ({
     }
   },
 
-  refreshStories: async () => {
-    set({ isRefreshing: true, error: null })
-    try {
-      const response = await getFeedApi('STORY')
-      console.log('Successful refresh stories:', response)
+  fetchGroupPosts: async (groupId: string, refresh = false) => {
+    const { groupPostsPagination, isLoading, isRefreshing } = get()
 
-      const currentUserId = await getUserId()
-      const filteredStories = feedFilter(
-        response.data.posts,
-        'STORY',
-        currentUserId || undefined
-      )
-
-      set({ stories: filteredStories, isRefreshing: false })
-    } catch (error) {
-      console.error('Error refreshing stories:', error)
-      set({ error: 'Failed to refresh stories', isRefreshing: false })
+    if (isLoading || isRefreshing) {
+      return
     }
-  },
 
-  fetchGroupPosts: async (groupId: string, page = 0) => {
+    const currentPagination = groupPostsPagination[groupId] || {
+      page: 0,
+      hasNext: true,
+    }
+    const page = refresh ? 0 : currentPagination.page
+
+    if (!refresh && !currentPagination.hasNext) {
+      return
+    }
+
     set({ isLoading: true, error: null })
     try {
       const response = await getGroupPostsApi(groupId, page)
       console.log('Successful fetch group posts:', response)
 
-      set(state => ({
-        groupPosts: {
-          ...state.groupPosts,
-          [groupId]: response.data.posts,
-        },
-        isLoading: false,
-      }))
+      set(state => {
+        const currentPosts = state.groupPosts[groupId] || []
+        return {
+          groupPosts: {
+            ...state.groupPosts,
+            [groupId]: refresh
+              ? response.data.posts
+              : [...currentPosts, ...response.data.posts],
+          },
+          groupPostsPagination: {
+            ...state.groupPostsPagination,
+            [groupId]: {
+              page: page + 1,
+              hasNext: response.data.hasNext,
+            },
+          },
+          isLoading: false,
+        }
+      })
     } catch (error) {
       console.error('Error fetching group posts:', error)
       set({ error: 'Failed to fetch group posts', isLoading: false })
     }
   },
 
-  fetchUserPosts: async (userId: string, page = 0) => {
+  fetchUserPosts: async (userId: string) => {
     set({ isLoading: true, error: null })
     try {
-      const response = await getUserPostsApi(userId, page)
+      const response = await getUserPostsApi(userId, 'POST')
       console.log('Successful fetch user posts:', response)
 
       set(state => ({
@@ -190,10 +211,10 @@ export const usePostStore = create<PostState>((set, get) => ({
     }
   },
 
-  fetchUserStories: async (userId: string, page = 0) => {
+  fetchUserStories: async (userId: string) => {
     set({ isLoading: true, error: null })
     try {
-      const response = await getUserPostsApi(userId, page, 10, 'STORY')
+      const response = await getUserPostsApi(userId, 'STORY')
       console.log('Successful fetch user stories:', response)
 
       set(state => ({

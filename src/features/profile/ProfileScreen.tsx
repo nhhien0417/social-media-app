@@ -56,7 +56,7 @@ export default function ProfileScreen() {
       fetchUserStories(displayUserId)
       fetchUserPosts(displayUserId)
     }
-  }, [displayUserId])
+  }, [displayUserId, fetchUserStories, fetchUserPosts])
 
   const userStoriesData = usePostStore(state =>
     displayUser ? state.userStories[displayUser.id] : undefined

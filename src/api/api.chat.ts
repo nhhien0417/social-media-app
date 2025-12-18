@@ -48,7 +48,7 @@ export const createGetChatApi = (data: CreateGetChatRequest) => {
   return ApiClient.post<ChatResponse>(ENDPOINTS.CHAT.CHAT_CREATE_GET, data)
 }
 
-export const getUserChatsApi = (page = 0, size = 20) => {
+export const getUserChatsApi = (page = 0, size = 15) => {
   return ApiClient.get<PagedChatsResponse>(
     `${ENDPOINTS.CHAT.CHAT_ALL}?page=${page}&size=${size}`
   )

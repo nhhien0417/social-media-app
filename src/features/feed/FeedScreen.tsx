@@ -1,6 +1,6 @@
 import { FlatList, StyleSheet, BackHandler, RefreshControl } from 'react-native'
 import { YStack, XStack, Text, Separator, Spinner } from 'tamagui'
-import { Send, Moon, Sun } from '@tamagui/lucide-icons'
+import { Send } from '@tamagui/lucide-icons'
 import { Image } from 'react-native'
 import { useEffect, useCallback } from 'react'
 import Animated, {
@@ -76,26 +76,30 @@ export default function FeedScreen() {
     stories,
     isLoading,
     isRefreshing,
+    feedPagination,
     fetchPosts,
-    refreshPosts,
     fetchStories,
-    refreshStories,
   } = usePostStore()
 
   useEffect(() => {
     if (posts.length === 0) {
-      fetchPosts()
+      fetchPosts(false)
     }
-
     if (stories.length === 0) {
       fetchStories()
     }
   }, [])
 
   const onRefresh = useCallback(() => {
-    refreshPosts()
-    refreshStories()
-  }, [])
+    fetchPosts(true)
+    fetchStories()
+  }, [fetchPosts, fetchStories])
+
+  const handleLoadMore = useCallback(() => {
+    if (!isLoading && feedPagination.hasNext) {
+      fetchPosts(false)
+    }
+  }, [isLoading, feedPagination.hasNext, fetchPosts])
 
   const onScroll = useAnimatedScrollHandler({
     onScroll: e => {
@@ -193,8 +197,17 @@ export default function FeedScreen() {
         refreshControl={
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
         }
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={
+          isLoading && posts.length > 0 && feedPagination.hasNext ? (
+            <YStack padding="$4" alignItems="center">
+              <Spinner size="large" color="$color" />
+            </YStack>
+          ) : null
+        }
         ListEmptyComponent={
-          isLoading ? (
+          isLoading && posts.length === 0 ? (
             <YStack padding="$4" alignItems="center">
               <Spinner size="large" color="$color" />
             </YStack>
