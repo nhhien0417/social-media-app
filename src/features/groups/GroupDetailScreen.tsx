@@ -641,7 +641,7 @@ export default function GroupDetailScreen() {
             </YStack>
 
             {userPosts.length > 0 ? (
-              userPosts.map(post => <PostCard post={post} />)
+              userPosts.map(post => <PostCard key={post.id} post={post} />)
             ) : (
               <YStack
                 backgroundColor={cardBackground}

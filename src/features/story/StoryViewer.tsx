@@ -450,28 +450,30 @@ export default function StoryViewer() {
             </YStack>
 
             {isOwner && (
-              <Pressable
-                style={styles.moreButton}
-                hitSlop={8}
-                onPress={() => {
-                  setSeenListVisible(true)
-                  setIsPaused(true)
-                }}
-              >
-                <Eye size={24} color="#ffffff" strokeWidth={2.5} />
-              </Pressable>
-            )}
+              <>
+                <Pressable
+                  style={styles.moreButton}
+                  hitSlop={8}
+                  onPress={() => {
+                    setSeenListVisible(true)
+                    setIsPaused(true)
+                  }}
+                >
+                  <Eye size={24} color="#ffffff" strokeWidth={2.5} />
+                </Pressable>
 
-            <Pressable
-              style={styles.moreButton}
-              hitSlop={8}
-              onPress={() => {
-                setOptionsSheetVisible(true)
-                setIsPaused(true)
-              }}
-            >
-              <MoreHorizontal size={24} color="#ffffff" strokeWidth={2.5} />
-            </Pressable>
+                <Pressable
+                  style={styles.moreButton}
+                  hitSlop={8}
+                  onPress={() => {
+                    setOptionsSheetVisible(true)
+                    setIsPaused(true)
+                  }}
+                >
+                  <MoreHorizontal size={24} color="#ffffff" strokeWidth={2.5} />
+                </Pressable>
+              </>
+            )}
             <Pressable
               onPress={handleClose}
               style={styles.closeButton}

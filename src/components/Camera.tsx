@@ -515,7 +515,6 @@ export default function Camera({ visible, onClose, onCapture }: Props) {
       isRecordingRef.current = false
       setRecordingTime(0)
       setCountdown(null)
-      console.log('Resetting zoom to 0')
       setZoom(0) // Reset zoom to 1.0x
       setShowZoomControls(false) // Hide zoom controls
       setCapturedMedia(null) // Reset captured media

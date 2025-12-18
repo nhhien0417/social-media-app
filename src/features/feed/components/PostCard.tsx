@@ -8,13 +8,7 @@ import {
 import { YStack, XStack, Text, Image, View } from 'tamagui'
 import Avatar from '@/components/Avatar'
 import { Post } from '@/types/Post'
-import {
-  MoreVertical,
-  Heart,
-  MessageCircle,
-  Send,
-  Bookmark,
-} from '@tamagui/lucide-icons'
+import { MoreVertical, Heart, MessageCircle } from '@tamagui/lucide-icons'
 import ButtonIcon from '@/components/IconButton'
 import { formatDate } from '@/utils/FormatDate'
 import Comment from '@/features/comment/Comment'
@@ -156,11 +150,13 @@ function PostCard({
             {author.username}
           </Text>
         </Pressable>
-        <ButtonIcon
-          Icon={MoreVertical}
-          Size={20}
-          onPress={() => setOptionsSheetVisible(true)}
-        />
+        {(isOwner || isAdmin) && (
+          <ButtonIcon
+            Icon={MoreVertical}
+            Size={20}
+            onPress={() => setOptionsSheetVisible(true)}
+          />
+        )}
       </XStack>
       {/* Media carousel */}
       {media.length > 0 && (
@@ -281,22 +277,12 @@ function PostCard({
               </Text>
             )}
           </XStack>
-
-          <ButtonIcon Icon={Send} />
         </XStack>
-        <ButtonIcon Icon={Bookmark} />
+        {/* Time */}
+        <Text paddingHorizontal="$3" color="#888" fontSize={12}>
+          {formatDate(createdAt)}
+        </Text>
       </XStack>
-
-      {/* Time */}
-      <Text
-        paddingHorizontal="$3"
-        marginTop="$1"
-        paddingBottom="$3"
-        color="#888"
-        fontSize={12}
-      >
-        {formatDate(createdAt)}
-      </Text>
 
       {/* Comment Sheet */}
       <Comment

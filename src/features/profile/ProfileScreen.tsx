@@ -7,7 +7,12 @@ import { ProfileInfo } from './components/ProfileInfo'
 import { ProfileBio } from './components/ProfileBio'
 import { ProfileActions } from './components/ProfileActions'
 import { StoryHighlights } from './components/StoryHighlights'
-import { useCurrentUser, useUser } from '@/hooks/useProfile'
+import {
+  useCurrentUser,
+  useCurrentUserId,
+  useUser,
+  useInitProfile,
+} from '@/hooks/useProfile'
 import MediaGrid from './components/MediaGrid'
 
 import { User } from '@/types/User'
@@ -32,7 +37,10 @@ export default function ProfileScreen() {
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
 
+  useInitProfile()
+
   const currentUser = useCurrentUser()
+  const currentUserId = useCurrentUserId()
   const otherUser = useUser(userId)
 
   const displayUser = userId ? otherUser : currentUser
@@ -174,22 +182,16 @@ export default function ProfileScreen() {
               {displayUser.username}
             </Text>
 
-            <XStack gap="$3" alignItems="center">
-              {isOwnProfile ? (
-                <>
-                  <Pressable hitSlop={8} onPress={handleCreatePost}>
-                    <Plus size={25} color={navIconColor} />
-                  </Pressable>
-                  <Pressable hitSlop={8} onPress={() => setShowSettings(true)}>
-                    <Menu size={25} color={navIconColor} />
-                  </Pressable>
-                </>
-              ) : (
-                <Pressable hitSlop={8}>
+            {isOwnProfile && (
+              <XStack gap="$3" alignItems="center">
+                <Pressable hitSlop={8} onPress={handleCreatePost}>
+                  <Plus size={25} color={navIconColor} />
+                </Pressable>
+                <Pressable hitSlop={8} onPress={() => setShowSettings(true)}>
                   <Menu size={25} color={navIconColor} />
                 </Pressable>
-              )}
-            </XStack>
+              </XStack>
+            )}
           </XStack>
 
           <ProfileInfo
@@ -200,7 +202,9 @@ export default function ProfileScreen() {
             onPostsPress={handlePostsPress}
           />
           <ProfileBio user={displayUser} isOwnProfile={isOwnProfile} />
-          <ProfileActions user={displayUser} isOwnProfile={isOwnProfile} />
+          {(isOwnProfile || currentUserId) && (
+            <ProfileActions user={displayUser} isOwnProfile={isOwnProfile} />
+          )}
           <StoryHighlights stories={userStories} />
           <MediaGrid
             items={filteredPosts}

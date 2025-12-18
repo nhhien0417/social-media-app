@@ -55,12 +55,12 @@ export default function ChatDetailHeader() {
           >
             {name}
           </Text>
-          <Text fontSize="$2" color={isOnline ? '$green10' : '$gray10'}>
+          <Text fontSize="$2" color={isOnline ? '#1877F2' : '#65676B'}>
             {isOnline ? 'Online' : 'Offline'}
           </Text>
         </YStack>
       </XStack>
-
+      {/* 
       <XStack gap="$4">
         <Pressable
           onPress={() => {
@@ -94,7 +94,7 @@ export default function ChatDetailHeader() {
         >
           <Video size={23} color="$color" />
         </Pressable>
-      </XStack>
+      </XStack> */}
     </XStack>
   )
 }

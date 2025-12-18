@@ -33,7 +33,7 @@ interface ProfileState {
   initialize: () => Promise<void>
 
   // Fetchers
-  fetchUser: (userId: string) => Promise<User | null>
+  fetchUser: (userId: string, force?: boolean) => Promise<User | null>
   fetchFriends: (userId?: string) => Promise<void>
   fetchPending: () => Promise<void>
   fetchSent: () => Promise<void>
@@ -66,6 +66,9 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
 
   // Initialize
   initialize: async () => {
+    const { currentUserId } = get()
+    if (currentUserId) return
+
     try {
       const userId = await getUserId()
       if (!userId) return
@@ -109,11 +112,11 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   },
 
   // Users fetcher
-  fetchUser: async (userId: string) => {
+  fetchUser: async (userId: string, force = false) => {
     const { users } = get()
 
     const existingUser = users[userId]
-    if (existingUser) {
+    if (existingUser && !force) {
       return existingUser
     }
 

@@ -5,16 +5,20 @@ import { useRouter } from 'expo-router'
 import { ShareProfileSheet } from './ShareProfileSheet'
 import { ProfileComponentProps } from '../ProfileScreen'
 import { useProfileActions } from '@/hooks/useProfile'
+import { useChatStore } from '@/stores/chatStore'
+import UnfriendConfirmModal from './UnfriendConfirmModal'
 
 export function ProfileActions({ user, isOwnProfile }: ProfileComponentProps) {
   const router = useRouter()
   const [showShare, setShowShare] = useState(false)
+  const [showUnfriendModal, setShowUnfriendModal] = useState(false)
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
   const secondaryBackground = isDark ? 'rgba(255,255,255,0.08)' : '#e3e8f1ff'
   const secondaryTextColor = isDark ? '#f5f5f5' : '#0d131eff'
   const outlineColor = isDark ? 'rgba(255,255,255,0.4)' : '#9fa2a7ff'
 
+  const { createGetChat } = useChatStore()
   const { addFriend, cancelFriend, acceptFriend, rejectFriend, unfriend } =
     useProfileActions()
 
@@ -26,19 +30,19 @@ export function ProfileActions({ user, isOwnProfile }: ProfileComponentProps) {
     await addFriend(user.id)
     setIsProcessing(false)
   }
-  
+
   const handleAccept = async () => {
     setIsProcessing(true)
     await acceptFriend(user.id)
     setIsProcessing(false)
   }
-  
+
   const handleCancel = async () => {
     setIsProcessing(true)
     await cancelFriend(user.id)
     setIsProcessing(false)
   }
-  
+
   const handleReject = async () => {
     setIsProcessing(true)
     await rejectFriend(user.id)
@@ -48,7 +52,20 @@ export function ProfileActions({ user, isOwnProfile }: ProfileComponentProps) {
   const handleUnfriend = async () => {
     setIsProcessing(true)
     await unfriend(user.id)
+    setShowUnfriendModal(false)
     setIsProcessing(false)
+  }
+
+  const handleMessage = async () => {
+    try {
+      await createGetChat(user.id)
+      const chat = useChatStore.getState().currentChat
+      if (chat) {
+        router.push(`/message/${chat.id}`)
+      }
+    } catch (error) {
+      console.error('Failed to create chat', error)
+    }
   }
 
   const renderFriendButton = () => {
@@ -66,7 +83,7 @@ export function ProfileActions({ user, isOwnProfile }: ProfileComponentProps) {
               fontSize={15}
               fontWeight={500}
               icon={<UserCheck size={18} color={secondaryTextColor} />}
-              onPress={handleUnfriend}
+              onPress={() => setShowUnfriendModal(true)}
               disabled={isProcessing}
             >
               Friends
@@ -80,7 +97,7 @@ export function ProfileActions({ user, isOwnProfile }: ProfileComponentProps) {
               borderWidth={1}
               fontSize={15}
               fontWeight={500}
-              onPress={() => router.push(`/message/${user.id}`)}
+              onPress={handleMessage}
             >
               Message
             </Button>
@@ -201,6 +218,14 @@ export function ProfileActions({ user, isOwnProfile }: ProfileComponentProps) {
         open={showShare}
         onOpenChange={setShowShare}
         user={user}
+      />
+
+      <UnfriendConfirmModal
+        visible={showUnfriendModal}
+        onClose={() => setShowUnfriendModal(false)}
+        onConfirm={handleUnfriend}
+        isProcessing={isProcessing}
+        username={user.username}
       />
     </>
   )

@@ -350,7 +350,7 @@ export default function MessageInput({ chatId }: MessageInputProps) {
               }}
               onBlur={stopTyping}
               borderRadius="$4"
-              backgroundColor="$gray2"
+              backgroundColor={containerBackground}
               paddingHorizontal="$3"
               height={40}
               editable={!isSending && !isRecordingState}

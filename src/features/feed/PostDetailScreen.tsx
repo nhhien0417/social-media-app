@@ -10,13 +10,7 @@ import {
 } from 'react-native'
 import { YStack, XStack, Text, View, Image } from 'tamagui'
 import Avatar from '@/components/Avatar'
-import {
-  X,
-  Heart,
-  MessageCircle,
-  Send,
-  MoreHorizontal,
-} from '@tamagui/lucide-icons'
+import { X, Heart, MessageCircle, MoreHorizontal } from '@tamagui/lucide-icons'
 import ButtonIcon from '@/components/IconButton'
 import { formatDate } from '@/utils/FormatDate'
 import Comment from '@/features/comment/Comment'
@@ -272,12 +266,14 @@ function PostDetailScreen() {
           <Pressable onPress={() => router.back()} hitSlop={8}>
             <X size={28} color="white" />
           </Pressable>
-          <ButtonIcon
-            Icon={MoreHorizontal}
-            Size={24}
-            Color="white"
-            onPress={() => setOptionsSheetVisible(true)}
-          />
+          {isOwner && (
+            <ButtonIcon
+              Icon={MoreHorizontal}
+              Size={24}
+              Color="white"
+              onPress={() => setOptionsSheetVisible(true)}
+            />
+          )}
         </XStack>
       </Animated.View>
 
@@ -444,10 +440,6 @@ function PostDetailScreen() {
                 </Pressable>
               )}
             </XStack>
-
-            <Pressable hitSlop={8}>
-              <Send size={26} color="white" />
-            </Pressable>
           </XStack>
         </YStack>
       </Animated.View>

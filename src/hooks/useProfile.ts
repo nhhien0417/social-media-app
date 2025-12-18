@@ -13,13 +13,17 @@ export const useCurrentUser = () => {
   return useProfileStore(state => state.currentUser)
 }
 
+export const useCurrentUserId = () => {
+  return useProfileStore(state => state.currentUserId)
+}
+
 export const useUser = (userId?: string) => {
   const users = useProfileStore(state => state.users)
   const fetchUser = useProfileStore(state => state.fetchUser)
 
   useEffect(() => {
     if (userId) {
-      fetchUser(userId)
+      fetchUser(userId, true)
     }
   }, [userId])
 
