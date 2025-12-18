@@ -500,6 +500,7 @@ export default function PostPreview({
               <RNImage
                 source={{ uri: fullscreenMedia.url }}
                 style={styles.fullscreenMedia}
+                resizeMode="contain"
               />
               {fullscreenMedia.type === 'video' && (
                 <YStack
@@ -576,7 +577,6 @@ const styles = StyleSheet.create({
   fullscreenMedia: {
     width: SCREEN_WIDTH,
     height: SCREEN_WIDTH,
-    resizeMode: 'contain',
   },
   fullscreenBadge: {
     right: 20,

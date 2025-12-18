@@ -117,10 +117,10 @@ export const NotificationToast: React.FC<NotificationToastProps> = ({
             left: 16,
             right: 16,
             zIndex: 100000,
+            pointerEvents: 'box-none',
           },
           animatedStyle,
         ]}
-        pointerEvents="box-none"
       >
         <YStack
           backgroundColor="$background"
@@ -135,7 +135,9 @@ export const NotificationToast: React.FC<NotificationToastProps> = ({
           pressStyle={{ opacity: 0.95 }}
           borderWidth={1}
           borderColor="$borderColor"
-          pointerEvents="auto"
+          style={{
+            pointerEvents: 'auto',
+          }}
         >
           <XStack alignItems="center" gap="$3">
             <YStack>

@@ -17,7 +17,7 @@ export function ProfileInfo({
   isOwnProfile,
   onFriendsPress,
   onGroupsPress,
-  onPostsPress
+  onPostsPress,
 }: ProfileInfoProps) {
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
@@ -45,6 +45,7 @@ export function ProfileInfo({
             <Avatar
               source={{ uri: user.avatarUrl || undefined }}
               style={styles.avatarImage}
+              objectFit="cover"
             />
           </YStack>
         </YStack>
@@ -112,7 +113,6 @@ const styles = StyleSheet.create({
   avatarImage: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
   },
   avatarImageWrapper: {
     width: AVATAR_SIZE,

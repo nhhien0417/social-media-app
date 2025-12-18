@@ -44,7 +44,7 @@ function MediaItem({ url }: { url: string }) {
           width: SCREEN_WIDTH,
           height: SCREEN_HEIGHT,
         }}
-        resizeMode="contain"
+        objectFit="contain"
       />
     </View>
   )

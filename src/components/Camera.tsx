@@ -44,7 +44,7 @@ const FILTERS = [
   { id: 'vivid', name: 'Vivid', colors: 'rgba(255,100,100,0.15)' },
   { id: 'warm', name: 'Warm', colors: 'rgba(255,150,50,0.2)' },
   { id: 'cool', name: 'Cool', colors: 'rgba(50,150,255,0.2)' },
-  { id: 'bw', name: 'B&W', colors: 'rgba(0,0,0,0.4)' }, // Darker overlay for B&W effect
+  { id: 'bw', name: 'B&W', colors: 'rgba(0,0,0,0.4)' },
   { id: 'sepia', name: 'Sepia', colors: 'rgba(150,100,50,0.25)' },
 ] as const
 
@@ -160,9 +160,6 @@ const styles = StyleSheet.create({
     fontSize: 90,
     fontWeight: '700',
     color: '#FFFFFF',
-    textShadowColor: 'rgba(0,0,0,0.8)',
-    textShadowOffset: { width: 0, height: 3 },
-    textShadowRadius: 12,
     zIndex: 50,
   },
   recordingTime: {

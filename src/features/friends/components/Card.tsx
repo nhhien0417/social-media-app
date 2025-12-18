@@ -57,6 +57,7 @@ export function UserCard({
           <Image
             source={{ uri: user.avatarUrl || undefined }}
             style={styles.avatarImage}
+            resizeMode="cover"
           />
         </YStack>
       </Pressable>
@@ -190,6 +191,5 @@ const styles = StyleSheet.create({
   avatarImage: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
   },
 })

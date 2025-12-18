@@ -61,6 +61,7 @@ export const StoryHighlights = memo(function StoryHighlights({
                     <Image
                       source={{ uri: coverImage }}
                       style={styles.highlightImage}
+                      resizeMode="cover"
                     />
                   ) : (
                     <YStack
@@ -100,6 +101,5 @@ const styles = StyleSheet.create({
   highlightImage: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
   },
 })

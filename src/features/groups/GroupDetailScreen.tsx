@@ -724,6 +724,7 @@ export default function GroupDetailScreen() {
             <Image
               source={{ uri: group.backgroundUrl }}
               style={styles.coverImage}
+              resizeMode="cover"
             />
             <YStack
               position="absolute"
@@ -755,6 +756,7 @@ export default function GroupDetailScreen() {
               <Image
                 source={{ uri: group.avatarUrl }}
                 style={styles.groupAvatar}
+                resizeMode="cover"
               />
             )}
             <YStack flex={1} gap="$1">
@@ -936,12 +938,10 @@ const styles = StyleSheet.create({
   coverImage: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
   },
   groupAvatar: {
     width: 70,
     height: 70,
     borderRadius: 14,
-    resizeMode: 'cover',
   },
 })

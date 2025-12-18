@@ -42,6 +42,7 @@ function CreateStoryItem() {
                 <Avatar
                   uri={currentUser?.avatarUrl || undefined}
                   style={styles.image}
+                  objectFit="cover"
                 />
               </YStack>
             </YStack>
@@ -151,7 +152,6 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
   },
 })
 

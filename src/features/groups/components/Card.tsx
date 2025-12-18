@@ -52,7 +52,11 @@ export function GroupCard({
       >
         <XStack alignItems="center" gap="$3">
           <YStack style={styles.avatar}>
-            <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
+            <Image
+              source={{ uri: avatarUrl }}
+              style={styles.avatarImage}
+              resizeMode="cover"
+            />
           </YStack>
 
           <YStack flex={1} gap="$1.5">
@@ -143,6 +147,5 @@ const styles = StyleSheet.create({
   avatarImage: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
   },
 })

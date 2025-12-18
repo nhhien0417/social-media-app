@@ -43,8 +43,7 @@ export default function GroupFormScreen() {
   const router = useRouter()
   const params = useLocalSearchParams()
   const insets = useSafeAreaInsets()
-  const { createGroup, updateGroup, currentGroup, groups } =
-    useGroupStore()
+  const { createGroup, updateGroup, currentGroup, groups } = useGroupStore()
 
   const themeName = useThemeName()
   const isDark = themeName === 'dark' || themeName.includes('dark')
@@ -247,7 +246,9 @@ export default function GroupFormScreen() {
                   backgroundColor="rgba(0,0,0,0.6)"
                   icon={<CameraIcon size={16} color="white" />}
                   onPress={() => handleOpenSelection('background')}
-                  pointerEvents="none" // Pass press to parent
+                  style={{
+                    pointerEvents: 'none',
+                  }}
                 />
               </YStack>
             </Pressable>
@@ -298,7 +299,9 @@ export default function GroupFormScreen() {
                   backgroundColor={primaryColor}
                   icon={<CameraIcon size={14} color="white" />}
                   onPress={() => handleOpenSelection('avatar')}
-                  pointerEvents="none" // Pass press to parent
+                  style={{
+                    pointerEvents: 'none',
+                  }}
                 />
               </YStack>
             </Pressable>
