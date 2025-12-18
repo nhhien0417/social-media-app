@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Button, XStack, useThemeName } from 'tamagui'
 import { Share2, UserPlus, UserMinus, UserCheck } from '@tamagui/lucide-icons'
 import { useRouter } from 'expo-router'
-import { ShareProfileSheet } from './ShareProfileSheet'
 import { ProfileComponentProps } from '../ProfileScreen'
 import { useProfileActions } from '@/hooks/useProfile'
 import { useChatStore } from '@/stores/chatStore'
@@ -10,7 +9,6 @@ import UnfriendConfirmModal from './UnfriendConfirmModal'
 
 export function ProfileActions({ user, isOwnProfile }: ProfileComponentProps) {
   const router = useRouter()
-  const [showShare, setShowShare] = useState(false)
   const [showUnfriendModal, setShowUnfriendModal] = useState(false)
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
@@ -180,45 +178,23 @@ export function ProfileActions({ user, isOwnProfile }: ProfileComponentProps) {
     <>
       <XStack gap="$3" paddingHorizontal="$3">
         {isOwnProfile ? (
-          <>
-            <Button
-              flex={1}
-              borderRadius="$5"
-              backgroundColor={secondaryBackground}
-              color={secondaryTextColor}
-              borderColor={outlineColor}
-              borderWidth={1}
-              fontSize={15}
-              fontWeight={500}
-              onPress={() => router.push('/profile/edit')}
-            >
-              Edit Profile
-            </Button>
-            <Button
-              flex={1}
-              borderRadius="$5"
-              backgroundColor={secondaryBackground}
-              color={secondaryTextColor}
-              borderColor={outlineColor}
-              borderWidth={1}
-              fontSize={15}
-              fontWeight={500}
-              icon={<Share2 size={18} color={secondaryTextColor} />}
-              onPress={() => setShowShare(true)}
-            >
-              Share Profile
-            </Button>
-          </>
+          <Button
+            flex={1}
+            borderRadius="$5"
+            backgroundColor={secondaryBackground}
+            color={secondaryTextColor}
+            borderColor={outlineColor}
+            borderWidth={1}
+            fontSize={15}
+            fontWeight={500}
+            onPress={() => router.push('/profile/edit')}
+          >
+            Edit Profile
+          </Button>
         ) : (
           <>{renderFriendButton()}</>
         )}
       </XStack>
-
-      <ShareProfileSheet
-        open={showShare}
-        onOpenChange={setShowShare}
-        user={user}
-      />
 
       <UnfriendConfirmModal
         visible={showUnfriendModal}

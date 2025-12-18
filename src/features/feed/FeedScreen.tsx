@@ -44,7 +44,7 @@ function HeaderContent() {
           style={{ width: 25, height: 25 }}
         />
         <Text fontFamily="$heading" fontSize={25} fontWeight="600">
-          Valorant
+          Hearty
         </Text>
       </XStack>
       <ButtonIcon Icon={Send} onPress={() => router.push('/message')} />
