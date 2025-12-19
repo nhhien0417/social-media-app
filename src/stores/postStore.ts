@@ -248,16 +248,28 @@ export const usePostStore = create<PostState>((set, get) => ({
       console.log('Successful get post detail:', response)
       const post = response.data
 
-      set(state => ({
-        posts: state.posts.some(p => p.id === postId)
-          ? state.posts
-          : [post, ...state.posts],
-        currentPost: post,
-        isLoading: false,
-      }))
+      set(state => {
+        if (post.type === 'STORY') {
+          return {
+            stories: state.stories.some(s => s.id === postId)
+              ? state.stories
+              : [post, ...state.stories],
+            currentPost: post,
+            isLoading: false,
+          }
+        }
+        return {
+          posts: state.posts.some(p => p.id === postId)
+            ? state.posts
+            : [post, ...state.posts],
+          currentPost: post,
+          isLoading: false,
+        }
+      })
     } catch (error) {
       console.error('Error fetching post detail:', error)
       set({ error: 'Failed to fetch post detail', isLoading: false })
+      throw error
     }
   },
 

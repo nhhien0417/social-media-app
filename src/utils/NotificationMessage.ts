@@ -13,8 +13,17 @@ export const getNotificationMessage = (
     case 'LIKE_POST':
       return `${senderName} liked your post`
 
+    case 'NEW_STORY':
+      return `${senderName} posted a new story`
+
+    case 'LIKE_STORY':
+      return `${senderName} liked your story`
+
     case 'COMMENT_ON_POST':
       return `${senderName} commented on your post`
+
+    case 'COMMENT_ON_STORY':
+      return `${senderName} replied to your story`
 
     case 'REPLY_COMMENT':
       return `${senderName} replied to your comment`

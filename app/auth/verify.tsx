@@ -12,7 +12,6 @@ import {
   XStack,
 } from 'tamagui'
 import { Image, Pressable, TextInput } from 'react-native'
-import { ChevronLeft } from '@tamagui/lucide-icons'
 
 export default function VerifyOtpScreen() {
   const router = useRouter()

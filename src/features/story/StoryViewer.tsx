@@ -9,6 +9,7 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from 'react-native'
 import { YStack, XStack, Text } from 'tamagui'
 import {
@@ -44,22 +45,71 @@ const STORY_DURATION = 5000
 export default function StoryViewer() {
   const {
     id: storyId,
-    mode,
+    mode: routeMode,
     userId,
   } = useLocalSearchParams<{
     id: string
-    mode?: 'FEED' | 'HIGHLIGHT'
+    mode?: 'FEED' | 'HIGHLIGHT' | 'SINGLE'
     userId?: string
   }>()
   const stories = usePostStore(state => state.stories)
   const userStoriesMap = usePostStore(state => state.userStories)
+  const currentPost = usePostStore(state => state.currentPost)
+  const getPostDetail = usePostStore(state => state.getPostDetail)
   const addComment = useCommentStore(state => state.addComment)
   const currentUser = useCurrentUser()
   const { trackSeen, cancelTracking } = useSeenTracking()
 
+  const [isLoading, setIsLoading] = useState(false)
+  const [fetchError, setFetchError] = useState(false)
+
+  const existingStory = useMemo(() => {
+    const fromStories = stories.find(s => s.id === storyId)
+    if (fromStories) return fromStories
+
+    for (const userStories of Object.values(userStoriesMap)) {
+      const found = userStories.find(s => s.id === storyId)
+      if (found) return found
+    }
+
+    if (currentPost?.id === storyId && currentPost?.type === 'STORY') {
+      return currentPost
+    }
+
+    return null
+  }, [storyId, stories, userStoriesMap, currentPost])
+
+  useEffect(() => {
+    if (!existingStory && storyId && !isLoading && !fetchError) {
+      setIsLoading(true)
+      setFetchError(false)
+      getPostDetail(storyId)
+        .catch(() => setFetchError(true))
+        .finally(() => setIsLoading(false))
+    }
+  }, [existingStory, storyId, getPostDetail, isLoading, fetchError])
+
+  // Determine mode: SINGLE if navigating directly without mode param and story found only in currentPost/fetched
+  const isSingleMode = useMemo(() => {
+    if (routeMode === 'SINGLE') return true
+    if (routeMode) return false
+
+    // If story not in stories array or userStories but only in currentPost, it's single mode
+    const inStories = stories.some(s => s.id === storyId)
+    const inUserStories = Object.values(userStoriesMap).some(arr =>
+      arr.some(s => s.id === storyId)
+    )
+    return !inStories && !inUserStories && existingStory !== null
+  }, [routeMode, stories, userStoriesMap, storyId, existingStory])
+
   // Group stories by author
   const groupedStories = useMemo(() => {
-    if (mode === 'HIGHLIGHT' && userId) {
+    // Single mode: just show the one fetched story
+    if (isSingleMode && existingStory) {
+      return [[existingStory]]
+    }
+
+    if (routeMode === 'HIGHLIGHT' && userId) {
       const userStories = userStoriesMap[userId] || []
       const sortedStories = [...userStories].sort(
         (a, b) =>
@@ -68,7 +118,15 @@ export default function StoryViewer() {
       return [sortedStories]
     }
     return groupAndSortStories(stories, currentUser?.id)
-  }, [stories, userStoriesMap, currentUser?.id, mode, userId])
+  }, [
+    stories,
+    userStoriesMap,
+    currentUser?.id,
+    routeMode,
+    userId,
+    isSingleMode,
+    existingStory,
+  ])
 
   const { initialUserIndex, initialStoryIndex } = useMemo(() => {
     let userIndex = 0
@@ -118,10 +176,13 @@ export default function StoryViewer() {
   )
 
   useEffect(() => {
+    // Don't navigate back while loading or if we have an existing story being fetched
+    if (isLoading || existingStory) return
+
     if (!currentUserStories || totalStories === 0) {
       router.back()
     }
-  }, [currentUserStories, totalStories])
+  }, [currentUserStories, totalStories, isLoading, existingStory])
 
   useEffect(() => {
     if (currentStory?.id && isFocused) {
@@ -164,6 +225,12 @@ export default function StoryViewer() {
   ])
 
   const handleNext = () => {
+    // In single mode, just close after the story ends
+    if (isSingleMode) {
+      router.back()
+      return
+    }
+
     if (currentStoryIndex < totalStories - 1) {
       const nextStoryIndex = currentStoryIndex + 1
       setCurrentStoryIndex(nextStoryIndex)
@@ -352,6 +419,40 @@ export default function StoryViewer() {
       },
     })
   ).current
+
+  // Loading state - show spinner while fetching story
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor="#000000" />
+        <YStack flex={1} alignItems="center" justifyContent="center">
+          <ActivityIndicator size="large" color="white" />
+        </YStack>
+      </View>
+    )
+  }
+
+  // Error state - show error message
+  if (fetchError) {
+    return (
+      <View style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor="#000000" />
+        <YStack flex={1} alignItems="center" justifyContent="center">
+          <Text color="white" fontSize={16}>
+            Story not found
+          </Text>
+          <Pressable
+            onPress={() => router.back()}
+            style={{ marginTop: 16, padding: 12 }}
+          >
+            <Text color="$blue10" fontSize={14}>
+              Go back
+            </Text>
+          </Pressable>
+        </YStack>
+      </View>
+    )
+  }
 
   if (!currentStory || !author) return null
 

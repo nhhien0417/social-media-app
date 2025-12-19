@@ -320,25 +320,50 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
         case 'NEW_POST':
         case 'LIKE_POST':
         case 'COMMENT_ON_POST':
+          if (data?.postId) {
+            targetPath = `/post/${data.postId}`
+          } else if (senderId) {
+            targetPath = `/profile/${senderId}`
+          }
+          break
+
+        case 'NEW_STORY':
+        case 'LIKE_STORY':
+        case 'COMMENT_ON_STORY':
+          if (data?.storyId) {
+            targetPath = `/story/${data.storyId}?mode=SINGLE`
+          } else if (senderId) {
+            targetPath = `/profile/${senderId}`
+          }
+          break
+
         case 'LIKE_COMMENT':
         case 'REPLY_COMMENT':
           if (data?.postId) {
             targetPath = `/post/${data.postId}`
+          } else if (data?.storyId) {
+            targetPath = `/story/${data.storyId}?mode=SINGLE`
+          } else if (senderId) {
+            targetPath = `/profile/${senderId}`
           }
           break
 
         case 'NEW_MESSAGE':
           if (data?.chatId) {
             targetPath = `/message/${data.chatId}`
+          } else if (senderId) {
+            targetPath = `/profile/${senderId}`
           }
           break
 
-        case 'GROUP_NEW_POST':
-        case 'GROUP_ROLE_CHANGE':
         case 'GROUP_JOIN_REQUEST':
         case 'GROUP_JOIN_ACCEPTED':
+        case 'GROUP_ROLE_CHANGE':
+        case 'GROUP_NEW_POST':
           if (data?.groupId) {
             targetPath = `/group/${data.groupId}`
+          } else if (senderId) {
+            targetPath = `/profile/${senderId}`
           }
           break
 
