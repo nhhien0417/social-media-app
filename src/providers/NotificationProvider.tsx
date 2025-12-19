@@ -17,7 +17,7 @@ import {
   setBadgeCount,
 } from '@/services/pushNotifications'
 import { registerPushToken } from '@/api/api.notification'
-import { useRouter } from 'expo-router'
+import { useRouter, usePathname } from 'expo-router'
 import { NotificationToast } from '@/features/notifications/components/NotificationToast'
 import { getNotificationMessage } from '@/utils/NotificationMessage'
 
@@ -63,6 +63,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   const responseListener = useRef<Notifications.Subscription | null>(null)
   const userId = propUserId
   const router = useRouter()
+  const pathname = usePathname()
   const [currentNotification, setCurrentNotification] =
     useState<Notification | null>(null)
 
@@ -199,30 +200,47 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
    * Handle new notification received from Kafka/Backend via STOMP WebSocket
    * This is the main source when app is OPEN (real-time, prioritized over Push)
    */
-  const handleNewNotification = useCallback((notification: Notification) => {
-    console.log('Notification received:', notification)
+  const handleNewNotification = useCallback(
+    (notification: Notification) => {
+      console.log('Notification received:', notification)
 
-    setNotifications(prev => {
-      // Check for duplicates
-      if (prev.some(n => n.id === notification.id)) {
-        console.log('Notification already exists, skipping...')
-        return prev
+      if (
+        notification.type === 'NEW_MESSAGE' &&
+        pathname?.startsWith('/message')
+      ) {
+        setNotifications(prev => {
+          if (prev.some(n => n.id === notification.id)) {
+            return prev
+          }
+          const formattedNotification = {
+            ...notification,
+            message: getNotificationMessage(notification.type),
+          }
+          return [formattedNotification, ...prev]
+        })
+        return
       }
 
-      // Add new notification at the beginning
-      const formattedNotification = {
+      setNotifications(prev => {
+        if (prev.some(n => n.id === notification.id)) {
+          return prev
+        }
+
+        const formattedNotification = {
+          ...notification,
+          message: getNotificationMessage(notification.type),
+        }
+        return [formattedNotification, ...prev]
+      })
+
+      // Show in-app toast
+      setCurrentNotification({
         ...notification,
         message: getNotificationMessage(notification.type),
-      }
-      return [formattedNotification, ...prev]
-    })
-
-    // Show in-app toast
-    setCurrentNotification({
-      ...notification,
-      message: getNotificationMessage(notification.type),
-    })
-  }, [])
+      })
+    },
+    [pathname]
+  )
 
   // Listen to notification events from STOMP WebSocket
   useStompEvent<Notification>('notification', handleNewNotification)
@@ -296,6 +314,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
 
       // Navigate based on type
       const { type, extraData: data, senderId } = notification
+      let targetPath: string | null = null
 
       switch (type) {
         case 'NEW_POST':
@@ -304,13 +323,13 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
         case 'LIKE_COMMENT':
         case 'REPLY_COMMENT':
           if (data?.postId) {
-            router.push(`/post/${data.postId}`)
+            targetPath = `/post/${data.postId}`
           }
           break
 
         case 'NEW_MESSAGE':
           if (data?.chatId) {
-            router.push(`/message/${data.chatId}`)
+            targetPath = `/message/${data.chatId}`
           }
           break
 
@@ -319,25 +338,35 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
         case 'GROUP_JOIN_REQUEST':
         case 'GROUP_JOIN_ACCEPTED':
           if (data?.groupId) {
-            router.push(`/group/${data.groupId}`)
+            targetPath = `/group/${data.groupId}`
           }
           break
 
         case 'FRIEND_REQUEST':
         case 'FRIEND_REQUEST_ACCEPTED':
           if (senderId) {
-            router.push(`/profile/${senderId}`)
+            targetPath = `/profile/${senderId}`
           }
           break
 
         default:
           if (senderId) {
-            router.push(`/profile/${senderId}`)
+            targetPath = `/profile/${senderId}`
           }
           break
       }
+
+      if (targetPath && pathname === targetPath) {
+        const refreshPath = `${targetPath}?refresh=${Date.now()}`
+        router.replace(refreshPath as any)
+        return
+      }
+
+      if (targetPath) {
+        router.push(targetPath as any)
+      }
     },
-    [markAsRead, router]
+    [markAsRead, pathname]
   )
 
   const value: NotificationContextValue = {
