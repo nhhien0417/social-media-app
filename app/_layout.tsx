@@ -10,6 +10,7 @@ import { ThemeProvider, useAppTheme } from '@/providers/ThemeProvider'
 import { QueryProvider } from '@/providers/QueryProvider'
 import { NotificationProvider } from '@/providers/NotificationProvider'
 import { PostStatusProvider } from '@/providers/PostStatusProvider'
+import { ChatProvider } from '@/providers/ChatProvider'
 import { getUserId } from '@/utils/SecureStore'
 
 SplashScreen.preventAutoHideAsync()
@@ -58,18 +59,20 @@ function RootContent() {
     <QueryProvider>
       <PostStatusProvider>
         <NotificationProvider userId={userId}>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="auth" />
-            <Stack.Screen name="call" />
-            <Stack.Screen name="create" />
-            <Stack.Screen name="group" />
-            <Stack.Screen name="message" />
-            <Stack.Screen name="post" />
-            <Stack.Screen name="profile" />
-            <Stack.Screen name="story" />
-            <Stack.Screen name="index" />
-          </Stack>
+          <ChatProvider userId={userId}>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="auth" />
+              <Stack.Screen name="call" />
+              <Stack.Screen name="create" />
+              <Stack.Screen name="group" />
+              <Stack.Screen name="message" />
+              <Stack.Screen name="post" />
+              <Stack.Screen name="profile" />
+              <Stack.Screen name="story" />
+              <Stack.Screen name="index" />
+            </Stack>
+          </ChatProvider>
         </NotificationProvider>
       </PostStatusProvider>
     </QueryProvider>

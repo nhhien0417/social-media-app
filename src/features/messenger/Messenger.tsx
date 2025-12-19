@@ -8,55 +8,13 @@ import ChatDetailHeader from './components/ChatDetailHeader'
 import ChatListItem from './components/ChatListItem'
 import ChatListHeader from './components/ChatListHeader'
 import { useChatStore } from '@/stores/chatStore'
-import { useChatWebSocket, useChatEvent } from '@/hooks/useChatWebSocket'
+import { useChatEvent } from '@/hooks/useChatWebSocket'
 import { ChatMessageEvent } from '@/types/Chat'
-import { getUserId } from '@/utils/SecureStore'
 
 export function ChatList() {
-  const {
-    chats,
-    fetchChats,
-    isLoading,
-    isRefreshing,
-    chatsPagination,
-    receiveNewMessage,
-    updateOnlineStatus,
-  } = useChatStore()
+  const { chats, fetchChats, isLoading, isRefreshing, chatsPagination } =
+    useChatStore()
   const [isFirstLoad, setIsFirstLoad] = useState(true)
-  const [userId, setUserId] = useState<string | null>(null)
-
-  useEffect(() => {
-    getUserId().then(id => setUserId(id))
-  }, [])
-
-  // Connect WebSocket
-  useChatWebSocket({ userId: userId || undefined })
-
-  // Listen for new messages
-  useChatEvent<ChatMessageEvent>(
-    'message',
-    useCallback(
-      event => {
-        if (event.eventType === 'NEW_MESSAGE') {
-          receiveNewMessage(event)
-        }
-      },
-      [receiveNewMessage]
-    )
-  )
-
-  // Listen for online status changes
-  useChatEvent<ChatMessageEvent>(
-    'online-status',
-    useCallback(
-      event => {
-        if (event.sender?.id) {
-          updateOnlineStatus(event.sender.id, event.eventType === 'USER_ONLINE')
-        }
-      },
-      [updateOnlineStatus]
-    )
-  )
 
   useEffect(() => {
     fetchChats(true).finally(() => setIsFirstLoad(false))
