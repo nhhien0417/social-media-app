@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Button, XStack, useThemeName } from 'tamagui'
-import { Share2, UserPlus, UserMinus, UserCheck } from '@tamagui/lucide-icons'
+import { UserPlus, UserMinus, UserCheck } from '@tamagui/lucide-icons'
 import { useRouter } from 'expo-router'
 import { ProfileComponentProps } from '../ProfileScreen'
 import { useProfileActions } from '@/hooks/useProfile'

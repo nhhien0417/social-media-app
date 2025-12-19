@@ -1,5 +1,5 @@
 import { Text, XStack, YStack } from 'tamagui'
-import { ChevronLeft, Phone, Video } from '@tamagui/lucide-icons'
+import { ChevronLeft } from '@tamagui/lucide-icons'
 import { useRouter } from 'expo-router'
 import { Pressable } from 'react-native'
 import { useChatStore } from '@/stores/chatStore'
@@ -16,7 +16,6 @@ export default function ChatDetailHeader() {
 
   const name = fromStore?.username || fromList?.username
   const avatar = fromStore?.avatarUrl || fromList?.avatarUrl
-  const id = chat?.id || params.id
   const otherUserId = fromStore?.id || fromList?.id
 
   const isOnline = otherUserId ? onlineUsers.has(otherUserId) : false

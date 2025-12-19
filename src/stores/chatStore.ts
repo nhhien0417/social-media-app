@@ -261,6 +261,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     })
 
     try {
+      console.log('[RT SEND] NEW_MESSAGE:', data.content || '[attachment]')
       const response = await sendMessageApi(data, attachments)
       console.log('Successful send message:', response)
 
@@ -364,6 +365,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   markAsRead: async (chatId: string) => {
     try {
+      console.log('[RT SEND] MESSAGE_READ')
       const response = await markAsReadApi(chatId)
       console.log('Successful mark as read:', response)
 
@@ -382,9 +384,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   // Realtime Actions
-  receiveNewMessage: event => {
+  receiveNewMessage: async event => {
     if (!event.chatId || !event.messageId) return
 
+    const currentUserId = await getUserId()
     const newMessage: Message = {
       id: event.messageId,
       chatId: event.chatId,
@@ -411,12 +414,17 @@ export const useChatStore = create<ChatState>((set, get) => ({
       let updatedChats = state.chats
 
       if (chatIndex > -1) {
+        const isOwnMessage = event.sender?.id === currentUserId
+        const newUnreadCount = isOwnMessage
+          ? state.chats[chatIndex].unreadCount
+          : state.chats[chatIndex].unreadCount + 1
+
         const updatedChat = {
           ...state.chats[chatIndex],
           lastMessage: lastMsgText,
           lastMessageTime: event.createdAt || new Date().toISOString(),
           lastMessageSenderId: event.sender?.id || '',
-          unreadCount: state.chats[chatIndex].unreadCount + 1,
+          unreadCount: newUnreadCount,
         }
         updatedChats = [
           updatedChat,

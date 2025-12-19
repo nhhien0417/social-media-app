@@ -26,45 +26,31 @@ export function ChatProvider({ userId, children }: ChatProviderProps) {
   const { isConnected } = useChatWebSocket({
     userId: userId || undefined,
     autoConnect: true,
-    autoDisconnect: true,
+    autoDisconnect: false,
   })
 
   const { receiveNewMessage, updateOnlineStatus } = useChatStore()
 
   // Listen for new messages globally
-  useChatEvent<ChatMessageEvent>(
-    'message',
-    useCallback(
-      event => {
-        if (event.eventType === 'NEW_MESSAGE') {
-          console.log('[ChatProvider] Received new message:', event.content)
-          receiveNewMessage(event)
-        }
-      },
-      [receiveNewMessage]
-    )
-  )
+  useChatEvent<ChatMessageEvent>('message', event => {
+    if (event.eventType === 'NEW_MESSAGE') {
+      receiveNewMessage(event)
+    }
+  })
 
   // Listen for online status changes globally
-  useChatEvent<ChatMessageEvent>(
-    'online-status',
-    useCallback(
-      event => {
-        if (event.sender?.id) {
-          const isOnline = event.eventType === 'USER_ONLINE'
-          console.log(
-            `[ChatProvider] User ${event.sender.username} is ${isOnline ? 'online' : 'offline'}`
-          )
-          updateOnlineStatus(event.sender.id, isOnline)
-        }
-      },
-      [updateOnlineStatus]
-    )
-  )
+  useChatEvent<ChatMessageEvent>('online-status', event => {
+    if (event.sender?.id) {
+      const isOnline = event.eventType === 'USER_ONLINE'
+      updateOnlineStatus(event.sender.id, isOnline)
+    }
+  })
 
-  // Log connection status changes
+  // Monitor connection status
   useEffect(() => {
-    console.log('[ChatProvider] Connection status changed:', isConnected)
+    if (!isConnected) {
+      console.warn('[ChatProvider] Connection lost - waiting for reconnect')
+    }
   }, [isConnected])
 
   return (

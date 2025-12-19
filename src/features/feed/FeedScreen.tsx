@@ -15,6 +15,7 @@ import StoryBar from './components/StoryBar'
 import PostCard from './components/PostCard'
 import PostingStatus from './components/PostingStatus'
 import { usePostStore } from '@/stores/postStore'
+import { useChatStore } from '@/stores/chatStore'
 import ButtonIcon from '@/components/IconButton'
 import { router } from 'expo-router'
 import { useSeenTracking } from '@/hooks/useSeenTracking'
@@ -27,6 +28,38 @@ const AnimatedSpacer = Animated.View
 const AnimatedList = Animated.createAnimatedComponent(
   FlatList
 ) as unknown as typeof FlatList
+
+function MessageButton() {
+  const { chats } = useChatStore()
+  const unreadCount = chats.reduce(
+    (sum, chat) => sum + (chat.unreadCount || 0),
+    0
+  )
+
+  return (
+    <YStack position="relative">
+      <ButtonIcon Icon={Send} onPress={() => router.push('/message')} />
+      {unreadCount > 0 && (
+        <YStack
+          position="absolute"
+          top={0}
+          right={-5}
+          backgroundColor="$red10"
+          borderRadius="$10"
+          paddingHorizontal="$2"
+          paddingVertical="$1"
+          minWidth={20}
+          alignItems="center"
+          onPress={() => router.push('/message')}
+        >
+          <Text fontSize="$2" fontWeight="700" color="white">
+            {unreadCount > 99 ? '99+' : unreadCount}
+          </Text>
+        </YStack>
+      )}
+    </YStack>
+  )
+}
 
 function HeaderContent() {
   return (
@@ -47,7 +80,7 @@ function HeaderContent() {
           Hearty
         </Text>
       </XStack>
-      <ButtonIcon Icon={Send} onPress={() => router.push('/message')} />
+      <MessageButton />
     </XStack>
   )
 }

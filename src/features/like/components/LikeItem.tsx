@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { TouchableOpacity } from 'react-native'
-import { XStack, YStack, SizableText, Button, useThemeName } from 'tamagui'
+import { XStack, YStack, SizableText, Button } from 'tamagui'
 import Avatar from '@/components/Avatar'
 import { router } from 'expo-router'
 import { User } from '@/types/User'
@@ -26,39 +26,45 @@ export default function LikeItem({
     useProfileActions()
 
   const [isProcessing, setIsProcessing] = useState(false)
+  const [friendStatus, setFriendStatus] = useState(user.friendStatus)
 
   const handleAddFriend = async () => {
     setIsProcessing(true)
     await addFriend(user.id)
+    setFriendStatus('OUTGOING_PENDING')
     setIsProcessing(false)
   }
 
   const handleAccept = async () => {
     setIsProcessing(true)
     await acceptFriend(user.id)
+    setFriendStatus('FRIEND')
     setIsProcessing(false)
   }
 
   const handleCancel = async () => {
     setIsProcessing(true)
     await cancelFriend(user.id)
+    setFriendStatus('NONE')
     setIsProcessing(false)
   }
 
   const handleReject = async () => {
     setIsProcessing(true)
     await rejectFriend(user.id)
+    setFriendStatus('NONE')
     setIsProcessing(false)
   }
 
   const handleUnfriend = async () => {
     setIsProcessing(true)
     await unfriend(user.id)
+    setFriendStatus('NONE')
     setIsProcessing(false)
   }
 
   const renderFriendButton = () => {
-    switch (user.friendStatus) {
+    switch (friendStatus) {
       case 'FRIEND':
         return (
           <Button

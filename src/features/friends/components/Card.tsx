@@ -4,6 +4,7 @@ import { UserPlus } from '@tamagui/lucide-icons'
 import { router } from 'expo-router'
 import { User } from '@/types/User'
 import { getUserId } from '@/utils/SecureStore'
+import { useChatStore } from '@/stores/chatStore'
 
 type CardType = 'friend' | 'request' | 'sent' | 'suggestion'
 
@@ -32,6 +33,7 @@ export function UserCard({
 }: UserCardProps) {
   const textColor = isDark ? '#f5f5f5' : '#111827'
   const subtitleColor = isDark ? 'rgba(255,255,255,0.6)' : '#6b7280'
+  const { createGetChat } = useChatStore()
 
   const handleNavigateToProfile = async () => {
     const currentUserId = await getUserId()
@@ -42,6 +44,18 @@ export function UserCard({
         pathname: '/profile/[id]',
         params: { id: user.id },
       })
+    }
+  }
+
+  const handleMessage = async () => {
+    try {
+      await createGetChat(user.id)
+      const chat = useChatStore.getState().currentChat
+      if (chat) {
+        router.push(`/message/${chat.id}`)
+      }
+    } catch (error) {
+      console.error('Failed to create chat', error)
     }
   }
 
@@ -85,7 +99,7 @@ export function UserCard({
             fontWeight="600"
             fontSize={14}
             pressStyle={{ opacity: 0.8 }}
-            onPress={() => router.push(`/message/${user.id}` as any)}
+            onPress={handleMessage}
             disabled={isLoading}
           >
             Message

@@ -81,21 +81,25 @@ export const useChatEvent = <T = ChatMessageEvent>(
     | 'connect'
     | 'disconnect'
     | 'error',
-  callback: (data: T) => void,
-  deps: any[] = []
+  callback: (data: T) => void
 ) => {
   const callbackRef = useRef(callback)
 
+  // Update callback ref when callback changes
   useEffect(() => {
     callbackRef.current = callback
   }, [callback])
 
+  // Register event listener only once
   useEffect(() => {
     const handler = (data: T) => callbackRef.current(data)
     chatStompService.on(event, handler)
-    return () => chatStompService.off(event, handler)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [event, ...deps])
+
+    // Cleanup on unmount
+    return () => {
+      chatStompService.off(event, handler)
+    }
+  }, [event]) // Only depend on event type, not deps
 }
 
 /**

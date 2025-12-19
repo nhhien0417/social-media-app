@@ -68,37 +68,26 @@ export function ChatDetail() {
   } = useChatStore()
 
   // Listen for message events specific to this chat
-  useChatEvent<ChatMessageEvent>(
-    'message',
-    useCallback(
-      event => {
-        if (event.chatId !== id) return
+  useChatEvent<ChatMessageEvent>('message', event => {
+    if (event.chatId !== id) return
 
-        switch (event.eventType) {
-          case 'NEW_MESSAGE':
-            receiveNewMessage(event)
-            break
-          case 'MESSAGE_READ':
-            receiveMessageRead(event)
-            break
-        }
-      },
-      [id, receiveNewMessage, receiveMessageRead]
-    )
-  )
+    switch (event.eventType) {
+      case 'NEW_MESSAGE':
+        receiveNewMessage(event)
+        markAsRead(id)
+        break
+      case 'MESSAGE_READ':
+        receiveMessageRead(event)
+        break
+    }
+  })
 
   // Listen for typing events
-  useChatEvent<ChatMessageEvent>(
-    'typing',
-    useCallback(
-      event => {
-        if (event.chatId !== id || !event.sender?.id) return
-        const isTyping = event.content === 'TYPING_START'
-        setTypingStatus(id, event.sender.id, isTyping)
-      },
-      [id, setTypingStatus]
-    )
-  )
+  useChatEvent<ChatMessageEvent>('typing', event => {
+    if (event.chatId !== id || !event.sender?.id) return
+    const isTyping = event.content === 'TYPING_START'
+    setTypingStatus(id, event.sender.id, isTyping)
+  })
 
   useEffect(() => {
     if (id) {
