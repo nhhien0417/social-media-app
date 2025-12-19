@@ -266,9 +266,16 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
       set(state => {
         const currentMessages = state.messagesByChatId[data.chatId] || []
-        const updatedMessages = currentMessages.map(m =>
-          m.id === tempId ? { ...response.data, status: 'sent' } : m
-        ) as Message[]
+
+        const withoutTemp = currentMessages.filter(m => m.id !== tempId)
+
+        const actualMessageExists = withoutTemp.some(
+          m => m.id === response.data.id
+        )
+
+        const updatedMessages = actualMessageExists
+          ? withoutTemp
+          : [{ ...response.data, status: 'sent' } as Message, ...withoutTemp]
 
         let newChats = state.chats
         const chatIndex = newChats.findIndex(c => c.id === data.chatId)

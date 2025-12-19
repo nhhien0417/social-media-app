@@ -137,7 +137,7 @@ export default function MessageBubble({
       const attachments = msg.attachments || []
 
       return (
-        <YStack key={msg.id} gap="$3" paddingVertical="$1.5">
+        <YStack gap="$3" paddingVertical="$1.5">
           {(shouldForceTimestamp || isExpanded) && timestampLabel ? (
             <Text
               alignSelf="center"
