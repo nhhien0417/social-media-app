@@ -75,6 +75,8 @@ export const ENDPOINTS = {
     MESSAGE_SEND: 'chat/messages',
     MESSAGE_GET: (id: string | number) => `chat/${id}/messages`,
     MESSAGE_DELETE: (id: string | number) => `chat/messages/${id}`,
+
+    ONLINE: 'chat/online',
   },
 
   NOTIFICATIONS: {

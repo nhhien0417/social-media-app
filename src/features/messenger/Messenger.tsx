@@ -1,55 +1,100 @@
-import { FlatList } from 'react-native'
+import {
+  ScrollView,
+  RefreshControl,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
+} from 'react-native'
 import { YStack, Spinner, Text } from 'tamagui'
 import { useLocalSearchParams } from 'expo-router'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import MessageBubble from './components/MessageBubble'
 import MessageInput from './components/MessageInput'
 import ChatDetailHeader from './components/ChatDetailHeader'
 import ChatListItem from './components/ChatListItem'
 import ChatListHeader from './components/ChatListHeader'
+import OnlineFriendsBar from './components/OnlineFriendsBar'
 import { useChatStore } from '@/stores/chatStore'
+import { useProfileStore } from '@/stores/profileStore'
 import { useChatEvent } from '@/hooks/useChatWebSocket'
 import { ChatMessageEvent } from '@/types/Chat'
 
 export function ChatList() {
-  const { chats, fetchChats, isLoading, isRefreshing, chatsPagination } =
-    useChatStore()
+  const {
+    chats,
+    isLoading,
+    isRefreshing,
+    chatsPagination,
+    fetchChats,
+    fetchOnlineFriends,
+  } = useChatStore()
+  const { fetchFriends, initialize } = useProfileStore()
   const [isFirstLoad, setIsFirstLoad] = useState(true)
 
   useEffect(() => {
-    fetchChats(true).finally(() => setIsFirstLoad(false))
+    const loadData = async () => {
+      await initialize()
+      fetchFriends()
+      fetchOnlineFriends()
+      fetchChats(true).finally(() => setIsFirstLoad(false))
+    }
+    loadData()
   }, [])
 
-  const handleLoadMore = () => {
-    if (chatsPagination.hasNext && !isLoading) {
-      fetchChats(false)
-    }
+  const handleRefresh = () => {
+    fetchChats(true)
+    fetchFriends()
+    fetchOnlineFriends()
+  }
+
+  const handleScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const { layoutMeasurement, contentOffset, contentSize } =
+        event.nativeEvent
+
+      const threshold = layoutMeasurement.height * 0.5
+      const isCloseToBottom =
+        layoutMeasurement.height + contentOffset.y >=
+        contentSize.height - threshold
+
+      if (isCloseToBottom && !isLoading && chatsPagination.hasNext) {
+        fetchChats(false)
+      }
+    },
+    [isLoading, chatsPagination, fetchChats]
+  )
+
+  // Loading state
+  if (isFirstLoad) {
+    return (
+      <YStack flex={1} backgroundColor="$background">
+        <ChatListHeader />
+        <YStack flex={1} justifyContent="center" alignItems="center">
+          <Spinner size="large" color="$color" />
+        </YStack>
+      </YStack>
+    )
   }
 
   return (
     <YStack flex={1} backgroundColor="$background">
       <ChatListHeader />
-      {isFirstLoad || (isLoading && chats.length === 0) ? (
-        <YStack flex={1} justifyContent="center" alignItems="center">
-          <Spinner size="large" color="$color" />
-        </YStack>
-      ) : chats.length === 0 ? (
-        <YStack flex={1} justifyContent="center" alignItems="center">
-          <Text color="$color">No chats yet</Text>
-        </YStack>
-      ) : (
-        <FlatList
-          data={chats}
-          keyExtractor={item => item.id}
-          renderItem={({ item }) => <ChatListItem item={item} />}
-          contentContainerStyle={{ paddingBottom: 20, flexGrow: 1 }}
-          showsVerticalScrollIndicator={false}
-          onRefresh={() => fetchChats(true)}
-          refreshing={isRefreshing}
-          onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.5}
-        />
-      )}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
+        }
+        onScroll={handleScroll}
+        scrollEventThrottle={400}
+      >
+        <OnlineFriendsBar />
+        {chats.length === 0 ? (
+          <YStack paddingVertical="$10" alignItems="center">
+            <Text color="$color">No chats yet</Text>
+          </YStack>
+        ) : (
+          chats.map(chat => <ChatListItem key={chat.id} item={chat} />)
+        )}
+      </ScrollView>
     </YStack>
   )
 }

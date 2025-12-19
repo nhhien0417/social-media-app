@@ -29,7 +29,7 @@ export default function ChatDetailHeader() {
       paddingVertical="$2"
       backgroundColor="$background"
     >
-      <XStack alignItems="center" gap="$2">
+      <XStack alignItems="center">
         <Pressable
           onPress={() => {
             if (router.canGoBack()) {
@@ -42,11 +42,26 @@ export default function ChatDetailHeader() {
           <ChevronLeft size={22} color="$color" />
         </Pressable>
 
-        <Avatar size={45} uri={avatar || undefined} />
+        <YStack marginHorizontal="$2" position="relative">
+          <Avatar size={50} uri={avatar || undefined} />
+          {isOnline && (
+            <YStack
+              position="absolute"
+              bottom={0}
+              right={0}
+              width={15}
+              height={15}
+              backgroundColor="#22C55E"
+              borderRadius={10}
+              borderWidth={2}
+              borderColor="$background"
+            />
+          )}
+        </YStack>
 
-        <YStack flexShrink={1}>
+        <YStack marginHorizontal="$2" flexShrink={1}>
           <Text
-            fontSize="$5"
+            fontSize="$6"
             fontWeight="700"
             numberOfLines={1}
             ellipsizeMode="tail"
@@ -54,9 +69,15 @@ export default function ChatDetailHeader() {
           >
             {name}
           </Text>
-          <Text fontSize="$2" color={isOnline ? '#1877F2' : '#65676B'}>
-            {isOnline ? 'Online' : 'Offline'}
-          </Text>
+          {isOnline ? (
+            <Text fontSize="$2" color="#22C55E" fontWeight="500">
+              Active now
+            </Text>
+          ) : (
+            <Text fontSize="$2" color="#65676B">
+              Offline
+            </Text>
+          )}
         </YStack>
       </XStack>
       {/* 

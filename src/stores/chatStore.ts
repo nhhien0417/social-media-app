@@ -11,6 +11,7 @@ import {
   getMessagesApi,
   deleteMessageApi,
   markAsReadApi,
+  getOnlineFriendsApi,
 } from '@/api/api.chat'
 import { getUserId } from '@/utils/SecureStore'
 
@@ -64,6 +65,7 @@ interface ChatState {
   receiveMessageRead: (event: ChatMessageEvent) => void
   updateOnlineStatus: (userId: string, isOnline: boolean) => void
   setTypingStatus: (chatId: string, userId: string, isTyping: boolean) => void
+  fetchOnlineFriends: () => Promise<void>
 
   clearCurrentChat: () => void
 }
@@ -502,6 +504,17 @@ export const useChatStore = create<ChatState>((set, get) => ({
         typingByChatId: { ...state.typingByChatId, [chatId]: updated },
       }
     })
+  },
+
+  fetchOnlineFriends: async () => {
+    try {
+      const response = await getOnlineFriendsApi()
+      const onlineUserIds = response.data || []
+      console.log('Successful fetch online friends:', onlineUserIds)
+      set({ onlineUsers: new Set(onlineUserIds) })
+    } catch (error) {
+      console.error('Error fetching online friends:', error)
+    }
   },
 
   clearCurrentChat: () => {

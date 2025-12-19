@@ -55,17 +55,17 @@ export default function ChatListItem({ item }: ChatListItemProps) {
       >
         <XStack padding="$3" alignItems="center" gap="$3">
           <XStack alignItems="center" gap="$3" flex={1}>
-            <Avatar size={50} uri={avatar || undefined} />
+            <Avatar size={60} uri={avatar || undefined} />
 
-            <YStack flex={1} alignItems="flex-start">
-              <Text fontWeight="700" fontSize="$4" color="$color">
+            <YStack flex={1} alignItems="flex-start" gap="$1">
+              <Text fontWeight="700" fontSize="$6" color="$color">
                 {name}
               </Text>
               <Text
                 color={item.unreadCount > 0 ? '$color' : '#888'}
                 fontWeight={item.unreadCount > 0 ? '700' : '400'}
                 numberOfLines={1}
-                fontSize="$3"
+                fontSize="$4"
                 textAlign="left"
               >
                 {currentUserId && item.lastMessageSenderId === currentUserId
@@ -76,14 +76,14 @@ export default function ChatListItem({ item }: ChatListItemProps) {
             </YStack>
           </XStack>
 
-          <YStack alignItems="flex-end" gap="$1">
-            <Text color="#888" fontSize="$2">
+          <YStack alignItems="flex-end" gap="$2">
+            <Text color="#888" fontSize="$3">
               {formatTime(item.lastMessageTime)}
             </Text>
             {item.unreadCount > 0 && (
               <YStack
-                width={9}
-                height={9}
+                width={10}
+                height={10}
                 borderRadius={99}
                 backgroundColor="$blue10"
               />
@@ -97,7 +97,7 @@ export default function ChatListItem({ item }: ChatListItemProps) {
             }}
             hitSlop={10}
           >
-            <YStack padding="$2">
+            <YStack padding="$1">
               <MoreVertical size={20} color="$color8" />
             </YStack>
           </Pressable>

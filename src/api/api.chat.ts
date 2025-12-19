@@ -42,6 +42,8 @@ export type PagedMessagesResponse = GenericResponse<{
   hasPrevious: boolean
 }>
 
+export type OnlineResponse = GenericResponse<string[]>
+
 // --- API Functions ---
 
 export const createGetChatApi = (data: CreateGetChatRequest) => {
@@ -107,4 +109,8 @@ export const getMessagesApi = (chatId: string, page = 0, size = 50) => {
 
 export const deleteMessageApi = (messageId: string) => {
   return ApiClient.delete<string>(ENDPOINTS.CHAT.MESSAGE_DELETE(messageId))
+}
+
+export const getOnlineFriendsApi = () => {
+  return ApiClient.get<OnlineResponse>(ENDPOINTS.CHAT.ONLINE)
 }
