@@ -202,7 +202,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
       console.log('Successful fetch messages:', response)
 
-      const newMessages = response.data.messages
+      const newMessages: Message[] = response.data.messages.map(
+        (msg: Message) => ({
+          ...msg,
+          status: (msg.readBy && msg.readBy.length > 1
+            ? 'seen'
+            : 'sent') as Message['status'],
+        })
+      )
 
       set(state => {
         const currentMessages = state.messagesByChatId[chatId] || []
@@ -443,18 +450,27 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   receiveMessageRead: event => {
-    if (!event.chatId || !event.readBy) return
+    if (!event.chatId) return
 
     set(state => {
       const messages = state.messagesByChatId[event.chatId!] || []
-      const updatedMessages = messages.map(m =>
-        m.id === event.messageId ? { ...m, readBy: event.readBy } : m
+
+      const updatedMessages = messages.map(m => ({
+        ...m,
+        status: 'seen' as const,
+        readBy: event.readBy || m.readBy,
+      }))
+
+      const updatedChats = state.chats.map(chat =>
+        chat.id === event.chatId ? { ...chat, unreadCount: 0 } : chat
       )
+
       return {
         messagesByChatId: {
           ...state.messagesByChatId,
           [event.chatId!]: updatedMessages,
         },
+        chats: updatedChats,
       }
     })
   },

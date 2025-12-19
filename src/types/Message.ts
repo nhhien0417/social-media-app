@@ -14,5 +14,6 @@ export interface Message {
   attachments?: string[]
   createdAt: string
   updatedAt: string
-  status?: 'sending' | 'sent' | 'error'
+  readBy?: string[]
+  status?: 'sending' | 'sent' | 'seen' | 'error'
 }

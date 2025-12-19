@@ -105,11 +105,6 @@ export default function MessageBubble({
       const isMe = currentUserId && msg.senderId === currentUserId
       const isLastMyMessage = isMe && index === 0
 
-      const isSeen =
-        (msg as any).readBy &&
-        (msg as any).readBy.length > 1 &&
-        (msg as any).readBy.some((id: string) => id !== currentUserId)
-
       const bubbleColor = isMe
         ? theme === 'dark'
           ? '$blue10'
@@ -135,6 +130,21 @@ export default function MessageBubble({
       }
 
       const attachments = msg.attachments || []
+
+      const statusText = () => {
+        switch (msg.status) {
+          case 'sending':
+            return 'Sending...'
+          case 'sent':
+            return 'Sent'
+          case 'seen':
+            return 'Seen'
+          case 'error':
+            return 'Failed'
+          default:
+            return 'Sent'
+        }
+      }
 
       return (
         <YStack gap="$3" paddingVertical="$1.5">
@@ -176,8 +186,8 @@ export default function MessageBubble({
             </YStack>
           </XStack>
 
-          {/* Status Message - Only show on last message from current user */}
-          {isLastMyMessage && msg.status && (
+          {/* Status */}
+          {isMe && msg.status && (isLastMyMessage || isExpanded) && (
             <Text
               alignSelf="flex-end"
               fontSize="$1"
@@ -185,13 +195,7 @@ export default function MessageBubble({
               paddingHorizontal="$2"
               marginTop="$-2"
             >
-              {msg.status === 'sending'
-                ? 'Sending...'
-                : msg.status === 'error'
-                  ? 'Failed'
-                  : isSeen
-                    ? 'Seen'
-                    : 'Sent'}
+              {statusText()}
             </Text>
           )}
         </YStack>

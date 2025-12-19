@@ -1,7 +1,7 @@
 import { FlatList } from 'react-native'
 import { YStack, Spinner, Text } from 'tamagui'
 import { useLocalSearchParams } from 'expo-router'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import MessageBubble from './components/MessageBubble'
 import MessageInput from './components/MessageInput'
 import ChatDetailHeader from './components/ChatDetailHeader'
