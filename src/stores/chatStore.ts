@@ -391,7 +391,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     const newMessage: Message = {
       id: event.messageId,
       chatId: event.chatId,
-      senderId: event.sender?.id || '',
+      senderId: event.senderId || '',
       content: event.content,
       attachments: event.attachments,
       createdAt: event.createdAt || new Date().toISOString(),
@@ -414,7 +414,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       let updatedChats = state.chats
 
       if (chatIndex > -1) {
-        const isOwnMessage = event.sender?.id === currentUserId
+        const isOwnMessage = event.senderId === currentUserId
         const newUnreadCount = isOwnMessage
           ? state.chats[chatIndex].unreadCount
           : state.chats[chatIndex].unreadCount + 1
@@ -423,7 +423,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
           ...state.chats[chatIndex],
           lastMessage: lastMsgText,
           lastMessageTime: event.createdAt || new Date().toISOString(),
-          lastMessageSenderId: event.sender?.id || '',
+          lastMessageSenderId: event.senderId || '',
           unreadCount: newUnreadCount,
         }
         updatedChats = [

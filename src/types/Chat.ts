@@ -20,7 +20,7 @@ export interface ChatMessageEvent {
   eventType: ChatEventType
   chatId?: string
   messageId?: string
-  sender?: User
+  senderId?: string
   recipientId?: string
   content?: string
   attachments?: string[]

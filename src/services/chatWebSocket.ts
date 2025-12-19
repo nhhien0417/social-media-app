@@ -163,7 +163,7 @@ class ChatStompService {
         try {
           const event: ChatMessageEvent = JSON.parse(message.body)
 
-          const isOwnEvent = event.sender?.id === this.currentUserId
+          const isOwnEvent = event.senderId === this.currentUserId
 
           if (event.eventType === 'NEW_MESSAGE' && !isOwnEvent) {
             console.log(

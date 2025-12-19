@@ -40,9 +40,9 @@ export function ChatProvider({ userId, children }: ChatProviderProps) {
 
   // Listen for online status changes globally
   useChatEvent<ChatMessageEvent>('online-status', event => {
-    if (event.sender?.id) {
+    if (event.senderId) {
       const isOnline = event.eventType === 'USER_ONLINE'
-      updateOnlineStatus(event.sender.id, isOnline)
+      updateOnlineStatus(event.senderId, isOnline)
     }
   })
 

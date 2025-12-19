@@ -84,9 +84,9 @@ export function ChatDetail() {
 
   // Listen for typing events
   useChatEvent<ChatMessageEvent>('typing', event => {
-    if (event.chatId !== id || !event.sender?.id) return
+    if (event.chatId !== id || !event.senderId) return
     const isTyping = event.content === 'TYPING_START'
-    setTypingStatus(id, event.sender.id, isTyping)
+    setTypingStatus(id, event.senderId, isTyping)
   })
 
   useEffect(() => {
