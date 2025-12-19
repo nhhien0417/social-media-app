@@ -1,60 +1,70 @@
-import { useEffect } from 'react'
-import { XStack, YStack, Text } from 'tamagui'
+import React, { useEffect, memo } from 'react'
+import { XStack } from 'tamagui'
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withRepeat,
+  withSequence,
   withTiming,
-  withDelay,
+  Easing,
 } from 'react-native-reanimated'
 
-export function TypingIndicator() {
-  const dot1Opacity = useSharedValue(0.3)
-  const dot2Opacity = useSharedValue(0.3)
-  const dot3Opacity = useSharedValue(0.3)
+const Dot = memo(({ delay }: { delay: number }) => {
+  const scale = useSharedValue(1)
 
   useEffect(() => {
-    // Animate each dot with delays for wave effect
-    dot1Opacity.value = withRepeat(withTiming(1, { duration: 600 }), -1, true)
-    dot2Opacity.value = withRepeat(
-      withDelay(200, withTiming(1, { duration: 600 })),
-      -1,
-      true
-    )
-    dot3Opacity.value = withRepeat(
-      withDelay(400, withTiming(1, { duration: 600 })),
-      -1,
-      true
-    )
+    scale.value = 1
+
+    const timeout = setTimeout(() => {
+      scale.value = withRepeat(
+        withSequence(
+          withTiming(1.3, {
+            duration: 350,
+            easing: Easing.out(Easing.ease),
+          }),
+          withTiming(1, {
+            duration: 350,
+            easing: Easing.in(Easing.ease),
+          })
+        ),
+        -1,
+        false
+      )
+    }, delay)
+
+    return () => clearTimeout(timeout)
   }, [])
 
-  const dot1Style = useAnimatedStyle(() => ({
-    opacity: dot1Opacity.value,
-  }))
-  const dot2Style = useAnimatedStyle(() => ({
-    opacity: dot2Opacity.value,
-  }))
-  const dot3Style = useAnimatedStyle(() => ({
-    opacity: dot3Opacity.value,
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
   }))
 
   return (
-    <XStack alignItems="center" gap="$1" paddingHorizontal="$1">
-      <Animated.View style={dot1Style}>
-        <Text fontSize="$6" lineHeight="$1">
-          •
-        </Text>
-      </Animated.View>
-      <Animated.View style={dot2Style}>
-        <Text fontSize="$6" lineHeight="$1">
-          •
-        </Text>
-      </Animated.View>
-      <Animated.View style={dot3Style}>
-        <Text fontSize="$6" lineHeight="$1">
-          •
-        </Text>
-      </Animated.View>
+    <Animated.View
+      style={[
+        {
+          width: 6,
+          height: 6,
+          borderRadius: 3,
+          backgroundColor: 'white',
+        },
+        animatedStyle,
+      ]}
+    />
+  )
+})
+
+export const TypingIndicator = () => {
+  return (
+    <XStack
+      gap="$1.5"
+      padding="$1.5"
+      alignItems="center"
+      justifyContent="center"
+    >
+      <Dot delay={0} />
+      <Dot delay={150} />
+      <Dot delay={300} />
     </XStack>
   )
 }

@@ -213,12 +213,11 @@ export default function MessageBubble({
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           typingUsers.length > 0 ? (
-            <XStack paddingHorizontal="$3" paddingVertical="$2">
+            <XStack paddingVertical="$1.5">
               <YStack
                 backgroundColor={theme === 'dark' ? '$green8' : '$green4'}
                 borderRadius={15}
-                paddingHorizontal="$3"
-                paddingVertical="$2"
+                padding="$2.5"
               >
                 <TypingIndicator />
               </YStack>
