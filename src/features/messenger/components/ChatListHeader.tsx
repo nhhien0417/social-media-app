@@ -20,7 +20,7 @@ export default function ChatListHeader() {
             if (router.canGoBack()) {
               router.back()
             } else {
-              router.replace('/message')
+              router.replace('/(tabs)')
             }
           }}
           style={({ pressed }) => ({
