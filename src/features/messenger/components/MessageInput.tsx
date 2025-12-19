@@ -208,6 +208,7 @@ export default function MessageInput({ chatId }: MessageInputProps) {
   const iconColor = isDark ? '#E4E6EB' : '#65676B'
   const containerBackground = isDark ? 'rgba(17,20,24,0.92)' : '#ffffff'
   const borderColor = isDark ? 'rgba(255,255,255,0.08)' : '#e4e6eb'
+  const backgroundColor = isDark ? '#4a4747ff' : '#c7c5c5ff'
 
   const renderPreviewItem = (item: MediaItem) => {
     const isImage = item.mimeType?.startsWith('image') || item.type === 'photo'
@@ -227,7 +228,7 @@ export default function MessageInput({ chatId }: MessageInputProps) {
         width={100}
         height={100}
         borderRadius={8}
-        backgroundColor="#DDD"
+        backgroundColor={backgroundColor}
         justifyContent="center"
         alignItems="center"
         padding="$2"

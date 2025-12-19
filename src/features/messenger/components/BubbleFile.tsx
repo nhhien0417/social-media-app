@@ -1,13 +1,13 @@
 import { XStack, Text, YStack } from 'tamagui'
 import { FileText, Download } from '@tamagui/lucide-icons'
-import { Pressable } from 'react-native'
+import { Pressable, Platform, Linking } from 'react-native'
 import * as FileSystem from 'expo-file-system/legacy'
 import { shareAsync } from 'expo-sharing'
 
 interface BubbleFileProps {
   uri: string
   name?: string
-  size?: number 
+  size?: number
 }
 
 export default function BubbleFile({
@@ -17,9 +17,23 @@ export default function BubbleFile({
 }: BubbleFileProps) {
   const handleOpen = async () => {
     try {
+      // Web: Use browser native download
+      if (Platform.OS === 'web') {
+        const link = document.createElement('a')
+        link.href = uri
+        link.download = name
+        link.target = '_blank'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        return
+      }
+
+      // Mobile: Download to cache and share
       const cacheDir = FileSystem.cacheDirectory
       if (!cacheDir) {
-        console.warn('No cache directory available')
+        // Fallback: Open URL directly
+        await Linking.openURL(uri)
         return
       }
 
@@ -28,6 +42,12 @@ export default function BubbleFile({
       await shareAsync(localUri)
     } catch (e) {
       console.error('Download error:', e)
+      // Fallback: Try to open URL directly
+      try {
+        await Linking.openURL(uri)
+      } catch (linkError) {
+        console.error('Failed to open URL:', linkError)
+      }
     }
   }
 
