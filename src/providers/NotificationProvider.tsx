@@ -300,14 +300,26 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
       switch (type) {
         case 'NEW_POST':
         case 'LIKE_POST':
-        case 'SHARE_POST':
-        case 'MENTION_POST':
         case 'COMMENT_ON_POST':
         case 'LIKE_COMMENT':
         case 'REPLY_COMMENT':
-        case 'MENTION_COMMENT':
           if (data?.postId) {
             router.push(`/post/${data.postId}`)
+          }
+          break
+
+        case 'NEW_MESSAGE':
+          if (data?.chatId) {
+            router.push(`/message/${data.chatId}`)
+          }
+          break
+
+        case 'GROUP_NEW_POST':
+        case 'GROUP_ROLE_CHANGE':
+        case 'GROUP_JOIN_REQUEST':
+        case 'GROUP_JOIN_ACCEPTED':
+          if (data?.groupId) {
+            router.push(`/group/${data.groupId}`)
           }
           break
 
@@ -315,16 +327,6 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
         case 'FRIEND_REQUEST_ACCEPTED':
           if (senderId) {
             router.push(`/profile/${senderId}`)
-          }
-          break
-
-        case 'GROUP_INVITE':
-        case 'GROUP_NEW_POST':
-        case 'GROUP_ROLE_CHANGE':
-        case 'GROUP_JOIN_REQUEST':
-        case 'GROUP_JOIN_ACCEPTED':
-          if (data?.groupId) {
-            router.push(`/group/${data.groupId}`)
           }
           break
 

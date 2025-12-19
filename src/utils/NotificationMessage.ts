@@ -13,12 +13,6 @@ export const getNotificationMessage = (
     case 'LIKE_POST':
       return `${senderName} liked your post`
 
-    case 'SHARE_POST':
-      return `${senderName} shared your post`
-
-    case 'MENTION_POST':
-      return `${senderName} mentioned you in a post`
-
     case 'COMMENT_ON_POST':
       return `${senderName} commented on your post`
 
@@ -28,17 +22,14 @@ export const getNotificationMessage = (
     case 'LIKE_COMMENT':
       return `${senderName} liked your comment`
 
-    case 'MENTION_COMMENT':
-      return `${senderName} mentioned you in a comment`
+    case 'NEW_MESSAGE':
+      return `${senderName} sent you a message`
 
     case 'FRIEND_REQUEST':
       return `${senderName} sent you a friend request`
 
     case 'FRIEND_REQUEST_ACCEPTED':
       return `${senderName} accepted your friend request`
-
-    case 'GROUP_INVITE':
-      return `${senderName} invited you to a group`
 
     case 'GROUP_JOIN_REQUEST':
       return `${senderName} requested to join your group`
