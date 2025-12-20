@@ -1,85 +1,99 @@
-import apiClient from './apiClient'
+import { ApiClient, GenericResponse } from './apiClient'
 import { ENDPOINTS } from './endpoints'
-import { formatPushTokenForBackend } from '@/services/pushNotifications'
-import { NotificationType } from '@/types/Notification'
+import { Notification, NotificationType } from '@/types/Notification'
 
 // --- Requests ---
 
-interface RegisterPushTokenRequest {
+export interface RegisterPushTokenRequest {
   token: string
-  type: 'ios' | 'android'
+  type?: 'ios' | 'android' | 'expo'
   deviceId?: string
   deviceName?: string
 }
 
-// --- Models ---
+export interface UnregisterPushTokenRequest {
+  token: string
+}
 
-type PushNotificationSettings = {
+export interface UpdateNotificationSettingsRequest {
+  enabled?: boolean
+  settings?: Partial<Record<NotificationType, boolean>>
+}
+
+// --- Responses ---
+
+export type NotificationsResponse = GenericResponse<{
+  notifications: Notification[]
+  currentPage: number
+  totalPages: number
+  totalElements: number
+  pageSize: number
+  hasNext: boolean
+  hasPrevious: boolean
+}>
+
+export type UnreadCountResponse = GenericResponse<number>
+
+export type NotificationSettingsResponse = GenericResponse<{
+  id: string
+  userId: string
   enabled: boolean
-} & Partial<Record<NotificationType, boolean>>
+  settings: Partial<Record<NotificationType, boolean>>
+  createdAt: string
+  updatedAt: string
+}>
 
 // --- API Functions ---
 
-export const registerPushToken = async (
-  token: string,
-  deviceInfo?: { deviceId?: string; deviceName?: string }
-): Promise<void> => {
-  try {
-    const formattedToken = formatPushTokenForBackend(token)
-
-    const response = await apiClient.post(
-      ENDPOINTS.NOTIFICATIONS.REGISTER_PUSH_TOKEN,
-      {
-        ...formattedToken,
-        ...deviceInfo,
-      }
-    )
-
-    console.log('Push Token registered successfully:', response.data)
-  } catch (error) {
-    console.error('Error registering Push Token:', error)
-    throw error
-  }
+export const getNotificationsApi = (page = 0, size = 20) => {
+  return ApiClient.get<NotificationsResponse>(
+    `${ENDPOINTS.NOTIFICATIONS.ALL}?page=${page}&size=${size}`
+  )
 }
 
-export const unregisterPushToken = async (token: string): Promise<void> => {
-  try {
-    await apiClient.post(ENDPOINTS.NOTIFICATIONS.UNREGISTER_PUSH_TOKEN, {
-      token,
-    })
-
-    console.log('Push Token unregistered successfully')
-  } catch (error) {
-    console.error('Error unregistering Push Token:', error)
-    throw error
-  }
+export const markAllNotificationsAsReadApi = () => {
+  return ApiClient.put<string>(ENDPOINTS.NOTIFICATIONS.ALL_READ)
 }
 
-export const updatePushSettings = async (
-  settings: Partial<PushNotificationSettings>
-): Promise<void> => {
-  try {
-    const response = await apiClient.put(
-      ENDPOINTS.NOTIFICATIONS.UPDATE_SETTINGS,
-      settings
-    )
-
-    console.log('Push Notification settings updated:', response.data)
-  } catch (error) {
-    console.error('Error updating settings:', error)
-    throw error
-  }
+export const getUnreadCountApi = () => {
+  return ApiClient.get<UnreadCountResponse>(ENDPOINTS.NOTIFICATIONS.UNREAD)
 }
 
-export const getPushSettings = async (): Promise<PushNotificationSettings> => {
-  try {
-    const response = await apiClient.get(ENDPOINTS.NOTIFICATIONS.GET_SETTINGS)
-
-    return response.data
-  } catch (error) {
-    console.error('Error getting settings:', error)
-    throw error
-  }
+export const markNotificationAsReadApi = (notificationId: string) => {
+  return ApiClient.put<string>(ENDPOINTS.NOTIFICATIONS.READ(notificationId))
 }
 
-export type { RegisterPushTokenRequest, PushNotificationSettings }
+export const deleteNotificationApi = (notificationId: string) => {
+  return ApiClient.delete<string>(
+    ENDPOINTS.NOTIFICATIONS.DELETE(notificationId)
+  )
+}
+
+export const registerPushTokenApi = (data: RegisterPushTokenRequest) => {
+  return ApiClient.post<GenericResponse<void>>(
+    ENDPOINTS.NOTIFICATIONS.REGISTER_PUSH_TOKEN,
+    data
+  )
+}
+
+export const unregisterPushTokenApi = (data: UnregisterPushTokenRequest) => {
+  return ApiClient.post<GenericResponse<void>>(
+    ENDPOINTS.NOTIFICATIONS.UNREGISTER_PUSH_TOKEN,
+    data
+  )
+}
+
+export const getNotificationSettingsApi = () => {
+  return ApiClient.get<NotificationSettingsResponse>(
+    ENDPOINTS.NOTIFICATIONS.GET_SETTINGS
+  )
+}
+
+export const updateNotificationSettingsApi = (
+  data: UpdateNotificationSettingsRequest
+) => {
+  return ApiClient.put<GenericResponse<void>>(
+    ENDPOINTS.NOTIFICATIONS.UPDATE_SETTINGS,
+    data
+  )
+}

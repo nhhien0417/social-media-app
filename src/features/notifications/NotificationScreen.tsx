@@ -1,78 +1,106 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { YStack } from 'tamagui'
+import { useNotificationStore } from '@/stores/notificationStore'
 import { useNotifications } from '@/providers/NotificationProvider'
 import type { Notification } from '@/types/Notification'
 import NotificationHeader from './components/NotificationHeader'
 import NotificationList from './components/NotificationList'
 import GlobalActionsSheet from './components/GlobalActionsSheet'
-import NotificationSheet from './components/NotificationSheet'
+import NotificationOptionsSheet from './components/NotificationOptionsSheet'
 
 export default function NotificationScreen() {
   const {
     notifications,
     unreadCount,
+    isLoading,
+    isRefreshing,
+    pagination,
+    fetchNotifications,
+    markAsRead,
     markAllAsRead,
     deleteNotification,
-    clearAll,
-    handleNotificationPress,
-  } = useNotifications()
+  } = useNotificationStore()
 
-  const [isSheetOpen, setIsSheetOpen] = useState(false)
-  const [isScrollable, setIsScrollable] = useState(false)
-  const [layoutHeight, setLayoutHeight] = useState(0)
-  const [contentHeight, setContentHeight] = useState(0)
+  const { handleNotificationPress } = useNotifications()
 
+  const [isGlobalSheetOpen, setIsGlobalSheetOpen] = useState(false)
   const [activeNotification, setActiveNotification] =
     useState<Notification | null>(null)
 
-  const handleMarkAllRead = () => {
-    markAllAsRead()
-    setIsSheetOpen(false)
-  }
-
-  const handleDeleteNotification = (id: string) => {
-    deleteNotification(id)
-    setActiveNotification(null)
-  }
-
-  const handleClearAll = () => {
-    clearAll()
-    setIsSheetOpen(false)
-  }
-
+  // Fetch notifications on mount
   useEffect(() => {
-    if (layoutHeight > 0 && contentHeight > 0) {
-      setIsScrollable(contentHeight > layoutHeight + 10)
+    fetchNotifications(true)
+  }, [fetchNotifications])
+
+  const handleRefresh = useCallback(() => {
+    fetchNotifications(true)
+  }, [fetchNotifications])
+
+  const handleLoadMore = useCallback(() => {
+    if (pagination.hasNext && !isLoading) {
+      fetchNotifications(false)
     }
-  }, [layoutHeight, contentHeight])
+  }, [fetchNotifications, pagination.hasNext, isLoading])
+
+  const handleMarkAllRead = useCallback(() => {
+    markAllAsRead()
+    setIsGlobalSheetOpen(false)
+  }, [markAllAsRead])
+
+  const handleMarkAsRead = useCallback(
+    (id: string) => {
+      markAsRead(id)
+      setActiveNotification(null)
+    },
+    [markAsRead]
+  )
+
+  const handleDeleteNotification = useCallback(
+    (id: string) => {
+      deleteNotification(id)
+      setActiveNotification(null)
+    },
+    [deleteNotification]
+  )
+
+  const handleNotificationItemPress = useCallback(
+    (notification: Notification) => {
+      // Mark as read if not already
+      if (!notification.read) {
+        markAsRead(notification.id)
+      }
+      handleNotificationPress(notification)
+    },
+    [markAsRead, handleNotificationPress]
+  )
 
   return (
     <YStack flex={1} backgroundColor="$background">
-      <NotificationHeader onMorePress={() => setIsSheetOpen(true)} />
+      <NotificationHeader onMorePress={() => setIsGlobalSheetOpen(true)} />
 
       <NotificationList
         notifications={notifications}
-        isScrollable={isScrollable}
-        onNotificationPress={handleNotificationPress}
+        isLoading={isLoading}
+        isRefreshing={isRefreshing}
+        hasNext={pagination.hasNext}
+        onNotificationPress={handleNotificationItemPress}
         onMorePress={setActiveNotification}
-        onLayout={e => setLayoutHeight(e.nativeEvent.layout.height)}
-        onContentSizeChange={(w, h) => setContentHeight(h)}
+        onRefresh={handleRefresh}
+        onLoadMore={handleLoadMore}
       />
 
       <GlobalActionsSheet
-        isOpen={isSheetOpen}
-        onOpenChange={setIsSheetOpen}
+        visible={isGlobalSheetOpen}
+        onClose={() => setIsGlobalSheetOpen(false)}
         unreadCount={unreadCount}
-        totalCount={notifications.length}
         onMarkAllAsRead={handleMarkAllRead}
-        onClearAll={handleClearAll}
       />
 
-      <NotificationSheet
+      <NotificationOptionsSheet
+        visible={!!activeNotification}
         notification={activeNotification}
-        onOpenChange={open => {
-          if (!open) setActiveNotification(null)
-        }}
+        onClose={() => setActiveNotification(null)}
+        onMarkAsRead={handleMarkAsRead}
         onDelete={handleDeleteNotification}
       />
     </YStack>

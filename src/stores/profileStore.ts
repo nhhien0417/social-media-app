@@ -34,6 +34,7 @@ interface ProfileState {
 
   // Fetchers
   fetchUser: (userId: string, force?: boolean) => Promise<User | null>
+  fetchUsersBatch: (userIds: string[]) => Promise<void>
   fetchFriends: (userId?: string) => Promise<void>
   fetchPending: () => Promise<void>
   fetchSent: () => Promise<void>
@@ -130,6 +131,33 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
     } catch (error) {
       console.error('Error fetch user:', error)
       return null
+    }
+  },
+
+  // Batch fetch users - only fetch those not in cache
+  fetchUsersBatch: async (userIds: string[]) => {
+    const { users } = get()
+    const missingIds = userIds.filter(id => !users[id])
+
+    if (missingIds.length === 0) return
+
+    // Fetch in parallel
+    const results = await Promise.allSettled(
+      missingIds.map(id => getUserApi(id))
+    )
+
+    const newUsers: Record<string, User> = {}
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled') {
+        const user = result.value.data
+        newUsers[missingIds[index]] = user
+      }
+    })
+
+    if (Object.keys(newUsers).length > 0) {
+      set(state => ({
+        users: { ...state.users, ...newUsers },
+      }))
     }
   },
 

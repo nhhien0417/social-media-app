@@ -1,4 +1,5 @@
-import { XStack, Text, Button } from 'tamagui'
+import { Pressable } from 'react-native'
+import { XStack, Text } from 'tamagui'
 import { MoreVertical } from '@tamagui/lucide-icons'
 
 interface NotificationHeaderProps {
@@ -15,21 +16,17 @@ export default function NotificationHeader({
       justifyContent="space-between"
       padding="$3"
     >
-      <XStack alignItems="center" gap="$2">
-        <Text fontSize="$7" fontWeight="700" color="$color">
-          Notifications
-        </Text>
-      </XStack>
+      <Text fontSize="$7" fontWeight="700" color="$color">
+        Notifications
+      </Text>
 
-      <XStack gap="$2" alignItems="center">
-        <Button
-          size="$3"
-          chromeless
-          onPress={onMorePress}
-          color="$color"
-          icon={<MoreVertical size={24} />}
-        />
-      </XStack>
+      <Pressable
+        onPress={onMorePress}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        style={{ opacity: 1 }}
+      >
+        <MoreVertical size={24} color="$color" />
+      </Pressable>
     </XStack>
   )
 }

@@ -17,18 +17,18 @@ export type NotificationType =
 
 export interface Notification {
   id: string
-  read: boolean
-  message: string
-  createdAt: string
   senderId: string
   receiverId: string
   type: NotificationType
+  read: boolean
+  createdAt: string
   extraData?: {
     postId?: string
     storyId?: string
     commentId?: string
-    chatId?: string
     groupId?: string
+    chatId?: string
+    messageId?: string
     [key: string]: any
   }
 }

@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react'
-import { YStack, XStack, Text, Button } from 'tamagui'
+import React from 'react'
+import { Pressable, StyleSheet } from 'react-native'
+import { YStack, XStack, Text, useThemeName } from 'tamagui'
 import Avatar from '@/components/Avatar'
 import { MoreVertical } from '@tamagui/lucide-icons'
 import type { Notification } from '@/types/Notification'
@@ -20,26 +21,17 @@ export default function NotificationItem({
   onPress,
   onMorePress,
 }: NotificationItemProps) {
-  const { fetchUser, users } = useProfileStore()
-  const [sender, setSender] = useState(users[notification.senderId])
+  const users = useProfileStore(state => state.users)
   const router = useRouter()
+  const themeName = useThemeName()
+  const isDark = themeName.includes('dark')
 
-  useEffect(() => {
-    const loadUser = async () => {
-      if (!sender) {
-        const user = await fetchUser(notification.senderId)
-        if (user) {
-          setSender(user)
-        }
-      }
-    }
-    loadUser()
-  }, [notification.senderId, fetchUser, sender])
-
+  const sender = users[notification.senderId]
   const senderName = sender?.username || 'Someone'
   const avatarUrl = sender?.avatarUrl || undefined
 
   const message = getNotificationMessage(notification.type, senderName)
+  const isUnread = !notification.read
 
   const handleAvatarPress = () => {
     if (notification.senderId) {
@@ -47,70 +39,73 @@ export default function NotificationItem({
     }
   }
 
+  const unreadBgColor = isDark
+    ? 'rgba(0, 122, 255, 0.12)'
+    : 'rgba(0, 122, 255, 0.08)'
+  const normalBgColor = 'transparent'
+
   return (
-    <YStack
-      backgroundColor={!notification.read ? '$backgroundHover' : '$background'}
-      padding="$3"
-      pressStyle={{ opacity: 0.8 }}
+    <Pressable
       onPress={() => onPress(notification)}
+      style={({ pressed }) => ({
+        backgroundColor: isUnread
+          ? unreadBgColor
+          : pressed
+            ? isDark
+              ? 'rgba(255,255,255,0.05)'
+              : 'rgba(0,0,0,0.03)'
+            : normalBgColor,
+      })}
     >
-      <XStack alignItems="center" gap="$3">
-        <YStack
-          onPress={e => {
-            e.stopPropagation()
-            handleAvatarPress()
-          }}
-        >
-          <Avatar uri={avatarUrl} size={65} />
-          <YStack
-            position="absolute"
-            bottom={-2}
-            right={-2}
-            backgroundColor="$background"
-            borderRadius={100}
-            padding={4}
-            elevation="$1"
-          >
-            {getNotificationIcon(notification.type)}
+      <XStack alignItems="center" gap="$3" padding="$3">
+        <Pressable onPress={handleAvatarPress}>
+          <YStack>
+            <Avatar uri={avatarUrl} size={56} />
+            <YStack
+              position="absolute"
+              bottom={-2}
+              right={-2}
+              backgroundColor={isDark ? '#1c1c1e' : 'white'}
+              borderRadius={100}
+              padding={3}
+            >
+              {getNotificationIcon(notification.type)}
+            </YStack>
           </YStack>
-        </YStack>
+        </Pressable>
+
         <YStack flex={1}>
           <Text color="$color" fontSize={15}>
-            <Text
-              fontWeight="bold"
-              onPress={e => {
-                e.stopPropagation()
-                handleAvatarPress()
-              }}
-            >
+            <Text fontWeight="bold" onPress={handleAvatarPress}>
               {senderName}
             </Text>{' '}
             {message.replace(senderName, '').trim()}
           </Text>
-          <Text color="#888" fontSize="$3" marginTop={2}>
+          <Text
+            color={isDark ? '#8e8e93' : '#8e8e93'}
+            fontSize={13}
+            marginTop={2}
+          >
             {formatDate(notification.createdAt)}
           </Text>
         </YStack>
 
-        {!notification.read && (
+        {isUnread && (
           <YStack
             width={8}
             height={8}
-            borderRadius="$10"
-            backgroundColor="$blue10"
+            borderRadius={5}
+            backgroundColor="#007aff"
           />
         )}
 
-        <Button
-          size="$3"
-          chromeless
-          onPress={e => {
-            e.stopPropagation()
-            onMorePress(notification)
-          }}
-          icon={<MoreVertical size={20} color="$color" />}
-        />
+        <Pressable
+          onPress={() => onMorePress(notification)}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <MoreVertical size={20} color={isDark ? '#8e8e93' : '#8e8e93'} />
+        </Pressable>
       </XStack>
-    </YStack>
+    </Pressable>
   )
 }

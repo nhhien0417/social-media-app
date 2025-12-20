@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react'
 import Avatar from '@/components/Avatar'
 import { getAccessToken } from '@/utils/SecureStore'
 import { useInitProfile, useCurrentUser } from '@/hooks/useProfile'
-import { useNotifications } from '@/providers/NotificationProvider'
+import { useNotificationStore } from '@/stores/notificationStore'
 
 export default function TabsLayout() {
   const theme = useTheme()
@@ -17,7 +17,7 @@ export default function TabsLayout() {
 
   useInitProfile()
   const currentUser = useCurrentUser()
-  const { unreadCount } = useNotifications()
+  const unreadCount = useNotificationStore(state => state.unreadCount)
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -114,8 +114,8 @@ export default function TabsLayout() {
                   <View
                     style={{
                       position: 'absolute',
-                      right: -3,
-                      top: -3,
+                      right: -10,
+                      top: -5,
                       borderRadius: 10,
                       minWidth: 16,
                       height: 16,

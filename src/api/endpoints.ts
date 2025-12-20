@@ -80,6 +80,12 @@ export const ENDPOINTS = {
   },
 
   NOTIFICATIONS: {
+    ALL: 'notification',
+    ALL_READ: 'notification',
+    UNREAD: 'notification/unread',
+    READ: (id: string) => `notification/${id}`,
+    DELETE: (id: string) => `notification/${id}`,
+
     REGISTER_PUSH_TOKEN: 'notification/push-token/register',
     UNREGISTER_PUSH_TOKEN: 'notification/push-token/unregister',
     UPDATE_SETTINGS: 'notification/settings',
