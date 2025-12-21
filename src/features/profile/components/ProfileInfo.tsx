@@ -1,15 +1,19 @@
-import { Text, XStack, YStack, useThemeName } from 'tamagui'
+import { Text, XStack, YStack, useThemeName, View } from 'tamagui'
 import { LinearGradient } from 'expo-linear-gradient'
 import { StyleSheet, Pressable } from 'react-native'
 import { INSTAGRAM_GRADIENT } from '@/utils/InstagramGradient'
 import { formatNumber } from '@/utils/FormatNumber'
 import { ProfileComponentProps } from '../ProfileScreen'
 import Avatar from '@/components/Avatar'
+import { Post } from '@/types/Post'
+import { useCurrentUserId } from '@/hooks/useProfile'
+import { useRouter } from 'expo-router'
 
 interface ProfileInfoProps extends ProfileComponentProps {
   onFriendsPress?: () => void
   onGroupsPress?: () => void
   onPostsPress?: () => void
+  userStories?: Post[]
 }
 
 export function ProfileInfo({
@@ -18,11 +22,38 @@ export function ProfileInfo({
   onFriendsPress,
   onGroupsPress,
   onPostsPress,
+  userStories = [],
 }: ProfileInfoProps) {
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
   const captionColor = isDark ? 'rgba(250,250,250,0.6)' : '#8E8E93'
   const ringBackground = isDark ? '#000000' : '#FFFFFF'
+  const currentUserId = useCurrentUserId()
+  const router = useRouter()
+
+  // Logic for story ring color
+  const hasActiveStory = userStories.length > 0
+  const hasUnseenStory =
+    !isOwnProfile &&
+    userStories.some(story => !story.seenBy.includes(currentUserId || ''))
+
+  // Determine ring colors
+  const shouldShowColoredRing = isOwnProfile ? hasActiveStory : hasUnseenStory
+  const ringColors = shouldShowColoredRing
+    ? INSTAGRAM_GRADIENT
+    : isDark
+      ? ['#3a3a3a', '#3a3a3a']
+      : ['#d1d1d1', '#d1d1d1']
+
+  const handleAvatarPress = () => {
+    if (userStories.length > 0) {
+      // Navigate to story viewer with first story
+      router.push({
+        pathname: '/story/[id]',
+        params: { id: userStories[0].id },
+      })
+    }
+  }
 
   return (
     <XStack
@@ -30,26 +61,28 @@ export function ProfileInfo({
       justifyContent="space-between"
       paddingHorizontal="$3"
     >
-      <LinearGradient
-        colors={INSTAGRAM_GRADIENT}
-        start={{ x: 0, y: 0.35 }}
-        end={{ x: 1, y: 0.65 }}
-        style={styles.avatarRing}
-      >
-        <YStack
-          style={[styles.avatarInner, { backgroundColor: ringBackground }]}
-          alignItems="center"
-          justifyContent="center"
+      <Pressable onPress={handleAvatarPress} disabled={!hasActiveStory}>
+        <LinearGradient
+          colors={ringColors}
+          start={{ x: 0, y: 0.35 }}
+          end={{ x: 1, y: 0.65 }}
+          style={styles.avatarRing}
         >
-          <YStack style={styles.avatarImageWrapper}>
-            <Avatar
-              source={{ uri: user.avatarUrl || undefined }}
-              style={styles.avatarImage}
-              objectFit="cover"
-            />
+          <YStack
+            style={[styles.avatarInner, { backgroundColor: ringBackground }]}
+            alignItems="center"
+            justifyContent="center"
+          >
+            <YStack style={styles.avatarImageWrapper}>
+              <Avatar
+                source={{ uri: user.avatarUrl || undefined }}
+                style={styles.avatarImage}
+                objectFit="cover"
+              />
+            </YStack>
           </YStack>
-        </YStack>
-      </LinearGradient>
+        </LinearGradient>
+      </Pressable>
 
       <XStack flex={1} justifyContent="space-around" marginLeft="$5">
         <Pressable onPress={onPostsPress}>
