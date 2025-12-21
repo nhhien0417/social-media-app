@@ -83,13 +83,19 @@ export const useSent = (enabled = true) => {
 
 export const useSuggestions = (enabled = true) => {
   const suggestions = useProfileStore(state => state.suggestions)
+  const friends = useProfileStore(state => state.friends)
+  const pending = useProfileStore(state => state.pending)
+  const sent = useProfileStore(state => state.sent)
   const fetchSuggestions = useProfileStore(state => state.fetchSuggestions)
 
+  const listsLoaded =
+    friends.length > 0 || pending.length > 0 || sent.length > 0
+
   useEffect(() => {
-    if (enabled && suggestions.length === 0) {
+    if (enabled && suggestions.length === 0 && listsLoaded) {
       fetchSuggestions()
     }
-  }, [enabled, suggestions.length])
+  }, [enabled, suggestions.length, listsLoaded, fetchSuggestions])
 
   return suggestions
 }
