@@ -3,7 +3,7 @@ import { AppColors, type ThemeMode } from './colors'
 
 /**
  * Custom hook to get themed colors
- * 
+ *
  * @example
  * const colors = useAppColors()
  * <View backgroundColor={colors.background} />
@@ -13,44 +13,44 @@ export const useAppColors = () => {
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
   const mode: ThemeMode = isDark ? 'dark' : 'light'
-  
+
   return {
     // Theme info
     isDark,
     mode,
-    
+
     // Basic colors
     background: AppColors[mode].background,
     backgroundSecondary: AppColors[mode].backgroundSecondary,
     backgroundTertiary: AppColors[mode].backgroundTertiary,
-    
+
     text: AppColors[mode].text,
     textSecondary: AppColors[mode].textSecondary,
     textTertiary: AppColors[mode].textTertiary,
     placeholder: AppColors[mode].placeholder,
-    
+
     border: AppColors[mode].border,
     borderSecondary: AppColors[mode].borderSecondary,
-    
+
     accent: AppColors[mode].accent,
     accentHover: AppColors[mode].accentHover,
-    
+
     card: AppColors[mode].card,
     modal: AppColors[mode].modal,
     overlay: AppColors[mode].overlay,
-    
+
     // Input colors
     input: AppColors[mode].input,
-    
+
     // Button colors
     button: AppColors[mode].button,
-    
+
     // Semantic colors
     success: AppColors.semantic.success[mode],
     error: AppColors.semantic.error[mode],
     warning: AppColors.semantic.warning[mode],
     info: AppColors.semantic.info[mode],
-    
+
     // Feature colors
     features: {
       storyGradient: AppColors.features.storyGradient,
@@ -58,7 +58,7 @@ export const useAppColors = () => {
       offline: AppColors.features.offline,
       like: AppColors.features.like,
       love: AppColors.features.love,
-      
+
       gallery: {
         icon: AppColors.features.gallery[mode],
         background: AppColors.features.gallery.background[mode],
@@ -67,19 +67,15 @@ export const useAppColors = () => {
         icon: AppColors.features.camera[mode],
         background: AppColors.features.camera.background[mode],
       },
-      feeling: {
-        icon: AppColors.features.feeling[mode],
-        background: AppColors.features.feeling.background[mode],
-      },
     },
-    
+
     // Component colors
     components: {
       segmentControl: AppColors.components.segmentControl[mode],
       chip: AppColors.components.chip[mode],
       searchBar: AppColors.components.searchBar[mode],
     },
-    
+
     // Direct access to full color palette if needed
     palette: AppColors,
   }
@@ -87,7 +83,7 @@ export const useAppColors = () => {
 
 /**
  * Get a specific themed color value
- * 
+ *
  * @example
  * const bgColor = getThemedColor('background', isDark)
  * const accentColor = getThemedColor('accent', isDark)
@@ -102,7 +98,7 @@ export const getThemedColor = (
 
 /**
  * Get semantic color
- * 
+ *
  * @example
  * const successColor = getSemanticColor('success', isDark)
  */

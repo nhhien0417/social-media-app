@@ -158,14 +158,6 @@ export const AppColors = {
         dark: 'rgba(88,86,214,0.2)',
       },
     },
-    feeling: {
-      light: '#FF9500',
-      dark: '#FF9F0A',
-      background: {
-        light: 'rgba(255,149,0,0.12)',
-        dark: 'rgba(255,159,10,0.2)',
-      },
-    },
   },
 
   // ========== COMPONENT-SPECIFIC ==========

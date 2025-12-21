@@ -1,6 +1,6 @@
 import { Platform } from 'react-native'
 
-const MOBILE_DEVICE_IP = '192.168.1.4'
+const MOBILE_DEVICE_IP = '192.168.1.6'
 
 const getApiURL = () => {
   if (Platform.OS === 'web') {

@@ -28,15 +28,7 @@ export default function PostAction({ onAddMedia, onTakePhoto }: Props) {
         onPress: onTakePhoto,
         background: colors.features.camera.background,
         iconColor: colors.features.camera.icon,
-      },
-      {
-        key: 'feeling',
-        label: 'Feeling',
-        icon: Smile,
-        onPress: undefined,
-        background: colors.features.feeling.background,
-        iconColor: colors.features.feeling.icon,
-      },
+      },  
     ],
     [colors, onAddMedia, onTakePhoto]
   )
