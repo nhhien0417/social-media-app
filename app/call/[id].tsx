@@ -11,7 +11,7 @@ import { useLocalSearchParams, router } from 'expo-router'
 import { YStack, XStack, Avatar, Text } from 'tamagui'
 import { Feather } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
-import { users } from '../../src/mock/users'
+// import { users } from '../../src/mock/users'
 
 type CallState = 'calling' | 'connected' | 'ended'
 
@@ -43,7 +43,7 @@ export default function CallScreen() {
   const waveAnim = useRef(new Animated.Value(0)).current
 
   // Get user info
-  const user = users.find(u => u.id === id) || {
+  const user = {
     id: id || '1',
     name: name || 'Unknown',
     avatarUrl: avatar || 'https://i.pravatar.cc/150?img=1',
