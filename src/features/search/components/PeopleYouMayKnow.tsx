@@ -30,6 +30,14 @@ const SuggestionCard = memo(function SuggestionCard({
   const cardBackground = isDark ? '#1f1f1f' : '#ffffff'
   const borderColor = isDark ? '#2a2a2a' : '#e5e7eb'
 
+  const themeName = useThemeName()
+  const isDark = themeName === 'dark'
+  const titleColor = isDark ? '#FAFAFA' : '#262626'
+  const subtitleColor = isDark ? 'rgba(250,250,250,0.6)' : '#8E8E93'
+  const buttonBackground = isDark ? '#1DA1F2' : '#0095F6'
+  const buttonTextColor = '#ffffff'
+  const buttonDisabledBackground = isDark ? 'rgba(255,255,255,0.15)' : '#F0F0F0'
+  const buttonDisabledTextColor = isDark ? 'rgba(250,250,250,0.6)' : '#8E8E93'
   const displayName =
     user.firstName && user.lastName
       ? `${user.firstName} ${user.lastName}`

@@ -1,5 +1,8 @@
 import { XStack, Button, useThemeName } from 'tamagui'
 import type { SearchCategory } from '@/types/Search'
+import { XStack, Button } from 'tamagui'
+import type { SearchCategory } from '../../../mock/search'
+import { useAppColors } from '@/theme'
 
 interface SearchFiltersProps {
   value: SearchCategory
@@ -14,14 +17,7 @@ const FILTERS: Array<{ label: string; value: SearchCategory }> = [
 ]
 
 export function SearchFilters({ value, onChange }: SearchFiltersProps) {
-  const themeName = useThemeName()
-  const isDark = themeName === 'dark'
-
-  const activeBackground = '#1877F2'
-  const inactiveBackground = isDark ? 'rgba(255,255,255,0.08)' : '#f3f4f6'
-  const inactiveBorderColor = isDark ? 'rgba(255,255,255,0.2)' : '#d5dae1'
-  const activeTextColor = '#ffffff'
-  const inactiveTextColor = isDark ? 'rgba(255,255,255,0.85)' : '#1f2937'
+  const colors = useAppColors()
 
   return (
     <XStack gap="$2" flexWrap="wrap">
@@ -35,10 +31,10 @@ export function SearchFilters({ value, onChange }: SearchFiltersProps) {
             fontSize="$4"
             fontWeight="500"
             borderRadius={999}
-            padding="$4"
-            backgroundColor={isActive ? activeBackground : inactiveBackground}
-            color={isActive ? activeTextColor : inactiveTextColor}
-            borderColor={isActive ? 'transparent' : inactiveBorderColor}
+            paddingHorizontal="$4"
+            backgroundColor={isActive ? colors.accent : colors.backgroundTertiary}
+            color={isActive ? '#FFFFFF' : colors.text}
+            borderColor={isActive ? 'transparent' : colors.border}
             borderWidth={isActive ? 0 : 1}
             onPress={() => onChange(filter.value)}
             pressStyle={{ opacity: isActive ? 0.85 : 0.7 }}
