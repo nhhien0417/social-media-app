@@ -1,9 +1,11 @@
 export const ENDPOINTS = {
   IDENTITY: {
+    GOOGLE: 'identity/auth/google',
     LOGIN: 'identity/auth/login',
     LOGOUT: 'identity/auth/logout',
     REGISTER: 'identity/auth/register',
-    GOOGLE_LOGIN: 'identity/auth/google',
+    FORGOT: 'identity/auth/forgot-password',
+    RESET: 'identity/auth/reset-password',
     TOKEN: 'identity/auth/refresh-token',
   },
 

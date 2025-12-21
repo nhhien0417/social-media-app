@@ -12,15 +12,17 @@ import {
   XStack,
 } from 'tamagui'
 import { Image } from 'react-native'
-import { ChevronLeft } from '@tamagui/lucide-icons'
+import { forgotPasswordApi } from '@/api/api.auth'
+import { CheckCircle } from '@tamagui/lucide-icons'
 
 export default function ForgotPasswordScreen() {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [isSuccess, setIsSuccess] = useState(false)
 
-  const handleSendOTP = async () => {
+  const handleSendNewPassword = async () => {
     if (!email.trim()) {
       setError('Email is required')
       return
@@ -34,21 +36,62 @@ export default function ForgotPasswordScreen() {
     setError('')
 
     try {
-      // TODO: Call API to send OTP
-      // await sendOtpApi(email)
-
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
-      router.push({
-        pathname: '/auth/verify',
-        params: { email },
-      })
-    } catch (err) {
-      setError('Failed to send OTP. Please try again.')
+      await forgotPasswordApi(email)
+      console.log('Password reset link sent successfully')
+      setIsSuccess(true)
+    } catch (err: any) {
+      console.log(err)
+      setError('Failed to send new password. Please try again.')
     } finally {
       setIsLoading(false)
     }
+  }
+
+  if (isSuccess) {
+    return (
+      <ScrollView
+        flex={1}
+        backgroundColor="$background"
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: 'center',
+        }}
+      >
+        <YStack
+          paddingHorizontal="$6"
+          paddingVertical="$6"
+          alignItems="center"
+          gap="$4"
+        >
+          <CheckCircle size={80} color="$green10" />
+          <SizableText size="$8" fontWeight="700" textAlign="center">
+            Password Sent!
+          </SizableText>
+          <Paragraph
+            color="#888"
+            fontSize="$4"
+            textAlign="center"
+            maxWidth={300}
+          >
+            A new password has been sent to your email. Please check your inbox
+            and use it to login.
+          </Paragraph>
+          <Button
+            size="$5"
+            theme="primary"
+            borderRadius="$7"
+            fontWeight="700"
+            marginTop="$4"
+            onPress={() => router.replace('/auth/signin')}
+            fontSize={18}
+            width="100%"
+            maxWidth={400}
+          >
+            Back to Login
+          </Button>
+        </YStack>
+      </ScrollView>
+    )
   }
 
   return (
@@ -82,8 +125,7 @@ export default function ForgotPasswordScreen() {
           fontSize="$4"
           textAlign="center"
         >
-          Enter your email address and we'll send you a code to reset your
-          password.
+          Enter your email address and we'll send you a new password.
         </Paragraph>
 
         {/* Form */}
@@ -121,12 +163,12 @@ export default function ForgotPasswordScreen() {
             theme="primary"
             borderRadius="$7"
             fontWeight="700"
-            onPress={handleSendOTP}
+            onPress={handleSendNewPassword}
             disabled={isLoading}
             icon={isLoading ? <Spinner size="small" /> : null}
             fontSize={18}
           >
-            {isLoading ? 'Sending Code...' : 'Send Code'}
+            {isLoading ? 'Sending...' : 'Send New Password'}
           </Button>
         </YStack>
 

@@ -11,12 +11,15 @@ import {
   Spinner,
   XStack,
 } from 'tamagui'
-import { ChevronLeft, Eye, EyeOff } from '@tamagui/lucide-icons'
+import { ChevronLeft, Eye, EyeOff, CheckCircle } from '@tamagui/lucide-icons'
 import ButtonIcon from '@/components/IconButton'
 import { Pressable } from 'react-native'
+import { resetPasswordApi } from '@/api/api.auth'
+import { useProfileStore } from '@/stores/profileStore'
 
 export default function ChangePasswordScreen() {
   const router = useRouter()
+  const currentUser = useProfileStore(state => state.currentUser)
 
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -27,6 +30,7 @@ export default function ChangePasswordScreen() {
 
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [isSuccess, setIsSuccess] = useState(false)
 
   const handleChangePassword = async () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
@@ -41,23 +45,78 @@ export default function ChangePasswordScreen() {
       setError('Passwords do not match')
       return
     }
+    if (!currentUser?.email) {
+      setError('Unable to get user information')
+      return
+    }
 
     setIsLoading(true)
     setError('')
 
     try {
-      // TODO: Call API to change password
-      // await changePasswordApi(currentPassword, newPassword)
-
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
-      router.back()
-    } catch (err) {
-      setError('Failed to change password. Please try again.')
+      await resetPasswordApi({
+        email: currentUser.email,
+        currentPassword,
+        newPassword,
+      })
+      console.log('Password changed successfully')
+      setIsSuccess(true)
+    } catch (err: any) {
+      console.log(err)
+      if (err?.response?.data?.data?.toLowerCase().includes('password')) {
+        setError('Current password is incorrect')
+      } else {
+        setError('Failed to change password. Please try again.')
+      }
     } finally {
       setIsLoading(false)
     }
+  }
+
+  if (isSuccess) {
+    return (
+      <ScrollView
+        flex={1}
+        backgroundColor="$background"
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: 'center',
+        }}
+      >
+        <YStack
+          paddingHorizontal="$6"
+          paddingVertical="$6"
+          alignItems="center"
+          gap="$4"
+        >
+          <CheckCircle size={80} color="$green10" />
+          <SizableText size="$8" fontWeight="700" textAlign="center">
+            Password Changed!
+          </SizableText>
+          <Paragraph
+            color="#888"
+            fontSize="$4"
+            textAlign="center"
+            maxWidth={300}
+          >
+            Your password has been successfully updated.
+          </Paragraph>
+          <Button
+            size="$5"
+            theme="primary"
+            borderRadius="$7"
+            fontWeight="700"
+            marginTop="$4"
+            onPress={() => router.back()}
+            fontSize={18}
+            width="100%"
+            maxWidth={400}
+          >
+            Done
+          </Button>
+        </YStack>
+      </ScrollView>
+    )
   }
 
   return (

@@ -14,6 +14,12 @@ export type SignUpData = {
   password: string
 }
 
+export type ResetPasswordData = {
+  email: string
+  currentPassword: string
+  newPassword: string
+}
+
 export type GoogleLoginData = { idToken: string }
 
 // --- Responses ---
@@ -39,6 +45,14 @@ export const signOutApi = (email: string) => {
   return ApiClient.post<string>(`${ENDPOINTS.IDENTITY.LOGOUT}?email=${email}`)
 }
 
+export const forgotPasswordApi = (email: string) => {
+  return ApiClient.get<string>(`${ENDPOINTS.IDENTITY.FORGOT}?email=${email}`)
+}
+
+export const resetPasswordApi = (data: ResetPasswordData) => {
+  return ApiClient.put<string>(ENDPOINTS.IDENTITY.RESET, data)
+}
+
 export const googleLoginApi = (data: GoogleLoginData) => {
-  return ApiClient.post<AuthResponse>(ENDPOINTS.IDENTITY.GOOGLE_LOGIN, data)
+  return ApiClient.post<AuthResponse>(ENDPOINTS.IDENTITY.GOOGLE, data)
 }
