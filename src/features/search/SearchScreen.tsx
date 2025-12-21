@@ -7,7 +7,6 @@ import { SearchFilters } from '@/features/search/components/SearchFilters'
 import { SearchResults } from '@/features/search/components/SearchResults'
 import { SearchHistoryList } from '@/features/search/components/SearchHistoryList'
 import { PeopleYouMayKnow } from '@/features/search/components/PeopleYouMayKnow'
-import { useAppColors } from '@/theme'
 
 export default function SearchScreen() {
   const themeName = useThemeName()
@@ -79,7 +78,7 @@ export default function SearchScreen() {
 
   return (
     <ScrollView
-      style={{ backgroundColor: isDark ? '#000000' : '#FFFFFF' }}
+      style={{ backgroundColor: isDark ? '#000000' : '#FAFAFA' }}
       contentContainerStyle={{ padding: 12 }}
       refreshControl={
         hasSubmitted ? (
@@ -99,12 +98,12 @@ export default function SearchScreen() {
           </Text>
           <XStack
             alignItems="center"
-            backgroundColor={searchBar.background}
+            backgroundColor={searchBarBackground}
             borderRadius={999}
             paddingHorizontal="$3"
             height={44}
             borderWidth={1}
-            borderColor={searchBar.border}
+            borderColor={searchBarBorder}
             gap="$2"
           >
             <XStack
@@ -113,7 +112,7 @@ export default function SearchScreen() {
               pressStyle={{ opacity: 0.7 }}
               onPress={() => performSearch()}
             >
-              <Search size={18} color={searchBar.iconColor} />
+              <Search size={18} color={searchIconColor} />
             </XStack>
             <Input
               flex={1}
@@ -124,8 +123,8 @@ export default function SearchScreen() {
               onChangeText={handleChangeQuery}
               autoCapitalize="none"
               autoCorrect={false}
-              placeholderTextColor={searchBar.placeholderColor}
-              color={searchBar.textColor}
+              placeholderTextColor={placeholderColor}
+              color={inputTextColor}
               onSubmitEditing={() => performSearch()}
               returnKeyType="search"
             />
@@ -133,11 +132,11 @@ export default function SearchScreen() {
               <XStack
                 padding="$2"
                 borderRadius={999}
-                backgroundColor={searchBar.clearButtonBackground}
+                backgroundColor={clearButtonBackground}
                 pressStyle={{ opacity: 0.6 }}
                 onPress={handleClearQuery}
               >
-                <Clear size={18} color={searchBar.clearIconColor} />
+                <Clear size={18} color={clearIconColor} />
               </XStack>
             ) : null}
           </XStack>
