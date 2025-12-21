@@ -44,7 +44,7 @@ export default function MessageOptionsSheet({
           style={styles.menuContainer}
         >
           <YStack
-            backgroundColor={isDark ? '#1c1c1e' : 'white'}
+            backgroundColor={isDark ? '#121212' : 'white'}
             borderRadius={16}
             overflow="hidden"
             margin={16}
@@ -67,8 +67,8 @@ export default function MessageOptionsSheet({
                 {
                   backgroundColor: pressed
                     ? isDark
-                      ? '#2c2c2e'
-                      : '#f5f5f5'
+                      ? 'rgba(255,255,255,0.08)'
+                      : '#F5F5F5'
                     : 'transparent',
                 },
               ]}
@@ -83,17 +83,17 @@ export default function MessageOptionsSheet({
                   width={36}
                   height={36}
                   borderRadius={18}
-                  backgroundColor="#ff3b301a"
+                  backgroundColor="rgba(255,59,48,0.12)"
                   alignItems="center"
                   justifyContent="center"
                 >
-                  <Trash2 size={18} color="#ff3b30" />
+                  <Trash2 size={18} color="#FF3B30" />
                 </YStack>
                 <YStack flex={1}>
-                  <Text fontSize={16} fontWeight="600" color="#ff3b30">
+                  <Text fontSize={16} fontWeight="600" color="#FF3B30">
                     Delete Message
                   </Text>
-                  <Text fontSize={13} color={isDark ? '#8e8e93' : '#8e8e93'}>
+                  <Text fontSize={13} color={isDark ? '#8E8E93' : '#8E8E93'}>
                     Message will only be deleted on your side
                   </Text>
                 </YStack>

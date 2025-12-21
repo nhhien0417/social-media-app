@@ -204,11 +204,11 @@ export default function MessageInput({ chatId }: MessageInputProps) {
 
   const hasText = text.trim().length > 0 || selectedMedia.length > 0
 
-  const likeColor = '#1877F2'
-  const iconColor = isDark ? '#E4E6EB' : '#65676B'
-  const containerBackground = isDark ? 'rgba(17,20,24,0.92)' : '#ffffff'
-  const borderColor = isDark ? 'rgba(255,255,255,0.08)' : '#e4e6eb'
-  const backgroundColor = isDark ? '#4a4747ff' : '#c7c5c5ff'
+  const likeColor = isDark ? '#1DA1F2' : '#0095F6'
+  const iconColor = isDark ? '#FAFAFA' : '#8E8E93'
+  const containerBackground = isDark ? 'rgba(18,18,18,0.95)' : '#FFFFFF'
+  const borderColor = isDark ? 'rgba(255,255,255,0.1)' : '#DBDBDB'
+  const backgroundColor = isDark ? 'rgba(255,255,255,0.12)' : '#F0F0F0'
 
   const renderPreviewItem = (item: MediaItem) => {
     const isImage = item.mimeType?.startsWith('image') || item.type === 'photo'
@@ -266,7 +266,7 @@ export default function MessageInput({ chatId }: MessageInputProps) {
         {/* Media Preview */}
         {selectedMedia.length > 0 && (
           <YStack
-            style={{ backgroundColor: isDark ? '#222' : '#f5f5f5', padding: 8 }}
+            style={{ backgroundColor: isDark ? '#1A1A1A' : '#F5F5F5', padding: 8 }}
           >
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {selectedMedia.map((item, index) => (
@@ -370,7 +370,7 @@ export default function MessageInput({ chatId }: MessageInputProps) {
               onPress={handleHeart}
               disabled={isSending || !!isRecordingState}
             >
-              <Heart size={24} color="#ef4e4eff" fill="#ef4e4eff" />
+              <Heart size={24} color="#FF3B30" fill="#FF3B30" />
             </Pressable>
           )}
         </XStack>

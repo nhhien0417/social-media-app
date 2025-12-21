@@ -22,8 +22,8 @@ function OnlineFriendItem({
 }: OnlineFriendItemProps) {
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
-  const labelColor = isDark ? '#f5f5f5' : '#111827'
-  const ringBackground = isDark ? '#121212' : '#ffffff'
+  const labelColor = isDark ? '#FAFAFA' : '#262626'
+  const ringBackground = isDark ? '#000000' : '#FFFFFF'
 
   const name =
     [friend.firstName, friend.lastName].filter(Boolean).join(' ') ||
@@ -47,7 +47,7 @@ function OnlineFriendItem({
               right={0}
               width={20}
               height={20}
-              backgroundColor="#22C55E"
+              backgroundColor="#34C759"
               borderRadius={10}
               borderWidth={3}
               borderColor={ringBackground}
