@@ -1,178 +1,165 @@
 import { memo, useEffect, useState } from 'react'
+import { ScrollView, Pressable } from 'react-native'
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-  Button,
   Spinner,
   Text,
   XStack,
   YStack,
+  Card,
   useThemeName,
 } from 'tamagui'
-import { Check, UserPlus } from '@tamagui/lucide-icons'
-import { addFriendApi, getAllProfilesApi } from '@/api/api.profile'
-import { getUserId } from '@/utils/SecureStore'
+import { useProfileStore } from '@/stores/profileStore'
 import { User } from '@/types/User'
 import { router } from 'expo-router'
-import { Pressable } from 'react-native'
+import { getAvatarUrl } from '@/utils/Avatar'
 
-interface PeopleYouMayKnowProps {
-  onAddFriend?: (user: User) => void
+interface SuggestionCardProps {
+  user: User
+  isDark: boolean
 }
 
-export const PeopleYouMayKnow = memo(function PeopleYouMayKnow({
-  onAddFriend,
-}: PeopleYouMayKnowProps) {
-  const [users, setUsers] = useState<User[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+const SuggestionCard = memo(function SuggestionCard({
+  user,
+  isDark,
+}: SuggestionCardProps) {
+  const textColor = isDark ? '#f5f5f5' : '#111827'
+  const subtitleColor = isDark ? 'rgba(255,255,255,0.6)' : '#6b7280'
+  const cardBackground = isDark ? '#1f1f1f' : '#ffffff'
+  const borderColor = isDark ? '#2a2a2a' : '#e5e7eb'
 
-  const themeName = useThemeName()
-  const isDark = themeName === 'dark'
-  const titleColor = isDark ? '#f5f5f5' : '#111827'
-  const subtitleColor = isDark ? 'rgba(255,255,255,0.65)' : '#4b5563'
-  const buttonBackground = '#1877F2'
-  const buttonTextColor = '#ffffff'
-  const buttonDisabledBackground = isDark ? 'rgba(255,255,255,0.12)' : '#e5e7eb'
-  const buttonDisabledTextColor = isDark ? 'rgba(255,255,255,0.7)' : '#4b5563'
+  const displayName =
+    user.firstName && user.lastName
+      ? `${user.firstName} ${user.lastName}`
+      : user.username || 'Unknown User'
 
-  // Fetch users from API on mount
-  useEffect(() => {
-    const fetchUsers = async () => {
-      setLoading(true)
-      setError(null)
-      try {
-        const profiles = await getAllProfilesApi()
-        console.log('Fetched profiles:', profiles)
-
-        // Transform API response to UserResult format
-        const transformedUsers = profiles.data.map(profile => ({
-          id: profile.id,
-          email: profile.email,
-          firstName: profile.firstName,
-          lastName: profile.lastName,
-          dob: profile.dob,
-        }))
-
-        setUsers(transformedUsers)
-      } catch (err) {
-        console.error('Failed to fetch users:', err)
-        setError('Failed to load users')
-      } finally {
-        setLoading(false)
-      }
+  const getInitials = () => {
+    if (user.firstName && user.lastName) {
+      return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
     }
-
-    fetchUsers()
-  }, [])
-
-  const handleAddFriend = async (friendId: string) => {
-    try {
-      const userId = await getUserId()
-      const res = await addFriendApi({
-        userId: userId || '',
-        friendUserId: friendId,
-      })
-      console.log(res)
-    } catch {}
+    return user.username ? user.username[0].toUpperCase() : 'U'
   }
 
-  const handleNavigateToProfile = async (userId: string) => {
-    const currentUserId = await getUserId()
-    if (currentUserId && userId === currentUserId) {
+  const handleNavigateToProfile = () => {
+    const currentUserId = useProfileStore.getState().currentUserId
+    if (currentUserId && user.id === currentUserId) {
       router.push('/(tabs)/profile')
     } else {
       router.push({
         pathname: '/profile/[id]',
-        params: { id: userId },
+        params: { id: user.id },
       })
     }
   }
 
-  if (loading) {
+  return (
+    <Card
+      width={150}
+      backgroundColor={cardBackground}
+      borderRadius={20}
+      borderColor={borderColor}
+      borderWidth={1}
+      padding="$3"
+      elevate
+      elevation={isDark ? 0 : 2}
+    >
+      <YStack alignItems="center" gap="$3">
+        <Pressable onPress={handleNavigateToProfile}>
+          <Avatar size="$6" circular>
+            <AvatarImage
+              src={user.avatarUrl || getAvatarUrl(user.username || 'user')}
+            />
+            <AvatarFallback backgroundColor={isDark ? '#374151' : '#dbeafe'}>
+              <Text fontWeight="700" color={textColor} fontSize={20}>
+                {getInitials()}
+              </Text>
+            </AvatarFallback>
+          </Avatar>
+        </Pressable>
+
+        <Pressable onPress={handleNavigateToProfile} style={{ width: '100%' }}>
+          <YStack alignItems="center" gap="$1.5">
+            <Text
+              fontSize={14}
+              fontWeight="700"
+              color={textColor}
+              textAlign="center"
+              numberOfLines={1}
+            >
+              {displayName}
+            </Text>
+            {user.username && (
+              <Text
+                fontSize={12}
+                color={subtitleColor}
+                textAlign="center"
+                numberOfLines={1}
+              >
+                @{user.username}
+              </Text>
+            )}
+          </YStack>
+        </Pressable>
+      </YStack>
+    </Card>
+  )
+})
+
+export const PeopleYouMayKnow = memo(function PeopleYouMayKnow() {
+  const themeName = useThemeName()
+  const isDark = themeName === 'dark'
+  const titleColor = isDark ? '#f5f5f5' : '#111827'
+  const subtitleColor = isDark ? 'rgba(255,255,255,0.65)' : '#4b5563'
+
+  const { suggestions, fetchSuggestions, isLoading } = useProfileStore()
+
+  useEffect(() => {
+    fetchSuggestions()
+  }, [fetchSuggestions])
+
+  const handleViewAll = () => {
+    router.push('/profile/friends')
+  }
+
+  if (isLoading) {
     return (
       <YStack gap="$3" alignItems="center" padding="$4">
         <Spinner size="large" color={titleColor} />
         <Text fontSize="$3" color={subtitleColor}>
-          Loading users...
+          Loading suggestions...
         </Text>
       </YStack>
     )
   }
 
-  if (error) {
-    return (
-      <YStack gap="$3" padding="$4">
-        <Text fontSize="$4" color="red" textAlign="center">
-          {error}
-        </Text>
-      </YStack>
-    )
-  }
-
-  if (!users.length) {
+  if (!suggestions.length) {
     return null
   }
 
   return (
     <YStack gap="$3">
-      <Text fontSize="$5" fontWeight="600" color={titleColor}>
-        People you may know
-      </Text>
+      <XStack justifyContent="space-between" alignItems="center">
+        <Text fontSize="$5" fontWeight="700" color={titleColor}>
+          People you may know
+        </Text>
+        <Pressable onPress={handleViewAll}>
+          <Text fontSize={14} color="#0095F6" fontWeight="600">
+            See All
+          </Text>
+        </Pressable>
+      </XStack>
 
-      <YStack gap="$3">
-        {users.map(user => (
-          <XStack key={user.id} gap="$3" alignItems="center">
-            <Pressable
-              onPress={() => handleNavigateToProfile(user.id)}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 12,
-                flex: 1,
-              }}
-            >
-              <Avatar size="$5">
-                <AvatarImage />
-                <AvatarFallback
-                  backgroundColor={isDark ? '#1f2937' : '#e5e7eb'}
-                >
-                  <Text fontWeight="700" color={titleColor}>
-                    {user.id?.toUpperCase() ?? 'U'}
-                  </Text>
-                </AvatarFallback>
-              </Avatar>
-
-              <YStack flex={1} gap="$1">
-                <Text fontSize="$4" fontWeight="600" color={titleColor}>
-                  {user.email}
-                </Text>
-                <Text fontSize="$3" color={subtitleColor}>
-                  {user.lastName}
-                </Text>
-                <Text fontSize="$2" color={subtitleColor}>
-                  {user.dob} mutual friends
-                </Text>
-              </YStack>
-            </Pressable>
-
-            <Button
-              size="$3"
-              borderRadius={999}
-              paddingHorizontal="$4"
-              backgroundColor={
-                !user.id ? buttonDisabledBackground : buttonBackground
-              }
-              color={!user.id ? buttonDisabledTextColor : buttonTextColor}
-              icon={!user.id ? Check : UserPlus}
-              onPress={() => handleAddFriend(user.id)}
-            >
-              {!user.id ? 'Friends' : 'Add friend'}
-            </Button>
-          </XStack>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ gap: 12, paddingRight: 12 }}
+      >
+        {suggestions.slice(0, 10).map(user => (
+          <SuggestionCard key={user.id} user={user} isDark={isDark} />
         ))}
-      </YStack>
+      </ScrollView>
     </YStack>
   )
 })

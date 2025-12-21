@@ -12,6 +12,7 @@ export const ENDPOINTS = {
   PROFILE: {
     ALL: 'profile/users',
     UPDATE: 'profile/users',
+    SEARCH: 'profile/users/search',
 
     DETAIL: (id: string | number) => `profile/users/${id}`,
     FRIENDS: (id: string | number) => `profile/friendships/${id}`,
@@ -25,6 +26,7 @@ export const ENDPOINTS = {
 
   POSTS: {
     POST_FEED: 'post/get-post',
+    POST_SEARCH: 'post/search',
     POST_GROUP: (id: string | number) => `post/group/${id}`,
     POST_PROFILE: (id: string | number) => `post/profile/${id}`,
     POST_DETAIL: (id: string | number) => `post/${id}`,
@@ -47,6 +49,7 @@ export const ENDPOINTS = {
   GROUP: {
     ALL: 'group/',
     USER_GROUPS: 'group/',
+    SEARCH: 'group/search',
 
     CREATE: 'group/',
     UPDATE: 'group/',

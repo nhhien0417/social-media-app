@@ -46,6 +46,8 @@ export type GetGroupDetailResponse = GenericResponse<Group>
 
 export type GetAllGroupsResponse = GenericResponse<Group[]>
 
+export type SearchGroupResponse = GenericResponse<Group[]>
+
 export type JoinGroupResponse = GenericResponse<GroupJoinRequest>
 
 export type GetUserJoinRequestsResponse = GenericResponse<GroupJoinRequest[]>
@@ -199,4 +201,10 @@ export const updateMemberRoleApi = (data: UpdateMemberRoleRequest) => {
 
 export const removeMemberApi = (groupId: string, memberId: string) => {
   return ApiClient.delete<string>(ENDPOINTS.GROUP.REMOVE(groupId, memberId))
+}
+
+export const searchGroupApi = (data: string) => {
+  return ApiClient.get<SearchGroupResponse>(
+    `${ENDPOINTS.GROUP.SEARCH}?keyword=${data}`
+  )
 }

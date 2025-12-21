@@ -27,6 +27,8 @@ export type AllProfileResponse = GenericResponse<User[]>
 
 export type UserProfileResponse = GenericResponse<User>
 
+export type SearchUserResponse = GenericResponse<User[]>
+
 export type FriendActionResponse = GenericResponse<string>
 
 // --- API Functions ---
@@ -110,4 +112,10 @@ export const acceptFriendApi = (data: FriendActionRequest) => {
 
 export const rejectFriendAPi = (data: FriendActionRequest) => {
   return ApiClient.post<FriendActionResponse>(ENDPOINTS.PROFILE.REJECT, data)
+}
+
+export const searchUserApi = (data: string) => {
+  return ApiClient.get<SearchUserResponse>(
+    `${ENDPOINTS.PROFILE.SEARCH}?keyword=${data}`
+  )
 }

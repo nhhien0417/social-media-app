@@ -79,6 +79,8 @@ export type UpdatePostResponse = GenericResponse<Post>
 
 export type LikePostResponse = GenericResponse<Post>
 
+export type SearchPostResponse = GenericResponse<Post[]>
+
 export type GetUserLikesResponse = GenericResponse<User[]>
 
 export type SeenPostResponse = GenericResponse<Post[]>
@@ -306,4 +308,10 @@ export const deleteCommentApi = (commentId: string) => {
 
 export const likeCommentApi = (data: LikeCommentRequest) => {
   return ApiClient.post<LikeCommentResponse>(ENDPOINTS.POSTS.COMMENT_LIKE, data)
+}
+
+export const searchPostApi = (data: string) => {
+  return ApiClient.get<SearchPostResponse>(
+    `${ENDPOINTS.POSTS.POST_SEARCH}?keyword=${data}`
+  )
 }

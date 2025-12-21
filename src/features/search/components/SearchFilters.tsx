@@ -1,5 +1,5 @@
 import { XStack, Button, useThemeName } from 'tamagui'
-import type { SearchCategory } from '../../../mock/search'
+import type { SearchCategory } from '@/types/Search'
 
 interface SearchFiltersProps {
   value: SearchCategory
@@ -32,8 +32,10 @@ export function SearchFilters({ value, onChange }: SearchFiltersProps) {
           <Button
             key={filter.value}
             size="$3"
+            fontSize="$4"
+            fontWeight="500"
             borderRadius={999}
-            paddingHorizontal="$4"
+            padding="$4"
             backgroundColor={isActive ? activeBackground : inactiveBackground}
             color={isActive ? activeTextColor : inactiveTextColor}
             borderColor={isActive ? 'transparent' : inactiveBorderColor}

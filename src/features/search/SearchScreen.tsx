@@ -1,30 +1,34 @@
-import { useMemo, useState } from 'react'
-import { ScrollView } from 'react-native'
+import { useCallback, useEffect } from 'react'
+import { ScrollView, RefreshControl } from 'react-native'
 import { Input, Separator, Text, XStack, YStack, useThemeName } from 'tamagui'
 import { Search, X as Clear } from '@tamagui/lucide-icons'
-import {
-  searchMockData,
-  searchHistoryMock,
-  type GroupResult,
-  type PostResult,
-  type SearchCategory,
-  type SearchResult,
-  type SearchHistoryItem,
-  type UserResult,
-} from '../../mock/search'
+import { useSearchStore } from '@/stores/searchStore'
 import { SearchFilters } from '@/features/search/components/SearchFilters'
 import { SearchResults } from '@/features/search/components/SearchResults'
 import { SearchHistoryList } from '@/features/search/components/SearchHistoryList'
 import { PeopleYouMayKnow } from '@/features/search/components/PeopleYouMayKnow'
 
 export default function SearchScreen() {
-  const [query, setQuery] = useState('')
-  const [category, setCategory] = useState<SearchCategory>('all')
-  const [results, setResults] = useState<SearchResult[]>(searchMockData)
-  const [history, setHistory] = useState<SearchHistoryItem[]>(searchHistoryMock)
-  const [hasSubmitted, setHasSubmitted] = useState(false)
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
+
+  const {
+    query,
+    category,
+    hasSubmitted,
+    users,
+    groups,
+    posts,
+    isSearching,
+    history,
+    setQuery,
+    setCategory,
+    searchAll,
+    resetSearch,
+    loadHistory,
+    removeFromHistory,
+    clearHistory,
+  } = useSearchStore()
 
   const searchBarBackground = isDark ? 'rgba(255,255,255,0.08)' : '#f0f2f5'
   const searchBarBorder = isDark ? 'rgba(255,255,255,0.15)' : '#dfe1e6'
@@ -34,94 +38,60 @@ export default function SearchScreen() {
   const clearButtonBackground = isDark ? 'rgba(255,255,255,0.12)' : '#e5e7eb'
   const clearIconColor = isDark ? 'rgba(255,255,255,0.8)' : '#4b5563'
 
-  const filteredResults = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase()
+  // Load history on mount
+  useEffect(() => {
+    loadHistory()
+  }, [loadHistory])
 
-    return results.filter(result => {
-      const matchesCategory =
-        category === 'all' ? true : result.category === category
+  const handleChangeQuery = useCallback(
+    (value: string) => {
+      setQuery(value)
+    },
+    [setQuery]
+  )
 
-      if (!matchesCategory) return false
+  const performSearch = useCallback(
+    (keyword?: string) => {
+      const value = (keyword ?? query).trim()
+      if (!value) return
+      searchAll(value)
+    },
+    [query, searchAll]
+  )
 
-      if (!normalizedQuery) return true
+  const handleHistorySelect = useCallback(
+    (keyword: string) => {
+      performSearch(keyword)
+    },
+    [performSearch]
+  )
 
-      return (
-        result.title.toLowerCase().includes(normalizedQuery) ||
-        result.description.toLowerCase().includes(normalizedQuery)
-      )
-    })
-  }, [results, category, query])
+  const handleClearQuery = useCallback(() => {
+    resetSearch()
+  }, [resetSearch])
 
-  const handleFriendRequest = (user: UserResult) => {
-    setResults(prev =>
-      prev.map(item =>
-        item.id === user.id && item.category === 'users'
-          ? { ...item, isFriend: true }
-          : item
-      )
-    )
-  }
-
-  const handleJoinGroup = (group: GroupResult) => {
-    setResults(prev =>
-      prev.map(item =>
-        item.id === group.id && item.category === 'groups'
-          ? { ...item, isMember: true }
-          : item
-      )
-    )
-  }
-
-  const handleOpenPost = (_post: PostResult) => {
-    // TODO: Navigate to post detail screen
-  }
-
-  const clearQuery = () => setQuery('')
-  const resetToLanding = () => {
-    setHasSubmitted(false)
-    setCategory('all')
-  }
-
-  const handleChangeQuery = (value: string) => {
-    setQuery(value)
-    if (!value.trim()) {
-      resetToLanding()
+  const handleRefresh = useCallback(() => {
+    if (hasSubmitted && query.trim()) {
+      searchAll(query)
     }
-  }
-
-  const performSearch = (keyword?: string) => {
-    const value = (keyword ?? query).trim()
-    if (!value) {
-      return
-    }
-
-    setQuery(value)
-    setHasSubmitted(true)
-    setCategory('all')
-
-    setHistory(prev => {
-      const withoutDuplicate = prev.filter(
-        item => item.keyword.toLowerCase() !== value.toLowerCase()
-      )
-      const nextEntry: SearchHistoryItem = {
-        id: `history-${Date.now()}`,
-        keyword: value,
-        timestamp: new Date().toISOString(),
-      }
-      return [nextEntry, ...withoutDuplicate].slice(0, 6)
-    })
-  }
-
-  const handleHistorySelect = (keyword: string) => {
-    performSearch(keyword)
-  }
+  }, [hasSubmitted, query, searchAll])
 
   return (
     <ScrollView
       style={{ backgroundColor: isDark ? '#000000' : '#FAFAFA' }}
       contentContainerStyle={{ padding: 12 }}
+      refreshControl={
+        hasSubmitted ? (
+          <RefreshControl
+            refreshing={isSearching}
+            onRefresh={handleRefresh}
+            tintColor={isDark ? '#ffffff' : '#000000'}
+          />
+        ) : undefined
+      }
     >
       <YStack gap="$3">
+        {/* Header and Search Bar */}
         <YStack gap="$2">
           <Text fontSize="$7" fontWeight="700">
             Search
@@ -164,10 +134,7 @@ export default function SearchScreen() {
                 borderRadius={999}
                 backgroundColor={clearButtonBackground}
                 pressStyle={{ opacity: 0.6 }}
-                onPress={() => {
-                  clearQuery()
-                  resetToLanding()
-                }}
+                onPress={handleClearQuery}
               >
                 <Clear size={18} color={clearIconColor} />
               </XStack>
@@ -175,6 +142,7 @@ export default function SearchScreen() {
           </XStack>
         </YStack>
 
+        {/* Search Results View */}
         {hasSubmitted ? (
           <>
             <SearchFilters value={category} onChange={setCategory} />
@@ -182,19 +150,26 @@ export default function SearchScreen() {
             <Separator />
 
             <SearchResults
-              data={filteredResults}
+              users={users}
+              groups={groups}
+              posts={posts}
               activeCategory={category}
-              onSendFriendRequest={handleFriendRequest}
-              onJoinGroup={handleJoinGroup}
-              onOpenPost={handleOpenPost}
+              isLoading={isSearching}
             />
           </>
         ) : (
           <>
-            <SearchHistoryList items={history} onSelect={handleHistorySelect} />
+            {/* Search History */}
+            <SearchHistoryList
+              items={history}
+              onSelect={handleHistorySelect}
+              onRemove={removeFromHistory}
+              onClearAll={clearHistory}
+            />
 
             <Separator />
 
+            {/* People You May Know */}
             <PeopleYouMayKnow />
           </>
         )}
