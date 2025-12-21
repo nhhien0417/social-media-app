@@ -200,6 +200,7 @@ export default function ProfileScreen() {
             onFriendsPress={handleFriendsPress}
             onGroupsPress={handleGroupsPress}
             onPostsPress={handlePostsPress}
+            userStories={userStories}
           />
           <ProfileBio user={displayUser} isOwnProfile={isOwnProfile} />
           {(isOwnProfile || currentUserId) && (
