@@ -22,7 +22,6 @@ import {
   Lock,
   Globe,
   Settings,
-  Search,
   Edit3,
   Shield,
   Crown,
@@ -36,7 +35,6 @@ import { GroupMember, GroupRole } from '@/types/Group'
 import PostCard from '../feed/components/PostCard'
 import { useGroupStore } from '@/stores/groupStore'
 import { usePostStore } from '@/stores/postStore'
-import { GroupSearchModal } from './components/GroupSearchModal'
 import { GroupMemberManagementModal } from './components/GroupMemberManagementModal'
 import GroupSettingsSheet from './components/GroupSettingsSheet'
 import DeleteGroupModal from './components/DeleteGroupModal'
@@ -82,7 +80,6 @@ export default function GroupDetailScreen() {
   const currentUser = useCurrentUser()
   const [activeTab, setActiveTab] = useState<GroupTab>('discussion')
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const [searchModalVisible, setSearchModalVisible] = useState(false)
   const [memberManagementVisible, setMemberManagementVisible] = useState(false)
   const [settingsSheetVisible, setSettingsSheetVisible] = useState(false)
   const [deleteGroupModalVisible, setDeleteGroupModalVisible] = useState(false)
@@ -728,9 +725,6 @@ export default function GroupDetailScreen() {
           </Text>
         </XStack>
         <XStack gap="$3">
-          <Pressable hitSlop={8} onPress={() => setSearchModalVisible(true)}>
-            <Search size={20} color={textColor} />
-          </Pressable>
           {isAdmin && (
             <Pressable hitSlop={8} onPress={handleSettingsPress}>
               <Settings size={20} color={textColor} />
@@ -898,14 +892,6 @@ export default function GroupDetailScreen() {
         {/* Tab Content */}
         {renderTabContent()}
       </ScrollView>
-
-      {/* Modals */}
-      <GroupSearchModal
-        visible={searchModalVisible}
-        onClose={() => setSearchModalVisible(false)}
-        isDark={isDark}
-        groupName={group.name}
-      />
 
       {/* Admin Modals */}
       {selectedMember && (
