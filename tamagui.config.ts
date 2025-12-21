@@ -1,27 +1,35 @@
 import { createTamagui } from 'tamagui'
 import { defaultConfig } from '@tamagui/config/v4'
 
-const accentColor = '#0095F6'
+// Instagram/Facebook inspired color palette
+const accentBlue = '#0095F6' // Instagram Blue
+const accentBlueDark = '#1DA1F2' // Brighter for dark mode
 
 const lightTheme = {
   ...defaultConfig.themes.light,
 
-  background: '#FAFAFA',
-  backgroundPress: '#F0F0F0',
-  backgroundFocus: '#F0F0F0',
-  backgroundHover: '#AAAAAA',
+  // Backgrounds - Clean white with subtle grays
+  background: '#FFFFFF',
+  backgroundPress: '#F7F7F7',
+  backgroundFocus: '#F7F7F7',
+  backgroundHover: '#F0F0F0',
   backgroundModal: '#FFFFFF',
-
-  color: '#000000',
-  colorPress: '#000000',
+  backgroundStrong: '#F5F5F5',
+  
+  // Text colors
+  color: '#262626', // Instagram's main text color
+  colorPress: '#262626',
   colorHover: '#000000',
-  colorFocus: '#000000',
-  placeholderColor: '#8E8E8E',
+  colorFocus: '#262626',
+  placeholderColor: '#8E8E93', // iOS-style placeholder
 
-  borderColor: '#DBDBDB',
+  // Borders - Subtle and refined
+  borderColor: '#DBDBDB', // Instagram's border color
   borderColorPress: '#C7C7C7',
+  borderColorHover: '#B3B3B3',
 
-  primary: accentColor,
+  // Primary colors
+  primary: accentBlue,
   primaryPress: '#0081D6',
   primaryHover: '#0081D6',
 }
@@ -29,24 +37,30 @@ const lightTheme = {
 const darkTheme = {
   ...defaultConfig.themes.dark,
 
-  background: '#000000',
-  backgroundPress: '#121212',
-  backgroundFocus: '#121212',
-  backgroundHover: '#555555',
-  backgroundModal: '#262626',
+  // Backgrounds - Modern dark gray (not pure black)
+  background: '#000000', // Pure black like Instagram dark mode
+  backgroundPress: '#1A1A1A',
+  backgroundFocus: '#1A1A1A',
+  backgroundHover: '#2A2A2A',
+  backgroundModal: '#121212',
+  backgroundStrong: '#262626',
 
-  color: '#FAFAFA',
+  // Text colors
+  color: '#FAFAFA', // High contrast white
   colorPress: '#FAFAFA',
-  colorHover: '#FAFAFA',
+  colorHover: '#FFFFFF',
   colorFocus: '#FAFAFA',
-  placeholderColor: '#8E8E8E',
+  placeholderColor: '#8E8E93',
 
-  borderColor: '#262626',
+  // Borders - Subtle in dark mode
+  borderColor: '#262626', // Subtle gray borders
   borderColorPress: '#363636',
+  borderColorHover: '#464646',
 
-  primary: accentColor,
-  primaryPress: '#1DA1F2',
-  primaryHover: '#1DA1F2',
+  // Primary colors - Brighter in dark mode
+  primary: accentBlueDark,
+  primaryPress: '#3DB5FF',
+  primaryHover: '#3DB5FF',
 }
 
 export default createTamagui({
