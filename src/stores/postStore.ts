@@ -60,6 +60,9 @@ interface PostState {
   seenPost: (postId: string, userId: string) => void
   getUserSeen: (postId: string) => Promise<User[]>
   flushSeenBatch: () => Promise<void>
+
+  // Reset
+  reset: () => void
 }
 
 export const usePostStore = create<PostState>((set, get) => ({
@@ -592,5 +595,31 @@ export const usePostStore = create<PostState>((set, get) => ({
       console.error('Error getting users seen:', error)
       throw error
     }
+  },
+
+  // Reset all state
+  reset: () => {
+    // Clear module-level caches
+    seenPostsCache.clear()
+    seenPendingBatch.clear()
+    if (batchTimer) {
+      clearTimeout(batchTimer)
+      batchTimer = null
+    }
+
+    set({
+      posts: [],
+      stories: [],
+      groupPosts: {},
+      userPosts: {},
+      userStories: {},
+      currentPost: null,
+      isLoading: false,
+      isRefreshing: false,
+      isFetchingPosts: false,
+      error: null,
+      feedPagination: { page: 0, hasNext: true },
+      groupPostsPagination: {},
+    })
   },
 }))

@@ -12,6 +12,12 @@ import { removeTokensAndUserId } from '@/utils/SecureStore'
 import { router } from 'expo-router'
 import { useState } from 'react'
 import { useCurrentUser } from '@/hooks/useProfile'
+import { useProfileStore } from '@/stores/profileStore'
+import { usePostStore } from '@/stores/postStore'
+import { useChatStore } from '@/stores/chatStore'
+import { useGroupStore } from '@/stores/groupStore'
+import { useCommentStore } from '@/stores/commentStore'
+import { useNotificationStore } from '@/stores/notificationStore'
 
 interface LogoutConfirmModalProps {
   visible: boolean
@@ -39,6 +45,14 @@ export default function LogoutConfirmModal({
     } catch (error) {
       console.warn('Logout API failed:', error)
     } finally {
+      // Reset all stores to clear cached data
+      useProfileStore.getState().reset()
+      usePostStore.getState().reset()
+      useChatStore.getState().reset()
+      useGroupStore.getState().reset()
+      useCommentStore.getState().reset()
+      useNotificationStore.getState().reset()
+
       await removeTokensAndUserId()
       onClose()
       router.replace('/auth/signin')

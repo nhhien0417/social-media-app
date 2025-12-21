@@ -26,6 +26,9 @@ interface CommentState {
   ) => Promise<void>
   deleteComment: (commentId: string) => Promise<void>
   likeComment: (commentId: string, userId: string) => Promise<void>
+
+  // Reset
+  reset: () => void
 }
 
 export const useCommentStore = create<CommentState>((set, get) => ({
@@ -110,5 +113,14 @@ export const useCommentStore = create<CommentState>((set, get) => ({
     } catch (error) {
       console.error('Error liking comment:', error)
     }
+  },
+
+  // Reset all state
+  reset: () => {
+    set({
+      comments: [],
+      isLoading: false,
+      error: null,
+    })
   },
 }))

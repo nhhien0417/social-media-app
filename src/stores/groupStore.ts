@@ -65,6 +65,9 @@ interface GroupState {
   ) => Promise<void>
   removeMember: (groupId: string, memberId: string) => Promise<void>
   clearCurrentGroup: () => void
+
+  // Reset
+  reset: () => void
 }
 
 export const useGroupStore = create<GroupState>((set, get) => ({
@@ -327,6 +330,21 @@ export const useGroupStore = create<GroupState>((set, get) => ({
       members: [],
       userRequests: [],
       groupRequests: [],
+      error: null,
+    })
+  },
+
+  // Reset all state
+  reset: () => {
+    set({
+      groups: [],
+      myGroups: [],
+      currentGroup: null,
+      members: [],
+      userRequests: [],
+      groupRequests: [],
+      isLoading: false,
+      isRefreshing: false,
       error: null,
     })
   },

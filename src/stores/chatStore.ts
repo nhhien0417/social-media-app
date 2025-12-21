@@ -68,6 +68,9 @@ interface ChatState {
   fetchOnlineFriends: () => Promise<void>
 
   clearCurrentChat: () => void
+
+  // Reset
+  reset: () => void
 }
 
 export const useChatStore = create<ChatState>((set, get) => ({
@@ -521,6 +524,22 @@ export const useChatStore = create<ChatState>((set, get) => ({
     set({
       currentChat: null,
       error: null,
+    })
+  },
+
+  // Reset all state
+  reset: () => {
+    set({
+      chats: [],
+      currentChat: null,
+      messagesByChatId: {},
+      isLoading: false,
+      isRefreshing: false,
+      error: null,
+      chatsPagination: { page: 0, hasNext: true },
+      paginationByChatId: {},
+      onlineUsers: new Set<string>(),
+      typingByChatId: {},
     })
   },
 }))

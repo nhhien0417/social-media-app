@@ -51,6 +51,9 @@ interface ProfileState {
     data: UpdateProfileRequest,
     avatar?: { uri: string; name: string; type: string }
   ) => Promise<UserProfileResponse>
+
+  // Reset
+  reset: () => void
 }
 
 export const useProfileStore = create<ProfileState>((set, get) => ({
@@ -438,5 +441,20 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       console.error('Error unfriend:', error)
       set({ users: { ...get().users, [friendUserId]: oldUser }, ...oldState })
     }
+  },
+
+  // Reset all state
+  reset: () => {
+    set({
+      currentUserId: null,
+      currentUser: null,
+      users: {},
+      friends: [],
+      pending: [],
+      sent: [],
+      suggestions: [],
+      isLoading: false,
+      error: null,
+    })
   },
 }))
