@@ -266,7 +266,10 @@ export default function MessageInput({ chatId }: MessageInputProps) {
         {/* Media Preview */}
         {selectedMedia.length > 0 && (
           <YStack
-            style={{ backgroundColor: isDark ? '#1A1A1A' : '#F5F5F5', padding: 8 }}
+            style={{
+              backgroundColor: isDark ? '#1A1A1A' : '#F5F5F5',
+              padding: 8,
+            }}
           >
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {selectedMedia.map((item, index) => (
@@ -332,8 +335,6 @@ export default function MessageInput({ chatId }: MessageInputProps) {
                 height={10}
                 borderRadius={5}
                 backgroundColor="$red10"
-                opacity={0.8}
-                animation="pulse"
               />
               <Text color="$red10" fontWeight="bold">
                 Recording {formatTime(recordingDuration)}

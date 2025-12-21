@@ -21,6 +21,7 @@ import { saveTokens, saveUserId } from '@/utils/SecureStore'
 import { urlToDataURI } from '@/utils/MediaUtils'
 import ButtonIcon from '@/components/IconButton'
 import { GoogleSignInButton } from '@/components/GoogleSignInButton'
+import { useProfileStore } from '@/stores/profileStore'
 
 type ValidationErrors = {
   email?: string
@@ -110,6 +111,8 @@ export default function SignUpScreen() {
       } catch (avatarError) {
         console.error('Failed to auto-generate avatar:', avatarError)
       }
+
+      await useProfileStore.getState().initialize()
 
       router.replace('/(tabs)')
     } catch (error: any) {

@@ -6,6 +6,7 @@ import { getUserApi, updateProfileApi } from '@/api/api.profile'
 import { getAvatarUrl } from '@/utils/Avatar'
 import { urlToDataURI } from '@/utils/MediaUtils'
 import { getUserId } from '@/utils/SecureStore'
+import { useProfileStore } from '@/stores/profileStore'
 
 export const GoogleSignInButton = () => {
   const { isLoading, handleGoogleSignIn } = useGoogleSignIn()
@@ -39,6 +40,7 @@ export const GoogleSignInButton = () => {
       } catch (error) {
         console.error('Error checking/uploading avatar:', error)
       }
+      await useProfileStore.getState().initialize()
       router.replace('/(tabs)')
     } else {
       console.log('Google sign-in failed:', result.error)

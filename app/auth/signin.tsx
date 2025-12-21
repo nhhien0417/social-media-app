@@ -18,6 +18,7 @@ import { Image } from 'react-native'
 import { signInApi } from '@/api/api.auth'
 import { saveTokens, saveUserId } from '@/utils/SecureStore'
 import { GoogleSignInButton } from '@/components/GoogleSignInButton'
+import { useProfileStore } from '@/stores/profileStore'
 
 type ValidationErrors = {
   email?: string
@@ -69,6 +70,8 @@ export default function SignInScreen() {
       if (response && response.data && response.data.accessToken) {
         await saveTokens(response.data.accessToken, response.data.refreshToken)
         await saveUserId(response.data.id)
+        
+        await useProfileStore.getState().initialize()
       } else {
         throw new Error('Login failed: Invalid response structure.')
       }

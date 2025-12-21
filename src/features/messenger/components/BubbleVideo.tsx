@@ -22,8 +22,8 @@ export default function BubbleVideo({ uri }: BubbleVideoProps) {
       <VideoView
         style={{ width: 240, height: 320 }}
         player={player}
-        allowsFullscreen
-        allowsPictureInPicture
+        nativeControls
+        contentFit="cover"
       />
     </YStack>
   )
