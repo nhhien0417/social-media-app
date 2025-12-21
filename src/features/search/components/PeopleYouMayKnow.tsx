@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from 'react'
+import { memo, useEffect } from 'react'
 import { ScrollView, Pressable } from 'react-native'
 import {
   Avatar,

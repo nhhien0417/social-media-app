@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import { Clock, Search, X } from '@tamagui/lucide-icons'
-import { Text, XStack, YStack, useThemeName, Button } from 'tamagui'
+import { Text, XStack, YStack, useThemeName } from 'tamagui'
 import type { SearchHistoryItem } from '@/types/Search'
 import { Pressable } from 'react-native'
 
