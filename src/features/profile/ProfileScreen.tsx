@@ -72,7 +72,7 @@ export default function ProfileScreen() {
     return userPosts.filter((p: Post) => p.media && p.media.length > 0)
   }, [userPosts])
 
-  const navIconColor = isDark ? '#f5f5f5' : '#111827'
+  const navIconColor = isDark ? '#FAFAFA' : '#262626'
   const { toggleTheme } = useAppTheme()
 
   const handleLogout = async () => {

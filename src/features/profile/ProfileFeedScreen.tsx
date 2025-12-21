@@ -121,14 +121,14 @@ export default function ProfileFeedScreen() {
             <Text
               fontSize="$7"
               fontWeight="700"
-              color={isDark ? '#f5f5f5' : '#111827'}
+              color={isDark ? '#FAFAFA' : '#262626'}
               textAlign="center"
             >
               No posts yet
             </Text>
             <Text
               fontSize="$4"
-              color={isDark ? 'rgba(255,255,255,0.6)' : '#6b7280'}
+              color={isDark ? 'rgba(250,250,250,0.6)' : '#8E8E93'}
               textAlign="center"
             >
               Once you share photos and videos, they will appear here.

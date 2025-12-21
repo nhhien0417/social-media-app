@@ -49,7 +49,7 @@ export default function UnfriendConfirmModal({
         >
           <Pressable onPress={e => e.stopPropagation()}>
             <YStack
-              backgroundColor={isDark ? '#1c1c1e' : 'white'}
+              backgroundColor={isDark ? '#121212' : 'white'}
               borderRadius={20}
               padding="$5"
               width={320}
@@ -68,7 +68,7 @@ export default function UnfriendConfirmModal({
                   width={64}
                   height={64}
                   borderRadius={32}
-                  backgroundColor="#ff95001a"
+                  backgroundColor="#FF9500"
                   alignItems="center"
                   justifyContent="center"
                 >

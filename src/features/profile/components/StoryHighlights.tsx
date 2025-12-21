@@ -15,8 +15,8 @@ export const StoryHighlights = memo(function StoryHighlights({
 }: StoryHighlightsProps) {
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
-  const ringBackground = isDark ? '#050506' : '#ffffff'
-  const fallbackBackground = isDark ? '#10131a' : '#e2e8f0'
+  const ringBackground = isDark ? '#000000' : '#FFFFFF'
+  const fallbackBackground = isDark ? '#1A1A1A' : '#F0F0F0'
 
   if (!stories.length) {
     return null

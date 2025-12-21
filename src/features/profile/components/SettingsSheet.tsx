@@ -53,7 +53,7 @@ export default function SettingsSheet({
           style={styles.menuContainer}
         >
           <YStack
-            backgroundColor={isDark ? '#1c1c1e' : 'white'}
+            backgroundColor={isDark ? '#121212' : 'white'}
             borderRadius={16}
             overflow="hidden"
             margin={16}
@@ -92,11 +92,11 @@ export default function SettingsSheet({
                   width={36}
                   height={36}
                   borderRadius={18}
-                  backgroundColor={isDark ? '#ff9f0a26' : '#ff9f0a1a'}
+                  backgroundColor={isDark ? 'rgba(255,159,10,0.2)' : 'rgba(255,149,0,0.12)'}
                   alignItems="center"
                   justifyContent="center"
                 >
-                  <Palette size={18} color={isDark ? '#ff9f0a' : '#ff9500'} />
+                  <Palette size={18} color={isDark ? '#FF9F0A' : '#FF9500'} />
                 </YStack>
                 <YStack flex={1}>
                   <Text
@@ -144,11 +144,11 @@ export default function SettingsSheet({
                   width={36}
                   height={36}
                   borderRadius={18}
-                  backgroundColor={isDark ? '#0a84ff26' : '#007aff1a'}
+                  backgroundColor={isDark ? 'rgba(29,161,242,0.2)' : 'rgba(0,149,246,0.12)'}
                   alignItems="center"
                   justifyContent="center"
                 >
-                  <Lock size={18} color={isDark ? '#0a84ff' : '#007aff'} />
+                  <Lock size={18} color={isDark ? '#1DA1F2' : '#0095F6'} />
                 </YStack>
                 <YStack flex={1}>
                   <Text

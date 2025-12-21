@@ -21,8 +21,8 @@ export function ProfileInfo({
 }: ProfileInfoProps) {
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
-  const captionColor = isDark ? 'rgba(255,255,255,0.7)' : '#4b5563'
-  const ringBackground = isDark ? '#050506' : '#ffffff'
+  const captionColor = isDark ? 'rgba(250,250,250,0.6)' : '#8E8E93'
+  const ringBackground = isDark ? '#000000' : '#FFFFFF'
 
   return (
     <XStack
