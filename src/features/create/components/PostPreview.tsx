@@ -105,29 +105,29 @@ export default function PostPreview({
 
   const themeName = useThemeName()
   const isDark = themeName === 'dark'
-  const accentColor = isDark ? '#0095F6' : '#1877F2'
-  const borderColor = isDark ? 'rgba(255,255,255,0.12)' : '#e5e7eb'
-  const cardBackground = isDark ? 'rgba(255,255,255,0.05)' : '#ffffff'
-  const chipBackground = isDark ? 'rgba(255,255,255,0.08)' : '#eff6ff'
-  const chipBorder = isDark ? 'rgba(255,255,255,0.14)' : '#dbeafe'
-  const mutedTextColor = isDark ? 'rgba(255,255,255,0.68)' : '#6b7280'
+  const accentColor = isDark ? '#1DA1F2' : '#0095F6'
+  const borderColor = isDark ? 'rgba(255,255,255,0.1)' : '#DBDBDB'
+  const cardBackground = isDark ? '#121212' : '#FFFFFF'
+  const chipBackground = isDark ? 'rgba(29,161,242,0.15)' : 'rgba(0,149,246,0.1)'
+  const chipBorder = isDark ? 'rgba(29,161,242,0.3)' : 'rgba(0,149,246,0.2)'
+  const mutedTextColor = isDark ? 'rgba(250,250,250,0.6)' : '#8E8E93'
   const overlayColor = 'rgba(0,0,0,0.65)'
-  const modalBackground = isDark ? '#242526' : '#ffffff'
-  const modalBorderColor = isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0'
-  const modalTitleColor = isDark ? '#f7f7f8' : '#0f172a'
-  const modalSubtitleColor = isDark ? 'rgba(209,213,219,0.78)' : '#475569'
+  const modalBackground = isDark ? '#121212' : '#FFFFFF'
+  const modalBorderColor = isDark ? 'rgba(255,255,255,0.1)' : '#DBDBDB'
+  const modalTitleColor = isDark ? '#FAFAFA' : '#262626'
+  const modalSubtitleColor = isDark ? 'rgba(250,250,250,0.6)' : '#8E8E93'
   const modalShadowColor = isDark ? 'rgba(0,0,0,0.85)' : 'rgba(15,23,42,0.12)'
   const modalOverlayColor = isDark ? 'rgba(0,0,0,0.85)' : 'rgba(0,0,0,0.7)'
   const privacyOptionActiveBackground = isDark
-    ? 'rgba(0,149,246,0.18)'
-    : '#eff6ff'
+    ? 'rgba(29,161,242,0.2)'
+    : 'rgba(0,149,246,0.12)'
   const privacyOptionInactiveBorder = isDark
-    ? 'rgba(255,255,255,0.08)'
-    : '#e2e8f0'
+    ? 'rgba(255,255,255,0.1)'
+    : '#DBDBDB'
   const privacyOptionIconBackground = isDark
-    ? 'rgba(255,255,255,0.08)'
-    : '#f1f5f9'
-  const privacyOptionCheckBorder = isDark ? 'rgba(148,163,184,0.5)' : '#94a3b8'
+    ? 'rgba(255,255,255,0.1)'
+    : '#F0F0F0'
+  const privacyOptionCheckBorder = isDark ? 'rgba(250,250,250,0.4)' : '#8E8E93'
 
   const selectedOption =
     privacyOptions.find(option => option.value === privacy) ?? privacyOptions[0]
@@ -155,32 +155,32 @@ export default function PostPreview({
 
   return (
     <>
-      <YStack paddingHorizontal="$3" paddingVertical="$3" gap="$3">
+      <YStack paddingHorizontal="$2.5" paddingVertical="$2.5" gap="$2.5">
         <YStack
           style={[
             styles.card,
             { backgroundColor: cardBackground, borderColor },
           ]}
-          gap="$3"
+          gap="$2.5"
         >
-          <XStack alignItems="center" gap="$3">
-            <Avatar uri={user.avatarUrl} size={40} />
+          <XStack alignItems="center" gap="$2.5">
+            <Avatar uri={user.avatarUrl} size={38} />
 
-            <YStack flex={1} gap={4}>
-              <SizableText size="$4" fontWeight="700">
+            <YStack flex={1} gap={3}>
+              <SizableText size="$3" fontWeight="700">
                 {user.name}
               </SizableText>
               {groupName ? (
                 <XStack alignItems="center" gap="$1.5">
-                  <Text fontSize={12} fontWeight="500" color={mutedTextColor}>
+                  <Text fontSize={11} fontWeight="500" color={mutedTextColor}>
                     Posting in
                   </Text>
-                  <Text fontSize={12} fontWeight="700" color={accentColor}>
+                  <Text fontSize={11} fontWeight="700" color={accentColor}>
                     {groupName}
                   </Text>
                 </XStack>
               ) : (
-                <Text fontSize={12} color={mutedTextColor}>
+                <Text fontSize={11} color={mutedTextColor}>
                   {selectedOption.explanation}
                 </Text>
               )}
@@ -188,9 +188,9 @@ export default function PostPreview({
 
             {!groupName && (
               <Button
-                size="$3"
-                height={30}
-                paddingHorizontal="$3"
+                size="$2"
+                height={28}
+                paddingHorizontal="$2.5"
                 borderRadius="$9"
                 backgroundColor={chipBackground}
                 borderWidth={1}
@@ -199,13 +199,13 @@ export default function PostPreview({
               >
                 <XStack alignItems="center" gap="$1.5">
                   <SelectedIcon
-                    size={14}
-                    color={isDark ? '#f5f5f5' : '#0f172a'}
+                    size={13}
+                    color={isDark ? '#FAFAFA' : '#262626'}
                   />
-                  <SizableText size="$3" fontWeight="600">
+                  <SizableText size="$2" fontWeight="600">
                     {selectedOption.label}
                   </SizableText>
-                  <ChevronDown size={14} color={mutedTextColor} />
+                  <ChevronDown size={13} color={mutedTextColor} />
                 </XStack>
               </Button>
             )}
@@ -213,9 +213,9 @@ export default function PostPreview({
 
           {showCaption && (
             <YStack
-              borderRadius={14}
-              backgroundColor={isDark ? 'rgba(255,255,255,0.03)' : '#f8fafc'}
-              padding={12}
+              borderRadius={12}
+              backgroundColor={isDark ? 'rgba(255,255,255,0.05)' : '#F5F5F5'}
+              padding={10}
             >
               <TextArea
                 unstyled
@@ -231,8 +231,8 @@ export default function PostPreview({
                 }}
                 style={{
                   height: textHeight,
-                  fontSize: 15,
-                  lineHeight: 20,
+                  fontSize: 14,
+                  lineHeight: 19,
                 }}
                 focusStyle={{ outlineWidth: 0 }}
                 color="$color"
@@ -427,7 +427,7 @@ export default function PostPreview({
                       <OptionIcon
                         size={20}
                         color={
-                          isActive ? '#ffffff' : isDark ? '#f5f5f5' : '#111827'
+                          isActive ? '#ffffff' : isDark ? '#FAFAFA' : '#262626'
                         }
                       />
                     </YStack>
@@ -525,9 +525,9 @@ export default function PostPreview({
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 22,
+    borderRadius: 18,
     borderWidth: StyleSheet.hairlineWidth,
-    padding: 16,
+    padding: 12,
   },
   privacyOverlay: {
     flex: 1,

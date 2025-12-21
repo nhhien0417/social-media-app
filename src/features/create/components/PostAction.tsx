@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react'
-import { XStack, Button, SizableText, useThemeName } from 'tamagui'
+import { XStack, Button, SizableText } from 'tamagui'
 import { Image, Camera, Smile } from '@tamagui/lucide-icons'
+import { useAppColors } from '@/theme'
 
 type Props = {
   onAddMedia?: () => void
@@ -8,8 +9,7 @@ type Props = {
 }
 
 export default function PostAction({ onAddMedia, onTakePhoto }: Props) {
-  const themeName = useThemeName()
-  const isDark = themeName === 'dark'
+  const colors = useAppColors()
 
   const actions = useMemo(
     () => [
@@ -18,49 +18,49 @@ export default function PostAction({ onAddMedia, onTakePhoto }: Props) {
         label: 'Gallery',
         icon: Image,
         onPress: onAddMedia,
-        background: isDark ? 'rgba(37,99,235,0.18)' : 'rgba(37,99,235,0.12)',
-        iconColor: '#2563EB',
+        background: colors.features.gallery.background,
+        iconColor: colors.features.gallery.icon,
       },
       {
         key: 'camera',
         label: 'Camera',
         icon: Camera,
         onPress: onTakePhoto,
-        background: isDark ? 'rgba(34,197,94,0.2)' : 'rgba(34,197,94,0.12)',
-        iconColor: '#22C55E',
+        background: colors.features.camera.background,
+        iconColor: colors.features.camera.icon,
       },
       {
         key: 'feeling',
         label: 'Feeling',
         icon: Smile,
         onPress: undefined,
-        background: isDark ? 'rgba(234,179,8,0.2)' : 'rgba(234,179,8,0.16)',
-        iconColor: '#ca8a04',
+        background: colors.features.feeling.background,
+        iconColor: colors.features.feeling.icon,
       },
     ],
-    [isDark, onAddMedia, onTakePhoto]
+    [colors, onAddMedia, onTakePhoto]
   )
 
-  const labelColor = isDark ? '#F9FAFB' : '#111827'
-
   return (
-    <XStack padding="$3" gap="$2" backgroundColor="$background">
+    <XStack padding="$2" gap="$1.5" backgroundColor={colors.background}>
       {actions.map(action => {
         const IconComponent = action.icon
         return (
           <Button
             key={action.key}
             flex={1}
-            size="$4"
+            size="$3"
             backgroundColor={action.background}
-            borderRadius={14}
+            borderRadius={12}
             onPress={action.onPress}
             disabled={!action.onPress}
             opacity={action.onPress ? 1 : 0.6}
+            paddingVertical="$2"
+            height={40}
           >
-            <XStack alignItems="center" justifyContent="center" gap="$2">
-              <IconComponent size={20} color={action.iconColor} />
-              <SizableText fontSize={15} fontWeight="600" color={labelColor}>
+            <XStack alignItems="center" justifyContent="center" gap="$1.5">
+              <IconComponent size={18} color={action.iconColor} />
+              <SizableText fontSize={14} fontWeight="600" color={colors.text}>
                 {action.label}
               </SizableText>
             </XStack>

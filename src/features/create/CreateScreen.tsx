@@ -387,11 +387,16 @@ export default function NewPostScreen() {
         style={{ flex: 1 }}
         behavior={Platform.select({
           ios: 'padding',
-          android: 'height',
+          android: undefined,
         })}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 55 : 0}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 50 : 0}
       >
-        <ScrollView flex={1} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          flex={1}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+        >
           <PostPreview
             user={user}
             caption={caption}
