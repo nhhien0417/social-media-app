@@ -1,5 +1,5 @@
 import { Modal, Pressable, StyleSheet } from 'react-native'
-import { YStack, Text, useThemeName } from 'tamagui'
+import { YStack, Text } from 'tamagui'
 import { AlertCircle } from '@tamagui/lucide-icons'
 import Animated, {
   FadeIn,
@@ -7,6 +7,7 @@ import Animated, {
   ZoomIn,
   ZoomOut,
 } from 'react-native-reanimated'
+import { useAppColors } from '@/theme/useAppColors'
 
 interface CommentDeleteConfirmModalProps {
   visible: boolean
@@ -21,8 +22,8 @@ export default function CommentDeleteConfirmModal({
   onClose,
   onConfirm,
 }: CommentDeleteConfirmModalProps) {
-  const themeName = useThemeName()
-  const isDark = themeName.includes('dark')
+  const colors = useAppColors()
+  const { isDark } = colors
 
   const handleDelete = async () => {
     onClose()
@@ -50,7 +51,7 @@ export default function CommentDeleteConfirmModal({
         >
           <Pressable onPress={e => e.stopPropagation()}>
             <YStack
-              backgroundColor={isDark ? '#1c1c1e' : 'white'}
+              backgroundColor={colors.modal}
               borderRadius={20}
               padding="$5"
               width={320}
@@ -73,7 +74,7 @@ export default function CommentDeleteConfirmModal({
                   alignItems="center"
                   justifyContent="center"
                 >
-                  <AlertCircle size={32} color="#ff3b30" />
+                  <AlertCircle size={32} color={colors.error} />
                 </YStack>
               </YStack>
 
@@ -82,14 +83,14 @@ export default function CommentDeleteConfirmModal({
                 <Text
                   fontSize={20}
                   fontWeight="700"
-                  color={isDark ? 'white' : 'black'}
+                  color={colors.text}
                   textAlign="center"
                 >
                   Delete Comment?
                 </Text>
                 <Text
                   fontSize={15}
-                  color={isDark ? '#8e8e93' : '#8e8e93'}
+                  color={colors.textSecondary}
                   textAlign="center"
                   lineHeight={20}
                 >
@@ -119,20 +120,12 @@ export default function CommentDeleteConfirmModal({
                     styles.button,
                     {
                       backgroundColor: pressed
-                        ? isDark
-                          ? '#2c2c2e'
-                          : '#f5f5f5'
-                        : isDark
-                          ? '#38383a'
-                          : '#f0f0f0',
+                        ? colors.backgroundTertiary
+                        : colors.backgroundSecondary,
                     },
                   ]}
                 >
-                  <Text
-                    fontSize={16}
-                    fontWeight="600"
-                    color={isDark ? 'white' : 'black'}
-                  >
+                  <Text fontSize={16} fontWeight="600" color={colors.text}>
                     Cancel
                   </Text>
                 </Pressable>

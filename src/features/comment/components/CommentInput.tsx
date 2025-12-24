@@ -1,4 +1,4 @@
-import React, { forwardRef, useState, useEffect } from 'react'
+import React, { forwardRef, useState, useEffect, useMemo } from 'react'
 import {
   TouchableOpacity,
   StyleSheet,
@@ -21,6 +21,7 @@ import {
   getMediaItemFromCamera,
   getMediaItemsFromPicker,
 } from '@/utils/MediaUtils'
+import { useAppColors } from '@/theme/useAppColors'
 
 type Props = {
   value: string
@@ -41,10 +42,6 @@ const styles = StyleSheet.create({
     height: 35,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  mediaPreviewContainer: {
-    backgroundColor: '#f5f5f5',
-    padding: 8,
   },
   mediaPreview: {
     width: 100,
@@ -97,6 +94,7 @@ const CommentInput = forwardRef<RNTextInput, Props>(
     },
     ref
   ) => {
+    const colors = useAppColors()
     const [selectedMedia, setSelectedMedia] = useState<string[]>([])
     const [showMediaPicker, setShowMediaPicker] = useState(false)
     const [showCamera, setShowCamera] = useState(false)
@@ -122,23 +120,34 @@ const CommentInput = forwardRef<RNTextInput, Props>(
       setSelectedMedia(prev => prev.filter((_, i) => i !== index))
     }
 
+    const dynamicStyles = useMemo(
+      () =>
+        StyleSheet.create({
+          mediaPreviewContainer: {
+            backgroundColor: colors.backgroundSecondary,
+            padding: 8,
+          },
+        }),
+      [colors]
+    )
+
     return (
-      <YStack borderTopWidth={1} borderColor="$borderColor">
+      <YStack borderTopWidth={1} borderColor={colors.border}>
         {/* Edit Indicator */}
         {editingComment && (
           <XStack
             paddingHorizontal="$3"
             paddingVertical="$2"
-            backgroundColor="#f0f0f0"
+            backgroundColor={colors.backgroundSecondary}
             alignItems="center"
             justifyContent="space-between"
           >
-            <SizableText fontSize={13} color="#666">
+            <SizableText fontSize={13} color={colors.textSecondary}>
               Editing comment...
             </SizableText>
             {onCancelEdit && (
               <TouchableOpacity onPress={onCancelEdit}>
-                <X size={16} color="#666" />
+                <X size={16} color={colors.textSecondary} />
               </TouchableOpacity>
             )}
           </XStack>
@@ -149,17 +158,17 @@ const CommentInput = forwardRef<RNTextInput, Props>(
           <XStack
             paddingHorizontal="$3"
             paddingVertical="$2"
-            backgroundColor="#f0f0f0"
+            backgroundColor={colors.backgroundSecondary}
             alignItems="center"
             justifyContent="space-between"
           >
-            <SizableText fontSize={13} color="#666">
+            <SizableText fontSize={13} color={colors.textSecondary}>
               Replying to {replyingTo.authorProfile?.username || 'Unknown User'}
               ...
             </SizableText>
             {onCancelReply && (
               <TouchableOpacity onPress={onCancelReply}>
-                <X size={16} color="#666" />
+                <X size={16} color={colors.textSecondary} />
               </TouchableOpacity>
             )}
           </XStack>
@@ -167,7 +176,7 @@ const CommentInput = forwardRef<RNTextInput, Props>(
 
         {/* Media Preview */}
         {selectedMedia.length > 0 && (
-          <YStack style={styles.mediaPreviewContainer}>
+          <YStack style={dynamicStyles.mediaPreviewContainer}>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {selectedMedia.map((uri, index) => (
                 <YStack key={index} position="relative">
@@ -188,7 +197,7 @@ const CommentInput = forwardRef<RNTextInput, Props>(
         <XStack
           paddingHorizontal="$3"
           paddingVertical="$2"
-          backgroundColor="$backgroundModal"
+          backgroundColor={colors.modal}
           justifyContent="space-around"
           alignItems="center"
         >
@@ -206,7 +215,7 @@ const CommentInput = forwardRef<RNTextInput, Props>(
         <XStack
           paddingHorizontal="$3"
           paddingBottom="$3"
-          backgroundColor="$backgroundModal"
+          backgroundColor={colors.modal}
           alignItems="center"
           gap="$3"
         >
@@ -216,15 +225,17 @@ const CommentInput = forwardRef<RNTextInput, Props>(
             ref={ref}
             flex={1}
             placeholder="Write a comment..."
+            placeholderTextColor={colors.placeholder}
             value={value}
             onChangeText={onChangeText}
             borderWidth={1}
-            borderColor="$placeholderColor"
+            borderColor={colors.border}
             borderRadius={20}
             paddingHorizontal="$3"
             paddingVertical="$2"
             fontSize={14}
-            backgroundColor="$backgroundModal"
+            backgroundColor={colors.input}
+            color={colors.text}
             editable={!isLoading}
           />
 
@@ -232,14 +243,20 @@ const CommentInput = forwardRef<RNTextInput, Props>(
             onPress={() => setShowCamera(true)}
             disabled={isLoading}
           >
-            <CameraIcon size={24} color={isLoading ? '#ccc' : '#888'} />
+            <CameraIcon
+              size={24}
+              color={isLoading ? colors.textTertiary : colors.textSecondary}
+            />
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => setShowMediaPicker(true)}
             disabled={isLoading}
           >
-            <ImageIcon size={24} color={isLoading ? '#ccc' : '#888'} />
+            <ImageIcon
+              size={24}
+              color={isLoading ? colors.textTertiary : colors.textSecondary}
+            />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -249,14 +266,14 @@ const CommentInput = forwardRef<RNTextInput, Props>(
             }
           >
             {isLoading ? (
-              <ActivityIndicator size="small" color="#0095F6" />
+              <ActivityIndicator size="small" color={colors.accent} />
             ) : (
               <Send
                 size={24}
                 color={
                   value.trim() || selectedMedia.length > 0
-                    ? '#0095F6'
-                    : '$placeholderColor'
+                    ? colors.accent
+                    : colors.placeholder
                 }
               />
             )}

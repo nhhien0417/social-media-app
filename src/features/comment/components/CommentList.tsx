@@ -1,8 +1,9 @@
 import React from 'react'
 import { FlatList } from 'react-native'
-import { YStack, SizableText, useTheme } from 'tamagui'
+import { YStack, SizableText } from 'tamagui'
 import { Comment } from '@/types/Comment'
 import CommentCard from './CommentCard'
+import { useAppColors } from '@/theme/useAppColors'
 
 type Props = {
   comments: Comment[]
@@ -27,13 +28,13 @@ export default function CommentList({
   currentUserId,
   onCloseModal,
 }: Props) {
+  const colors = useAppColors()
   const topLevelComments = comments
     .filter(c => !c.parentCommentId)
     .sort(
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     )
-  const theme = useTheme()
 
   const getReplies = (commentId: string) => {
     return comments
@@ -48,7 +49,7 @@ export default function CommentList({
     <FlatList
       style={{
         flex: 1,
-        backgroundColor: theme.$backgroundModal?.val || '#fff',
+        backgroundColor: colors.modal,
       }}
       data={topLevelComments}
       keyExtractor={item => item.id}
@@ -116,7 +117,7 @@ export default function CommentList({
           alignItems="center"
           paddingVertical="$6"
         >
-          <SizableText fontSize={15} color="#888">
+          <SizableText fontSize={15} color={colors.textSecondary}>
             No comments yet
           </SizableText>
         </YStack>
