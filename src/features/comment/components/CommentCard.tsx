@@ -8,6 +8,7 @@ import { formatDate } from '@/utils/FormatDate'
 import CommentOptionsSheet from './CommentOptionsSheet'
 import CommentDeleteConfirmModal from './CommentDeleteConfirmModal'
 import { router } from 'expo-router'
+import { useAppColors } from '@/theme/useAppColors'
 
 type Props = {
   comment: Comment
@@ -62,6 +63,7 @@ export default function CommentCard({
   currentUserId,
   onCloseModal,
 }: Props) {
+  const colors = useAppColors()
   const [showOptionsSheet, setShowOptionsSheet] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const isOwner = currentUserId === comment.authorProfile?.id
@@ -148,18 +150,22 @@ export default function CommentCard({
               {/* Username and time */}
               <XStack alignItems="center" gap="$2">
                 <TouchableOpacity onPress={handleNavigateToProfile}>
-                  <SizableText fontSize={14} color="$color" fontWeight="600">
+                  <SizableText
+                    fontSize={14}
+                    color={colors.text}
+                    fontWeight="600"
+                  >
                     {comment.authorProfile?.username || 'Unknown User'}
                   </SizableText>
                 </TouchableOpacity>
-                <SizableText fontSize={12} color="#888">
+                <SizableText fontSize={12} color={colors.textSecondary}>
                   {formatDate(comment.createdAt)}
                 </SizableText>
               </XStack>
 
               {/* Content */}
               {comment.content ? (
-                <SizableText fontSize={14} lineHeight={18}>
+                <SizableText fontSize={14} lineHeight={18} color={colors.text}>
                   {comment.content}
                 </SizableText>
               ) : null}
@@ -170,14 +176,22 @@ export default function CommentCard({
               {/* Actions */}
               <XStack alignItems="center" gap="$4" marginTop="$1">
                 <TouchableOpacity onPress={() => onReply(comment)}>
-                  <SizableText fontSize={13} fontWeight="600" color="#888">
+                  <SizableText
+                    fontSize={13}
+                    fontWeight="600"
+                    color={colors.textSecondary}
+                  >
                     Reply
                   </SizableText>
                 </TouchableOpacity>
 
                 {!isReply && replyCount > 0 && (
                   <TouchableOpacity onPress={() => onViewReplies(comment.id)}>
-                    <SizableText fontSize={13} fontWeight="600" color="#888">
+                    <SizableText
+                      fontSize={13}
+                      fontWeight="600"
+                      color={colors.textSecondary}
+                    >
                       — {isExpanded ? 'Hide' : 'View'} replies ({replyCount})
                     </SizableText>
                   </TouchableOpacity>
@@ -189,12 +203,16 @@ export default function CommentCard({
               <TouchableOpacity onPress={() => onLike(comment.id)}>
                 <Heart
                   size={20}
-                  color={isLiked ? '#ff4444' : '#888'}
-                  fill={isLiked ? '#ff4444' : 'none'}
+                  color={isLiked ? colors.features.like : colors.textSecondary}
+                  fill={isLiked ? colors.features.like : 'none'}
                 />
               </TouchableOpacity>
               {likeCount > 0 && (
-                <SizableText fontSize={13} fontWeight="600" color="#888">
+                <SizableText
+                  fontSize={13}
+                  fontWeight="600"
+                  color={colors.textSecondary}
+                >
                   {likeCount}
                 </SizableText>
               )}
