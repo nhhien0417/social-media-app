@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react'
+import React, { useRef, useState, useEffect, useMemo } from 'react'
 import {
   StyleSheet,
   Modal,
@@ -21,6 +21,7 @@ import { useCommentStore } from '@/stores/commentStore'
 import { getUserId } from '@/utils/SecureStore'
 import { useProfileStore } from '@/stores/profileStore'
 import { processMediaForUpload } from '@/utils/MediaUtils'
+import { useAppColors } from '@/theme/useAppColors'
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window')
 
@@ -36,52 +37,57 @@ type Props = {
   userAvatarUrl?: string
 }
 
-const styles = StyleSheet.create({
-  absoluteFill: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  overlayTouchable: {
-    flex: 1,
-  },
-  bottomSheet: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    top: 0,
-    backgroundColor: 'white',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    overflow: 'hidden',
-  },
-  dragHandleArea: {
-    alignItems: 'center',
-    width: '100%',
-  },
-  dragHandle: {
-    width: 50,
-    height: 5,
-    borderRadius: 999,
-    backgroundColor: '#888',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-})
-
 export default function Comment({
   visible,
   onClose,
   postId,
   userAvatarUrl,
 }: Props) {
+  const colors = useAppColors()
+
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        absoluteFill: {
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: colors.overlay,
+        },
+        overlayTouchable: {
+          flex: 1,
+        },
+        bottomSheet: {
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          top: 0,
+          backgroundColor: colors.modal,
+          borderTopLeftRadius: 20,
+          borderTopRightRadius: 20,
+          overflow: 'hidden',
+        },
+        dragHandleArea: {
+          alignItems: 'center',
+          width: '100%',
+        },
+        dragHandle: {
+          width: 50,
+          height: 5,
+          borderRadius: 999,
+          backgroundColor: colors.textTertiary,
+        },
+        loadingContainer: {
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+      }),
+    [colors]
+  )
   const [commentText, setCommentText] = useState('')
   const [replyingTo, setReplyingTo] = useState<Comment | null>(null)
   const [editingComment, setEditingComment] = useState<Comment | null>(null)
@@ -351,19 +357,24 @@ export default function Comment({
             <YStack {...panResponder.panHandlers}>
               {/* Header */}
               <YStack
-                backgroundColor="$backgroundModal"
+                backgroundColor={colors.modal}
                 borderBottomWidth={StyleSheet.hairlineWidth}
-                borderColor="$borderColor"
+                borderColor={colors.border}
                 paddingVertical="$3"
               >
                 <YStack
                   style={styles.dragHandleArea}
-                  backgroundColor="$backgroundModal"
+                  backgroundColor={colors.modal}
                 >
                   <YStack style={styles.dragHandle} />
                 </YStack>
                 <XStack justifyContent="center" alignItems="center">
-                  <SizableText fontSize={17} fontWeight="700" paddingTop="$1">
+                  <SizableText
+                    fontSize={17}
+                    fontWeight="700"
+                    paddingTop="$1"
+                    color={colors.text}
+                  >
                     Comments
                   </SizableText>
                 </XStack>
@@ -371,10 +382,10 @@ export default function Comment({
             </YStack>
 
             {/* Comments List */}
-            <YStack flex={1}>
+            <YStack flex={1} backgroundColor={colors.modal}>
               {isLoading ? (
                 <YStack style={styles.loadingContainer}>
-                  <ActivityIndicator size="large" color="#0095F6" />
+                  <ActivityIndicator size="large" color={colors.accent} />
                 </YStack>
               ) : (
                 <CommentList
